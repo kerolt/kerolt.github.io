@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="简记靠右的const是顶层const，靠左的const是底层const 顶层const即指针本身是个常量 12345int a &#x3D; 1;int b &#x3D; 2;int* const pa1 &#x3D; &amp;a;pa1 &#x3D; &amp;b; &#x2F;&#x2F; 编译出错  出错原因是因为pa1是一个顶层const，即其只能指向a，无法修改其指向b。 底层const即指针所指的的对象是个常量 123456int a &#x3D; 1">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Hexo">
+<meta property="og:url" content="http://example.com/2024/02/14/C++/%E9%A1%B6%E5%B1%82const%E4%B8%8E%E5%BA%95%E5%B1%82const/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="简记靠右的const是顶层const，靠左的const是底层const 顶层const即指针本身是个常量 12345int a &#x3D; 1;int b &#x3D; 2;int* const pa1 &#x3D; &amp;a;pa1 &#x3D; &amp;b; &#x2F;&#x2F; 编译出错  出错原因是因为pa1是一个顶层const，即其只能指向a，无法修改其指向b。 底层const即指针所指的的对象是个常量 123456int a &#x3D; 1">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2024-02-14T04:15:22.481Z">
+<meta property="article:modified_time" content="2024-01-17T07:54:17.379Z">
+<meta property="article:author" content="John Doe">
+<meta name="twitter:card" content="summary">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+  
+<meta name="generator" content="Hexo 7.1.1"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"><span class="fa fa-bars"></span></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+        
+          <a class="nav-icon" href="/atom.xml" title="RSS Feed"><span class="fa fa-rss"></span></a>
+        
+        <a class="nav-icon nav-search-btn" title="Search"><span class="fa fa-search"></span></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://example.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main"><article id="post-C++/顶层const与底层const" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2024/02/14/C++/%E9%A1%B6%E5%B1%82const%E4%B8%8E%E5%BA%95%E5%B1%82const/" class="article-date">
+  <time class="dt-published" datetime="2024-02-14T04:15:22.481Z" itemprop="datePublished">2024-02-14</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <h2 id="简记"><a href="#简记" class="headerlink" title="简记"></a>简记</h2><p><strong>靠右</strong>的const是<strong>顶层</strong>const，<strong>靠左</strong>的const是<strong>底层</strong>const</p>
+<h2 id="顶层const"><a href="#顶层const" class="headerlink" title="顶层const"></a>顶层const</h2><p>即指针<strong>本身</strong>是个常量</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> a = <span class="number">1</span>;</span><br><span class="line"><span class="type">int</span> b = <span class="number">2</span>;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span>* <span class="type">const</span> pa1 = &amp;a;</span><br><span class="line">pa1 = &amp;b; <span class="comment">// 编译出错</span></span><br></pre></td></tr></table></figure>
+
+<p>出错原因是因为pa1是一个顶层const，即其只能指向a，无法修改其指向b。</p>
+<h2 id="底层const"><a href="#底层const" class="headerlink" title="底层const"></a>底层const</h2><p>即指针<strong>所指的的对象</strong>是个常量</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> a = <span class="number">1</span>;</span><br><span class="line"><span class="type">int</span> b = <span class="number">2</span>;</span><br><span class="line"></span><br><span class="line"><span class="type">const</span> <span class="type">int</span>* pa2 = &amp;a;</span><br><span class="line">pa2 = &amp;b; <span class="comment">// 没问题，OK</span></span><br><span class="line">*pa2 = <span class="number">3</span>; <span class="comment">// 编译出错</span></span><br></pre></td></tr></table></figure>
+
+<p>pa2是一个底层const，即pa2所指对象的值不可改变，但是pa2所指向的对象可以改变</p>
+<blockquote>
+<p>注意：<br>用于声明引用的const都是底层const</p>
+</blockquote>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2024/02/14/C++/%E9%A1%B6%E5%B1%82const%E4%B8%8E%E5%BA%95%E5%B1%82const/" data-id="clslbd0o000030li51ym128mk" data-title="" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2024/02/14/C++/%E7%BA%A0%E6%AD%A3%E4%B8%80%E4%B8%8B%E5%AF%B9cpp%E7%A7%BB%E5%8A%A8%E8%AF%AD%E4%B9%89%E7%9A%84%E9%94%99%E8%AF%AF%E7%90%86%E8%A7%A3/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          (no title)
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2024/02/14/%E7%AE%97%E6%B3%95/%E3%80%90%E9%93%BE%E8%A1%A8%E3%80%91%E5%88%A4%E6%96%AD%E5%9B%9E%E6%96%87%E9%93%BE%E8%A1%A8/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title"></div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/02/">February 2024</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2024/02/14/C++/C++%E4%B8%ADlambda%E4%B8%8Epriority_queue%E4%B8%80%E8%B5%B7%E4%BD%BF%E7%94%A8/">(no title)</a>
+          </li>
+        
+          <li>
+            <a href="/2024/02/14/C++/muduo%E7%BD%91%E7%BB%9C%E5%BA%93%E7%9A%84%E5%AE%89%E8%A3%85/">(no title)</a>
+          </li>
+        
+          <li>
+            <a href="/2024/02/14/C++/%E7%BA%A0%E6%AD%A3%E4%B8%80%E4%B8%8B%E5%AF%B9cpp%E7%A7%BB%E5%8A%A8%E8%AF%AD%E4%B9%89%E7%9A%84%E9%94%99%E8%AF%AF%E7%90%86%E8%A7%A3/">(no title)</a>
+          </li>
+        
+          <li>
+            <a href="/2024/02/14/C++/%E9%A1%B6%E5%B1%82const%E4%B8%8E%E5%BA%95%E5%B1%82const/">(no title)</a>
+          </li>
+        
+          <li>
+            <a href="/2024/02/14/%E7%AE%97%E6%B3%95/%E3%80%90%E9%93%BE%E8%A1%A8%E3%80%91%E5%88%A4%E6%96%AD%E5%9B%9E%E6%96%87%E9%93%BE%E8%A1%A8/">(no title)</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+      &copy; 2024 John Doe<br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+
+<script src="/js/jquery-3.6.4.min.js"></script>
+
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+
+  </div>
+</body>
+</html>

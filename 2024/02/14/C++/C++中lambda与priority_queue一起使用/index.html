@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="想写这篇博客的原因是在刷力扣的 347. 前 K 个高频元素 一题时，需要使用到优先队列priority_queue，其定义如下： 12345template&lt;    class T,    class Container &#x3D; std::vector&lt;T&gt;,    class Compare &#x3D; std::less&lt;typename Container::value_typ">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Hexo">
+<meta property="og:url" content="http://example.com/2024/02/14/C++/C++%E4%B8%ADlambda%E4%B8%8Epriority_queue%E4%B8%80%E8%B5%B7%E4%BD%BF%E7%94%A8/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="想写这篇博客的原因是在刷力扣的 347. 前 K 个高频元素 一题时，需要使用到优先队列priority_queue，其定义如下： 12345template&lt;    class T,    class Container &#x3D; std::vector&lt;T&gt;,    class Compare &#x3D; std::less&lt;typename Container::value_typ">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://example.com/images/2024-01-22-16-14.png">
+<meta property="article:published_time" content="2024-02-14T04:15:22.481Z">
+<meta property="article:modified_time" content="2024-02-05T14:41:52.527Z">
+<meta property="article:author" content="John Doe">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/images/2024-01-22-16-14.png">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+  
+<meta name="generator" content="Hexo 7.1.1"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"><span class="fa fa-bars"></span></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+        
+          <a class="nav-icon" href="/atom.xml" title="RSS Feed"><span class="fa fa-rss"></span></a>
+        
+        <a class="nav-icon nav-search-btn" title="Search"><span class="fa fa-search"></span></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://example.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main"><article id="post-C++/C++中lambda与priority_queue一起使用" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2024/02/14/C++/C++%E4%B8%ADlambda%E4%B8%8Epriority_queue%E4%B8%80%E8%B5%B7%E4%BD%BF%E7%94%A8/" class="article-date">
+  <time class="dt-published" datetime="2024-02-14T04:15:22.481Z" itemprop="datePublished">2024-02-14</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <p>想写这篇博客的原因是在刷力扣的 <a target="_blank" rel="noopener" href="https://leetcode.cn/problems/top-k-frequent-elements/">347. 前 K 个高频元素</a> 一题时，需要使用到优先队列<code>priority_queue</code>，其定义如下：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span>&lt;</span><br><span class="line">    <span class="keyword">class</span> <span class="title class_">T</span>,</span><br><span class="line">    <span class="keyword">class</span> <span class="title class_">Container</span> = std::vector&lt;T&gt;,</span><br><span class="line">    <span class="keyword">class</span> Compare = std::less&lt;<span class="keyword">typename</span> Container::value_type&gt;</span><br><span class="line">&gt; <span class="keyword">class</span> priority_queue;</span><br></pre></td></tr></table></figure>
+
+<p>第三个参数是一个可以自定义的比较类型，其必须满足<a target="_blank" rel="noopener" href="https://zh.cppreference.com/w/cpp/named_req/BinaryPredicate">二元谓词</a>，通常可以使用如下两种方法：</p>
+<ol>
+<li>使用自定义的函数对象</li>
+<li>lambda表达式</li>
+<li>使用<code>std::greater</code>或<code>std::less</code>（这里就不介绍这种方法了）</li>
+</ol>
+<p>以题 <a target="_blank" rel="noopener" href="https://leetcode.cn/problems/top-k-frequent-elements/">347. 前 K 个高频元素</a> 为例，我们要建立一个小根堆，那么代码如下：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 方法一</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">using</span> PII = pair&lt;<span class="type">int</span>, <span class="type">int</span>&gt;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 比较类，重载了括号运算符</span></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">Comp</span> &#123;</span><br><span class="line">    <span class="function"><span class="type">bool</span> <span class="title">operator</span><span class="params">()</span><span class="params">(PII&amp; p1, PII&amp; p2)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> p1.second &gt; p2.second;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">priority_queue&lt;PII, vector&lt;PII&gt;, Comp&gt; pq;</span><br></pre></td></tr></table></figure>
+
+<p>当然，另一种方法就是使用lambda表达式，如下：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 方法二</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">using</span> PII = pair&lt;<span class="type">int</span>, <span class="type">int</span>&gt;;</span><br><span class="line"><span class="keyword">auto</span> comp = [](PII&amp; p1, PII&amp; p2) &#123;</span><br><span class="line">    <span class="keyword">return</span> p1.second &gt; p2.second;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="comment">// 注意这里需要使用decltype</span></span><br><span class="line">priority_queue&lt;PII, vector&lt;PII&gt;, <span class="keyword">decltype</span>(comp)&gt; pq;</span><br></pre></td></tr></table></figure>
+
+<p>但值得注意的是，方法二需要在<strong>C++20</strong>下才可使用。这是因为priority_queue的第三个模板形参需要的二元谓词要求<a target="_blank" rel="noopener" href="https://zh.cppreference.com/w/cpp/named_req/CopyConstructible">可复制构造</a>。</p>
+<p>lambda表达式即构造闭包（能够捕获作用域中的变量的无名函数对象）。而在C++20之前，闭包类型非可默认构造，闭包类型没有默认构造函数。C++20及之后，如果<strong>没有指定捕获</strong>，那么闭包类型拥有预置的默认构造函数。</p>
+<p><img src="/images/2024-01-22-16-14.png"></p>
+<p>而在目前，力扣中C++编译器使用的是clang17，支持C++20，故使用lambda表达式是没有问题的。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2024/02/14/C++/C++%E4%B8%ADlambda%E4%B8%8Epriority_queue%E4%B8%80%E8%B5%B7%E4%BD%BF%E7%94%A8/" data-id="clslbd0nq00000li575125cr0" data-title="" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/2024/02/14/C++/muduo%E7%BD%91%E7%BB%9C%E5%BA%93%E7%9A%84%E5%AE%89%E8%A3%85/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title"></div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/02/">February 2024</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2024/02/14/C++/C++%E4%B8%ADlambda%E4%B8%8Epriority_queue%E4%B8%80%E8%B5%B7%E4%BD%BF%E7%94%A8/">(no title)</a>
+          </li>
+        
+          <li>
+            <a href="/2024/02/14/C++/muduo%E7%BD%91%E7%BB%9C%E5%BA%93%E7%9A%84%E5%AE%89%E8%A3%85/">(no title)</a>
+          </li>
+        
+          <li>
+            <a href="/2024/02/14/C++/%E7%BA%A0%E6%AD%A3%E4%B8%80%E4%B8%8B%E5%AF%B9cpp%E7%A7%BB%E5%8A%A8%E8%AF%AD%E4%B9%89%E7%9A%84%E9%94%99%E8%AF%AF%E7%90%86%E8%A7%A3/">(no title)</a>
+          </li>
+        
+          <li>
+            <a href="/2024/02/14/C++/%E9%A1%B6%E5%B1%82const%E4%B8%8E%E5%BA%95%E5%B1%82const/">(no title)</a>
+          </li>
+        
+          <li>
+            <a href="/2024/02/14/%E7%AE%97%E6%B3%95/%E3%80%90%E9%93%BE%E8%A1%A8%E3%80%91%E5%88%A4%E6%96%AD%E5%9B%9E%E6%96%87%E9%93%BE%E8%A1%A8/">(no title)</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+      &copy; 2024 John Doe<br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+
+<script src="/js/jquery-3.6.4.min.js"></script>
+
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+
+  </div>
+</body>
+</html>
