@@ -19,29 +19,27 @@
 
 <script class="next-config" data-name="main" type="application/json">{"hostname":"kerolt.github.io","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.19.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":true,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
 
-    <meta name="description" content="想写这篇博客的原因是在刷力扣的 347. 前 K 个高频元素 一题时，需要使用到优先队列priority_queue，其定义如下： 12345template&lt;    class T,    class Container &#x3D; std::vector&lt;T&gt;,    class Compare &#x3D; std::less&lt;typename Container::value_typ">
+    <meta name="description" content="添加源文件的几种方法假设当前项目文件目录如下： 1234567.├── CMakeLists.txt├── include│   └── add.h└── src    ├── add.cpp    └── main.cpp  即当前项目的源文件为src目录下的cpp文件，在顶层的CMakeLists.txt中添加源文件目标： 1234567891011# 方法一file(GLOB SOURCE_">
 <meta property="og:type" content="article">
-<meta property="og:title" content="C++中lambda与priority_queue一起使用">
-<meta property="og:url" content="http://kerolt.github.io/2024/02/14/C++/C++%E4%B8%ADlambda%E4%B8%8Epriority_queue%E4%B8%80%E8%B5%B7%E4%BD%BF%E7%94%A8/index.html">
+<meta property="og:title" content="【CMake】CMake使用笔记">
+<meta property="og:url" content="http://kerolt.github.io/2024/02/20/%E7%BC%96%E7%A8%8B%E5%BC%80%E5%8F%91/%E3%80%90CMake%E3%80%91CMake%E4%BD%BF%E7%94%A8%E7%AC%94%E8%AE%B0/index.html">
 <meta property="og:site_name" content="Kerolt&#39;s Blog">
-<meta property="og:description" content="想写这篇博客的原因是在刷力扣的 347. 前 K 个高频元素 一题时，需要使用到优先队列priority_queue，其定义如下： 12345template&lt;    class T,    class Container &#x3D; std::vector&lt;T&gt;,    class Compare &#x3D; std::less&lt;typename Container::value_typ">
+<meta property="og:description" content="添加源文件的几种方法假设当前项目文件目录如下： 1234567.├── CMakeLists.txt├── include│   └── add.h└── src    ├── add.cpp    └── main.cpp  即当前项目的源文件为src目录下的cpp文件，在顶层的CMakeLists.txt中添加源文件目标： 1234567891011# 方法一file(GLOB SOURCE_">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="http://kerolt.github.io/images/2024-01-22-16-14.png">
-<meta property="article:published_time" content="2024-02-14T14:20:52.146Z">
-<meta property="article:modified_time" content="2024-02-14T14:20:52.146Z">
+<meta property="article:published_time" content="2024-02-20T09:24:35.292Z">
+<meta property="article:modified_time" content="2024-02-20T09:24:35.292Z">
 <meta property="article:author" content="Kerolt">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="http://kerolt.github.io/images/2024-01-22-16-14.png">
 
 
-<link rel="canonical" href="http://kerolt.github.io/2024/02/14/C++/C++%E4%B8%ADlambda%E4%B8%8Epriority_queue%E4%B8%80%E8%B5%B7%E4%BD%BF%E7%94%A8/">
+<link rel="canonical" href="http://kerolt.github.io/2024/02/20/%E7%BC%96%E7%A8%8B%E5%BC%80%E5%8F%91/%E3%80%90CMake%E3%80%91CMake%E4%BD%BF%E7%94%A8%E7%AC%94%E8%AE%B0/">
 
 
 
-<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://kerolt.github.io/2024/02/14/C++/C++%E4%B8%ADlambda%E4%B8%8Epriority_queue%E4%B8%80%E8%B5%B7%E4%BD%BF%E7%94%A8/","path":"2024/02/14/C++/C++中lambda与priority_queue一起使用/","title":"C++中lambda与priority_queue一起使用"}</script>
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://kerolt.github.io/2024/02/20/%E7%BC%96%E7%A8%8B%E5%BC%80%E5%8F%91/%E3%80%90CMake%E3%80%91CMake%E4%BD%BF%E7%94%A8%E7%AC%94%E8%AE%B0/","path":"2024/02/20/编程开发/【CMake】CMake使用笔记/","title":"【CMake】CMake使用笔记"}</script>
 
 <script class="next-config" data-name="calendar" type="application/json">""</script>
-<title>C++中lambda与priority_queue一起使用 | Kerolt's Blog</title>
+<title>【CMake】CMake使用笔记 | Kerolt's Blog</title>
   
 
 
@@ -100,7 +98,7 @@
   
   <aside class="sidebar">
 
-    <div class="sidebar-inner sidebar-overview-active">
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
       <ul class="sidebar-nav">
         <li class="sidebar-nav-toc">
           文章目录
@@ -113,6 +111,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B7%BB%E5%8A%A0%E6%BA%90%E6%96%87%E4%BB%B6%E7%9A%84%E5%87%A0%E7%A7%8D%E6%96%B9%E6%B3%95"><span class="nav-number">1.</span> <span class="nav-text">添加源文件的几种方法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%AE%BE%E7%BD%AE%E5%8F%AF%E6%89%A7%E8%A1%8C%E6%96%87%E4%BB%B6%E7%9A%84%E8%BE%93%E5%87%BA%E4%BD%8D%E7%BD%AE"><span class="nav-number">2.</span> <span class="nav-text">设置可执行文件的输出位置</span></a></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -127,7 +126,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">8</span>
+          <span class="site-state-item-count">9</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -160,7 +159,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://kerolt.github.io/2024/02/14/C++/C++%E4%B8%ADlambda%E4%B8%8Epriority_queue%E4%B8%80%E8%B5%B7%E4%BD%BF%E7%94%A8/">
+    <link itemprop="mainEntityOfPage" href="http://kerolt.github.io/2024/02/20/%E7%BC%96%E7%A8%8B%E5%BC%80%E5%8F%91/%E3%80%90CMake%E3%80%91CMake%E4%BD%BF%E7%94%A8%E7%AC%94%E8%AE%B0/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="https://picx.zhimg.com/v2-f14895864d68f2db5f8e650481075209_xll.jpg">
@@ -173,12 +172,12 @@
     </span>
 
     <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="C++中lambda与priority_queue一起使用 | Kerolt's Blog">
+      <meta itemprop="name" content="【CMake】CMake使用笔记 | Kerolt's Blog">
       <meta itemprop="description" content="">
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          C++中lambda与priority_queue一起使用
+          【CMake】CMake使用笔记
         </h1>
 
         <div class="post-meta-container">
@@ -189,7 +188,7 @@
       </span>
       <span class="post-meta-item-text">发表于</span>
 
-      <time title="创建时间：2024-02-14 14:20:52" itemprop="dateCreated datePublished" datetime="2024-02-14T14:20:52+00:00">2024-02-14</time>
+      <time title="创建时间：2024-02-20 09:24:35" itemprop="dateCreated datePublished" datetime="2024-02-20T09:24:35+00:00">2024-02-20</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -197,7 +196,7 @@
       </span>
       <span class="post-meta-item-text">分类于</span>
         <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/C/" itemprop="url" rel="index"><span itemprop="name">C++</span></a>
+          <a href="/categories/%E7%BC%96%E7%A8%8B%E5%BC%80%E5%8F%91/" itemprop="url" rel="index"><span itemprop="name">编程开发</span></a>
         </span>
     </span>
 
@@ -210,26 +209,18 @@
     
     
     
-    <div class="post-body" itemprop="articleBody"><p>想写这篇博客的原因是在刷力扣的 <a target="_blank" rel="noopener" href="https://leetcode.cn/problems/top-k-frequent-elements/">347. 前 K 个高频元素</a> 一题时，需要使用到优先队列<code>priority_queue</code>，其定义如下：</p>
-<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span>&lt;</span><br><span class="line">    <span class="keyword">class</span> <span class="title class_">T</span>,</span><br><span class="line">    <span class="keyword">class</span> <span class="title class_">Container</span> = std::vector&lt;T&gt;,</span><br><span class="line">    <span class="keyword">class</span> Compare = std::less&lt;<span class="keyword">typename</span> Container::value_type&gt;</span><br><span class="line">&gt; <span class="keyword">class</span> priority_queue;</span><br></pre></td></tr></table></figure>
+    <div class="post-body" itemprop="articleBody"><h2 id="添加源文件的几种方法"><a href="#添加源文件的几种方法" class="headerlink" title="添加源文件的几种方法"></a>添加源文件的几种方法</h2><p>假设当前项目文件目录如下：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">.</span><br><span class="line">├── CMakeLists.txt</span><br><span class="line">├── include</span><br><span class="line">│   └── add.h</span><br><span class="line">└── src</span><br><span class="line">    ├── add.cpp</span><br><span class="line">    └── main.cpp</span><br></pre></td></tr></table></figure>
 
-<p>第三个参数是一个可以自定义的比较类型，其必须满足<a target="_blank" rel="noopener" href="https://zh.cppreference.com/w/cpp/named_req/BinaryPredicate">二元谓词</a>，通常可以使用如下两种方法：</p>
+<p>即当前项目的源文件为src目录下的cpp文件，在顶层的<code>CMakeLists.txt</code>中添加源文件目标：</p>
+<figure class="highlight cmake"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 方法一</span></span><br><span class="line"><span class="keyword">file</span>(GLOB SOURCE_FILES <span class="string">&quot;$&#123;CMAKE_CURRENT_SOURCE_DIR&#125;/src/*.cpp&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 方法二</span></span><br><span class="line"><span class="keyword">file</span>(GLOB_RECURSE SOURCE_FILES CONFIGURE_DEPENDS <span class="variable">$&#123;PROJECT_SOURCE_DIR&#125;</span>/src/*.cpp)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 方法三</span></span><br><span class="line"><span class="keyword">aux_source_directory</span>(<span class="variable">$&#123;PROJECT_SOURCE_DIR&#125;</span>/src SOURCE_FILES)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 添加下面这一句即用上述源文件生成可执行文件app（也可使用add_library生成库文件等）</span></span><br><span class="line"><span class="keyword">add_executable</span>(app <span class="variable">$&#123;SOURCE_FILES&#125;</span>)</span><br></pre></td></tr></table></figure>
+
+<p>可以看到，方法一和方法二虽然都是使用<code>file</code>指令，但内容却稍有区别：</p>
 <ol>
-<li>使用自定义的函数对象</li>
-<li>lambda表达式</li>
-<li>使用<code>std::greater</code>或<code>std::less</code>（这里就不介绍这种方法了）</li>
+<li>都是按照通配符批量匹配文件，<code>GLOB</code>和<code>GLOB_RECURSE</code>的区别在于后者允许*递归目录去匹配</li>
+<li>对于选项<code>CONFIGURE_DEPENDS</code>，如果不添加，则在src&#x2F;下添加新文件，由于cmake缓存的原因，<code>SOURCE_FILES</code>变量并不会更新，需要重新执行<code>cmake -B build</code></li>
 </ol>
-<p>以题 <a target="_blank" rel="noopener" href="https://leetcode.cn/problems/top-k-frequent-elements/">347. 前 K 个高频元素</a> 为例，我们要建立一个小根堆，那么代码如下：</p>
-<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 方法一</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">using</span> PII = pair&lt;<span class="type">int</span>, <span class="type">int</span>&gt;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 比较类，重载了括号运算符</span></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">Comp</span> &#123;</span><br><span class="line">    <span class="function"><span class="type">bool</span> <span class="title">operator</span><span class="params">()</span><span class="params">(PII&amp; p1, PII&amp; p2)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> p1.second &gt; p2.second;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">priority_queue&lt;PII, vector&lt;PII&gt;, Comp&gt; pq;</span><br></pre></td></tr></table></figure>
-
-<p>当然，另一种方法就是使用lambda表达式，如下：</p>
-<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 方法二</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">using</span> PII = pair&lt;<span class="type">int</span>, <span class="type">int</span>&gt;;</span><br><span class="line"><span class="keyword">auto</span> comp = [](PII&amp; p1, PII&amp; p2) &#123;</span><br><span class="line">    <span class="keyword">return</span> p1.second &gt; p2.second;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="comment">// 注意这里需要使用decltype</span></span><br><span class="line">priority_queue&lt;PII, vector&lt;PII&gt;, <span class="keyword">decltype</span>(comp)&gt; pq;</span><br></pre></td></tr></table></figure>
-
-<p>但值得注意的是，方法二需要在<strong>C++20</strong>下才可使用。这是因为priority_queue的第三个模板形参需要的二元谓词要求<a target="_blank" rel="noopener" href="https://zh.cppreference.com/w/cpp/named_req/CopyConstructible">可复制构造</a>。</p>
-<p>lambda表达式即构造闭包（能够捕获作用域中的变量的无名函数对象）。而在C++20之前，闭包类型非可默认构造，闭包类型没有默认构造函数。C++20及之后，如果<strong>没有指定捕获</strong>，那么闭包类型拥有预置的默认构造函数。</p>
-<p><img src="/images/2024-01-22-16-14.png"></p>
-<p>而在目前，力扣中C++编译器使用的是clang17，支持C++20，故使用lambda表达式是没有问题的。</p>
-
+<h2 id="设置可执行文件的输出位置"><a href="#设置可执行文件的输出位置" class="headerlink" title="设置可执行文件的输出位置"></a>设置可执行文件的输出位置</h2><figure class="highlight cmake"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">set</span>(EXECUTABLE_OUTPUT_PATH <span class="variable">$&#123;PROJECT_SOURCE_DIR&#125;</span>/bin)</span><br></pre></td></tr></table></figure>
     </div>
 
     
@@ -242,11 +233,14 @@
 
           <div class="post-nav">
             <div class="post-nav-item">
-                <a href="/2024/02/14/C++/muduo%E7%BD%91%E7%BB%9C%E5%BA%93%E7%9A%84%E5%AE%89%E8%A3%85/" rel="prev" title="muduo网络库的安装">
-                  <i class="fa fa-angle-left"></i> muduo网络库的安装
+                <a href="/2024/02/20/C++/C++%E4%B8%ADlambda%E4%B8%8Epriority_queue%E4%B8%80%E8%B5%B7%E4%BD%BF%E7%94%A8/" rel="prev" title="C++中lambda与priority_queue一起使用">
+                  <i class="fa fa-angle-left"></i> C++中lambda与priority_queue一起使用
                 </a>
             </div>
             <div class="post-nav-item">
+                <a href="/2024/02/20/%E7%BC%96%E7%A8%8B%E5%BC%80%E5%8F%91/CMake%E4%B8%AD%E4%BD%BF%E7%94%A8find_pakage%E6%9D%A5%E4%BD%BF%E7%94%A8MySQL/" rel="next" title="CMake中使用find_pakage来使用MySQL">
+                  CMake中使用find_pakage来使用MySQL <i class="fa fa-angle-right"></i>
+                </a>
             </div>
           </div>
     </footer>
