@@ -19,27 +19,27 @@
 
 <script class="next-config" data-name="main" type="application/json">{"hostname":"kerolt.github.io","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.19.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":true,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
 
-    <meta name="description" content="添加源文件的几种方法假设当前项目文件目录如下： 1234567.├── CMakeLists.txt├── include│   └── add.h└── src    ├── add.cpp    └── main.cpp  即当前项目的源文件为src目录下的cpp文件，在顶层的CMakeLists.txt中添加源文件目标： 1234567891011# 方法一file(GLOB SOURCE_">
+    <meta name="description" content="一般来说，如果我们在C++程序中要使用mysql的库，最简单的就是 1g++ server.cpp -o server -lmysqlclient  但要是在大一点的项目中，在数不清的源文件下使用g++命令来完成，怕是不太现实。 通常使用的工具为CMake，用其来构建项目，但它又没有包管理功能，对于我们想要使用的库，需要在 CMakeLists.txt 中引入。 引用的方式我这里选择 find_p">
 <meta property="og:type" content="article">
-<meta property="og:title" content="【CMake】CMake使用笔记">
-<meta property="og:url" content="http://kerolt.github.io/2024/02/20/%E7%BC%96%E7%A8%8B%E5%BC%80%E5%8F%91/%E3%80%90CMake%E3%80%91CMake%E4%BD%BF%E7%94%A8%E7%AC%94%E8%AE%B0/index.html">
+<meta property="og:title" content="CMake中使用find_pakage来使用MySQL">
+<meta property="og:url" content="http://kerolt.github.io/2024/02/28/%E7%BC%96%E7%A8%8B%E5%BC%80%E5%8F%91/CMake%E4%B8%AD%E4%BD%BF%E7%94%A8find_pakage%E6%9D%A5%E4%BD%BF%E7%94%A8MySQL/index.html">
 <meta property="og:site_name" content="Kerolt&#39;s Blog">
-<meta property="og:description" content="添加源文件的几种方法假设当前项目文件目录如下： 1234567.├── CMakeLists.txt├── include│   └── add.h└── src    ├── add.cpp    └── main.cpp  即当前项目的源文件为src目录下的cpp文件，在顶层的CMakeLists.txt中添加源文件目标： 1234567891011# 方法一file(GLOB SOURCE_">
+<meta property="og:description" content="一般来说，如果我们在C++程序中要使用mysql的库，最简单的就是 1g++ server.cpp -o server -lmysqlclient  但要是在大一点的项目中，在数不清的源文件下使用g++命令来完成，怕是不太现实。 通常使用的工具为CMake，用其来构建项目，但它又没有包管理功能，对于我们想要使用的库，需要在 CMakeLists.txt 中引入。 引用的方式我这里选择 find_p">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2024-02-20T09:38:19.021Z">
-<meta property="article:modified_time" content="2024-02-20T09:38:19.021Z">
+<meta property="article:published_time" content="2024-02-28T08:20:53.723Z">
+<meta property="article:modified_time" content="2024-02-28T08:20:53.723Z">
 <meta property="article:author" content="Kerolt">
 <meta name="twitter:card" content="summary">
 
 
-<link rel="canonical" href="http://kerolt.github.io/2024/02/20/%E7%BC%96%E7%A8%8B%E5%BC%80%E5%8F%91/%E3%80%90CMake%E3%80%91CMake%E4%BD%BF%E7%94%A8%E7%AC%94%E8%AE%B0/">
+<link rel="canonical" href="http://kerolt.github.io/2024/02/28/%E7%BC%96%E7%A8%8B%E5%BC%80%E5%8F%91/CMake%E4%B8%AD%E4%BD%BF%E7%94%A8find_pakage%E6%9D%A5%E4%BD%BF%E7%94%A8MySQL/">
 
 
 
-<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://kerolt.github.io/2024/02/20/%E7%BC%96%E7%A8%8B%E5%BC%80%E5%8F%91/%E3%80%90CMake%E3%80%91CMake%E4%BD%BF%E7%94%A8%E7%AC%94%E8%AE%B0/","path":"2024/02/20/编程开发/【CMake】CMake使用笔记/","title":"【CMake】CMake使用笔记"}</script>
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://kerolt.github.io/2024/02/28/%E7%BC%96%E7%A8%8B%E5%BC%80%E5%8F%91/CMake%E4%B8%AD%E4%BD%BF%E7%94%A8find_pakage%E6%9D%A5%E4%BD%BF%E7%94%A8MySQL/","path":"2024/02/28/编程开发/CMake中使用find_pakage来使用MySQL/","title":"CMake中使用find_pakage来使用MySQL"}</script>
 
 <script class="next-config" data-name="calendar" type="application/json">""</script>
-<title>【CMake】CMake使用笔记 | Kerolt's Blog</title>
+<title>CMake中使用find_pakage来使用MySQL | Kerolt's Blog</title>
   
 
 
@@ -98,7 +98,7 @@
   
   <aside class="sidebar">
 
-    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+    <div class="sidebar-inner sidebar-overview-active">
       <ul class="sidebar-nav">
         <li class="sidebar-nav-toc">
           文章目录
@@ -111,7 +111,6 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B7%BB%E5%8A%A0%E6%BA%90%E6%96%87%E4%BB%B6%E7%9A%84%E5%87%A0%E7%A7%8D%E6%96%B9%E6%B3%95"><span class="nav-number">1.</span> <span class="nav-text">添加源文件的几种方法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%AE%BE%E7%BD%AE%E5%8F%AF%E6%89%A7%E8%A1%8C%E6%96%87%E4%BB%B6%E7%9A%84%E8%BE%93%E5%87%BA%E4%BD%8D%E7%BD%AE"><span class="nav-number">2.</span> <span class="nav-text">设置可执行文件的输出位置</span></a></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -159,7 +158,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://kerolt.github.io/2024/02/20/%E7%BC%96%E7%A8%8B%E5%BC%80%E5%8F%91/%E3%80%90CMake%E3%80%91CMake%E4%BD%BF%E7%94%A8%E7%AC%94%E8%AE%B0/">
+    <link itemprop="mainEntityOfPage" href="http://kerolt.github.io/2024/02/28/%E7%BC%96%E7%A8%8B%E5%BC%80%E5%8F%91/CMake%E4%B8%AD%E4%BD%BF%E7%94%A8find_pakage%E6%9D%A5%E4%BD%BF%E7%94%A8MySQL/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="https://picx.zhimg.com/v2-f14895864d68f2db5f8e650481075209_xll.jpg">
@@ -172,12 +171,12 @@
     </span>
 
     <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="【CMake】CMake使用笔记 | Kerolt's Blog">
+      <meta itemprop="name" content="CMake中使用find_pakage来使用MySQL | Kerolt's Blog">
       <meta itemprop="description" content="">
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          【CMake】CMake使用笔记
+          CMake中使用find_pakage来使用MySQL
         </h1>
 
         <div class="post-meta-container">
@@ -188,7 +187,7 @@
       </span>
       <span class="post-meta-item-text">发表于</span>
 
-      <time title="创建时间：2024-02-20 09:38:19" itemprop="dateCreated datePublished" datetime="2024-02-20T09:38:19+00:00">2024-02-20</time>
+      <time title="创建时间：2024-02-28 08:20:53" itemprop="dateCreated datePublished" datetime="2024-02-28T08:20:53+00:00">2024-02-28</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -209,18 +208,23 @@
     
     
     
-    <div class="post-body" itemprop="articleBody"><h2 id="添加源文件的几种方法"><a href="#添加源文件的几种方法" class="headerlink" title="添加源文件的几种方法"></a>添加源文件的几种方法</h2><p>假设当前项目文件目录如下：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">.</span><br><span class="line">├── CMakeLists.txt</span><br><span class="line">├── include</span><br><span class="line">│   └── add.h</span><br><span class="line">└── src</span><br><span class="line">    ├── add.cpp</span><br><span class="line">    └── main.cpp</span><br></pre></td></tr></table></figure>
+    <div class="post-body" itemprop="articleBody"><p>一般来说，如果我们在C++程序中要使用mysql的库，最简单的就是</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">g++ server.cpp -o server -lmysqlclient</span><br></pre></td></tr></table></figure>
 
-<p>即当前项目的源文件为src目录下的cpp文件，在顶层的<code>CMakeLists.txt</code>中添加源文件目标：</p>
-<figure class="highlight cmake"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 方法一</span></span><br><span class="line"><span class="keyword">file</span>(GLOB SOURCE_FILES <span class="string">&quot;$&#123;CMAKE_CURRENT_SOURCE_DIR&#125;/src/*.cpp&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 方法二</span></span><br><span class="line"><span class="keyword">file</span>(GLOB_RECURSE SOURCE_FILES CONFIGURE_DEPENDS <span class="variable">$&#123;PROJECT_SOURCE_DIR&#125;</span>/src/*.cpp)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 方法三</span></span><br><span class="line"><span class="keyword">aux_source_directory</span>(<span class="variable">$&#123;PROJECT_SOURCE_DIR&#125;</span>/src SOURCE_FILES)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 添加下面这一句即用上述源文件生成可执行文件app（也可使用add_library生成库文件等）</span></span><br><span class="line"><span class="keyword">add_executable</span>(app <span class="variable">$&#123;SOURCE_FILES&#125;</span>)</span><br></pre></td></tr></table></figure>
+<p>但要是在大一点的项目中，在数不清的源文件下使用g++命令来完成，怕是不太现实。</p>
+<p>通常使用的工具为CMake，用其来构建项目，但它又没有包管理功能，对于我们想要使用的库，需要在 <code>CMakeLists.txt</code> 中引入。</p>
+<p>引用的方式我这里选择 <code>find_pakage</code> （其概述和使用方法这里就不过多赘述了）</p>
+<figure class="highlight cmake"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">set</span>(CMAKE_MODULE_PATH /usr/share/cmake/Modules)</span><br><span class="line"></span><br><span class="line"><span class="keyword">find_package</span>(MySQL REQUIRED)</span><br><span class="line"></span><br><span class="line"><span class="keyword">add_executable</span>(server <span class="variable">$&#123;src_list&#125;</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span>(MYSQL_FOUND)</span><br><span class="line">    <span class="keyword">target_link_libraries</span>(server <span class="variable">$&#123;MYSQL_LIBRARIES&#125;</span>)</span><br><span class="line"><span class="keyword">else</span>(MYSQL_FOUND)</span><br><span class="line">    <span class="keyword">message</span>(FATAL_ERROR <span class="string">&quot;MySQL library not found&quot;</span>)</span><br><span class="line"><span class="keyword">endif</span>(CURL_FOUND)</span><br></pre></td></tr></table></figure>
 
-<p>可以看到，方法一和方法二虽然都是使用<code>file</code>指令，但内容却稍有区别：</p>
+<p>对上面的代码做一下解释：</p>
 <ol>
-<li>都是按照通配符批量匹配文件，<code>GLOB</code>和<code>GLOB_RECURSE</code>的区别在于后者允许*递归目录去匹配</li>
-<li>对于选项<code>CONFIGURE_DEPENDS</code>，如果不添加，则在src&#x2F;下添加新文件，由于cmake缓存的原因，<code>SOURCE_FILES</code>变量并不会更新，需要重新执行<code>cmake -B build</code></li>
+<li>首先设置一下cmake module的路径，其实就是存放<code>.cmake</code>文件的位置。有时候看一些项目，会发现其根目录下会有一个<code>cmake</code>目录，诶，没错，就和这个一样</li>
+<li>使用find_package来引入依赖库</li>
+<li>添加可执行程序server</li>
+<li>如果使用find_package找到了MySQL库，则将其链接到server上，否则终止构建</li>
 </ol>
-<h2 id="设置可执行文件的输出位置"><a href="#设置可执行文件的输出位置" class="headerlink" title="设置可执行文件的输出位置"></a>设置可执行文件的输出位置</h2><figure class="highlight cmake"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">set</span>(EXECUTABLE_OUTPUT_PATH <span class="variable">$&#123;PROJECT_SOURCE_DIR&#125;</span>/bin)</span><br></pre></td></tr></table></figure>
+<p>值得注意的是，在CMAKE_MODULE_PATH目录下，必须有<code>Find&lt;LibaryName&gt;.cmake</code> 模块，在本例中，即为 <code>FindMySQL.cmake</code>，该文件可在网上找到。</p>
+
     </div>
 
     
@@ -233,13 +237,13 @@
 
           <div class="post-nav">
             <div class="post-nav-item">
-                <a href="/2024/02/14/C++/C++%E4%B8%ADlambda%E4%B8%8Epriority_queue%E4%B8%80%E8%B5%B7%E4%BD%BF%E7%94%A8/" rel="prev" title="C++中lambda与priority_queue一起使用">
-                  <i class="fa fa-angle-left"></i> C++中lambda与priority_queue一起使用
+                <a href="/2024/02/28/%E7%AE%97%E6%B3%95/%E8%A1%8C%E5%88%97%E9%80%92%E5%A2%9E%E7%9F%A9%E9%98%B5/" rel="prev" title="行列递增矩阵">
+                  <i class="fa fa-angle-left"></i> 行列递增矩阵
                 </a>
             </div>
             <div class="post-nav-item">
-                <a href="/2024/02/20/%E7%BC%96%E7%A8%8B%E5%BC%80%E5%8F%91/CMake%E4%B8%AD%E4%BD%BF%E7%94%A8find_pakage%E6%9D%A5%E4%BD%BF%E7%94%A8MySQL/" rel="next" title="CMake中使用find_pakage来使用MySQL">
-                  CMake中使用find_pakage来使用MySQL <i class="fa fa-angle-right"></i>
+                <a href="/2024/02/28/%E7%AE%97%E6%B3%95/%E3%80%90%E9%93%BE%E8%A1%A8%E3%80%91%E5%88%A4%E6%96%AD%E5%9B%9E%E6%96%87%E9%93%BE%E8%A1%A8/" rel="next" title="【链表】判断回文链表">
+                  【链表】判断回文链表 <i class="fa fa-angle-right"></i>
                 </a>
             </div>
           </div>
