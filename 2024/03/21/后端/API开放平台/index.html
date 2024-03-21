@@ -19,18 +19,20 @@
 
 <script class="next-config" data-name="main" type="application/json">{"hostname":"kerolt.github.io","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.19.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":true,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
 
-    <meta name="description" content="项目架构![[Screenshot_20240321_190000.png]] 用户前台普通用户例如管理员发布了一个新的接口A，如果一位开发者并没有注册为该平台的用户，那么即便这位开发者拿到了这个接口地址，也是不可以使用接口A的。 当他注册为平台用户后，后台会给他生成AccessKey和SecretKey（后文简称为ak和sk）用于API签名认证，这时，用户带着这两个key，就可通过前台提供的在线">
+    <meta name="description" content="前言通过一个项目来学习一下如何设计一个多服务的系统。同时也能学习Spring Cloud Gateway、Dubbo、API签名等一些知识。 项目架构">
 <meta property="og:type" content="article">
 <meta property="og:title" content="API开放平台">
 <meta property="og:url" content="http://kerolt.github.io/2024/03/21/%E5%90%8E%E7%AB%AF/API%E5%BC%80%E6%94%BE%E5%B9%B3%E5%8F%B0/index.html">
 <meta property="og:site_name" content="Kerolt&#39;s Blog">
-<meta property="og:description" content="项目架构![[Screenshot_20240321_190000.png]] 用户前台普通用户例如管理员发布了一个新的接口A，如果一位开发者并没有注册为该平台的用户，那么即便这位开发者拿到了这个接口地址，也是不可以使用接口A的。 当他注册为平台用户后，后台会给他生成AccessKey和SecretKey（后文简称为ak和sk）用于API签名认证，这时，用户带着这两个key，就可通过前台提供的在线">
+<meta property="og:description" content="前言通过一个项目来学习一下如何设计一个多服务的系统。同时也能学习Spring Cloud Gateway、Dubbo、API签名等一些知识。 项目架构">
 <meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://kerolt.github.io/Screenshot_20240321_190000.png">
 <meta property="article:published_time" content="2024-03-21T00:00:00.000Z">
 <meta property="article:modified_time" content="2024-03-21T00:00:00.000Z">
 <meta property="article:author" content="Kerolt">
 <meta property="article:tag" content="SpringBoot">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://kerolt.github.io/Screenshot_20240321_190000.png">
 
 
 <link rel="canonical" href="http://kerolt.github.io/2024/03/21/%E5%90%8E%E7%AB%AF/API%E5%BC%80%E6%94%BE%E5%B9%B3%E5%8F%B0/">
@@ -112,7 +114,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%A1%B9%E7%9B%AE%E6%9E%B6%E6%9E%84"><span class="nav-number">1.</span> <span class="nav-text">项目架构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%94%A8%E6%88%B7%E5%89%8D%E5%8F%B0"><span class="nav-number">2.</span> <span class="nav-text">用户前台</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%99%AE%E9%80%9A%E7%94%A8%E6%88%B7"><span class="nav-number">2.1.</span> <span class="nav-text">普通用户</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AE%A1%E7%90%86%E5%91%98"><span class="nav-number">2.2.</span> <span class="nav-text">管理员</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%A2%E6%88%B7%E7%AB%AFSDK"><span class="nav-number">3.</span> <span class="nav-text">客户端SDK</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BD%91%E5%85%B3"><span class="nav-number">4.</span> <span class="nav-text">网关</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8E%A5%E5%8F%A3%E6%9C%8D%E5%8A%A1"><span class="nav-number">5.</span> <span class="nav-text">接口服务</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9C%8D%E5%8A%A1%E5%90%8E%E5%8F%B0"><span class="nav-number">6.</span> <span class="nav-text">服务后台</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8E%A5%E5%8F%A3%E7%AE%A1%E7%90%86"><span class="nav-number">6.1.</span> <span class="nav-text">接口管理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9C%A8%E7%BA%BF%E6%B5%8B%E8%AF%95"><span class="nav-number">6.2.</span> <span class="nav-text">在线测试</span></a></li></ol></li></ol></div>
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%A1%B9%E7%9B%AE%E6%9E%B6%E6%9E%84"><span class="nav-number">2.</span> <span class="nav-text">项目架构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%94%A8%E6%88%B7%E5%89%8D%E5%8F%B0"><span class="nav-number">3.</span> <span class="nav-text">用户前台</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%99%AE%E9%80%9A%E7%94%A8%E6%88%B7"><span class="nav-number">3.1.</span> <span class="nav-text">普通用户</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AE%A1%E7%90%86%E5%91%98"><span class="nav-number">3.2.</span> <span class="nav-text">管理员</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%A2%E6%88%B7%E7%AB%AFSDK%EF%BC%88api-client-sdk%EF%BC%89"><span class="nav-number">4.</span> <span class="nav-text">客户端SDK（api-client-sdk）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BD%91%E5%85%B3%EF%BC%88api-gateway%EF%BC%89"><span class="nav-number">5.</span> <span class="nav-text">网关（api-gateway）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8E%A5%E5%8F%A3%E6%9C%8D%E5%8A%A1%EF%BC%88api-interface%EF%BC%89"><span class="nav-number">6.</span> <span class="nav-text">接口服务（api-interface）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8A%BD%E8%B1%A1%E6%8E%A5%E5%8F%A3%EF%BC%88api-common%EF%BC%89"><span class="nav-number">7.</span> <span class="nav-text">抽象接口（api-common）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9C%8D%E5%8A%A1%E5%90%8E%E5%8F%B0%EF%BC%88api-backend%EF%BC%89"><span class="nav-number">8.</span> <span class="nav-text">服务后台（api-backend）</span></a></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -215,16 +217,31 @@
     
     
     
-    <div class="post-body" itemprop="articleBody"><h2 id="项目架构"><a href="#项目架构" class="headerlink" title="项目架构"></a>项目架构</h2><p>![[Screenshot_20240321_190000.png]]</p>
+    <div class="post-body" itemprop="articleBody"><h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>通过一个项目来学习一下如何设计一个多服务的系统。同时也能学习Spring Cloud Gateway、Dubbo、API签名等一些知识。</p>
+<h2 id="项目架构"><a href="#项目架构" class="headerlink" title="项目架构"></a>项目架构</h2><p><img src="/Screenshot_20240321_190000.png"></p>
+<span id="more"></span>
+
 <h2 id="用户前台"><a href="#用户前台" class="headerlink" title="用户前台"></a>用户前台</h2><h3 id="普通用户"><a href="#普通用户" class="headerlink" title="普通用户"></a>普通用户</h3><p>例如管理员发布了一个新的接口A，如果一位开发者并没有注册为该平台的用户，那么即便这位开发者拿到了这个接口地址，也是不可以使用接口A的。</p>
 <p>当他注册为平台用户后，后台会给他生成<strong>AccessKey</strong>和<strong>SecretKey</strong>（后文简称为ak和sk）用于API签名认证，这时，用户带着这两个key，就可通过前台提供的在线测试或者客户端SDK来调用想要的接口了。</p>
-<h3 id="管理员"><a href="#管理员" class="headerlink" title="管理员"></a>管理员</h3><p>管理员职责就是管理接口</p>
-<h2 id="客户端SDK"><a href="#客户端SDK" class="headerlink" title="客户端SDK"></a>客户端SDK</h2><p>若管理员将接口下线，则请求无效</p>
-<p>通过<strong>AccessKey</strong>和<strong>SecretKey</strong>来请求<code>api-interface</code>接口服务。当然，添加网关后，应该在<code>api-interface</code>前使用添加一层网关服务来避免api接口的直接暴露。</p>
-<h2 id="网关"><a href="#网关" class="headerlink" title="网关"></a>网关</h2><p>统一去做一些校验或解决一些问题。</p>
-<h2 id="接口服务"><a href="#接口服务" class="headerlink" title="接口服务"></a>接口服务</h2><p>真正实现和提供接口的地方。</p>
-<h2 id="服务后台"><a href="#服务后台" class="headerlink" title="服务后台"></a>服务后台</h2><h3 id="接口管理"><a href="#接口管理" class="headerlink" title="接口管理"></a>接口管理</h3><p>接口信息的管理，即普通的增删改查，发布、下线接口，接口调用统计。</p>
-<h3 id="在线测试"><a href="#在线测试" class="headerlink" title="在线测试"></a>在线测试</h3><p>当前台用户要进行在线测试时，我们会使用到用户的ak和sk，只有这样才能够比较安全的调用接口；而再通过客户端SDK，就能比较方便地去请求接口。</p>
+<h3 id="管理员"><a href="#管理员" class="headerlink" title="管理员"></a>管理员</h3><p>管理员职责就是管理接口，包括接口的上线、下线、添加等</p>
+<h2 id="客户端SDK（api-client-sdk）"><a href="#客户端SDK（api-client-sdk）" class="headerlink" title="客户端SDK（api-client-sdk）"></a>客户端SDK（api-client-sdk）</h2><p>若管理员将接口下线，则请求无效</p>
+<p>通过<strong>AccessKey</strong>和<strong>SecretKey</strong>来请求<code>api-interface</code>接口服务。其中ak和sk只有用户在平台注册账号后才会分。当然，添加网关后，应该在<code>api-interface</code>前使用添加一层网关服务来避免api接口的直接暴露</p>
+<h2 id="网关（api-gateway）"><a href="#网关（api-gateway）" class="headerlink" title="网关（api-gateway）"></a>网关（api-gateway）</h2><p>使用Spring Cloud Gateway来完成一下功能</p>
+<ol>
+<li><strong>统一鉴权认证</strong>：应用 API 签名认证算法校验用户请求的合法性。根据请求拿到用户信息后从数据库中获取ak、sk进行比较，如果相同则代表用户请求合法</li>
+<li><strong>公共业务逻辑</strong>：对每个接口的调用进行集中的统计 。这类似于Spring MVC中的拦截器和Spring中的AOP</li>
+<li><strong>路由转发</strong>：前端发送请求到 API 网关，通过网关转发到实际的 API 接口 。这样就避免了直接将完整的接口地址暴露出来</li>
+<li><strong>流量染色</strong>：给经过网关的请求加上特定的请求头参数，便于让实际的 API 服务确定请求来源及合法性</li>
+</ol>
+<h2 id="接口服务（api-interface）"><a href="#接口服务（api-interface）" class="headerlink" title="接口服务（api-interface）"></a>接口服务（api-interface）</h2><p>真正实现和提供接口的地方，可以只编写controller层</p>
+<h2 id="抽象接口（api-common）"><a href="#抽象接口（api-common）" class="headerlink" title="抽象接口（api-common）"></a>抽象接口（api-common）</h2><p>在网关层由于要进行API鉴权，这避免不料要查询数据库，但是网关服务项目并没有使用MyBatis-Plus，为了避免写重复的代码，利用Dubbo分布式改造，使得网关层可以通过RPC来调用后端服务的方法</p>
+<h2 id="服务后台（api-backend）"><a href="#服务后台（api-backend）" class="headerlink" title="服务后台（api-backend）"></a>服务后台（api-backend）</h2><p>最核心的业务层服务！</p>
+<ul>
+<li>用户注册时会自动生成其ak和sk</li>
+<li>接口信息的管理，即普通的增删改查，发布、下线接口</li>
+<li>接口调用统计（没错，网关是通过rpc调用这里的服务）</li>
+<li>当前台用户要进行在线测试时，我们会使用到用户的ak和sk，只有这样才能够比较安全的调用接口；而再通过客户端SDK，就能比较方便地去请求接口</li>
+</ul>
 
     </div>
 

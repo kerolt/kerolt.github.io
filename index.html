@@ -209,17 +209,16 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <h2 id="项目架构"><a href="#项目架构" class="headerlink" title="项目架构"></a>项目架构</h2><p>![[Screenshot_20240321_190000.png]]</p>
-<h2 id="用户前台"><a href="#用户前台" class="headerlink" title="用户前台"></a>用户前台</h2><h3 id="普通用户"><a href="#普通用户" class="headerlink" title="普通用户"></a>普通用户</h3><p>例如管理员发布了一个新的接口A，如果一位开发者并没有注册为该平台的用户，那么即便这位开发者拿到了这个接口地址，也是不可以使用接口A的。</p>
-<p>当他注册为平台用户后，后台会给他生成<strong>AccessKey</strong>和<strong>SecretKey</strong>（后文简称为ak和sk）用于API签名认证，这时，用户带着这两个key，就可通过前台提供的在线测试或者客户端SDK来调用想要的接口了。</p>
-<h3 id="管理员"><a href="#管理员" class="headerlink" title="管理员"></a>管理员</h3><p>管理员职责就是管理接口</p>
-<h2 id="客户端SDK"><a href="#客户端SDK" class="headerlink" title="客户端SDK"></a>客户端SDK</h2><p>若管理员将接口下线，则请求无效</p>
-<p>通过<strong>AccessKey</strong>和<strong>SecretKey</strong>来请求<code>api-interface</code>接口服务。当然，添加网关后，应该在<code>api-interface</code>前使用添加一层网关服务来避免api接口的直接暴露。</p>
-<h2 id="网关"><a href="#网关" class="headerlink" title="网关"></a>网关</h2><p>统一去做一些校验或解决一些问题。</p>
-<h2 id="接口服务"><a href="#接口服务" class="headerlink" title="接口服务"></a>接口服务</h2><p>真正实现和提供接口的地方。</p>
-<h2 id="服务后台"><a href="#服务后台" class="headerlink" title="服务后台"></a>服务后台</h2><h3 id="接口管理"><a href="#接口管理" class="headerlink" title="接口管理"></a>接口管理</h3><p>接口信息的管理，即普通的增删改查，发布、下线接口，接口调用统计。</p>
-<h3 id="在线测试"><a href="#在线测试" class="headerlink" title="在线测试"></a>在线测试</h3><p>当前台用户要进行在线测试时，我们会使用到用户的ak和sk，只有这样才能够比较安全的调用接口；而再通过客户端SDK，就能比较方便地去请求接口。</p>
-
+          <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>通过一个项目来学习一下如何设计一个多服务的系统。同时也能学习Spring Cloud Gateway、Dubbo、API签名等一些知识。</p>
+<h2 id="项目架构"><a href="#项目架构" class="headerlink" title="项目架构"></a>项目架构</h2><p><img src="/Screenshot_20240321_190000.png"></p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2024/03/21/%E5%90%8E%E7%AB%AF/API%E5%BC%80%E6%94%BE%E5%B9%B3%E5%8F%B0/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
       
     </div>
 
