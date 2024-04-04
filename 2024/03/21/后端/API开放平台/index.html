@@ -226,6 +226,7 @@
 <h3 id="管理员"><a href="#管理员" class="headerlink" title="管理员"></a>管理员</h3><p>管理员职责就是管理接口，包括接口的上线、下线、添加等</p>
 <h2 id="客户端SDK（api-client-sdk）"><a href="#客户端SDK（api-client-sdk）" class="headerlink" title="客户端SDK（api-client-sdk）"></a>客户端SDK（api-client-sdk）</h2><p>若管理员将接口下线，则请求无效</p>
 <p>通过<strong>AccessKey</strong>和<strong>SecretKey</strong>来请求<code>api-interface</code>接口服务。其中ak和sk只有用户在平台注册账号后才会分。当然，添加网关后，应该在<code>api-interface</code>前使用添加一层网关服务来避免api接口的直接暴露</p>
+<p>sdk中的请求方法应该和api-interface中提供的接口一一对应，也就是两边应该同步修改</p>
 <h2 id="网关（api-gateway）"><a href="#网关（api-gateway）" class="headerlink" title="网关（api-gateway）"></a>网关（api-gateway）</h2><p>使用Spring Cloud Gateway来完成一下功能</p>
 <ol>
 <li><strong>统一鉴权认证</strong>：应用 API 签名认证算法校验用户请求的合法性。根据请求拿到用户信息后从数据库中获取ak、sk进行比较，如果相同则代表用户请求合法</li>
