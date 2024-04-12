@@ -130,7 +130,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">12</span>
+          <span class="site-state-item-count">13</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -254,7 +254,7 @@
 
 <p>上面还有几个问题</p>
 <ul>
-<li>为什么当i不在范围时<code>return hold ? INT_MIN : 0;</code>？（好吧这里我也还没搞清楚）</li>
+<li>为什么当i不在范围时<code>return hold ? INT_MIN : 0;</code>？当i不在范围内，那么说明此时就算拥有股票也是非法的，那么其返回值一定不能影响到正常的i值，而用于比较返回值的函数为max，那么将该返回值设置成INT_MAX就是最好的选择了</li>
 <li>为什么最后只要返回<code>dfs(n - 1, false)</code>？这时因为最后一天卖出去（也就是未持有股票，false）所拥有的利润一定比最后一天不卖出去（持有股票，true）所拥有的利润高，因此也每次要返回<code>max(dfs(n - 1, false), dfs(n - 1, true))</code>了</li>
 </ul>
 <p>好，这时点击提交！会发现超时了！这时因为我们在递归的过程中重复计算了子问题，造成了不必要的开销</p>
@@ -283,6 +283,9 @@
                 </a>
             </div>
             <div class="post-nav-item">
+                <a href="/2024/04/12/%E7%AE%97%E6%B3%95/%E8%82%A1%E7%A5%A8%E9%97%AE%E9%A2%98%E7%AC%AC%E4%BA%8C%E6%B3%A2/" rel="next" title="股票问题第二波">
+                  股票问题第二波 <i class="fa fa-angle-right"></i>
+                </a>
             </div>
           </div>
     </footer>
