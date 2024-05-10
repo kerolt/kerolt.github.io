@@ -158,7 +158,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://kerolt.github.io/2024/05/09/OS/%E3%80%90MIT6.S081%E3%80%91Lab2%20trace/">
+    <link itemprop="mainEntityOfPage" href="http://kerolt.github.io/posts/18ad9abb/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="https://picx.zhimg.com/v2-f14895864d68f2db5f8e650481075209_xll.jpg">
@@ -176,7 +176,7 @@
     </span>
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
-          <a href="/2024/05/09/OS/%E3%80%90MIT6.S081%E3%80%91Lab2%20trace/" class="post-title-link" itemprop="url">【MIT6.S081】Lab2 trace</a>
+          <a href="/posts/18ad9abb/" class="post-title-link" itemprop="url">【MIT6.S081】Lab2 trace</a>
         </h2>
 
         <div class="post-meta-container">
@@ -187,7 +187,7 @@
       </span>
       <span class="post-meta-item-text">发表于</span>
 
-      <time title="创建时间：2024-05-09 15:41:06" itemprop="dateCreated datePublished" datetime="2024-05-09T15:41:06+00:00">2024-05-09</time>
+      <time title="创建时间：2024-05-10 00:00:00" itemprop="dateCreated datePublished" datetime="2024-05-10T00:00:00+00:00">2024-05-10</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -209,15 +209,16 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>首先，我们要清楚这个实验的目的是什么：</p>
+          <h2 id="前言">前言<a class="anchor" href="#前言">·</a></h2>
+<p>首先，我们要清楚这个实验的目的是什么：</p>
 <blockquote>
-<p>In this assignment you will add a system call tracing feature that may help you when debugging later labs. You’ll create a new trace system call that will control tracing. It should take one argument, an integer “mask”, whose bits specify which system calls to trace. For example, to trace the fork system call, a program calls trace(1 &lt;&lt; SYS_fork), where SYS_fork is a syscall number from kernel&#x2F;syscall.h. You have to modify the xv6 kernel to print out a line when each system call is about to return, if the system call’s number is set in the mask. The line should contain the process id, the name of the system call and the return value; you don’t need to print the system call arguments. The trace system call should enable tracing for the process that calls it and any children that it subsequently forks, but should not affect other processes.</p>
+<p>In this assignment you will add a system call tracing feature that may help you when debugging later labs. You’ll create a new trace system call that will control tracing. It should take one argument, an integer “mask”, whose bits specify which system calls to trace. For example, to trace the fork system call, a program calls trace(1 &lt;&lt; SYS_fork), where SYS_fork is a syscall number from kernel/syscall.h. You have to modify the xv6 kernel to print out a line when each system call is about to return, if the system call’s number is set in the mask. The line should contain the process id, the name of the system call and the return value; you don’t need to print the system call arguments. The trace system call should enable tracing for the process that calls it and any children that it subsequently forks, but should not affect other processes.</p>
 </blockquote>
 <p>译：在Xv6的trace命令中，它应该有一个参数，一个整数“掩码”，其位指定要跟踪的系统调用。例如，要跟踪fork系统调用，程序调用<code>trace(1&lt;&lt;SYS_fork)</code>，其中SYS_fork是<code>kernel/syscall.h</code>中的系统调用编号。如果系统调用的编号在掩码中设置，则必须修改xv6内核，以便在每个系统调用即将返回时打印出一行。该行应包含<strong>进程id</strong>、<strong>系统调用的名称</strong>和<strong>返回值</strong>；您不需要打印系统调用参数。跟踪系统调用应启用对调用它的进程及其随后分叉的任何<strong>子进程</strong>的跟踪，但不应影响其他进程。</p>
 <p>注意，在该实验的初始阶段，xv6已经为我们提供了trace命令的用户态实现，但是其底层的系统调用需要我们自己实现。</p>
           <!--noindex-->
             <div class="post-button">
-              <a class="btn" href="/2024/05/09/OS/%E3%80%90MIT6.S081%E3%80%91Lab2%20trace/#more" rel="contents">
+              <a class="btn" href="/posts/18ad9abb/#more" rel="contents">
                 阅读全文 &raquo;
               </a>
             </div>
@@ -248,7 +249,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://kerolt.github.io/2024/04/12/%E7%AE%97%E6%B3%95/%E8%82%A1%E7%A5%A8%E9%97%AE%E9%A2%98%E7%AC%AC%E4%BA%8C%E6%B3%A2/">
+    <link itemprop="mainEntityOfPage" href="http://kerolt.github.io/posts/bb522614/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="https://picx.zhimg.com/v2-f14895864d68f2db5f8e650481075209_xll.jpg">
@@ -266,7 +267,7 @@
     </span>
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
-          <a href="/2024/04/12/%E7%AE%97%E6%B3%95/%E8%82%A1%E7%A5%A8%E9%97%AE%E9%A2%98%E7%AC%AC%E4%BA%8C%E6%B3%A2/" class="post-title-link" itemprop="url">股票问题第二波</a>
+          <a href="/posts/bb522614/" class="post-title-link" itemprop="url">股票问题第二波</a>
         </h2>
 
         <div class="post-meta-container">
@@ -308,7 +309,7 @@
 </ul>
           <!--noindex-->
             <div class="post-button">
-              <a class="btn" href="/2024/04/12/%E7%AE%97%E6%B3%95/%E8%82%A1%E7%A5%A8%E9%97%AE%E9%A2%98%E7%AC%AC%E4%BA%8C%E6%B3%A2/#more" rel="contents">
+              <a class="btn" href="/posts/bb522614/#more" rel="contents">
                 阅读全文 &raquo;
               </a>
             </div>
@@ -339,7 +340,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://kerolt.github.io/2024/04/11/%E7%AE%97%E6%B3%95/%E8%82%A1%E7%A5%A8%E9%97%AE%E9%A2%98%E4%B8%8E%E7%8A%B6%E6%80%81%E6%9C%BAdp/">
+    <link itemprop="mainEntityOfPage" href="http://kerolt.github.io/posts/d925b9f8/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="https://picx.zhimg.com/v2-f14895864d68f2db5f8e650481075209_xll.jpg">
@@ -357,7 +358,7 @@
     </span>
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
-          <a href="/2024/04/11/%E7%AE%97%E6%B3%95/%E8%82%A1%E7%A5%A8%E9%97%AE%E9%A2%98%E4%B8%8E%E7%8A%B6%E6%80%81%E6%9C%BAdp/" class="post-title-link" itemprop="url">股票问题与状态机dp</a>
+          <a href="/posts/d925b9f8/" class="post-title-link" itemprop="url">股票问题与状态机dp</a>
         </h2>
 
         <div class="post-meta-container">
@@ -391,13 +392,13 @@
     
     <div class="post-body" itemprop="articleBody">
           <blockquote>
-<p>本篇文章思路来源于 @bilibili&#x2F;<a target="_blank" rel="noopener" href="https://space.bilibili.com/206214">灵茶山艾府</a></p>
+<p>本篇文章思路来源于 @bilibili/<a target="_blank" rel="noopener" href="https://space.bilibili.com/206214">灵茶山艾府</a></p>
 </blockquote>
 <p>题目描述：<a target="_blank" rel="noopener" href="https://leetcode.cn/problems/best-time-to-buy-and-sell-stock-ii">https://leetcode.cn/problems/best-time-to-buy-and-sell-stock-ii</a></p>
 <p>相对于买卖股票的最佳时机I，该问题可以多次买入和卖出股票以获取最大利益</p>
           <!--noindex-->
             <div class="post-button">
-              <a class="btn" href="/2024/04/11/%E7%AE%97%E6%B3%95/%E8%82%A1%E7%A5%A8%E9%97%AE%E9%A2%98%E4%B8%8E%E7%8A%B6%E6%80%81%E6%9C%BAdp/#more" rel="contents">
+              <a class="btn" href="/posts/d925b9f8/#more" rel="contents">
                 阅读全文 &raquo;
               </a>
             </div>
@@ -428,7 +429,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://kerolt.github.io/2024/03/21/%E5%90%8E%E7%AB%AF/API%E5%BC%80%E6%94%BE%E5%B9%B3%E5%8F%B0/">
+    <link itemprop="mainEntityOfPage" href="http://kerolt.github.io/posts/c40430e5/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="https://picx.zhimg.com/v2-f14895864d68f2db5f8e650481075209_xll.jpg">
@@ -446,7 +447,7 @@
     </span>
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
-          <a href="/2024/03/21/%E5%90%8E%E7%AB%AF/API%E5%BC%80%E6%94%BE%E5%B9%B3%E5%8F%B0/" class="post-title-link" itemprop="url">API开放平台</a>
+          <a href="/posts/c40430e5/" class="post-title-link" itemprop="url">API开放平台</a>
         </h2>
 
         <div class="post-meta-container">
@@ -479,11 +480,13 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>通过一个项目来学习一下如何设计一个多服务的系统。同时也能学习Spring Cloud Gateway、Dubbo、API签名等一些知识。</p>
-<h2 id="项目架构"><a href="#项目架构" class="headerlink" title="项目架构"></a>项目架构</h2><p><img src="/../../images/Screenshot_20240321_190000.png"></p>
+          <h2 id="前言">前言<a class="anchor" href="#前言">·</a></h2>
+<p>通过一个项目来学习一下如何设计一个多服务的系统。同时也能学习Spring Cloud Gateway、Dubbo、API签名等一些知识。</p>
+<h2 id="项目架构">项目架构<a class="anchor" href="#项目架构">·</a></h2>
+<p><img src="../../images/Screenshot_20240321_190000.png" alt=""></p>
           <!--noindex-->
             <div class="post-button">
-              <a class="btn" href="/2024/03/21/%E5%90%8E%E7%AB%AF/API%E5%BC%80%E6%94%BE%E5%B9%B3%E5%8F%B0/#more" rel="contents">
+              <a class="btn" href="/posts/c40430e5/#more" rel="contents">
                 阅读全文 &raquo;
               </a>
             </div>
@@ -514,7 +517,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://kerolt.github.io/2024/03/07/OS/%E3%80%8CMIT6.S081%E3%80%8DLab1%20Utilities/">
+    <link itemprop="mainEntityOfPage" href="http://kerolt.github.io/posts/50c5c1b7/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="https://picx.zhimg.com/v2-f14895864d68f2db5f8e650481075209_xll.jpg">
@@ -532,7 +535,7 @@
     </span>
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
-          <a href="/2024/03/07/OS/%E3%80%8CMIT6.S081%E3%80%8DLab1%20Utilities/" class="post-title-link" itemprop="url">「MIT6.S081」Lab1 Utilities</a>
+          <a href="/posts/50c5c1b7/" class="post-title-link" itemprop="url">「MIT6.S081」Lab1 Utilities</a>
         </h2>
 
         <div class="post-meta-container">
@@ -565,7 +568,8 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>该Lab通过实现几个命令来熟悉 xv6 及其系统调用</p>
+          <h2 id="前言">前言<a class="anchor" href="#前言">·</a></h2>
+<p>该Lab通过实现几个命令来熟悉 xv6 及其系统调用</p>
 <ul>
 <li>sleep</li>
 <li>pingpong</li>
@@ -577,7 +581,7 @@
 <p>个人代码实现仓库：<a target="_blank" rel="noopener" href="https://github.com/kerolt/MIT6.081-labs">https://github.com/kerolt/MIT6.081-labs</a></p>
           <!--noindex-->
             <div class="post-button">
-              <a class="btn" href="/2024/03/07/OS/%E3%80%8CMIT6.S081%E3%80%8DLab1%20Utilities/#more" rel="contents">
+              <a class="btn" href="/posts/50c5c1b7/#more" rel="contents">
                 阅读全文 &raquo;
               </a>
             </div>
@@ -608,7 +612,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://kerolt.github.io/2024/02/21/C++/%E9%81%BF%E5%85%8Dcout%E7%BA%BF%E7%A8%8B%E4%B8%8D%E5%AE%89%E5%85%A8%E7%9A%84%E4%B8%80%E4%B8%AA%E5%81%9A%E6%B3%95/">
+    <link itemprop="mainEntityOfPage" href="http://kerolt.github.io/posts/68d3d49b/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="https://picx.zhimg.com/v2-f14895864d68f2db5f8e650481075209_xll.jpg">
@@ -626,7 +630,7 @@
     </span>
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
-          <a href="/2024/02/21/C++/%E9%81%BF%E5%85%8Dcout%E7%BA%BF%E7%A8%8B%E4%B8%8D%E5%AE%89%E5%85%A8%E7%9A%84%E4%B8%80%E4%B8%AA%E5%81%9A%E6%B3%95/" class="post-title-link" itemprop="url">避免cout线程不安全的一个做法</a>
+          <a href="/posts/68d3d49b/" class="post-title-link" itemprop="url">避免cout线程不安全的一个做法</a>
         </h2>
 
         <div class="post-meta-container">
@@ -659,10 +663,11 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p><code>std::cout</code>重载了<code>&lt;&lt;</code>运算符，这使得写一些很短的代码时很方便。但是如果在多线程的条件下，cout并不是线程安全的。</p>
+          <h2 id="前言">前言<a class="anchor" href="#前言">·</a></h2>
+<p><code>std::cout</code>重载了<code>&lt;&lt;</code>运算符，这使得写一些很短的代码时很方便。但是如果在多线程的条件下，cout并不是线程安全的。</p>
           <!--noindex-->
             <div class="post-button">
-              <a class="btn" href="/2024/02/21/C++/%E9%81%BF%E5%85%8Dcout%E7%BA%BF%E7%A8%8B%E4%B8%8D%E5%AE%89%E5%85%A8%E7%9A%84%E4%B8%80%E4%B8%AA%E5%81%9A%E6%B3%95/#more" rel="contents">
+              <a class="btn" href="/posts/68d3d49b/#more" rel="contents">
                 阅读全文 &raquo;
               </a>
             </div>
@@ -693,7 +698,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://kerolt.github.io/2024/02/18/C++/%E7%BA%A0%E6%AD%A3%E4%B8%80%E4%B8%8B%E5%AF%B9cpp%E7%A7%BB%E5%8A%A8%E8%AF%AD%E4%B9%89%E7%9A%84%E9%94%99%E8%AF%AF%E7%90%86%E8%A7%A3/">
+    <link itemprop="mainEntityOfPage" href="http://kerolt.github.io/posts/2a4bdcb8/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="https://picx.zhimg.com/v2-f14895864d68f2db5f8e650481075209_xll.jpg">
@@ -711,7 +716,7 @@
     </span>
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
-          <a href="/2024/02/18/C++/%E7%BA%A0%E6%AD%A3%E4%B8%80%E4%B8%8B%E5%AF%B9cpp%E7%A7%BB%E5%8A%A8%E8%AF%AD%E4%B9%89%E7%9A%84%E9%94%99%E8%AF%AF%E7%90%86%E8%A7%A3/" class="post-title-link" itemprop="url">纠正一下对cpp移动语义的错误理解</a>
+          <a href="/posts/2a4bdcb8/" class="post-title-link" itemprop="url">纠正一下对cpp移动语义的错误理解</a>
         </h2>
 
         <div class="post-meta-container">
@@ -747,7 +752,7 @@
           <p>之前对于移动语义的理解就是使用std::move将一个对象所占有的资源的所有权转移给另一个对象，但是只要使用std::move就足够了吗？这显然是错误的。</p>
           <!--noindex-->
             <div class="post-button">
-              <a class="btn" href="/2024/02/18/C++/%E7%BA%A0%E6%AD%A3%E4%B8%80%E4%B8%8B%E5%AF%B9cpp%E7%A7%BB%E5%8A%A8%E8%AF%AD%E4%B9%89%E7%9A%84%E9%94%99%E8%AF%AF%E7%90%86%E8%A7%A3/#more" rel="contents">
+              <a class="btn" href="/posts/2a4bdcb8/#more" rel="contents">
                 阅读全文 &raquo;
               </a>
             </div>
@@ -778,7 +783,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://kerolt.github.io/2024/02/14/C++/C++%E4%B8%ADlambda%E4%B8%8Epriority_queue%E4%B8%80%E8%B5%B7%E4%BD%BF%E7%94%A8/">
+    <link itemprop="mainEntityOfPage" href="http://kerolt.github.io/posts/3096ce14/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="https://picx.zhimg.com/v2-f14895864d68f2db5f8e650481075209_xll.jpg">
@@ -796,7 +801,7 @@
     </span>
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
-          <a href="/2024/02/14/C++/C++%E4%B8%ADlambda%E4%B8%8Epriority_queue%E4%B8%80%E8%B5%B7%E4%BD%BF%E7%94%A8/" class="post-title-link" itemprop="url">C++中lambda与priority_queue一起使用</a>
+          <a href="/posts/3096ce14/" class="post-title-link" itemprop="url">C++中lambda与priority_queue一起使用</a>
         </h2>
 
         <div class="post-meta-container">
@@ -831,7 +836,6 @@
     <div class="post-body" itemprop="articleBody">
           <p>想写这篇博客的原因是在刷力扣的 <a target="_blank" rel="noopener" href="https://leetcode.cn/problems/top-k-frequent-elements/">347. 前 K 个高频元素</a> 一题时，需要使用到优先队列<code>priority_queue</code>，其定义如下：</p>
 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span>&lt;</span><br><span class="line">    <span class="keyword">class</span> <span class="title class_">T</span>,</span><br><span class="line">    <span class="keyword">class</span> <span class="title class_">Container</span> = std::vector&lt;T&gt;,</span><br><span class="line">    <span class="keyword">class</span> Compare = std::less&lt;<span class="keyword">typename</span> Container::value_type&gt;</span><br><span class="line">&gt; <span class="keyword">class</span> priority_queue;</span><br></pre></td></tr></table></figure>
-
 <p>第三个参数是一个可以自定义的比较类型，其必须满足<a target="_blank" rel="noopener" href="https://zh.cppreference.com/w/cpp/named_req/BinaryPredicate">二元谓词</a>，通常可以使用如下两种方法：</p>
 <ol>
 <li>使用自定义的函数对象</li>
@@ -840,7 +844,7 @@
 </ol>
           <!--noindex-->
             <div class="post-button">
-              <a class="btn" href="/2024/02/14/C++/C++%E4%B8%ADlambda%E4%B8%8Epriority_queue%E4%B8%80%E8%B5%B7%E4%BD%BF%E7%94%A8/#more" rel="contents">
+              <a class="btn" href="/posts/3096ce14/#more" rel="contents">
                 阅读全文 &raquo;
               </a>
             </div>
@@ -871,7 +875,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://kerolt.github.io/2024/01/29/%E7%BC%96%E7%A8%8B%E5%BC%80%E5%8F%91/CMake%E4%B8%AD%E4%BD%BF%E7%94%A8find_pakage%E6%9D%A5%E4%BD%BF%E7%94%A8MySQL/">
+    <link itemprop="mainEntityOfPage" href="http://kerolt.github.io/posts/50cb0d54/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="https://picx.zhimg.com/v2-f14895864d68f2db5f8e650481075209_xll.jpg">
@@ -889,7 +893,7 @@
     </span>
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
-          <a href="/2024/01/29/%E7%BC%96%E7%A8%8B%E5%BC%80%E5%8F%91/CMake%E4%B8%AD%E4%BD%BF%E7%94%A8find_pakage%E6%9D%A5%E4%BD%BF%E7%94%A8MySQL/" class="post-title-link" itemprop="url">CMake中使用find_pakage来使用MySQL</a>
+          <a href="/posts/50cb0d54/" class="post-title-link" itemprop="url">CMake中使用find_pakage来使用MySQL</a>
         </h2>
 
         <div class="post-meta-container">
@@ -924,11 +928,10 @@
     <div class="post-body" itemprop="articleBody">
           <p>一般来说，如果我们在C++程序中要使用mysql的库，最简单的就是</p>
 <figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">g++ server.cpp -o server -lmysqlclient</span><br></pre></td></tr></table></figure>
-
 <p>但要是在大一点的项目中，在数不清的源文件下使用g++命令来完成，怕是不太现实。</p>
           <!--noindex-->
             <div class="post-button">
-              <a class="btn" href="/2024/01/29/%E7%BC%96%E7%A8%8B%E5%BC%80%E5%8F%91/CMake%E4%B8%AD%E4%BD%BF%E7%94%A8find_pakage%E6%9D%A5%E4%BD%BF%E7%94%A8MySQL/#more" rel="contents">
+              <a class="btn" href="/posts/50cb0d54/#more" rel="contents">
                 阅读全文 &raquo;
               </a>
             </div>
@@ -959,7 +962,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://kerolt.github.io/2024/01/25/%E7%BC%96%E7%A8%8B%E5%BC%80%E5%8F%91/%E3%80%90CMake%E3%80%91CMake%E4%BD%BF%E7%94%A8%E7%AC%94%E8%AE%B0/">
+    <link itemprop="mainEntityOfPage" href="http://kerolt.github.io/posts/aa749fff/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="https://picx.zhimg.com/v2-f14895864d68f2db5f8e650481075209_xll.jpg">
@@ -977,7 +980,7 @@
     </span>
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
-          <a href="/2024/01/25/%E7%BC%96%E7%A8%8B%E5%BC%80%E5%8F%91/%E3%80%90CMake%E3%80%91CMake%E4%BD%BF%E7%94%A8%E7%AC%94%E8%AE%B0/" class="post-title-link" itemprop="url">【CMake】CMake使用笔记</a>
+          <a href="/posts/aa749fff/" class="post-title-link" itemprop="url">【CMake】CMake使用笔记</a>
         </h2>
 
         <div class="post-meta-container">
@@ -1014,7 +1017,7 @@
 <p>ps：CMake相比xmake来说确实太繁琐，但还是得学习🍭</p>
           <!--noindex-->
             <div class="post-button">
-              <a class="btn" href="/2024/01/25/%E7%BC%96%E7%A8%8B%E5%BC%80%E5%8F%91/%E3%80%90CMake%E3%80%91CMake%E4%BD%BF%E7%94%A8%E7%AC%94%E8%AE%B0/#more" rel="contents">
+              <a class="btn" href="/posts/aa749fff/#more" rel="contents">
                 阅读全文 &raquo;
               </a>
             </div>
