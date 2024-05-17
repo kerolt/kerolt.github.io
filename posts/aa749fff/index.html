@@ -221,8 +221,9 @@
 <p>在“古代”CMake中，我们想要构建项目要这样：</p>
 <figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">mkdir</span> build</span><br><span class="line"><span class="built_in">cd</span> build</span><br><span class="line">cmake ..</span><br><span class="line">make</span><br></pre></td></tr></table></figure>
 <p>太啰嗦了，最后一步可能还用的不是make命令。不过在现代CMake中，提供了更为方便的 -B 和 --build，如下：</p>
-<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">cmake - B build</span><br><span class="line">cmake --build build</span><br></pre></td></tr></table></figure>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">cmake -B build <span class="comment"># 用于生成构建目录。-B 参数后面跟的是一个目录名，这里指定为 build</span></span><br><span class="line">cmake --build build <span class="comment"># 用于在已经生成的构建目录中构建项目</span></span><br></pre></td></tr></table></figure>
 <p>这样省去了创建build目录等繁琐的操作，还统一了不同平台上的构建命令。</p>
+<p>如果碰到了有关build缓存的相关问题，可以使用rm删除build目录，或者使用<code>cmake --build build --clean-first</code>来在构建之前先清理构建目录。</p>
 <h2 id="添加源文件的几种方法">添加源文件的几种方法<a class="anchor" href="#添加源文件的几种方法">·</a></h2>
 <p>假设当前项目文件目录如下：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">.</span><br><span class="line">├── CMakeLists.txt</span><br><span class="line">├── include</span><br><span class="line">│   └── add.h</span><br><span class="line">└── src</span><br><span class="line">    ├── add.cpp</span><br><span class="line">    └── main.cpp</span><br></pre></td></tr></table></figure>
