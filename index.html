@@ -132,7 +132,7 @@
       </div>
       <div class="site-state-item site-state-tags">
           <a href="/tags/">
-        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-count">7</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -209,23 +209,15 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <h2 id="uni-cli创建项目">uni-cli创建项目<a class="anchor" href="#uni-cli创建项目">·</a></h2>
-<p>由于我是在linux上使用uniapp，无法使用HBuilderX，故采用uni-cli来创建项目并使用vscode进行开发。</p>
-<p>uni-cli创建项目很简单，一行命令即可，这里采用vue3/vite版：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">npx degit dcloudio/uni-preset-vue#vite my-vue3-project</span><br><span class="line">````</span><br><span class="line"></span><br><span class="line">这里只用来创建项目，发布运行什么的具体可以看[官网](https://zh.uniapp.dcloud.io/worktile/CLI.html)。</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash"><span class="comment"># 使用eslint</span></span></span><br><span class="line"></span><br><span class="line">eslint的配置文件和配置方式我感觉有好多种，所以在配置的时候折腾了挺久，最好还是按照官网最新文档来：</span><br><span class="line"></span><br><span class="line">- **eslint**：https://eslint.org/docs/latest/use/getting-started</span><br><span class="line">- **eslint-plugin-vue**：https://eslint.vuejs.org/</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash"><span class="comment">## 安装eslint</span></span></span><br><span class="line"></span><br><span class="line">```shell</span><br><span class="line">npm init @eslint/config@latest</span><br></pre></td></tr></table></figure>
-<h3 id="配置">配置<a class="anchor" href="#配置">·</a></h3>
-<p>安装完后，一般项目的根目录下就会出现<code>eslint.config.mjs</code>文件（eslint 9.4.0版本，采用vue框架），主体如下：</p>
-<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> pluginVue <span class="keyword">from</span> <span class="string">&quot;eslint-plugin-vue&quot;</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> [</span><br><span class="line">  ......</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="attr">rules</span>: &#123;</span><br><span class="line">    </span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">];</span><br></pre></td></tr></table></figure>
-<p>现在我们就要来按照自己的要求来配置，最好是按照官方的文档来定制：<a target="_blank" rel="noopener" href="https://eslint.vuejs.org/">eslint-plugin-vue</a>，一般使用的规则会写在<code>rules</code>对象中。</p>
-<h3 id="举个🌰">举个🌰<a class="anchor" href="#举个🌰">·</a></h3>
-<p>比如我希望在代码中使用双引号，并且语句使用分号结尾，那么<code>eslint.config.mjs</code>文件就可以这样写：</p>
-<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> pluginVue <span class="keyword">from</span> <span class="string">&quot;eslint-plugin-vue&quot;</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> [</span><br><span class="line">  ...pluginVue.<span class="property">configs</span>[<span class="string">&quot;flat/recommended&quot;</span>],</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="attr">rules</span>: &#123;</span><br><span class="line">      <span class="attr">quotes</span>: [<span class="string">&quot;error&quot;</span>, <span class="string">&quot;double&quot;</span>],</span><br><span class="line">      <span class="attr">semi</span>: [<span class="string">&quot;error&quot;</span>]</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">];</span><br></pre></td></tr></table></figure>
-<p>如果在代码中碰到一些eslint的报错，例如</p>
-<p><img src="../../images/Pasted%20image%2020240608133029.png" alt=""></p>
-<p>那么可以在报错信息中给出的链接网页中查找</p>
-<p><img src="../../images/Pasted%20image%2020240608133229.png" alt=""></p>
-<p>在<code>eslint.config.mjs</code>中的rules中加入<code>&quot;vue/multi-word-component-names&quot;: 0</code>后，报错就消失了。</p>
-
+          <p>记录一下如何配置eslint（其实是怕下一次又被折磨）。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/posts/4976678f/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
       
     </div>
 
