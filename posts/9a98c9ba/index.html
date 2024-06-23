@@ -19,12 +19,12 @@
 
 <script class="next-config" data-name="main" type="application/json">{"hostname":"kerolt.github.io","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.19.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":true,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
 
-    <meta name="description" content="Speed up system calls (easy)· 通常我们在需要执行系统调用时，在操作系统中会发生从用户态到内核态的切换，这是因为这些核心的操作只能交给内核去完成。在这个实验中，xv6要求我们通过在用户空间和内核之间共享只读区域中的数据来加快某些系统调用。 由于现在只是入门如何将映射添加至页表中，这个实验只需要为xv6中的getpid()系统调用进行优化。 在xv6的实验指导书中：  创">
+    <meta name="description" content="前言· 页表是最常用的机制，操作系统通过它为每个进程提供自己的私有地址空间和内存。页表决定了内存地址的含义，以及可以访问物理内存的哪些部分。在本文中，记录了Lab: page tables的前两个实验：加速系统调用和打印页表。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="【MIT6.S081】Lab3 page tables（上）">
 <meta property="og:url" content="http://kerolt.github.io/posts/9a98c9ba/index.html">
 <meta property="og:site_name" content="Kerolt&#39;s Blog">
-<meta property="og:description" content="Speed up system calls (easy)· 通常我们在需要执行系统调用时，在操作系统中会发生从用户态到内核态的切换，这是因为这些核心的操作只能交给内核去完成。在这个实验中，xv6要求我们通过在用户空间和内核之间共享只读区域中的数据来加快某些系统调用。 由于现在只是入门如何将映射添加至页表中，这个实验只需要为xv6中的getpid()系统调用进行优化。 在xv6的实验指导书中：  创">
+<meta property="og:description" content="前言· 页表是最常用的机制，操作系统通过它为每个进程提供自己的私有地址空间和内存。页表决定了内存地址的含义，以及可以访问物理内存的哪些部分。在本文中，记录了Lab: page tables的前两个实验：加速系统调用和打印页表。">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="http://kerolt.github.io/images/Pasted%20image%2020240623170452.png">
 <meta property="article:published_time" content="2024-06-23T00:00:00.000Z">
@@ -115,7 +115,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Speed-up-system-calls-easy"><span class="nav-number">1.</span> <span class="nav-text">Speed up system calls (easy)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Print-a-page-table-easy"><span class="nav-number">2.</span> <span class="nav-text">Print a page table (easy)</span></a></li></ol></div>
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Speed-up-system-calls-easy"><span class="nav-number">2.</span> <span class="nav-text">Speed up system calls (easy)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Print-a-page-table-easy"><span class="nav-number">3.</span> <span class="nav-text">Print a page table (easy)</span></a></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -216,7 +216,7 @@
         <i class="far fa-file-word"></i>
       </span>
       <span class="post-meta-item-text">本文字数：</span>
-      <span>1.1k</span>
+      <span>1.2k</span>
     </span>
     <span class="post-meta-item" title="阅读时长">
       <span class="post-meta-item-icon">
@@ -233,7 +233,10 @@
     
     
     
-    <div class="post-body" itemprop="articleBody"><h2 id="Speed-up-system-calls-easy">Speed up system calls (easy)<a class="anchor" href="#Speed-up-system-calls-easy">·</a></h2>
+    <div class="post-body" itemprop="articleBody"><h2 id="前言">前言<a class="anchor" href="#前言">·</a></h2>
+<p>页表是最常用的机制，操作系统通过它为每个进程提供自己的私有地址空间和内存。页表决定了内存地址的含义，以及可以访问物理内存的哪些部分。在本文中，记录了<code>Lab: page tables</code>的前两个实验：加速系统调用和打印页表。</p>
+<span id="more"></span>
+<h2 id="Speed-up-system-calls-easy">Speed up system calls (easy)<a class="anchor" href="#Speed-up-system-calls-easy">·</a></h2>
 <p>通常我们在需要执行系统调用时，在操作系统中会发生从用户态到内核态的切换，这是因为这些核心的操作只能交给内核去完成。在这个实验中，xv6要求我们通过在用户空间和内核之间<strong>共享只读区域中的数据</strong>来加快某些系统调用。</p>
 <p>由于现在只是入门如何将映射添加至页表中，这个实验只需要为xv6中的<code>getpid()</code>系统调用进行优化。</p>
 <p>在xv6的实验指导书中：</p>
