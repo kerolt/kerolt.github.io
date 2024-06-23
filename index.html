@@ -121,7 +121,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">19</span>
+          <span class="site-state-item-count">20</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -149,6 +149,131 @@
     </div>
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://kerolt.github.io/posts/9a98c9ba/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://picx.zhimg.com/v2-f14895864d68f2db5f8e650481075209_xll.jpg">
+      <meta itemprop="name" content="Kerolt">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Kerolt's Blog">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | Kerolt's Blog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/posts/9a98c9ba/" class="post-title-link" itemprop="url">【MIT6.S081】Lab3 page tables（上）</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2024-06-23 00:00:00" itemprop="dateCreated datePublished" datetime="2024-06-23T00:00:00+00:00">2024-06-23</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/OS/" itemprop="url" rel="index"><span itemprop="name">OS</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>1.1k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>4 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h2 id="Speed-up-system-calls-easy">Speed up system calls (easy)<a class="anchor" href="#Speed-up-system-calls-easy">·</a></h2>
+<p>通常我们在需要执行系统调用时，在操作系统中会发生从用户态到内核态的切换，这是因为这些核心的操作只能交给内核去完成。在这个实验中，xv6要求我们通过在用户空间和内核之间<strong>共享只读区域中的数据</strong>来加快某些系统调用。</p>
+<p>由于现在只是入门如何将映射添加至页表中，这个实验只需要为xv6中的<code>getpid()</code>系统调用进行优化。</p>
+<p>在xv6的实验指导书中：</p>
+<blockquote>
+<p>创建每个进程时，在USYSCALL（memlayout.h中定义的虚拟地址）映射一个只读页。在该页面的开头，存储一个usyscall结构体（也在memlayout.h中定义），并对其进行初始化以存储当前进程的PID。</p>
+</blockquote>
+<p>既然如此，进程结构体中也应当有一个usyscall结构体：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// kernel/proc.h</span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">proc</span> &#123;</span></span><br><span class="line">	...</span><br><span class="line">	<span class="type">pagetable_t</span> pagetable;       <span class="comment">// User page table</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">trapframe</span> *<span class="title">trapframe</span>;</span> <span class="comment">// data page for trampoline.S</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">usyscall</span> *<span class="title">usyscall</span>;</span>   <span class="comment">// data page for USYSCALL</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">context</span> <span class="title">context</span>;</span>      <span class="comment">// swtch() here to run process</span></span><br><span class="line">	...</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>这样就可以通过<code>p-&gt;usyscall</code>来获取了。</p>
+<p>在<code>memlayout.h</code>中我们可以看到用户态空间内存布局：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">Address zero first:</span><br><span class="line">  text</span><br><span class="line">  original data and bss</span><br><span class="line">  fixed-size stack</span><br><span class="line">  expandable heap</span><br><span class="line">  ...</span><br><span class="line">  USYSCALL (shared with kernel)</span><br><span class="line">  TRAPFRAME (p-&gt;trapframe, used by the trampoline)</span><br><span class="line">  TRAMPOLINE (the same page as in the kernel)</span><br></pre></td></tr></table></figure>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">MAXVA-&gt; -------------------------------------</span><br><span class="line">        | TRAMPOLINE (与内核相同的页面)        |</span><br><span class="line">        -------------------------------------</span><br><span class="line">        | TRAPFRAME (p-&gt;trapframe, 由跳板使用)|</span><br><span class="line">        -------------------------------------</span><br><span class="line">        | USYSCALL (与内核共享)               |</span><br><span class="line">        -------------------------------------</span><br><span class="line">        | ...                               |</span><br><span class="line">        -------------------------------------</span><br><span class="line">        | 可扩展堆                           |</span><br><span class="line">        -------------------------------------</span><br><span class="line">        | 固定大小的栈                        |</span><br><span class="line">        -------------------------------------</span><br><span class="line">        | 原始数据和BSS                       |</span><br><span class="line">        -------------------------------------</span><br><span class="line">        | text                              |</span><br><span class="line">0 -&gt;    -------------------------------------</span><br></pre></td></tr></table></figure>
+<p>我们需要做的就是仿照<code>TRAPFRAME</code>将<code>USYSCALL</code>也做一层映射。</p>
+<p>在<code>allocproc()</code>为进程分配物理页时，使用<code>kalloc()</code>对usyscall的分配（kalloc每次从空闲页表中取出一个项，其大小为4KB）：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Allocate a usyscall page.</span></span><br><span class="line"><span class="keyword">if</span>((p-&gt;usyscall = (<span class="keyword">struct</span> usyscall *)kalloc()) == <span class="number">0</span>)&#123;</span><br><span class="line">	freeproc(p);</span><br><span class="line">	release(&amp;p-&gt;lock);</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在<code>proc_pagetable()</code>函数中，其为指定进程创建用户页表，不含用户内存，但有trampoline 和 trapframe页。以下代码是对trampoline 和 trapframe进行映射。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// map the trampoline code (for system call return)</span></span><br><span class="line"><span class="comment">// at the highest user virtual address.</span></span><br><span class="line"><span class="comment">// only the supervisor uses it, on the way</span></span><br><span class="line"><span class="comment">// to/from user space, so not PTE_U.</span></span><br><span class="line"><span class="keyword">if</span>(mappages(pagetable, TRAMPOLINE, PGSIZE,</span><br><span class="line">		  (uint64)trampoline, PTE_R | PTE_X) &lt; <span class="number">0</span>)&#123;</span><br><span class="line">	uvmfree(pagetable, <span class="number">0</span>);</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// map the trapframe page just below the trampoline page, for</span></span><br><span class="line"><span class="comment">// trampoline.S.</span></span><br><span class="line"><span class="keyword">if</span>(mappages(pagetable, TRAPFRAME, PGSIZE,</span><br><span class="line">		  (uint64)(p-&gt;trapframe), PTE_R | PTE_W) &lt; <span class="number">0</span>)&#123;</span><br><span class="line">	uvmunmap(pagetable, TRAMPOLINE, <span class="number">1</span>, <span class="number">0</span>);</span><br><span class="line">	uvmfree(pagetable, <span class="number">0</span>);</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>如此，我们照猫画虎，也可以写出usyscall的映射。需要注意的是，该页是read-only的，并且允许用户态访问，因此其权限应该为<code>PTE_R</code>和<code>PTE_U</code>。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// map the usyscall page</span></span><br><span class="line"><span class="keyword">if</span>(mappages(pagetable, USYSCALL, PGSIZE,</span><br><span class="line">		   (uint64)(p-&gt;usyscall), PTE_R | PTE_U) &lt; <span class="number">0</span>)&#123;</span><br><span class="line">	uvmunmap(pagetable, USYSCALL, <span class="number">1</span>, <span class="number">0</span>);</span><br><span class="line">	uvmunmap(pagetable, TRAMPOLINE, <span class="number">1</span>, <span class="number">0</span>);</span><br><span class="line">	uvmfree(pagetable, <span class="number">0</span>);</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在结束进程时，即<code>freeproc</code>函数中，也需要对usyscall的空间进行释放：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span>(p-&gt;usyscall)</span><br><span class="line">	kfree((<span class="type">void</span>*)p-&gt;usyscall);</span><br><span class="line">p-&gt;usyscall = <span class="number">0</span>;</span><br></pre></td></tr></table></figure>
+<p>同时还应当在<code>proc_freepagetable</code>函数中解除之前对usyscall的映射：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">uvmunmap(pagetable, USYSCALL, <span class="number">1</span>, <span class="number">0</span>);</span><br></pre></td></tr></table></figure>
+<h2 id="Print-a-page-table-easy">Print a page table (easy)<a class="anchor" href="#Print-a-page-table-easy">·</a></h2>
+<p>这个实验要求我们将页表打印出来。在实验开始前，让我们先看看xv6中的页表。</p>
+<p><img src="../../images/Pasted%20image%2020240623170452.png" alt=""></p>
+<p>xv6中的页表为三级页表，在VA转换为PA的过程中，处理单元会通过<code>satp</code>寄存器找到当前进程的页表基地址，然后取出VA中的L2部分找到一级页表的项，一级页表中的项（PTE）保存二级页表的地址，再通过L1可获取二级页表中的项，依次类推即可将VA转换为PA。</p>
+<p>这样看来，想要打印页表，有点类似于DFS算法，需要使用递归。按照实验指导书所说，我们可以从<code>freewalk</code>函数中获取灵感，查看其源码可以知道如何去遍历页表项。那么按照要求所实现打印页表就比较容易了：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">static</span> <span class="type">void</span> <span class="title function_">print_pgtbl</span><span class="params">(<span class="type">pagetable_t</span> pagetable, <span class="type">int</span> depth)</span> &#123;</span><br><span class="line">  <span class="keyword">if</span> (depth &gt; <span class="number">2</span>) &#123;</span><br><span class="line">    <span class="keyword">return</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">for</span>(<span class="type">int</span> i = <span class="number">0</span>; i &lt; <span class="number">512</span>; i++)&#123;</span><br><span class="line">    <span class="type">pte_t</span> pte = pagetable[i];</span><br><span class="line">    <span class="keyword">if</span> (pte &amp; PTE_V) &#123;</span><br><span class="line">      <span class="keyword">if</span> (depth == <span class="number">0</span>) &#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;..&quot;</span>);</span><br><span class="line">      &#125; <span class="keyword">else</span> <span class="keyword">if</span> (depth == <span class="number">1</span>) &#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;.. ..&quot;</span>);</span><br><span class="line">      &#125; <span class="keyword">else</span> <span class="keyword">if</span> (depth == <span class="number">2</span>) &#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;.. .. ..&quot;</span>);</span><br><span class="line">      &#125;</span><br><span class="line">      uint64 child = PTE2PA(pte);</span><br><span class="line">      <span class="built_in">printf</span>(<span class="string">&quot;%d: pte %p pa %p\n&quot;</span>, i, pte, PTE2PA(pte));</span><br><span class="line">      print_pgtbl((<span class="type">pagetable_t</span>)child, depth + <span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> <span class="title function_">vmprint</span><span class="params">(<span class="type">pagetable_t</span> pagetable)</span> &#123;</span><br><span class="line">  <span class="built_in">printf</span>(<span class="string">&quot;page table %p\n&quot;</span>, pagetable);</span><br><span class="line">  print_pgtbl(pagetable, <span class="number">0</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>由于打印页表这个操作是进程号为1的<code>init</code>进程做的，所以不要忘记在<code>kernel/exec.c</code>的<code>exec</code>函数中添加：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (p-&gt;pid == <span class="number">1</span>) &#123;</span><br><span class="line">  vmprint(p-&gt;pagetable);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>并且在<code>kernel/defs.h</code>中添加<code>vmprint</code>的函数声明：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">vmprint</span><span class="params">(<span class="type">pagetable_t</span>)</span>;</span><br></pre></td></tr></table></figure>
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -200,6 +325,21 @@
     </span>
 
   
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>178</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>1 分钟</span>
+    </span>
 </div>
 
         </div>
@@ -285,6 +425,21 @@
     </span>
 
   
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>406</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>1 分钟</span>
+    </span>
 </div>
 
         </div>
@@ -374,6 +529,21 @@
     </span>
 
   
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>389</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>1 分钟</span>
+    </span>
 </div>
 
         </div>
@@ -459,6 +629,21 @@
     </span>
 
   
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>422</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>2 分钟</span>
+    </span>
 </div>
 
         </div>
@@ -548,6 +733,21 @@
     </span>
 
   
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>434</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>2 分钟</span>
+    </span>
 </div>
 
         </div>
@@ -633,6 +833,21 @@
     </span>
 
   
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>2.6k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>9 分钟</span>
+    </span>
 </div>
 
         </div>
@@ -724,6 +939,21 @@
     </span>
 
   
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>610</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>2 分钟</span>
+    </span>
 </div>
 
         </div>
@@ -815,6 +1045,21 @@
     </span>
 
   
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>1.1k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>4 分钟</span>
+    </span>
 </div>
 
         </div>
@@ -904,6 +1149,21 @@
     </span>
 
   
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>786</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>3 分钟</span>
+    </span>
 </div>
 
         </div>
@@ -920,101 +1180,6 @@
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/posts/c40430e5/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://kerolt.github.io/posts/50c5c1b7/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="https://picx.zhimg.com/v2-f14895864d68f2db5f8e650481075209_xll.jpg">
-      <meta itemprop="name" content="Kerolt">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Kerolt's Blog">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="undefined | Kerolt's Blog">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/posts/50c5c1b7/" class="post-title-link" itemprop="url">「MIT6.S081」Lab1 Utilities</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2024-03-07 00:00:00" itemprop="dateCreated datePublished" datetime="2024-03-07T00:00:00+00:00">2024-03-07</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/OS/" itemprop="url" rel="index"><span itemprop="name">OS</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h2 id="前言">前言<a class="anchor" href="#前言">·</a></h2>
-<p>该Lab通过实现几个命令来熟悉 xv6 及其系统调用</p>
-<ul>
-<li>sleep</li>
-<li>pingpong</li>
-<li>primes</li>
-<li>find</li>
-<li>xargs</li>
-</ul>
-<p>官方实验指导：<a target="_blank" rel="noopener" href="https://pdos.csail.mit.edu/6.S081/2021/labs/util.html">https://pdos.csail.mit.edu/6.S081/2021/labs/util.html</a></p>
-<p>个人代码实现仓库：<a target="_blank" rel="noopener" href="https://github.com/kerolt/MIT6.081-labs">https://github.com/kerolt/MIT6.081-labs</a></p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/posts/50c5c1b7/#more" rel="contents">
                 阅读全文 &raquo;
               </a>
             </div>
@@ -1055,6 +1220,20 @@
     </span>
     <span class="author" itemprop="copyrightHolder">Kerolt</span>
   </div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+    <span title="站点总字数">13k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">47 分钟</span>
+  </span>
+</div>
   <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
   </div>
 

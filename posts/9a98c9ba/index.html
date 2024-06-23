@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.1.1">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha256-yIDrPSXHZdOZhAqiBP7CKzIwMQmRCJ8UeB8Jo17YC4o=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"kerolt.github.io","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.19.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":true,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="Speed up system calls (easy)· 通常我们在需要执行系统调用时，在操作系统中会发生从用户态到内核态的切换，这是因为这些核心的操作只能交给内核去完成。在这个实验中，xv6要求我们通过在用户空间和内核之间共享只读区域中的数据来加快某些系统调用。 由于现在只是入门如何将映射添加至页表中，这个实验只需要为xv6中的getpid()系统调用进行优化。 在xv6的实验指导书中：  创">
+<meta property="og:type" content="article">
+<meta property="og:title" content="【MIT6.S081】Lab3 page tables（上）">
+<meta property="og:url" content="http://kerolt.github.io/posts/9a98c9ba/index.html">
+<meta property="og:site_name" content="Kerolt&#39;s Blog">
+<meta property="og:description" content="Speed up system calls (easy)· 通常我们在需要执行系统调用时，在操作系统中会发生从用户态到内核态的切换，这是因为这些核心的操作只能交给内核去完成。在这个实验中，xv6要求我们通过在用户空间和内核之间共享只读区域中的数据来加快某些系统调用。 由于现在只是入门如何将映射添加至页表中，这个实验只需要为xv6中的getpid()系统调用进行优化。 在xv6的实验指导书中：  创">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://kerolt.github.io/images/Pasted%20image%2020240623170452.png">
+<meta property="article:published_time" content="2024-06-23T00:00:00.000Z">
+<meta property="article:modified_time" content="2024-06-23T00:00:00.000Z">
+<meta property="article:author" content="Kerolt">
+<meta property="article:tag" content="MIT6-S081">
+<meta property="article:tag" content="OS">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://kerolt.github.io/images/Pasted%20image%2020240623170452.png">
+
+
+<link rel="canonical" href="http://kerolt.github.io/posts/9a98c9ba/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://kerolt.github.io/posts/9a98c9ba/","path":"posts/9a98c9ba/","title":"【MIT6.S081】Lab3 page tables（上）"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>【MIT6.S081】Lab3 page tables（上） | Kerolt's Blog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Kerolt's Blog</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+  </ul>
+</nav>
+
+
+
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Speed-up-system-calls-easy"><span class="nav-number">1.</span> <span class="nav-text">Speed up system calls (easy)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Print-a-page-table-easy"><span class="nav-number">2.</span> <span class="nav-text">Print a page table (easy)</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Kerolt"
+      src="https://picx.zhimg.com/v2-f14895864d68f2db5f8e650481075209_xll.jpg">
+  <p class="site-author-name" itemprop="name">Kerolt</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">20</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://kerolt.github.io/posts/9a98c9ba/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://picx.zhimg.com/v2-f14895864d68f2db5f8e650481075209_xll.jpg">
+      <meta itemprop="name" content="Kerolt">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Kerolt's Blog">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="【MIT6.S081】Lab3 page tables（上） | Kerolt's Blog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          【MIT6.S081】Lab3 page tables（上）
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2024-06-23 00:00:00" itemprop="dateCreated datePublished" datetime="2024-06-23T00:00:00+00:00">2024-06-23</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/OS/" itemprop="url" rel="index"><span itemprop="name">OS</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>1.1k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>4 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h2 id="Speed-up-system-calls-easy">Speed up system calls (easy)<a class="anchor" href="#Speed-up-system-calls-easy">·</a></h2>
+<p>通常我们在需要执行系统调用时，在操作系统中会发生从用户态到内核态的切换，这是因为这些核心的操作只能交给内核去完成。在这个实验中，xv6要求我们通过在用户空间和内核之间<strong>共享只读区域中的数据</strong>来加快某些系统调用。</p>
+<p>由于现在只是入门如何将映射添加至页表中，这个实验只需要为xv6中的<code>getpid()</code>系统调用进行优化。</p>
+<p>在xv6的实验指导书中：</p>
+<blockquote>
+<p>创建每个进程时，在USYSCALL（memlayout.h中定义的虚拟地址）映射一个只读页。在该页面的开头，存储一个usyscall结构体（也在memlayout.h中定义），并对其进行初始化以存储当前进程的PID。</p>
+</blockquote>
+<p>既然如此，进程结构体中也应当有一个usyscall结构体：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// kernel/proc.h</span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">proc</span> &#123;</span></span><br><span class="line">	...</span><br><span class="line">	<span class="type">pagetable_t</span> pagetable;       <span class="comment">// User page table</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">trapframe</span> *<span class="title">trapframe</span>;</span> <span class="comment">// data page for trampoline.S</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">usyscall</span> *<span class="title">usyscall</span>;</span>   <span class="comment">// data page for USYSCALL</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">context</span> <span class="title">context</span>;</span>      <span class="comment">// swtch() here to run process</span></span><br><span class="line">	...</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>这样就可以通过<code>p-&gt;usyscall</code>来获取了。</p>
+<p>在<code>memlayout.h</code>中我们可以看到用户态空间内存布局：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">Address zero first:</span><br><span class="line">  text</span><br><span class="line">  original data and bss</span><br><span class="line">  fixed-size stack</span><br><span class="line">  expandable heap</span><br><span class="line">  ...</span><br><span class="line">  USYSCALL (shared with kernel)</span><br><span class="line">  TRAPFRAME (p-&gt;trapframe, used by the trampoline)</span><br><span class="line">  TRAMPOLINE (the same page as in the kernel)</span><br></pre></td></tr></table></figure>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">MAXVA-&gt; -------------------------------------</span><br><span class="line">        | TRAMPOLINE (与内核相同的页面)        |</span><br><span class="line">        -------------------------------------</span><br><span class="line">        | TRAPFRAME (p-&gt;trapframe, 由跳板使用)|</span><br><span class="line">        -------------------------------------</span><br><span class="line">        | USYSCALL (与内核共享)               |</span><br><span class="line">        -------------------------------------</span><br><span class="line">        | ...                               |</span><br><span class="line">        -------------------------------------</span><br><span class="line">        | 可扩展堆                           |</span><br><span class="line">        -------------------------------------</span><br><span class="line">        | 固定大小的栈                        |</span><br><span class="line">        -------------------------------------</span><br><span class="line">        | 原始数据和BSS                       |</span><br><span class="line">        -------------------------------------</span><br><span class="line">        | text                              |</span><br><span class="line">0 -&gt;    -------------------------------------</span><br></pre></td></tr></table></figure>
+<p>我们需要做的就是仿照<code>TRAPFRAME</code>将<code>USYSCALL</code>也做一层映射。</p>
+<p>在<code>allocproc()</code>为进程分配物理页时，使用<code>kalloc()</code>对usyscall的分配（kalloc每次从空闲页表中取出一个项，其大小为4KB）：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Allocate a usyscall page.</span></span><br><span class="line"><span class="keyword">if</span>((p-&gt;usyscall = (<span class="keyword">struct</span> usyscall *)kalloc()) == <span class="number">0</span>)&#123;</span><br><span class="line">	freeproc(p);</span><br><span class="line">	release(&amp;p-&gt;lock);</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在<code>proc_pagetable()</code>函数中，其为指定进程创建用户页表，不含用户内存，但有trampoline 和 trapframe页。以下代码是对trampoline 和 trapframe进行映射。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// map the trampoline code (for system call return)</span></span><br><span class="line"><span class="comment">// at the highest user virtual address.</span></span><br><span class="line"><span class="comment">// only the supervisor uses it, on the way</span></span><br><span class="line"><span class="comment">// to/from user space, so not PTE_U.</span></span><br><span class="line"><span class="keyword">if</span>(mappages(pagetable, TRAMPOLINE, PGSIZE,</span><br><span class="line">		  (uint64)trampoline, PTE_R | PTE_X) &lt; <span class="number">0</span>)&#123;</span><br><span class="line">	uvmfree(pagetable, <span class="number">0</span>);</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// map the trapframe page just below the trampoline page, for</span></span><br><span class="line"><span class="comment">// trampoline.S.</span></span><br><span class="line"><span class="keyword">if</span>(mappages(pagetable, TRAPFRAME, PGSIZE,</span><br><span class="line">		  (uint64)(p-&gt;trapframe), PTE_R | PTE_W) &lt; <span class="number">0</span>)&#123;</span><br><span class="line">	uvmunmap(pagetable, TRAMPOLINE, <span class="number">1</span>, <span class="number">0</span>);</span><br><span class="line">	uvmfree(pagetable, <span class="number">0</span>);</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>如此，我们照猫画虎，也可以写出usyscall的映射。需要注意的是，该页是read-only的，并且允许用户态访问，因此其权限应该为<code>PTE_R</code>和<code>PTE_U</code>。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// map the usyscall page</span></span><br><span class="line"><span class="keyword">if</span>(mappages(pagetable, USYSCALL, PGSIZE,</span><br><span class="line">		   (uint64)(p-&gt;usyscall), PTE_R | PTE_U) &lt; <span class="number">0</span>)&#123;</span><br><span class="line">	uvmunmap(pagetable, USYSCALL, <span class="number">1</span>, <span class="number">0</span>);</span><br><span class="line">	uvmunmap(pagetable, TRAMPOLINE, <span class="number">1</span>, <span class="number">0</span>);</span><br><span class="line">	uvmfree(pagetable, <span class="number">0</span>);</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在结束进程时，即<code>freeproc</code>函数中，也需要对usyscall的空间进行释放：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span>(p-&gt;usyscall)</span><br><span class="line">	kfree((<span class="type">void</span>*)p-&gt;usyscall);</span><br><span class="line">p-&gt;usyscall = <span class="number">0</span>;</span><br></pre></td></tr></table></figure>
+<p>同时还应当在<code>proc_freepagetable</code>函数中解除之前对usyscall的映射：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">uvmunmap(pagetable, USYSCALL, <span class="number">1</span>, <span class="number">0</span>);</span><br></pre></td></tr></table></figure>
+<h2 id="Print-a-page-table-easy">Print a page table (easy)<a class="anchor" href="#Print-a-page-table-easy">·</a></h2>
+<p>这个实验要求我们将页表打印出来。在实验开始前，让我们先看看xv6中的页表。</p>
+<p><img src="../../images/Pasted%20image%2020240623170452.png" alt=""></p>
+<p>xv6中的页表为三级页表，在VA转换为PA的过程中，处理单元会通过<code>satp</code>寄存器找到当前进程的页表基地址，然后取出VA中的L2部分找到一级页表的项，一级页表中的项（PTE）保存二级页表的地址，再通过L1可获取二级页表中的项，依次类推即可将VA转换为PA。</p>
+<p>这样看来，想要打印页表，有点类似于DFS算法，需要使用递归。按照实验指导书所说，我们可以从<code>freewalk</code>函数中获取灵感，查看其源码可以知道如何去遍历页表项。那么按照要求所实现打印页表就比较容易了：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">static</span> <span class="type">void</span> <span class="title function_">print_pgtbl</span><span class="params">(<span class="type">pagetable_t</span> pagetable, <span class="type">int</span> depth)</span> &#123;</span><br><span class="line">  <span class="keyword">if</span> (depth &gt; <span class="number">2</span>) &#123;</span><br><span class="line">    <span class="keyword">return</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">for</span>(<span class="type">int</span> i = <span class="number">0</span>; i &lt; <span class="number">512</span>; i++)&#123;</span><br><span class="line">    <span class="type">pte_t</span> pte = pagetable[i];</span><br><span class="line">    <span class="keyword">if</span> (pte &amp; PTE_V) &#123;</span><br><span class="line">      <span class="keyword">if</span> (depth == <span class="number">0</span>) &#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;..&quot;</span>);</span><br><span class="line">      &#125; <span class="keyword">else</span> <span class="keyword">if</span> (depth == <span class="number">1</span>) &#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;.. ..&quot;</span>);</span><br><span class="line">      &#125; <span class="keyword">else</span> <span class="keyword">if</span> (depth == <span class="number">2</span>) &#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;.. .. ..&quot;</span>);</span><br><span class="line">      &#125;</span><br><span class="line">      uint64 child = PTE2PA(pte);</span><br><span class="line">      <span class="built_in">printf</span>(<span class="string">&quot;%d: pte %p pa %p\n&quot;</span>, i, pte, PTE2PA(pte));</span><br><span class="line">      print_pgtbl((<span class="type">pagetable_t</span>)child, depth + <span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> <span class="title function_">vmprint</span><span class="params">(<span class="type">pagetable_t</span> pagetable)</span> &#123;</span><br><span class="line">  <span class="built_in">printf</span>(<span class="string">&quot;page table %p\n&quot;</span>, pagetable);</span><br><span class="line">  print_pgtbl(pagetable, <span class="number">0</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>由于打印页表这个操作是进程号为1的<code>init</code>进程做的，所以不要忘记在<code>kernel/exec.c</code>的<code>exec</code>函数中添加：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (p-&gt;pid == <span class="number">1</span>) &#123;</span><br><span class="line">  vmprint(p-&gt;pagetable);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>并且在<code>kernel/defs.h</code>中添加<code>vmprint</code>的函数声明：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">vmprint</span><span class="params">(<span class="type">pagetable_t</span>)</span>;</span><br></pre></td></tr></table></figure>
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/MIT6-S081/" rel="tag"># MIT6-S081</a>
+              <a href="/tags/OS/" rel="tag"># OS</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/posts/2945410c/" rel="prev" title="Linux开放端口号">
+                  <i class="fa fa-angle-left"></i> Linux开放端口号
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2024</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Kerolt</span>
+  </div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+    <span title="站点总字数">13k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">47 分钟</span>
+  </span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>
