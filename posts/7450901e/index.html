@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.1.1">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <meta name="google-site-verification" content="G2bBvIdEL2IvKAU2atPObrKeGOZYYjla4BUoKafFos0">
+  <meta name="msvalidate.01" content="2300A23B82DB579A2DEA6261191AD771">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha256-yIDrPSXHZdOZhAqiBP7CKzIwMQmRCJ8UeB8Jo17YC4o=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"kerolt.github.io","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.19.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":true,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="Alarm综合了该lab中前几个练习的知识点：系统调用、中断、寄存器等，我们需要对trap机制有比较好的认识才能理解。Alarm的任务是需要我们完成一个定时器的实现：sigalarm(interval, handler)，当调用sigalarm(n, fn)时，内核会每n个时间间隔（tick）执行fn函数。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="【MIT6.S081】Lab4 trap alarm">
+<meta property="og:url" content="http://kerolt.github.io/posts/7450901e/index.html">
+<meta property="og:site_name" content="Kerolt&#39;s Blog">
+<meta property="og:description" content="Alarm综合了该lab中前几个练习的知识点：系统调用、中断、寄存器等，我们需要对trap机制有比较好的认识才能理解。Alarm的任务是需要我们完成一个定时器的实现：sigalarm(interval, handler)，当调用sigalarm(n, fn)时，内核会每n个时间间隔（tick）执行fn函数。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2024-07-05T00:00:00.000Z">
+<meta property="article:modified_time" content="2024-07-05T00:00:00.000Z">
+<meta property="article:author" content="Kerolt">
+<meta property="article:tag" content="MIT6-S081">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="http://kerolt.github.io/posts/7450901e/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://kerolt.github.io/posts/7450901e/","path":"posts/7450901e/","title":"【MIT6.S081】Lab4 trap alarm"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>【MIT6.S081】Lab4 trap alarm | Kerolt's Blog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Kerolt's Blog</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li><li class="menu-item menu-item-sitemap"><a href="/sitemap.xml" rel="section"><i class="fa fa-sitemap fa-fw"></i>站点地图</a></li>
+  </ul>
+</nav>
+
+
+
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E7%90%86%E8%A7%A3Alarm"><span class="nav-number">1.</span> <span class="nav-text">如何理解Alarm</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#test0-3%E6%89%80%E5%81%9A%E7%9A%84%E4%BA%8B"><span class="nav-number">2.</span> <span class="nav-text">test0~3所做的事</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%9E%E7%8E%B0"><span class="nav-number">3.</span> <span class="nav-text">实现</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B3%A8%E5%86%8C%E7%B3%BB%E7%BB%9F%E8%B0%83%E7%94%A8"><span class="nav-number">3.1.</span> <span class="nav-text">注册系统调用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#struc-proc%E7%BB%93%E6%9E%84%E4%BD%93"><span class="nav-number">3.2.</span> <span class="nav-text">struc proc结构体</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%9E%E7%8E%B0sys-sigalarm"><span class="nav-number">3.3.</span> <span class="nav-text">实现sys_sigalarm</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BF%9B%E7%A8%8B%E5%88%9D%E5%A7%8B%E5%8C%96%E4%B8%8E%E7%BB%93%E6%9D%9F%E9%94%80%E6%AF%81"><span class="nav-number">3.4.</span> <span class="nav-text">进程初始化与结束销毁</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A1%A5%E5%85%A8usertrap"><span class="nav-number">3.5.</span> <span class="nav-text">补全usertrap</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BF%94%E5%9B%9E%EF%BC%8C%E6%81%A2%E5%A4%8D%E7%8E%B0%E5%9C%BA"><span class="nav-number">3.6.</span> <span class="nav-text">返回，恢复现场</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Kerolt"
+      src="https://picx.zhimg.com/v2-f14895864d68f2db5f8e650481075209_xll.jpg">
+  <p class="site-author-name" itemprop="name">Kerolt</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">23</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://kerolt.github.io/posts/7450901e/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://picx.zhimg.com/v2-f14895864d68f2db5f8e650481075209_xll.jpg">
+      <meta itemprop="name" content="Kerolt">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Kerolt's Blog">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="【MIT6.S081】Lab4 trap alarm | Kerolt's Blog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          【MIT6.S081】Lab4 trap alarm
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2024-07-05 00:00:00" itemprop="dateCreated datePublished" datetime="2024-07-05T00:00:00+00:00">2024-07-05</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/OS/" itemprop="url" rel="index"><span itemprop="name">OS</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>1.3k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>5 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>Alarm综合了该lab中前几个练习的知识点：系统调用、中断、寄存器等，我们需要对trap机制有比较好的认识才能理解。Alarm的任务是需要我们完成一个定时器的实现：<code>sigalarm(interval, handler)</code>，当调用<code>sigalarm(n, fn)</code>时，内核会每n个时间间隔（tick）执行fn函数。</p>
+<span id="more"></span>
+<h2 id="如何理解Alarm">如何理解Alarm<a class="anchor" href="#如何理解Alarm">·</a></h2>
+<p>“内核会每n个时间间隔执行fn函数”，如何理解这“每n个时间间隔”呢？在计算机中有一个“时钟周期”的概念，而我们这里所说的时间间隔就是xv6中设置的每次发生时钟中断所间隔的始终周期。在xv6内核初始化时会执行<code>timerinit()</code>函数，其中有：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// ask the CLINT for a timer interrupt.</span></span><br><span class="line"><span class="type">int</span> interval = <span class="number">1000000</span>; <span class="comment">// cycles; about 1/10th second in qemu.</span></span><br><span class="line">*(uint64*)CLINT_MTIMECMP(id) = *(uint64*)CLINT_MTIME + interval;</span><br></pre></td></tr></table></figure>
+<p>这里就是设置了xv6会每经过interval个时钟周期（在qemu中大概为0.1秒）进行一次时钟中断，这个中断是<strong>硬件自动执行的</strong>（在没看源码之前，一直没搞懂xv6是什么时候、怎么进行的时钟中断）。下文将以时钟中断的间隔tick作为基本单位。</p>
+<p>所以简单来说，Alarm需要我们在内核中进行计数，每当经过n个tick的时候，需要去执行fn函数。</p>
+<h2 id="test0-3所做的事">test0~3所做的事<a class="anchor" href="#test0-3所做的事">·</a></h2>
+<ul>
+<li><code>test0</code>：用于测试我们的sigalarm是否起作用了；</li>
+<li><code>test1</code>：用于测试内核是否多次调用处理函数，需要确保中断发生时跳转的地址为处理函数所在的地址，还有中断时需要保存好之前寄存器中的值；</li>
+<li><code>test2</code>：用于测试内核不允许重入sysalarm系统调用，即若某个进程正在执行处理函数，那么内核就不应该再次调用它；</li>
+<li><code>test3</code>：用于测试sys_sigreturn系统调用能否正确返回寄存器a0的值。</li>
+</ul>
+<h2 id="实现">实现<a class="anchor" href="#实现">·</a></h2>
+<h3 id="注册系统调用">注册系统调用<a class="anchor" href="#注册系统调用">·</a></h3>
+<p>首先的注册系统调用的步骤这里就不展开了，具体可参考之前的lab。</p>
+<h3 id="struc-proc结构体">struc proc结构体<a class="anchor" href="#struc-proc结构体">·</a></h3>
+<p>为了完成定时执行某个函数，我们需要在<code>struct proc</code>结构体中加入一些成员：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">proc</span> &#123;</span></span><br><span class="line">  ...</span><br><span class="line">  <span class="type">int</span> is_handling;                   <span class="comment">// 用于判断当前进程是否正在执行处理函数</span></span><br><span class="line">  <span class="type">int</span> tick_interval;                 <span class="comment">// 定时器间隔，由系统sigalarm的第一个参数传入</span></span><br><span class="line">  <span class="type">int</span> tick_counter;                  <span class="comment">// 定时器计数器，每次tick进行+1</span></span><br><span class="line">  uint64 tick_handler;               <span class="comment">// 间隔到了后执行的处理函数</span></span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">trapframe</span> *<span class="title">saved_trapframe</span>;</span> <span class="comment">// 保存寄存器</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>值的注意的是处理函数的类型我们设置为了<code>uint64</code>，为什么不是一个函数指针呢？其实都差不多，在之后设置跳转处理函数的时候，就是通过地址来跳转，而地址在xv6中就是用的uint64来表示。故这里的设置即是处理函数所在的起始地址。</p>
+<h3 id="实现sys-sigalarm">实现sys_sigalarm<a class="anchor" href="#实现sys-sigalarm">·</a></h3>
+<p>在<code>sysproc.c</code>中实现<code>sys_sigalarm()</code>函数：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">uint64 <span class="title function_">sys_sigalarm</span><span class="params">(<span class="type">void</span>)</span> &#123;</span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">proc</span> *<span class="title">p</span> =</span> myproc();</span><br><span class="line">  argint(<span class="number">0</span>, &amp;(p-&gt;tick_interval));</span><br><span class="line">  argaddr(<span class="number">1</span>, &amp;(p-&gt;tick_handler));</span><br><span class="line">  <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>该函数要做的事情很简单，只需要接收从用户态传来的两个参数，并将其赋值给当前进程的<code>tick_interval</code>和<code>tick_handler</code>。</p>
+<h3 id="进程初始化与结束销毁">进程初始化与结束销毁<a class="anchor" href="#进程初始化与结束销毁">·</a></h3>
+<p>接着需要在进程创建和销毁时对这些变量进行相应的初始化和清零：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">static</span> <span class="keyword">struct</span> proc*</span><br><span class="line"><span class="title function_">allocproc</span><span class="params">(<span class="type">void</span>)</span></span><br><span class="line">&#123;</span><br><span class="line">  ...</span><br><span class="line">  p-&gt;tick_interval = <span class="number">0</span>;</span><br><span class="line">  p-&gt;tick_counter = <span class="number">0</span>;</span><br><span class="line">  p-&gt;tick_handler = <span class="number">0</span>;</span><br><span class="line">  p-&gt;is_handling = <span class="number">0</span>;</span><br><span class="line">  ...</span><br><span class="line">  <span class="comment">// Allocate a saved_trapframe page.</span></span><br><span class="line">  <span class="keyword">if</span>((p-&gt;saved_trapframe = (<span class="keyword">struct</span> trapframe *)kalloc()) == <span class="number">0</span>)&#123;</span><br><span class="line">    freeproc(p);</span><br><span class="line">    release(&amp;p-&gt;lock);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  ...</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">static</span> <span class="type">void</span></span><br><span class="line"><span class="title function_">freeproc</span><span class="params">(<span class="keyword">struct</span> proc *p)</span></span><br><span class="line">&#123;</span><br><span class="line">  ...</span><br><span class="line">  <span class="keyword">if</span>(p-&gt;saved_trapframe)</span><br><span class="line">    kfree((<span class="type">void</span>*)p-&gt;saved_trapframe);</span><br><span class="line">  p-&gt;saved_trapframe = <span class="number">0</span>;</span><br><span class="line">  ...</span><br><span class="line">  p-&gt;tick_counter = <span class="number">0</span>;</span><br><span class="line">  p-&gt;tick_interval = <span class="number">0</span>;</span><br><span class="line">  p-&gt;tick_handler = <span class="number">0</span>;</span><br><span class="line">  p-&gt;is_handling = <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="补全usertrap">补全usertrap<a class="anchor" href="#补全usertrap">·</a></h3>
+<p>接下来就是需要实现在usertrap中处理时钟中断，在实验指导书中提示我们在<code>if(which_dev == 2) ...</code>中处理时钟中断。这里我的处理逻辑为，当时钟中断发生时：</p>
+<ol>
+<li>当前进程的tick计数器++</li>
+<li>判断进程设置的定时器间隔是否不为0、当前计数器是否已经经过了interval个间隔、且当前进程未执行处理函数，如果其中一项不满足，则不进行第三步</li>
+<li>将当前进程的trapframe的内容（即寄存器的值）保存到saved_trapframe（用于恢复现场），将<code>SEPC</code>寄存器的值设置为处理函数的地址，这样中断结束返回时就会去执行处理函数了，最后设置当前进程“正在执行处理函数”</li>
+</ol>
+<p>代码如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span></span><br><span class="line"><span class="title function_">usertrap</span><span class="params">(<span class="type">void</span>)</span></span><br><span class="line">&#123;</span><br><span class="line">  ...</span><br><span class="line">  <span class="comment">// give up the CPU if this is a timer interrupt.</span></span><br><span class="line">  <span class="keyword">if</span> (which_dev == <span class="number">2</span>) &#123;</span><br><span class="line">    p-&gt;tick_counter++;</span><br><span class="line">    <span class="keyword">if</span> (p-&gt;tick_interval &amp;&amp; p-&gt;tick_counter % p-&gt;tick_interval == <span class="number">0</span> &amp;&amp; p-&gt;is_handling == <span class="number">0</span>) &#123;</span><br><span class="line">      memmove(p-&gt;saved_trapframe, p-&gt;trapframe, PGSIZE);</span><br><span class="line">      p-&gt;trapframe-&gt;epc = p-&gt;tick_handler;</span><br><span class="line">      p-&gt;is_handling = <span class="number">1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    yield();</span><br><span class="line">  &#125;</span><br><span class="line">  ...</span><br></pre></td></tr></table></figure>
+<h3 id="返回，恢复现场">返回，恢复现场<a class="anchor" href="#返回，恢复现场">·</a></h3>
+<p>在处理函数执行的最后，将会执行<code>sigreturn</code>系统调用进行返回并恢复现场，这时我们就可以将之前存放在saved_trapframe中的值拷贝回trapframe中，并设置当前进程“未执行处理函数”。实验指导书中还提示我们最终返回的结果为a0寄存器中的值。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">uint64 <span class="title function_">sys_sigreturn</span><span class="params">(<span class="type">void</span>)</span> &#123;</span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">proc</span> *<span class="title">p</span> =</span> myproc();</span><br><span class="line">  memmove(p-&gt;trapframe, p-&gt;saved_trapframe, PGSIZE); </span><br><span class="line">  p-&gt;is_handling = <span class="number">0</span>;</span><br><span class="line">  <span class="keyword">return</span> p-&gt;trapframe-&gt;a0; <span class="comment">// return this for alarm test3</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/MIT6-S081/" rel="tag"># MIT6-S081</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/posts/657551f/" rel="prev" title="【MIT6.S081】Lab4 trap backtrace">
+                  <i class="fa fa-angle-left"></i> 【MIT6.S081】Lab4 trap backtrace
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2024</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Kerolt</span>
+  </div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+    <span title="站点总字数">16k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">59 分钟</span>
+  </span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>
