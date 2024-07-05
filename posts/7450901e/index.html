@@ -215,7 +215,7 @@
         <i class="far fa-file-word"></i>
       </span>
       <span class="post-meta-item-text">本文字数：</span>
-      <span>1.3k</span>
+      <span>1.4k</span>
     </span>
     <span class="post-meta-item" title="阅读时长">
       <span class="post-meta-item-icon">
@@ -269,6 +269,9 @@
 </ol>
 <p>代码如下：</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span></span><br><span class="line"><span class="title function_">usertrap</span><span class="params">(<span class="type">void</span>)</span></span><br><span class="line">&#123;</span><br><span class="line">  ...</span><br><span class="line">  <span class="comment">// give up the CPU if this is a timer interrupt.</span></span><br><span class="line">  <span class="keyword">if</span> (which_dev == <span class="number">2</span>) &#123;</span><br><span class="line">    p-&gt;tick_counter++;</span><br><span class="line">    <span class="keyword">if</span> (p-&gt;tick_interval &amp;&amp; p-&gt;tick_counter % p-&gt;tick_interval == <span class="number">0</span> &amp;&amp; p-&gt;is_handling == <span class="number">0</span>) &#123;</span><br><span class="line">      memmove(p-&gt;saved_trapframe, p-&gt;trapframe, PGSIZE);</span><br><span class="line">      p-&gt;trapframe-&gt;epc = p-&gt;tick_handler;</span><br><span class="line">      p-&gt;is_handling = <span class="number">1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    yield();</span><br><span class="line">  &#125;</span><br><span class="line">  ...</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>在第二步中不知道是xv6的bug还是我有地方没理解好，如果不先检查<code>tick_interval != 0</code>，则可能在执行<code>p-&gt;tick_counter % p-&gt;tick_interval</code>会有问题，因为取模运算符<code>%</code>在分母为0时是未定义的，但这么运行时xv6并没有任何错误。</p>
+</blockquote>
 <h3 id="返回，恢复现场">返回，恢复现场<a class="anchor" href="#返回，恢复现场">·</a></h3>
 <p>在处理函数执行的最后，将会执行<code>sigreturn</code>系统调用进行返回并恢复现场，这时我们就可以将之前存放在saved_trapframe中的值拷贝回trapframe中，并设置当前进程“未执行处理函数”。实验指导书中还提示我们最终返回的结果为a0寄存器中的值。</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">uint64 <span class="title function_">sys_sigreturn</span><span class="params">(<span class="type">void</span>)</span> &#123;</span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">proc</span> *<span class="title">p</span> =</span> myproc();</span><br><span class="line">  memmove(p-&gt;trapframe, p-&gt;saved_trapframe, PGSIZE); </span><br><span class="line">  p-&gt;is_handling = <span class="number">0</span>;</span><br><span class="line">  <span class="keyword">return</span> p-&gt;trapframe-&gt;a0; <span class="comment">// return this for alarm test3</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
