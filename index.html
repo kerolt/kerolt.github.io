@@ -227,6 +227,9 @@
     
     <div class="post-body" itemprop="articleBody">
           <p>Alarm综合了该lab中前几个练习的知识点：系统调用、中断、寄存器等，我们需要对trap机制有比较好的认识才能理解。Alarm的任务是需要我们完成一个定时器的实现：<code>sigalarm(interval, handler)</code>，当调用<code>sigalarm(n, fn)</code>时，内核会每n个时间间隔（tick）执行fn函数。</p>
+<blockquote>
+<p>该实验的代码实现见：<a target="_blank" rel="noopener" href="https://github.com/kerolt/xv6-labs-2023/commit/0f70ef7d68ab1273262b8d43a2deaf7345a87698">仓库commit</a></p>
+</blockquote>
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/posts/7450901e/#more" rel="contents">
@@ -293,6 +296,13 @@
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2024-07-05 00:00:00" itemprop="dateModified" datetime="2024-07-05T00:00:00+00:00">2024-07-05</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
         <i class="far fa-folder"></i>
       </span>
       <span class="post-meta-item-text">分类于</span>
@@ -327,6 +337,9 @@
     
     <div class="post-body" itemprop="articleBody">
           <p>backtrace这个lab非常有意思，虽然实现的代码量不多，但是能让我们更好地理解栈、栈帧、指针、gdb的一些知识。</p>
+<blockquote>
+<p>该实验的代码实现见：<a target="_blank" rel="noopener" href="https://github.com/kerolt/xv6-labs-2023/commit/d1dba8ae4a1a71604e8bb6df5238f8cac1771683">仓库commit</a></p>
+</blockquote>
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/posts/657551f/#more" rel="contents">
