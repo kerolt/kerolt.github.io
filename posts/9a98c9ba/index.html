@@ -21,12 +21,12 @@
 
 <script class="next-config" data-name="main" type="application/json">{"hostname":"kerolt.github.io","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.19.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":true,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
 
-    <meta name="description" content="前言· 页表是最常用的机制，操作系统通过它为每个进程提供自己的私有地址空间和内存。页表决定了内存地址的含义，以及可以访问物理内存的哪些部分。在本文中，记录了Lab: page tables的前两个实验：加速系统调用和打印页表。">
+    <meta name="description" content="前言 页表是最常用的机制，操作系统通过它为每个进程提供自己的私有地址空间和内存。页表决定了内存地址的含义，以及可以访问物理内存的哪些部分。在本文中，记录了Lab: page tables的前两个实验：加速系统调用和打印页表。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="【MIT6.S081】Lab3 page tables（上）">
 <meta property="og:url" content="http://kerolt.github.io/posts/9a98c9ba/index.html">
 <meta property="og:site_name" content="Kerolt&#39;s Blog">
-<meta property="og:description" content="前言· 页表是最常用的机制，操作系统通过它为每个进程提供自己的私有地址空间和内存。页表决定了内存地址的含义，以及可以访问物理内存的哪些部分。在本文中，记录了Lab: page tables的前两个实验：加速系统调用和打印页表。">
+<meta property="og:description" content="前言 页表是最常用的机制，操作系统通过它为每个进程提供自己的私有地址空间和内存。页表决定了内存地址的含义，以及可以访问物理内存的哪些部分。在本文中，记录了Lab: page tables的前两个实验：加速系统调用和打印页表。">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="http://kerolt.github.io/images/Pasted%20image%2020240623170452.png">
 <meta property="article:published_time" content="2024-06-23T00:00:00.000Z">
@@ -246,10 +246,10 @@
     
     
     
-    <div class="post-body" itemprop="articleBody"><h2 id="前言">前言<a class="anchor" href="#前言">·</a></h2>
+    <div class="post-body" itemprop="articleBody"><h2 id="前言">前言<a class="anchor" href="#前言"></a></h2>
 <p>页表是最常用的机制，操作系统通过它为每个进程提供自己的私有地址空间和内存。页表决定了内存地址的含义，以及可以访问物理内存的哪些部分。在本文中，记录了<code>Lab: page tables</code>的前两个实验：加速系统调用和打印页表。</p>
 <span id="more"></span>
-<h2 id="Speed-up-system-calls-easy">Speed up system calls (easy)<a class="anchor" href="#Speed-up-system-calls-easy">·</a></h2>
+<h2 id="Speed-up-system-calls-easy">Speed up system calls (easy)<a class="anchor" href="#Speed-up-system-calls-easy"></a></h2>
 <p>通常我们在需要执行系统调用时，在操作系统中会发生从用户态到内核态的切换，这是因为这些核心的操作只能交给内核去完成。在这个实验中，xv6要求我们通过在用户空间和内核之间<strong>共享只读区域中的数据</strong>来加快某些系统调用。</p>
 <p>由于现在只是入门如何将映射添加至页表中，这个实验只需要为xv6中的<code>getpid()</code>系统调用进行优化。</p>
 <p>在xv6的实验指导书中：</p>
@@ -273,7 +273,7 @@
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span>(p-&gt;usyscall)</span><br><span class="line">	kfree((<span class="type">void</span>*)p-&gt;usyscall);</span><br><span class="line">p-&gt;usyscall = <span class="number">0</span>;</span><br></pre></td></tr></table></figure>
 <p>同时还应当在<code>proc_freepagetable</code>函数中解除之前对usyscall的映射：</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">uvmunmap(pagetable, USYSCALL, <span class="number">1</span>, <span class="number">0</span>);</span><br></pre></td></tr></table></figure>
-<h2 id="Print-a-page-table-easy">Print a page table (easy)<a class="anchor" href="#Print-a-page-table-easy">·</a></h2>
+<h2 id="Print-a-page-table-easy">Print a page table (easy)<a class="anchor" href="#Print-a-page-table-easy"></a></h2>
 <p>这个实验要求我们将页表打印出来。在实验开始前，让我们先看看xv6中的页表。</p>
 <p><img src="../../images/Pasted%20image%2020240623170452.png" alt=""></p>
 <p>xv6中的页表为三级页表，在VA转换为PA的过程中，处理单元会通过<code>satp</code>寄存器找到当前进程的页表基地址，然后取出VA中的L2部分找到一级页表的项，一级页表中的项（PTE）保存二级页表的地址，再通过L1可获取二级页表中的项，依次类推即可将VA转换为PA。</p>

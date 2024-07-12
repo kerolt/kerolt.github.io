@@ -21,12 +21,12 @@
 
 <script class="next-config" data-name="main" type="application/json">{"hostname":"kerolt.github.io","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.19.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":true,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
 
-    <meta name="description" content="前言· 在Vue3项目中，如果我们想上传图片一般可以利用element-ui中的el-upload，为了避免代码的重复，我们可以自己封装一个图片上传组件。 其中，主要实现思想为前端利用el-upload组件选择上传的图片，并利用其http-request属性来自定义函数来实现文件上传请求：该请求函数使用七牛云的对象存储，在通过后端得到的上传凭证token后来实现文件上传。">
+    <meta name="description" content="前言 在Vue3项目中，如果我们想上传图片一般可以利用element-ui中的el-upload，为了避免代码的重复，我们可以自己封装一个图片上传组件。 其中，主要实现思想为前端利用el-upload组件选择上传的图片，并利用其http-request属性来自定义函数来实现文件上传请求：该请求函数使用七牛云的对象存储，在通过后端得到的上传凭证token后来实现文件上传。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Vue3封装el-upload">
 <meta property="og:url" content="http://kerolt.github.io/posts/be7ff390/index.html">
 <meta property="og:site_name" content="Kerolt&#39;s Blog">
-<meta property="og:description" content="前言· 在Vue3项目中，如果我们想上传图片一般可以利用element-ui中的el-upload，为了避免代码的重复，我们可以自己封装一个图片上传组件。 其中，主要实现思想为前端利用el-upload组件选择上传的图片，并利用其http-request属性来自定义函数来实现文件上传请求：该请求函数使用七牛云的对象存储，在通过后端得到的上传凭证token后来实现文件上传。">
+<meta property="og:description" content="前言 在Vue3项目中，如果我们想上传图片一般可以利用element-ui中的el-upload，为了避免代码的重复，我们可以自己封装一个图片上传组件。 其中，主要实现思想为前端利用el-upload组件选择上传的图片，并利用其http-request属性来自定义函数来实现文件上传请求：该请求函数使用七牛云的对象存储，在通过后端得到的上传凭证token后来实现文件上传。">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2023-12-10T00:00:00.000Z">
 <meta property="article:modified_time" content="2023-12-10T00:00:00.000Z">
@@ -243,37 +243,37 @@
     
     
     
-    <div class="post-body" itemprop="articleBody"><h2 id="前言">前言<a class="anchor" href="#前言">·</a></h2>
+    <div class="post-body" itemprop="articleBody"><h2 id="前言">前言<a class="anchor" href="#前言"></a></h2>
 <p>在Vue3项目中，如果我们想上传图片一般可以利用element-ui中的<code>el-upload</code>，为了避免代码的重复，我们可以自己封装一个图片上传组件。</p>
 <p>其中，主要实现思想为前端利用el-upload组件选择上传的图片，并利用其<code>http-request</code>属性来自定义函数来实现文件上传请求：该请求函数使用七牛云的对象存储，在通过后端得到的上传凭证token后来实现文件上传。</p>
 <span id="more"></span>
-<h2 id="后端代码">后端代码<a class="anchor" href="#后端代码">·</a></h2>
+<h2 id="后端代码">后端代码<a class="anchor" href="#后端代码"></a></h2>
 <blockquote>
 <p>使用express框架，获取七牛云上传凭证并响应给前端</p>
 </blockquote>
-<h3 id="项目结构">项目结构<a class="anchor" href="#项目结构">·</a></h3>
+<h3 id="项目结构">项目结构<a class="anchor" href="#项目结构"></a></h3>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"> - routes</span><br><span class="line">     |- token.js</span><br><span class="line">     |- index.js</span><br><span class="line"> - app.js</span><br><span class="line"> - config.js</span><br><span class="line"> - package.json</span><br></pre></td></tr></table></figure>
-<h3 id="安装七牛云的SDK：">安装七牛云的SDK：<a class="anchor" href="#安装七牛云的SDK：">·</a></h3>
+<h3 id="安装七牛云的SDK：">安装七牛云的SDK：<a class="anchor" href="#安装七牛云的SDK："></a></h3>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"> npm i qiniu</span><br></pre></td></tr></table></figure>
-<h3 id="获取上传凭证">获取上传凭证<a class="anchor" href="#获取上传凭证">·</a></h3>
+<h3 id="获取上传凭证">获取上传凭证<a class="anchor" href="#获取上传凭证"></a></h3>
 <p>编写获取上传凭证的相关代码：</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"> /* config.js */</span><br><span class="line"> ​</span><br><span class="line"> const qiniu = require(&#x27;qiniu&#x27;)</span><br><span class="line"> ​</span><br><span class="line"> // 创建上传凭证</span><br><span class="line"> const accessKey = &#x27;*****&#x27; // 这里填写七牛云的accessKey</span><br><span class="line"> const secretKey = &#x27;*****&#x27;// 这里填写七牛云的secretKey</span><br><span class="line"> const mac = new qiniu.auth.digest.Mac(accessKey, secretKey)</span><br><span class="line"> const options = &#123;</span><br><span class="line">   scope: &#x27;*****&#x27;, // 这里填写七牛云空间名称</span><br><span class="line">   expires: 60 * 60 * 24 * 7 // 这里是凭证的有效时间，默认是一小时</span><br><span class="line"> &#125;</span><br><span class="line"> const putPolicy = new qiniu.rs.PutPolicy(options)</span><br><span class="line"> const uploadToken = putPolicy.uploadToken(mac)</span><br><span class="line"> ​</span><br><span class="line"> module.exports = &#123;</span><br><span class="line">   uploadToken</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
-<h3 id="配置路由">配置路由<a class="anchor" href="#配置路由">·</a></h3>
+<h3 id="配置路由">配置路由<a class="anchor" href="#配置路由"></a></h3>
 <p>token.js</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"> const tokenRouter = require(&#x27;express&#x27;).Router()</span><br><span class="line"> const qnconfig = require(&#x27;../config&#x27;) // 引入七牛云配置</span><br><span class="line"> ​</span><br><span class="line"> tokenRouter.get(&#x27;/qiniu&#x27;, (req, res, next) =&gt; &#123;</span><br><span class="line">   res.status(200).send(qnconfig.uploadToken)</span><br><span class="line"> &#125;)</span><br><span class="line"> ​</span><br><span class="line"> module.exports = tokenRouter</span><br></pre></td></tr></table></figure>
 <p>index.js</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"> const token = require(&#x27;./token&#x27;)</span><br><span class="line"> ​</span><br><span class="line"> module.exports = routes = (app) =&gt; &#123;</span><br><span class="line">   app.use(&#x27;/token&#x27;, token) // 可以通过/token/qiniu的方式获取上传凭证</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
-<h3 id="项目启动">项目启动<a class="anchor" href="#项目启动">·</a></h3>
+<h3 id="项目启动">项目启动<a class="anchor" href="#项目启动"></a></h3>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"> const express = require(&#x27;express&#x27;)</span><br><span class="line"> const bodyparse = require(&#x27;body-parser&#x27;)</span><br><span class="line"> const routers = require(&#x27;./route&#x27;)</span><br><span class="line"> ​</span><br><span class="line"> // 创建服务</span><br><span class="line"> const app = express()</span><br><span class="line"> // 解析数据</span><br><span class="line"> app.use(bodyparse.json())</span><br><span class="line"> ​</span><br><span class="line"> // 路由</span><br><span class="line"> routes(app)</span><br><span class="line"> ​</span><br><span class="line"> // 监听3000端口</span><br><span class="line"> app.listen(3000, () =&gt; &#123;</span><br><span class="line">   console.log(&#x27;this server are running on localhost:3000!&#x27;)</span><br><span class="line"> &#125;)</span><br></pre></td></tr></table></figure>
 <p>使用命令<code>node app.js</code>启动项目，这时访问<code>http://localhost:3000/token/qiniu</code>即可获取上传凭证了。</p>
-<h2 id="前端代码">前端代码<a class="anchor" href="#前端代码">·</a></h2>
-<h3 id="配置跨域">配置跨域<a class="anchor" href="#配置跨域">·</a></h3>
+<h2 id="前端代码">前端代码<a class="anchor" href="#前端代码"></a></h2>
+<h3 id="配置跨域">配置跨域<a class="anchor" href="#配置跨域"></a></h3>
 <p>由于前后端项目运行在不同的端口，因此需要解决跨域问题，这里在vite.config.js中解决如下：</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"> server: &#123;</span><br><span class="line">   proxy: &#123;</span><br><span class="line">     &#x27;/api&#x27;: &#123;</span><br><span class="line">       target: &#x27;http://localhost:3000&#x27;,</span><br><span class="line">       changeOrigin: true,</span><br><span class="line">       rewrite: (path) =&gt; path.replace(/^/api/, &#x27;&#x27;)</span><br><span class="line">     &#125;</span><br><span class="line">   &#125;</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
-<h3 id="父组件使用">父组件使用<a class="anchor" href="#父组件使用">·</a></h3>
+<h3 id="父组件使用">父组件使用<a class="anchor" href="#父组件使用"></a></h3>
 <p>我们希望子组件上传图片得到一串url后父组件能接受到，并且在展示上传图片时其尺寸应能指定或者有默认值。</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"> &lt;template&gt;</span><br><span class="line">   &lt;Upload :url=&quot;imageUrl&quot; @upload=&quot;changeUrl&quot; /&gt;</span><br><span class="line"> &lt;/template&gt;</span><br><span class="line"> ​</span><br><span class="line"> &lt;script setup&gt;</span><br><span class="line"> import Upload from &#x27;@/components/Upload.vue&#x27;</span><br><span class="line"> import &#123; ref &#125; from &#x27;vue&#x27;</span><br><span class="line">     </span><br><span class="line"> const imageUrl = ref(&#x27;&#x27;)</span><br><span class="line"> ​</span><br><span class="line"> const changeUrl = (url) =&gt; &#123;</span><br><span class="line">     imageUrl.value = url</span><br><span class="line"> &#125;</span><br><span class="line"> &lt;/script&gt;</span><br></pre></td></tr></table></figure>
-<h3 id="封装组件Upload-vue">封装组件Upload.vue<a class="anchor" href="#封装组件Upload-vue">·</a></h3>
+<h3 id="封装组件Upload-vue">封装组件Upload.vue<a class="anchor" href="#封装组件Upload-vue"></a></h3>
 <blockquote>
 <p>这里只是简单使用axios，没有对其进行封装。</p>
 </blockquote>

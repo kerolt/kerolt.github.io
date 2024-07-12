@@ -21,12 +21,12 @@
 
 <script class="next-config" data-name="main" type="application/json">{"hostname":"kerolt.github.io","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.19.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":true,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
 
-    <meta name="description" content="前言· std::cout重载了&lt;&lt;运算符，这使得写一些很短的代码时很方便。但是如果在多线程的条件下，cout并不是线程安全的。">
+    <meta name="description" content="前言 std::cout重载了&lt;&lt;运算符，这使得写一些很短的代码时很方便。但是如果在多线程的条件下，cout并不是线程安全的。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="避免cout线程不安全的一个做法">
 <meta property="og:url" content="http://kerolt.github.io/posts/68d3d49b/index.html">
 <meta property="og:site_name" content="Kerolt&#39;s Blog">
-<meta property="og:description" content="前言· std::cout重载了&lt;&lt;运算符，这使得写一些很短的代码时很方便。但是如果在多线程的条件下，cout并不是线程安全的。">
+<meta property="og:description" content="前言 std::cout重载了&lt;&lt;运算符，这使得写一些很短的代码时很方便。但是如果在多线程的条件下，cout并不是线程安全的。">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2024-02-21T00:00:00.000Z">
 <meta property="article:modified_time" content="2024-02-21T00:00:00.000Z">
@@ -243,10 +243,10 @@
     
     
     
-    <div class="post-body" itemprop="articleBody"><h2 id="前言">前言<a class="anchor" href="#前言">·</a></h2>
+    <div class="post-body" itemprop="articleBody"><h2 id="前言">前言<a class="anchor" href="#前言"></a></h2>
 <p><code>std::cout</code>重载了<code>&lt;&lt;</code>运算符，这使得写一些很短的代码时很方便。但是如果在多线程的条件下，cout并不是线程安全的。</p>
 <span id="more"></span>
-<h2 id="举例">举例<a class="anchor" href="#举例">·</a></h2>
+<h2 id="举例">举例<a class="anchor" href="#举例"></a></h2>
 <p>举个例子，我们创建5个线程</p>
 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;thread&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">Test</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    std::cout &lt;&lt; <span class="string">&quot;msg1&quot;</span></span><br><span class="line">              &lt;&lt; <span class="string">&quot; msg2&quot;</span></span><br><span class="line">              &lt;&lt; <span class="string">&quot; msg3&quot;</span></span><br><span class="line">              &lt;&lt; <span class="string">&quot; thread_id = &quot;</span> &lt;&lt; std::this_thread::<span class="built_in">get_id</span>() &lt;&lt; std::endl;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    std::thread threads[<span class="number">5</span>];</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; <span class="number">5</span>; i++) &#123;</span><br><span class="line">        threads[i] = std::<span class="built_in">thread</span>(Test);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; <span class="number">5</span>; i++) &#123;</span><br><span class="line">        threads[i].<span class="built_in">join</span>();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>实际上，看样子好像控制台应该输出5行内容，但是运行结果可能是这样的</p>
@@ -254,7 +254,7 @@
 <p>这是因为cout在使用时<strong>可能</strong>会存在线程之间的打印信息<strong>乱串</strong>的问题，看一下编译器眼中我们这段程序中的cout是什么样的：</p>
 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">std::<span class="keyword">operator</span>&lt;&lt;(std::<span class="keyword">operator</span>&lt;&lt;(std::<span class="keyword">operator</span>&lt;&lt;(std::<span class="keyword">operator</span>&lt;&lt;(std::<span class="keyword">operator</span>&lt;&lt;(std::cout, <span class="string">&quot;msg1&quot;</span>), <span class="string">&quot; msg2&quot;</span>), <span class="string">&quot; msg3&quot;</span>), <span class="string">&quot; thread_id = &quot;</span>), std::this_thread::<span class="built_in">get_id</span>()).<span class="keyword">operator</span>&lt;&lt;(std::endl);</span><br></pre></td></tr></table></figure>
 <p>可以看到，这不是通过单个 <code>std::operator&lt;&lt;</code> 调用完成的，也就是说这个操作<strong>并不是原子的</strong></p>
-<h2 id="解决方法">解决方法<a class="anchor" href="#解决方法">·</a></h2>
+<h2 id="解决方法">解决方法<a class="anchor" href="#解决方法"></a></h2>
 <ol>
 <li>使用<code>std::format</code>（C++20）</li>
 <li>使用第三方库，如<code>folly</code>，<code>fmtlib</code>等</li>

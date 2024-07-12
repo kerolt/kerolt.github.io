@@ -246,14 +246,14 @@
     <div class="post-body" itemprop="articleBody"><p>记录学习CMake中碰到的一些问题和笔记</p>
 <p>ps：CMake相比xmake来说确实太繁琐，但还是得学习🍭</p>
 <span id="more"></span>
-<h2 id="现代CMake的命令行构建">现代CMake的命令行构建<a class="anchor" href="#现代CMake的命令行构建">·</a></h2>
+<h2 id="现代CMake的命令行构建">现代CMake的命令行构建<a class="anchor" href="#现代CMake的命令行构建"></a></h2>
 <p>在“古代”CMake中，我们想要构建项目要这样：</p>
 <figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">mkdir</span> build</span><br><span class="line"><span class="built_in">cd</span> build</span><br><span class="line">cmake ..</span><br><span class="line">make</span><br></pre></td></tr></table></figure>
 <p>太啰嗦了，最后一步可能还用的不是make命令。不过在现代CMake中，提供了更为方便的 -B 和 --build，如下：</p>
 <figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">cmake -B build <span class="comment"># 用于生成构建目录。-B 参数后面跟的是一个目录名，这里指定为 build</span></span><br><span class="line">cmake --build build <span class="comment"># 用于在已经生成的构建目录中构建项目</span></span><br></pre></td></tr></table></figure>
 <p>这样省去了创建build目录等繁琐的操作，还统一了不同平台上的构建命令。</p>
 <p>如果碰到了有关build缓存的相关问题，可以使用rm删除build目录，或者使用<code>cmake --build build --clean-first</code>来在构建之前先清理构建目录。</p>
-<h2 id="添加源文件的几种方法">添加源文件的几种方法<a class="anchor" href="#添加源文件的几种方法">·</a></h2>
+<h2 id="添加源文件的几种方法">添加源文件的几种方法<a class="anchor" href="#添加源文件的几种方法"></a></h2>
 <p>假设当前项目文件目录如下：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">.</span><br><span class="line">├── CMakeLists.txt</span><br><span class="line">├── include</span><br><span class="line">│   └── add.h</span><br><span class="line">└── src</span><br><span class="line">    ├── add.cpp</span><br><span class="line">    └── main.cpp</span><br></pre></td></tr></table></figure>
 <p>即当前项目的源文件为src目录下的cpp文件，在顶层的<code>CMakeLists.txt</code>中添加源文件目标：</p>
@@ -263,7 +263,7 @@
 <li>都是按照通配符批量匹配文件，<code>GLOB</code>和<code>GLOB_RECURSE</code>的区别在于后者允许*递归目录去匹配</li>
 <li>对于选项<code>CONFIGURE_DEPENDS</code>，如果不添加，则在src/下添加新文件，由于cmake缓存的原因，<code>SOURCE_FILES</code>变量并不会更新，需要重新执行<code>cmake -B build</code></li>
 </ol>
-<h2 id="设置可执行文件的输出位置">设置可执行文件的输出位置<a class="anchor" href="#设置可执行文件的输出位置">·</a></h2>
+<h2 id="设置可执行文件的输出位置">设置可执行文件的输出位置<a class="anchor" href="#设置可执行文件的输出位置"></a></h2>
 <figure class="highlight cmake"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">set</span>(EXECUTABLE_OUTPUT_PATH <span class="variable">$&#123;PROJECT_SOURCE_DIR&#125;</span>/bin)</span><br></pre></td></tr></table></figure>
     </div>
 

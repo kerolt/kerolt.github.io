@@ -237,7 +237,7 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <h2 id="为什么我们需要copy-on-write">为什么我们需要copy on write<a class="anchor" href="#为什么我们需要copy-on-write">·</a></h2>
+          <h2 id="为什么我们需要copy-on-write">为什么我们需要copy on write<a class="anchor" href="#为什么我们需要copy-on-write"></a></h2>
 <p>通过xv6的实验指导书，我们可以知道：</p>
 <p>xv6中的<code>fork()</code>系统调用将父进程的所有用户空间内存复制到子进程中。如果父进程所使用的页数很大，复制可能需要很长时间，而这样的复制操作经常是没有用的：<code>fork()</code>之后通常是子进程中的<code>exec()</code>，这会丢弃复制的内存而不是使用它们。</p>
 <p>那么，我们是不是可以在子进程刚创建时将其页表的映射到父进程的物理页，而在其需要对内存进行写操作时再重新分配内存呢？没错，这就是通过copy on write（写时复制）技术来进行优化。</p>
@@ -664,7 +664,7 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <h2 id="前言">前言<a class="anchor" href="#前言">·</a></h2>
+          <h2 id="前言">前言<a class="anchor" href="#前言"></a></h2>
 <p>页表是最常用的机制，操作系统通过它为每个进程提供自己的私有地址空间和内存。页表决定了内存地址的含义，以及可以访问物理内存的哪些部分。在本文中，记录了<code>Lab: page tables</code>的前两个实验：加速系统调用和打印页表。</p>
           <!--noindex-->
             <div class="post-button">

@@ -21,12 +21,12 @@
 
 <script class="next-config" data-name="main" type="application/json">{"hostname":"kerolt.github.io","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.19.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":true,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
 
-    <meta name="description" content="前言· 通过一个项目来学习一下如何设计一个多服务的系统。同时也能学习Spring Cloud Gateway、Dubbo、API签名等一些知识。 项目架构·">
+    <meta name="description" content="前言 通过一个项目来学习一下如何设计一个多服务的系统。同时也能学习Spring Cloud Gateway、Dubbo、API签名等一些知识。 项目架构">
 <meta property="og:type" content="article">
 <meta property="og:title" content="API开放平台">
 <meta property="og:url" content="http://kerolt.github.io/posts/c40430e5/index.html">
 <meta property="og:site_name" content="Kerolt&#39;s Blog">
-<meta property="og:description" content="前言· 通过一个项目来学习一下如何设计一个多服务的系统。同时也能学习Spring Cloud Gateway、Dubbo、API签名等一些知识。 项目架构·">
+<meta property="og:description" content="前言 通过一个项目来学习一下如何设计一个多服务的系统。同时也能学习Spring Cloud Gateway、Dubbo、API签名等一些知识。 项目架构">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="http://kerolt.github.io/images/Screenshot_20240321_190000.png">
 <meta property="article:published_time" content="2024-03-21T00:00:00.000Z">
@@ -245,22 +245,22 @@
     
     
     
-    <div class="post-body" itemprop="articleBody"><h2 id="前言">前言<a class="anchor" href="#前言">·</a></h2>
+    <div class="post-body" itemprop="articleBody"><h2 id="前言">前言<a class="anchor" href="#前言"></a></h2>
 <p>通过一个项目来学习一下如何设计一个多服务的系统。同时也能学习Spring Cloud Gateway、Dubbo、API签名等一些知识。</p>
-<h2 id="项目架构">项目架构<a class="anchor" href="#项目架构">·</a></h2>
+<h2 id="项目架构">项目架构<a class="anchor" href="#项目架构"></a></h2>
 <p><img src="../../images/Screenshot_20240321_190000.png" alt=""></p>
 <span id="more"></span>
-<h2 id="用户前台">用户前台<a class="anchor" href="#用户前台">·</a></h2>
-<h3 id="普通用户">普通用户<a class="anchor" href="#普通用户">·</a></h3>
+<h2 id="用户前台">用户前台<a class="anchor" href="#用户前台"></a></h2>
+<h3 id="普通用户">普通用户<a class="anchor" href="#普通用户"></a></h3>
 <p>例如管理员发布了一个新的接口A，如果一位开发者并没有注册为该平台的用户，那么即便这位开发者拿到了这个接口地址，也是不可以使用接口A的。</p>
 <p>当他注册为平台用户后，后台会给他生成<strong>AccessKey</strong>和<strong>SecretKey</strong>（后文简称为ak和sk）用于API签名认证，这时，用户带着这两个key，就可通过前台提供的在线测试或者客户端SDK来调用想要的接口了。</p>
-<h3 id="管理员">管理员<a class="anchor" href="#管理员">·</a></h3>
+<h3 id="管理员">管理员<a class="anchor" href="#管理员"></a></h3>
 <p>管理员职责就是管理接口，包括接口的上线、下线、添加等</p>
-<h2 id="客户端SDK（api-client-sdk）">客户端SDK（api-client-sdk）<a class="anchor" href="#客户端SDK（api-client-sdk）">·</a></h2>
+<h2 id="客户端SDK（api-client-sdk）">客户端SDK（api-client-sdk）<a class="anchor" href="#客户端SDK（api-client-sdk）"></a></h2>
 <p>若管理员将接口下线，则请求无效</p>
 <p>通过<strong>AccessKey</strong>和<strong>SecretKey</strong>来请求<code>api-interface</code>接口服务。其中ak和sk只有用户在平台注册账号后才会分。当然，添加网关后，应该在<code>api-interface</code>前使用添加一层网关服务来避免api接口的直接暴露</p>
 <p>sdk中的请求方法应该和api-interface中提供的接口一一对应，也就是两边应该同步修改</p>
-<h2 id="网关（api-gateway）">网关（api-gateway）<a class="anchor" href="#网关（api-gateway）">·</a></h2>
+<h2 id="网关（api-gateway）">网关（api-gateway）<a class="anchor" href="#网关（api-gateway）"></a></h2>
 <p>使用Spring Cloud Gateway来完成一下功能</p>
 <ol>
 <li><strong>统一鉴权认证</strong>：应用 API 签名认证算法校验用户请求的合法性。根据请求拿到用户信息后从数据库中获取ak、sk进行比较，如果相同则代表用户请求合法</li>
@@ -268,11 +268,11 @@
 <li><strong>路由转发</strong>：前端发送请求到 API 网关，通过网关转发到实际的 API 接口 。这样就避免了直接将完整的接口地址暴露出来</li>
 <li><strong>流量染色</strong>：给经过网关的请求加上特定的请求头参数，便于让实际的 API 服务确定请求来源及合法性</li>
 </ol>
-<h2 id="接口服务（api-interface）">接口服务（api-interface）<a class="anchor" href="#接口服务（api-interface）">·</a></h2>
+<h2 id="接口服务（api-interface）">接口服务（api-interface）<a class="anchor" href="#接口服务（api-interface）"></a></h2>
 <p>真正实现和提供接口的地方，可以只编写controller层</p>
-<h2 id="抽象接口（api-common）">抽象接口（api-common）<a class="anchor" href="#抽象接口（api-common）">·</a></h2>
+<h2 id="抽象接口（api-common）">抽象接口（api-common）<a class="anchor" href="#抽象接口（api-common）"></a></h2>
 <p>在网关层由于要进行API鉴权，这避免不料要查询数据库，但是网关服务项目并没有使用MyBatis-Plus，为了避免写重复的代码，利用Dubbo分布式改造，使得网关层可以通过RPC来调用后端服务的方法</p>
-<h2 id="服务后台（api-backend）">服务后台（api-backend）<a class="anchor" href="#服务后台（api-backend）">·</a></h2>
+<h2 id="服务后台（api-backend）">服务后台（api-backend）<a class="anchor" href="#服务后台（api-backend）"></a></h2>
 <p>最核心的业务层服务！</p>
 <ul>
 <li>用户注册时会自动生成其ak和sk</li>
