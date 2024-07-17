@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <meta name="google-site-verification" content="G2bBvIdEL2IvKAU2atPObrKeGOZYYjla4BUoKafFos0">
+  <meta name="msvalidate.01" content="2300A23B82DB579A2DEA6261191AD771">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha256-yIDrPSXHZdOZhAqiBP7CKzIwMQmRCJ8UeB8Jo17YC4o=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"kerolt.github.io","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.19.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":true,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="本次的实验总体都不是很难，第一个练习让我们在用户态模拟了线程的切换，这里重要的就是进程&#x2F;线程上下文的保存与恢复；第二三个练习则是让我们跳出了xv6，去熟悉pthread库和线程的同步互斥。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="【MIT6.S081】Lab6 multithreading">
+<meta property="og:url" content="http://kerolt.github.io/posts/cb4e63bc/index.html">
+<meta property="og:site_name" content="Kerolt&#39;s Blog">
+<meta property="og:description" content="本次的实验总体都不是很难，第一个练习让我们在用户态模拟了线程的切换，这里重要的就是进程&#x2F;线程上下文的保存与恢复；第二三个练习则是让我们跳出了xv6，去熟悉pthread库和线程的同步互斥。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://kerolt.github.io/images/Pasted%20image%2020240717175838.png">
+<meta property="og:image" content="http://kerolt.github.io/images/Pasted%20image%2020240715214134.png">
+<meta property="og:image" content="http://kerolt.github.io/images/Pasted%20image%2020240715214649.png">
+<meta property="article:published_time" content="2024-07-17T00:00:00.000Z">
+<meta property="article:modified_time" content="2024-07-17T00:00:00.000Z">
+<meta property="article:author" content="Kerolt">
+<meta property="article:tag" content="MIT6-S081">
+<meta property="article:tag" content="OS">
+<meta property="article:tag" content="xv6">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://kerolt.github.io/images/Pasted%20image%2020240717175838.png">
+
+
+<link rel="canonical" href="http://kerolt.github.io/posts/cb4e63bc/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://kerolt.github.io/posts/cb4e63bc/","path":"posts/cb4e63bc/","title":"【MIT6.S081】Lab6 multithreading"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>【MIT6.S081】Lab6 multithreading | Kerolt's Blog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Kerolt's Blog</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li><li class="menu-item menu-item-sitemap"><a href="/sitemap.xml" rel="section"><i class="fa fa-sitemap fa-fw"></i>站点地图</a></li>
+  </ul>
+</nav>
+
+
+
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AE%80%E5%8D%95%E5%88%86%E6%9E%90xv6%E4%B8%AD%E7%9A%84%E8%BF%9B%E7%A8%8B%E5%88%87%E6%8D%A2"><span class="nav-number">1.</span> <span class="nav-text">简单分析xv6中的进程切换</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Uthread-switching-between-threads"><span class="nav-number">2.</span> <span class="nav-text">Uthread: switching between threads</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%89%8D%E7%BD%AE%E5%87%86%E5%A4%87"><span class="nav-number">2.1.</span> <span class="nav-text">前置准备</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%90%AF%E5%8A%A8"><span class="nav-number">2.2.</span> <span class="nav-text">启动</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%B0%83%E5%BA%A6"><span class="nav-number">2.3.</span> <span class="nav-text">调度</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Using-threads"><span class="nav-number">3.</span> <span class="nav-text">Using threads</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Barrier"><span class="nav-number">4.</span> <span class="nav-text">Barrier</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B0%9D%E8%AF%951"><span class="nav-number">4.1.</span> <span class="nav-text">尝试1</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B0%9D%E8%AF%952"><span class="nav-number">4.2.</span> <span class="nav-text">尝试2</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%AD%A3%E7%A1%AE%E5%81%9A%E6%B3%95"><span class="nav-number">4.3.</span> <span class="nav-text">正确做法</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%A3%E7%A0%81%E5%AE%9E%E7%8E%B0%E8%AF%A6%E6%83%85"><span class="nav-number">5.</span> <span class="nav-text">代码实现详情</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Reference"><span class="nav-number">6.</span> <span class="nav-text">Reference</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Kerolt"
+      src="https://picx.zhimg.com/v2-f14895864d68f2db5f8e650481075209_xll.jpg">
+  <p class="site-author-name" itemprop="name">Kerolt</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">26</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/kerolt" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;kerolt" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:kerolt@qq.com" title="E-Mail → mailto:kerolt@qq.com" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i></a>
+      </span>
+  </div>
+  <div class="cc-license animated" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="https://cdnjs.cloudflare.com/ajax/libs/creativecommons-vocabulary/2020.11.3/assets/license_badges/small/by_nc_sa.svg" alt="Creative Commons"></a>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://kerolt.github.io/posts/cb4e63bc/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://picx.zhimg.com/v2-f14895864d68f2db5f8e650481075209_xll.jpg">
+      <meta itemprop="name" content="Kerolt">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Kerolt's Blog">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="【MIT6.S081】Lab6 multithreading | Kerolt's Blog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          【MIT6.S081】Lab6 multithreading
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2024-07-17 00:00:00" itemprop="dateCreated datePublished" datetime="2024-07-17T00:00:00+00:00">2024-07-17</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/OS/" itemprop="url" rel="index"><span itemprop="name">OS</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>2.3k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>8 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>本次的实验总体都不是很难，第一个练习让我们在用户态模拟了线程的切换，这里重要的就是进程/线程上下文的保存与恢复；第二三个练习则是让我们跳出了xv6，去熟悉pthread库和线程的同步互斥。</p>
+<span id="more"></span>
+<h2 id="简单分析xv6中的进程切换">简单分析xv6中的进程切换<a class="anchor" href="#简单分析xv6中的进程切换"></a></h2>
+<p>init是用户态最先启动的进程，其启动后会创建sh进程，sh进程又会fork并exec其他命令：</p>
+<ol>
+<li>内核会在<code>userinit()</code>中准备init进程，这是最先启动的用户态进程，将其运行状态设置为<code>RUNNABLE</code></li>
+<li>内核启动scheduler进行进程调度（这个函数会一直执行），当前只有init进程，且其状态为<code>RUNNABLE</code>，故运行</li>
+<li>init进程会fork一个子进程，并使用exec执行sh进程，其用于处理用户在控制台的输入</li>
+<li>用户输入命令后，sh解析命令后fork子进程并用exec来将命令对应的进程替换掉fork的子进程</li>
+</ol>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">init</span><br><span class="line">- sh</span><br><span class="line">	- ls</span><br><span class="line">	- cat</span><br><span class="line">	- ...</span><br></pre></td></tr></table></figure>
+<p>xv6内部采用时间片轮转来进行进程调度，当进程时间片到了后，触发时钟中断，执行yield，在yield中，会将当前进程的状态从运行态RUNNING设置为RUNNABLE，并切换至scheduler调度器，由其来寻找下一个可运行的进程进行切换。</p>
+<p>那么xv6是怎么切换当前进程和scheduler调度器的呢？其实现是根据<code>swtch</code>函数来实现的：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Switch to scheduler.  Must hold only p-&gt;lock</span></span><br><span class="line"><span class="comment">// and have changed proc-&gt;state. Saves and restores</span></span><br><span class="line"><span class="comment">// intena because intena is a property of this</span></span><br><span class="line"><span class="comment">// kernel thread, not this CPU. It should</span></span><br><span class="line"><span class="comment">// be proc-&gt;intena and proc-&gt;noff, but that would</span></span><br><span class="line"><span class="comment">// break in the few places where a lock is held but</span></span><br><span class="line"><span class="comment">// there&#x27;s no process.</span></span><br><span class="line"><span class="type">void</span></span><br><span class="line"><span class="title function_">sched</span><span class="params">(<span class="type">void</span>)</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="type">int</span> intena;</span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">proc</span> *<span class="title">p</span> =</span> myproc();</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span>(!holding(&amp;p-&gt;lock))</span><br><span class="line">    panic(<span class="string">&quot;sched p-&gt;lock&quot;</span>);</span><br><span class="line">  <span class="keyword">if</span>(mycpu()-&gt;noff != <span class="number">1</span>)</span><br><span class="line">    panic(<span class="string">&quot;sched locks&quot;</span>);</span><br><span class="line">  <span class="keyword">if</span>(p-&gt;state == RUNNING)</span><br><span class="line">    panic(<span class="string">&quot;sched running&quot;</span>);</span><br><span class="line">  <span class="keyword">if</span>(intr_get())</span><br><span class="line">    panic(<span class="string">&quot;sched interruptible&quot;</span>);</span><br><span class="line"></span><br><span class="line">  intena = mycpu()-&gt;intena;</span><br><span class="line">  swtch(&amp;p-&gt;context, &amp;mycpu()-&gt;context);</span><br><span class="line">  mycpu()-&gt;intena = intena;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Give up the CPU for one scheduling round.</span></span><br><span class="line"><span class="type">void</span></span><br><span class="line"><span class="title function_">yield</span><span class="params">(<span class="type">void</span>)</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">proc</span> *<span class="title">p</span> =</span> myproc();</span><br><span class="line">  acquire(&amp;p-&gt;lock);</span><br><span class="line">  p-&gt;state = RUNNABLE;</span><br><span class="line">  sched();</span><br><span class="line">  release(&amp;p-&gt;lock);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>swtch(&amp;p-&gt;context, &amp;mycpu()-&gt;context)</code>函数会将当前寄存器中的值保存到p-&gt;context中，并将当前cpu中context的内容恢复到寄存器中，其中最重要的就是<code>ra</code>寄存器，当恢复了这个后，ra的值对应的地址在调度器<code>scheduler()</code>中：</p>
+<p><img src="../../images/Pasted%20image%2020240717175838.png" alt=""></p>
+<p>（这里ra的16进制为0x8000141e）</p>
+<p>这样，xv6就从：执行当前进程 -&gt; yield -&gt; shed -&gt; scheduler；在scheduler调度器中，内核会找到下一个就绪态的进程，并使用swtch进行进程切换：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Per-CPU process scheduler.</span></span><br><span class="line"><span class="comment">// Each CPU calls scheduler() after setting itself up.</span></span><br><span class="line"><span class="comment">// Scheduler never returns.  It loops, doing:</span></span><br><span class="line"><span class="comment">//  - choose a process to run.</span></span><br><span class="line"><span class="comment">//  - swtch to start running that process.</span></span><br><span class="line"><span class="comment">//  - eventually that process transfers control</span></span><br><span class="line"><span class="comment">//    via swtch back to the scheduler.</span></span><br><span class="line"><span class="type">void</span></span><br><span class="line"><span class="title function_">scheduler</span><span class="params">(<span class="type">void</span>)</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">proc</span> *<span class="title">p</span>;</span></span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">cpu</span> *<span class="title">c</span> =</span> mycpu();</span><br><span class="line"></span><br><span class="line">  c-&gt;proc = <span class="number">0</span>;</span><br><span class="line">  <span class="keyword">for</span>(;;)&#123;</span><br><span class="line">    <span class="comment">// The most recent process to run may have had interrupts</span></span><br><span class="line">    <span class="comment">// turned off; enable them to avoid a deadlock if all</span></span><br><span class="line">    <span class="comment">// processes are waiting.</span></span><br><span class="line">    intr_on();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span>(p = proc; p &lt; &amp;proc[NPROC]; p++) &#123;</span><br><span class="line">      acquire(&amp;p-&gt;lock);</span><br><span class="line">      <span class="keyword">if</span>(p-&gt;state == RUNNABLE) &#123;</span><br><span class="line">        <span class="comment">// Switch to chosen process.  It is the process&#x27;s job</span></span><br><span class="line">        <span class="comment">// to release its lock and then reacquire it</span></span><br><span class="line">        <span class="comment">// before jumping back to us.</span></span><br><span class="line">        p-&gt;state = RUNNING;</span><br><span class="line">        c-&gt;proc = p;</span><br><span class="line">        swtch(&amp;c-&gt;context, &amp;p-&gt;context);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// Process is done running for now.</span></span><br><span class="line">        <span class="comment">// It should have changed its p-&gt;state before coming back.</span></span><br><span class="line">        c-&gt;proc = <span class="number">0</span>;</span><br><span class="line">      &#125;</span><br><span class="line">      release(&amp;p-&gt;lock);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这样，xv6又从调度器切换到了下一个进程去执行了。</p>
+<h2 id="Uthread-switching-between-threads">Uthread: switching between threads<a class="anchor" href="#Uthread-switching-between-threads"></a></h2>
+<p>在<code>uthread.c</code>中，我们需要在用户态下模拟了线程的运行与切换。可以简单理解，运行一个线程就是执行了一个函数。</p>
+<p>源代码中已经给出要运行的线程（函数），如何启动它们并对他们进行切换呢？</p>
+<h3 id="前置准备">前置准备<a class="anchor" href="#前置准备"></a></h3>
+<p>线程的切换同进程的切换相似，需要保存通用寄存器的值，所以我们可以对内核照猫画虎般在用户线程<code>struct thread</code>中添加一个<code>struct context</code>变量：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">context</span> &#123;</span></span><br><span class="line">  uint64 ra;</span><br><span class="line">  uint64 sp;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// callee-saved</span></span><br><span class="line">  uint64 s0;</span><br><span class="line">  uint64 s1;</span><br><span class="line">  uint64 s2;</span><br><span class="line">  uint64 s3;</span><br><span class="line">  uint64 s4;</span><br><span class="line">  uint64 s5;</span><br><span class="line">  uint64 s6;</span><br><span class="line">  uint64 s7;</span><br><span class="line">  uint64 s8;</span><br><span class="line">  uint64 s9;</span><br><span class="line">  uint64 s10;</span><br><span class="line">  uint64 s11;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">thread</span> &#123;</span></span><br><span class="line">  <span class="type">char</span>       <span class="built_in">stack</span>[STACK_SIZE]; <span class="comment">/* the thread&#x27;s stack */</span></span><br><span class="line">  <span class="type">int</span>        state;             <span class="comment">/* FREE, RUNNING, RUNNABLE */</span></span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">context</span> <span class="title">t_context</span>;</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<h3 id="启动">启动<a class="anchor" href="#启动"></a></h3>
+<p>risc-v中的ra寄存器的作用是保存函数返回地址。具体来说，当一个函数被调用时，调用指令会将返回地址，即调用该函数的下一条指令的地址，保存在<code>ra</code>寄存器中。</p>
+<p>在实验中，我们通过<code>thread_create</code>来创建线程，那么，在执行玩thread_create之后并进行了调度后，是不是就该运行线程函数了？没错，那么我们需要保存创建的线程对应的函数的地址到ra寄存器中，同时，还需要设置线程的栈指针：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> </span><br><span class="line"><span class="title function_">thread_create</span><span class="params">(<span class="type">void</span> (*func)())</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">thread</span> *<span class="title">t</span>;</span></span><br><span class="line"></span><br><span class="line">  <span class="keyword">for</span> (t = all_thread; t &lt; all_thread + MAX_THREAD; t++) &#123;</span><br><span class="line">    <span class="keyword">if</span> (t-&gt;state == FREE) <span class="keyword">break</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  t-&gt;state = RUNNABLE;</span><br><span class="line">  <span class="comment">// YOUR CODE HERE</span></span><br><span class="line">  t-&gt;t_context.ra = (uint64)func;</span><br><span class="line">  t-&gt;t_context.sp = (uint64)t-&gt;<span class="built_in">stack</span> + STACK_SIZE;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h3 id="调度">调度<a class="anchor" href="#调度"></a></h3>
+<p>即切换线程，我们需要保存当前线程的通用寄存器，并将下一个要运行的线程的通用寄存器值恢复到硬件上，如同进程切换那样：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"># uthread_switch.S</span><br><span class="line"></span><br><span class="line">thread_switch:</span><br><span class="line">	/* YOUR CODE HERE */</span><br><span class="line">	sd ra, 0(a0)</span><br><span class="line">	sd sp, 8(a0)</span><br><span class="line">	sd s0, 16(a0)</span><br><span class="line">	sd s1, 24(a0)</span><br><span class="line">	sd s2, 32(a0)</span><br><span class="line">	sd s3, 40(a0)</span><br><span class="line">	sd s4, 48(a0)</span><br><span class="line">	sd s5, 56(a0)</span><br><span class="line">	sd s6, 64(a0)</span><br><span class="line">	sd s7, 72(a0)</span><br><span class="line">	sd s8, 80(a0)</span><br><span class="line">	sd s9, 88(a0)</span><br><span class="line">	sd s10, 96(a0)</span><br><span class="line">	sd s11, 104(a0)</span><br><span class="line"></span><br><span class="line">	ld ra, 0(a1)</span><br><span class="line">	ld sp, 8(a1)</span><br><span class="line">	ld s0, 16(a1)</span><br><span class="line">	ld s1, 24(a1)</span><br><span class="line">	ld s2, 32(a1)</span><br><span class="line">	ld s3, 40(a1)</span><br><span class="line">	ld s4, 48(a1)</span><br><span class="line">	ld s5, 56(a1)</span><br><span class="line">	ld s6, 64(a1)</span><br><span class="line">	ld s7, 72(a1)</span><br><span class="line">	ld s8, 80(a1)</span><br><span class="line">	ld s9, 88(a1)</span><br><span class="line">	ld s10, 96(a1)</span><br><span class="line">	ld s11, 104(a1)</span><br><span class="line"></span><br><span class="line">	ret    /* return to ra */</span><br></pre></td></tr></table></figure>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// uthread.c</span></span><br><span class="line"></span><br><span class="line"><span class="type">void</span> </span><br><span class="line"><span class="title function_">thread_schedule</span><span class="params">(<span class="type">void</span>)</span></span><br><span class="line">&#123;</span><br><span class="line">  ...</span><br><span class="line">  <span class="keyword">if</span> (current_thread != next_thread) &#123;         <span class="comment">/* switch threads?  */</span></span><br><span class="line">    next_thread-&gt;state = RUNNING;</span><br><span class="line">    t = current_thread;</span><br><span class="line">    current_thread = next_thread;</span><br><span class="line">    <span class="comment">/* YOUR CODE HERE</span></span><br><span class="line"><span class="comment">     * Invoke thread_switch to switch from t to next_thread:</span></span><br><span class="line"><span class="comment">     * thread_switch(??, ??);</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    thread_switch((uint64)&amp;t-&gt;t_context, (uint64)&amp;next_thread-&gt;t_context);</span><br><span class="line">  &#125; <span class="keyword">else</span></span><br><span class="line">    next_thread = <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="Using-threads">Using threads<a class="anchor" href="#Using-threads"></a></h2>
+<p>如果只是简单在get和put操作中加上锁，那么这样虽然能够保证对共享资源的互斥访问，当时无法达到双线程所带来的性能提升。</p>
+<p>应该实现的是两个线程，你放你的，我放我的，现在有5个entry table，我们可以不止使用一把锁来锁住5个table，而是使用5把锁，哪一个table需要互斥操作时只锁它一个就行，这样就细化了锁的粒度。</p>
+<p>这里需要把table改为一个数组，实现代码比较简单，这里就不放了。</p>
+<h2 id="Barrier">Barrier<a class="anchor" href="#Barrier"></a></h2>
+<p>实验的要求是每来一个线程运行到barrier就阻塞，直到所有线程都运行到了barrier才释放。这里是想让我们熟悉pthread库中关于锁和条件变量的使用，更加了解线程的同步关系。</p>
+<p>我们可以给全局的bstate中添加一个变量<code>count</code>用于记录当前轮次有多少个线程已经到达了barrier，只要有线程到达，执行<code>++bstate.count</code>，需要注意的是，这个全局变量会被多个线程使用，故需要使用锁来保证互斥访问。</p>
+<p>接下来判断count的值是否等于线程的数量，如果不相等，就wait阻塞当前线程，并释放锁；否则，说明一轮结束，将count置0，轮次+1，并使用broadcaset唤醒被阻塞的线程。</p>
+<h3 id="尝试1">尝试1<a class="anchor" href="#尝试1"></a></h3>
+<p>按刚刚说的思路，如果这么写代码，将会造成系统程序死锁。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">static</span> <span class="type">void</span> </span><br><span class="line"><span class="title function_">barrier</span><span class="params">()</span></span><br><span class="line">&#123;</span><br><span class="line">  pthread_mutex_lock(&amp;bstate.barrier_mutex);</span><br><span class="line">  ++bstate.count;</span><br><span class="line">  pthread_mutex_unlock(&amp;bstate.barrier_mutex);</span><br><span class="line">  <span class="keyword">if</span> (bstate.count == bstate.nthread) &#123;</span><br><span class="line">    bstate.count = <span class="number">0</span>;</span><br><span class="line">    ++bstate.round;</span><br><span class="line">    pthread_cond_broadcast(&amp;bstate.barrier_cond);</span><br><span class="line">    <span class="keyword">return</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  pthread_cond_wait(&amp;bstate.barrier_cond, &amp;bstate.barrier_mutex);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><img src="../../images/Pasted%20image%2020240715214134.png" alt=""></p>
+<p>当条件变量 <code>cond</code> 变为真且该线程被唤醒时，<code>pthread_cond_wait</code> <strong>会自动重新获取互斥锁</strong> <code>mutex</code>，然后返回。</p>
+<ul>
+<li>线程1第0轮获得锁，++count后释放锁，然后在wait处阻塞，并释放锁</li>
+<li>接着线程2在第0轮获得锁，++count后进入if判断，使用broadcast唤醒线程1</li>
+<li>线程1被唤醒，并自动获取锁</li>
+<li>线程2进入第1轮，尝试获得锁，但是此时线程1正持有锁，故线程2阻塞</li>
+<li>线程1进入第1轮，但之前自己已经获得锁了，此时又请求锁，故阻塞</li>
+<li>两个线程都阻塞，程序出现死锁</li>
+</ul>
+<h3 id="尝试2">尝试2<a class="anchor" href="#尝试2"></a></h3>
+<p>既然<code>pthread_cond_wait</code>会自动重新获取互斥锁，那就在调用之后使用<code>pthread_mutex_unlock</code>释放锁不久好了吗？</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">static</span> <span class="type">void</span> </span><br><span class="line"><span class="title function_">barrier</span><span class="params">()</span></span><br><span class="line">&#123;</span><br><span class="line">  pthread_mutex_lock(&amp;bstate.barrier_mutex);</span><br><span class="line">  <span class="keyword">if</span> (++bstate.count == bstate.nthread) &#123;</span><br><span class="line">    bstate.count = <span class="number">0</span>;</span><br><span class="line">    ++bstate.round;</span><br><span class="line">    pthread_cond_broadcast(&amp;bstate.barrier_cond);</span><br><span class="line">    <span class="keyword">return</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  pthread_cond_wait(&amp;bstate.barrier_cond, &amp;bstate.barrier_mutex);</span><br><span class="line">  pthread_mutex_unlock(&amp;bstate.barrier_mutex);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><img src="../../images/Pasted%20image%2020240715214649.png" alt=""></p>
+<p>这样还是不行：原因是<code>pthread_cond_broadcast</code><strong>不会释放锁</strong>。</p>
+<ul>
+<li>在第0轮线程1拿到锁后++count后进入wait状态，此时线程1阻塞并释放锁</li>
+<li>在第0轮线程2拿到锁，执行++count操作后使用broadcast尝试唤醒线程1，但是线程2并没有释放锁</li>
+<li>线程1抢到CPU，但是拿不到锁，继续阻塞</li>
+<li>线程2抢到了CPU的执行权进入第1轮，企图获得锁，但是之前自己没有释放锁，也阻塞</li>
+<li>两个线程都阻塞，程序出现死锁</li>
+</ul>
+<h3 id="正确做法">正确做法<a class="anchor" href="#正确做法"></a></h3>
+<p>所以正确的做法是在broadcast后也使用unlock释放锁：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">static</span> <span class="type">void</span> </span><br><span class="line"><span class="title function_">barrier</span><span class="params">()</span></span><br><span class="line">&#123;</span><br><span class="line">  pthread_mutex_lock(&amp;bstate.barrier_mutex);</span><br><span class="line">  <span class="keyword">if</span> (++bstate.count == bstate.nthread) &#123;</span><br><span class="line">    bstate.count = <span class="number">0</span>;</span><br><span class="line">    ++bstate.round;</span><br><span class="line">    pthread_cond_broadcast(&amp;bstate.barrier_cond);</span><br><span class="line">    pthread_mutex_unlock(&amp;bstate.barrier_mutex);</span><br><span class="line">    <span class="keyword">return</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  pthread_cond_wait(&amp;bstate.barrier_cond, &amp;bstate.barrier_mutex);</span><br><span class="line">  pthread_mutex_unlock(&amp;bstate.barrier_mutex);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="代码实现详情">代码实现详情<a class="anchor" href="#代码实现详情"></a></h2>
+<p>请见Github：<a target="_blank" rel="noopener" href="https://github.com/kerolt/xv6-labs-2023/tree/thread">https://github.com/kerolt/xv6-labs-2023/tree/thread</a></p>
+<h2 id="Reference">Reference<a class="anchor" href="#Reference"></a></h2>
+<ol>
+<li>https://www.cnblogs.com/looking-for-zihuatanejo/p/17682582.html</li>
+<li>https://mit-public-courses-cn-translatio.gitbook.io/mit6-s081/lec11-thread-switching-robert/11.7-xv6-switch-function</li>
+<li>https://www.bilibili.com/video/BV1bZ421U75W/?spm_id_from=333.999.0.0&amp;vd_source=e7bb0cfb7224c8d6671fa62c0e80c832</li>
+<li>https://pdos.csail.mit.edu/6.S081/2023/labs/thread.html</li>
+</ol>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          
+
+<div class="post-copyright">
+<ul>
+  <li class="post-copyright-author">
+      <strong>本文作者： </strong>Kerolt
+  </li>
+  <li class="post-copyright-link">
+      <strong>本文链接：</strong>
+      <a href="http://kerolt.github.io/posts/cb4e63bc/" title="【MIT6.S081】Lab6 multithreading">http://kerolt.github.io/posts/cb4e63bc/</a>
+  </li>
+  <li class="post-copyright-license">
+      <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/MIT6-S081/" rel="tag"># MIT6-S081</a>
+              <a href="/tags/OS/" rel="tag"># OS</a>
+              <a href="/tags/xv6/" rel="tag"># xv6</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/posts/4ece7d1a/" rel="prev" title="【MIT6.S081】Lab5 copy-on-write fork">
+                  <i class="fa fa-angle-left"></i> 【MIT6.S081】Lab5 copy-on-write fork
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/posts/21251a7/" rel="next" title="259. 关闭分部的可行集合数目">
+                  259. 关闭分部的可行集合数目 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2024</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Kerolt</span>
+  </div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+    <span title="站点总字数">21k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">1:18</span>
+  </span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

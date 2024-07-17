@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width">
-<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.1.1">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.3.0">
 
   <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
   <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
@@ -128,7 +128,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">24</span>
+          <span class="site-state-item-count">26</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -139,7 +139,7 @@
       </div>
       <div class="site-state-item site-state-tags">
           <a href="/tags/">
-        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-count">11</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -249,7 +249,7 @@
 <p>其实<code>move</code>的实现并没有很复杂，粗略一点的理解就是将一个左值强制转换为右值。</p>
 <p>std::move 并不会真正地移动对象，真正的移动操作是在移动构造函数、移动赋值函数等完成的，std::move 只是将参数转换为右值引用而已。</p>
 <p>写一个简单的例子如下：</p>
-<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;fmt/core.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;string&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;utility&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">A</span> &#123;</span><br><span class="line">    <span class="built_in">A</span>(std::string str)</span><br><span class="line">        : <span class="built_in">data</span>(str) &#123;&#125;</span><br><span class="line">    <span class="built_in">A</span>(<span class="type">const</span> A&amp;) &#123;</span><br><span class="line">        <span class="built_in">puts</span>(<span class="string">&quot;copy&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">A</span>(A&amp;&amp;) &#123;</span><br><span class="line">        <span class="built_in">puts</span>(<span class="string">&quot;move&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    std::string data = <span class="string">&quot;default&quot;</span>;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="function">A <span class="title">a</span><span class="params">(<span class="string">&quot;hello&quot;</span>)</span></span>;</span><br><span class="line">    <span class="function">A <span class="title">a2</span><span class="params">(std::move(a))</span></span>;</span><br><span class="line">    fmt::<span class="built_in">print</span>(<span class="string">&quot;a: &#123;&#125;, a2: &#123;&#125;\n&quot;</span>, a.data, a2.data);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;fmt/core.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;string&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;utility&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">A</span> &#123;</span><br><span class="line">    <span class="built_in">A</span>(std::string str)</span><br><span class="line">        : <span class="built_in">data</span>(str) &#123;&#125;</span><br><span class="line">    <span class="built_in">A</span>(<span class="type">const</span> A&amp;) &#123;</span><br><span class="line">        <span class="built_in">puts</span>(<span class="string">&quot;copy&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">A</span>(A&amp;&amp;) &#123;</span><br><span class="line">        <span class="built_in">puts</span>(<span class="string">&quot;move&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    std::string data = <span class="string">&quot;default&quot;</span>;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="function">A <span class="title">a</span><span class="params">(<span class="string">&quot;hello&quot;</span>)</span></span>;</span><br><span class="line">    <span class="function">A <span class="title">a2</span><span class="params">(std::move(a))</span></span>;</span><br><span class="line">    fmt::<span class="built_in">print</span>(<span class="string">&quot;a: &#123;&#125;, a2: &#123;&#125;\n&quot;</span>, a.data, a<span class="number">2.</span>data);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>看样子我们使用std::move后a2的data数据应该为“hello”，但是运行结果为</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">move</span><br><span class="line">a: hello, a2: default</span><br></pre></td></tr></table></figure>
 <p>虽然使用move匹配到了A的移动构造函数，但是在上文提到过，std::move仅仅只是一个强制转换，并没有实现真正的移动！但要是我们不写A中的移动构造函数或是将其设置成<code>default</code>：</p>
@@ -329,13 +329,13 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-line"></i>
     </span>
-    <span title="站点总字数">18k</span>
+    <span title="站点总字数">21k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">1:07</span>
+    <span title="站点阅读时长">1:18</span>
   </span>
 </div>
   <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动

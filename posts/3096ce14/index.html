@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width">
-<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.1.1">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.3.0">
 
   <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
   <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
@@ -130,7 +130,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">24</span>
+          <span class="site-state-item-count">26</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -141,7 +141,7 @@
       </div>
       <div class="site-state-item site-state-tags">
           <a href="/tags/">
-        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-count">11</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -254,9 +254,9 @@
 </ol>
 <span id="more"></span>
 <p>以题 <a target="_blank" rel="noopener" href="https://leetcode.cn/problems/top-k-frequent-elements/">347. 前 K 个高频元素</a> 为例，我们要建立一个小根堆，那么代码如下：</p>
-<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 方法一</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">using</span> PII = pair&lt;<span class="type">int</span>, <span class="type">int</span>&gt;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 比较类，重载了括号运算符</span></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">Comp</span> &#123;</span><br><span class="line">    <span class="function"><span class="type">bool</span> <span class="title">operator</span><span class="params">()</span><span class="params">(PII&amp; p1, PII&amp; p2)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> p1.second &gt; p2.second;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">priority_queue&lt;PII, vector&lt;PII&gt;, Comp&gt; pq;</span><br></pre></td></tr></table></figure>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 方法一</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">using</span> PII = pair&lt;<span class="type">int</span>, <span class="type">int</span>&gt;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 比较类，重载了括号运算符</span></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">Comp</span> &#123;</span><br><span class="line">    <span class="function"><span class="type">bool</span> <span class="title">operator</span><span class="params">()</span><span class="params">(PII&amp; p1, PII&amp; p2)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> p<span class="number">1.</span>second &gt; p<span class="number">2.</span>second;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">priority_queue&lt;PII, vector&lt;PII&gt;, Comp&gt; pq;</span><br></pre></td></tr></table></figure>
 <p>当然，另一种方法就是使用lambda表达式，如下：</p>
-<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 方法二</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">using</span> PII = pair&lt;<span class="type">int</span>, <span class="type">int</span>&gt;;</span><br><span class="line"><span class="keyword">auto</span> comp = [](PII&amp; p1, PII&amp; p2) &#123;</span><br><span class="line">    <span class="keyword">return</span> p1.second &gt; p2.second;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="comment">// 注意这里需要使用decltype</span></span><br><span class="line">priority_queue&lt;PII, vector&lt;PII&gt;, <span class="keyword">decltype</span>(comp)&gt; pq;</span><br></pre></td></tr></table></figure>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 方法二</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">using</span> PII = pair&lt;<span class="type">int</span>, <span class="type">int</span>&gt;;</span><br><span class="line"><span class="keyword">auto</span> comp = [](PII&amp; p1, PII&amp; p2) &#123;</span><br><span class="line">    <span class="keyword">return</span> p<span class="number">1.</span>second &gt; p<span class="number">2.</span>second;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="comment">// 注意这里需要使用decltype</span></span><br><span class="line">priority_queue&lt;PII, vector&lt;PII&gt;, <span class="keyword">decltype</span>(comp)&gt; pq;</span><br></pre></td></tr></table></figure>
 <p>但值得注意的是，方法二需要在<strong>C++20</strong>下才可使用。这是因为priority_queue的第三个模板形参需要的二元谓词要求<a target="_blank" rel="noopener" href="https://zh.cppreference.com/w/cpp/named_req/CopyConstructible">可复制构造</a>。</p>
 <p>lambda表达式即构造闭包（能够捕获作用域中的变量的无名函数对象）。而在C<ins>20之前，闭包类型非可默认构造，闭包类型没有默认构造函数。C</ins>20及之后，如果<strong>没有指定捕获</strong>，那么闭包类型拥有预置的默认构造函数。</p>
 <p><img src="/images/2024-01-22-16-14.png" alt=""></p>
@@ -332,13 +332,13 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-line"></i>
     </span>
-    <span title="站点总字数">18k</span>
+    <span title="站点总字数">21k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">1:07</span>
+    <span title="站点阅读时长">1:18</span>
   </span>
 </div>
   <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动

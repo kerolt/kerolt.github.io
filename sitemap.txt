@@ -1,3 +1,5 @@
+http://kerolt.github.io/posts/21251a7/
+http://kerolt.github.io/posts/cb4e63bc/
 http://kerolt.github.io/posts/4ece7d1a/
 http://kerolt.github.io/posts/7450901e/
 http://kerolt.github.io/posts/657551f/
@@ -29,9 +31,13 @@ http://kerolt.github.io/
 http://kerolt.github.io/tags/cpp/
 http://kerolt.github.io/tags/MIT6-S081/
 http://kerolt.github.io/tags/OS/
+http://kerolt.github.io/tags/xv6/
 http://kerolt.github.io/tags/vue/
 http://kerolt.github.io/tags/uniapp/
 http://kerolt.github.io/tags/SpringBoot/
+http://kerolt.github.io/tags/%E4%BD%8D%E8%BF%90%E7%AE%97/
+http://kerolt.github.io/tags/%E5%9B%BE%E8%AE%BA/
+http://kerolt.github.io/tags/Floyd%E7%AE%97%E6%B3%95/
 http://kerolt.github.io/tags/cmake/
 http://kerolt.github.io/categories/C/
 http://kerolt.github.io/categories/Linux/

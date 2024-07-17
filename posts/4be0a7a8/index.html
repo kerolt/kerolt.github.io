@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width">
-<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.1.1">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.3.0">
 
   <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
   <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
@@ -127,7 +127,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">24</span>
+          <span class="site-state-item-count">26</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -138,7 +138,7 @@
       </div>
       <div class="site-state-item site-state-tags">
           <a href="/tags/">
-        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-count">11</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -249,15 +249,15 @@
 </blockquote>
 <p>搜了一下发现是原因为<strong>VMware无法访问其必要的内核模块vmmon</strong>：</p>
 <p>我首先是尝试了手动启用VMware模块，然后执行命令安装缺失的模块</p>
-<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">sudo /etc/init.d/vmware start</span><br><span class="line"></span><br><span class="line">sudo vmware-modconfig --console --install-all</span><br></pre></td></tr></table></figure>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> /etc/init.d/vmware start</span><br><span class="line"></span><br><span class="line"><span class="built_in">sudo</span> vmware-modconfig --console --install-all</span><br></pre></td></tr></table></figure>
 <p>但是还是无效，在查看别人的<a target="_blank" rel="noopener" href="https://segmentfault.com/a/1190000042268631">博客</a>后，我手动去编译安装缺失的<code>vmmon</code>和<code>vmnet</code>模块：</p>
-<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">git <span class="built_in">clone</span> https://github.com/mkubecek/vmware-host-modules</span><br><span class="line"><span class="built_in">cd</span> vmware-host-modules</span><br><span class="line">git checkout workstation-17.5.1</span><br><span class="line"></span><br><span class="line">sudo make</span><br><span class="line">sudo make install</span><br></pre></td></tr></table></figure>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">git <span class="built_in">clone</span> https://github.com/mkubecek/vmware-host-modules</span><br><span class="line"><span class="built_in">cd</span> vmware-host-modules</span><br><span class="line">git checkout workstation-17.5.1</span><br><span class="line"></span><br><span class="line"><span class="built_in">sudo</span> make</span><br><span class="line"><span class="built_in">sudo</span> make install</span><br></pre></td></tr></table></figure>
 <p>执行完成后，这两个模块将会安装到<code>/lib/modules/6.1.0-18-amd64/misc</code>下</p>
 <figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">kerolt  /usr/lib/modules/6.1.0-18-amd64/misc     </span><br><span class="line">$ <span class="built_in">ls</span> -l  </span><br><span class="line">总计 7164  </span><br><span class="line">-rw-r--r-- 1 root root 3996784  5月27日 18:48 vmmon.ko  </span><br><span class="line">-rw-r--r-- 1 root root 3337384  5月27日 18:48 vmnet.ko</span><br></pre></td></tr></table></figure>
 <p>本以为到现在已经结束，结果再次启动VMware，还是不信，于是我想着可能是内核模块没有加载，采用如下命令查看：</p>
 <figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">lsmod | grep vmmon</span><br></pre></td></tr></table></figure>
 <p>不出意外，没有输出，手动加载模块：</p>
-<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo modprobe vmmon</span><br><span class="line"><span class="comment"># modprobe: ERROR: could not insert &#x27;vmmon&#x27;: Key was rejected by service</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> modprobe vmmon</span><br><span class="line"><span class="comment"># modprobe: ERROR: could not insert &#x27;vmmon&#x27;: Key was rejected by service</span></span><br></pre></td></tr></table></figure>
 <p>根据该错误询问ChatGPT，其给出的答复为：<strong>启用了安全启动（Secure Boot），导致系统拒绝加载未签名或未正确签名的内核模块</strong>。</p>
 <p>重启计算机，进入 BIOS/UEFI 设置，将<code>Secure Boot</code> 设置为 <code>Disabled</code>，之后再次启动VMware时就没有问题了～</p>
 
@@ -328,13 +328,13 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-line"></i>
     </span>
-    <span title="站点总字数">18k</span>
+    <span title="站点总字数">21k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">1:07</span>
+    <span title="站点阅读时长">1:18</span>
   </span>
 </div>
   <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
