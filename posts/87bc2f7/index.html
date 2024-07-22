@@ -21,12 +21,12 @@
 
 <script class="next-config" data-name="main" type="application/json">{"hostname":"kerolt.github.io","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.19.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":true,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
 
-    <meta name="description" content="在使用allocproc创建进程时，会为创建的proc设置ra的值，初始会设置为forkret函数的地址。 12345678910static struct proc*allocproc(void)&#123;  ...  memset(&amp;p-&gt;context, 0, sizeof(p-&gt;context));  p-&gt;context.ra &#x3D; (uint64)forkre">
+    <meta name="description" content="在做thread lab的时候，阅读xv6的源码后对于进程调度的实现有了大致的了解，但是其中锁的获取与释放顺序让我困惑了好久：在yield函数中，不是先获取了进程p的锁吗，那么之后在调度器中又获取p的锁，那不是会死锁吗？在调度器内使用swtch发生进程切换后，又会跳转到哪里？ 而在我观摩大佬的一些博客和视频后，发现我之前的想法有很大的问题，归根结底是没有弄明白xv6何时发生了切换，切换后应该从哪里">
 <meta property="og:type" content="article">
-<meta property="og:title" content="xv6进程调度">
-<meta property="og:url" content="http://kerolt.github.io/posts/26f22719/index.html">
+<meta property="og:title" content="【MIT6.S081】xv6进程调度分析">
+<meta property="og:url" content="http://kerolt.github.io/posts/87bc2f7/index.html">
 <meta property="og:site_name" content="Kerolt&#39;s Blog">
-<meta property="og:description" content="在使用allocproc创建进程时，会为创建的proc设置ra的值，初始会设置为forkret函数的地址。 12345678910static struct proc*allocproc(void)&#123;  ...  memset(&amp;p-&gt;context, 0, sizeof(p-&gt;context));  p-&gt;context.ra &#x3D; (uint64)forkre">
+<meta property="og:description" content="在做thread lab的时候，阅读xv6的源码后对于进程调度的实现有了大致的了解，但是其中锁的获取与释放顺序让我困惑了好久：在yield函数中，不是先获取了进程p的锁吗，那么之后在调度器中又获取p的锁，那不是会死锁吗？在调度器内使用swtch发生进程切换后，又会跳转到哪里？ 而在我观摩大佬的一些博客和视频后，发现我之前的想法有很大的问题，归根结底是没有弄明白xv6何时发生了切换，切换后应该从哪里">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="http://kerolt.github.io/images/Pasted%20image%2020240722165522.png">
 <meta property="og:image" content="http://kerolt.github.io/images/Pasted%20image%2020240722165543.png">
@@ -34,20 +34,20 @@
 <meta property="article:modified_time" content="2024-07-22T00:00:00.000Z">
 <meta property="article:author" content="Kerolt">
 <meta property="article:tag" content="MIT6-S081">
-<meta property="article:tag" content="xv6">
 <meta property="article:tag" content="OS">
+<meta property="article:tag" content="xv6">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="http://kerolt.github.io/images/Pasted%20image%2020240722165522.png">
 
 
-<link rel="canonical" href="http://kerolt.github.io/posts/26f22719/">
+<link rel="canonical" href="http://kerolt.github.io/posts/87bc2f7/">
 
 
 
-<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://kerolt.github.io/posts/26f22719/","path":"posts/26f22719/","title":"xv6进程调度"}</script>
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://kerolt.github.io/posts/87bc2f7/","path":"posts/87bc2f7/","title":"【MIT6.S081】xv6进程调度分析"}</script>
 
 <script class="next-config" data-name="calendar" type="application/json">""</script>
-<title>xv6进程调度 | Kerolt's Blog</title>
+<title>【MIT6.S081】xv6进程调度分析 | Kerolt's Blog</title>
   
 
 
@@ -182,7 +182,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://kerolt.github.io/posts/26f22719/">
+    <link itemprop="mainEntityOfPage" href="http://kerolt.github.io/posts/87bc2f7/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="https://picx.zhimg.com/v2-f14895864d68f2db5f8e650481075209_xll.jpg">
@@ -195,12 +195,12 @@
     </span>
 
     <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="xv6进程调度 | Kerolt's Blog">
+      <meta itemprop="name" content="【MIT6.S081】xv6进程调度分析 | Kerolt's Blog">
       <meta itemprop="description" content="">
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          xv6进程调度
+          【MIT6.S081】xv6进程调度分析
         </h1>
 
         <div class="post-meta-container">
@@ -230,14 +230,14 @@
         <i class="far fa-file-word"></i>
       </span>
       <span class="post-meta-item-text">本文字数：</span>
-      <span>940</span>
+      <span>1.1k</span>
     </span>
     <span class="post-meta-item" title="阅读时长">
       <span class="post-meta-item-icon">
         <i class="far fa-clock"></i>
       </span>
       <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>3 分钟</span>
+      <span>4 分钟</span>
     </span>
 </div>
 
@@ -247,7 +247,10 @@
     
     
     
-    <div class="post-body" itemprop="articleBody"><p>在使用allocproc创建进程时，会为创建的proc设置ra的值，初始会设置为forkret函数的地址。</p>
+    <div class="post-body" itemprop="articleBody"><p>在做thread lab的时候，阅读xv6的源码后对于进程调度的实现有了大致的了解，但是其中锁的获取与释放顺序让我困惑了好久：在yield函数中，不是先获取了进程p的锁吗，那么之后在调度器中又获取p的锁，那不是会死锁吗？在调度器内使用swtch发生进程切换后，又会跳转到哪里？</p>
+<p>而在我观摩大佬的一些博客和视频后，发现我之前的想法有很大的问题，归根结底是没有弄明白xv6何时发生了切换，切换后应该从哪里开始运行。这篇笔记就是对于分析xv6进程调度的总结。</p>
+<span id="more"></span>
+<p>在使用allocproc创建进程时，会为创建的proc设置ra的值，初始会设置为forkret函数的地址。</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">static</span> <span class="keyword">struct</span> proc*</span><br><span class="line"><span class="title function_">allocproc</span><span class="params">(<span class="type">void</span>)</span></span><br><span class="line">&#123;</span><br><span class="line">  ...</span><br><span class="line">  <span class="built_in">memset</span>(&amp;p-&gt;context, <span class="number">0</span>, <span class="keyword">sizeof</span>(p-&gt;context));</span><br><span class="line">  p-&gt;context.ra = (uint64)forkret;</span><br><span class="line">  p-&gt;context.sp = p-&gt;kstack + PGSIZE;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> p;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>在调度器scheduler开始运行后，遍历进程表，先对遍历到的当前进程p上锁，如果这个进程是可运行的（RUNNABLE），则执行swtch函数切换上下文，保存当前cpu的上下文，同时加载p的上下文到寄存器中。</p>
 <p>执行完swtch后会跳转到ra寄存器所保存的地址，也就是这个进程初始设置的forkret的位置，这个函数中会释放在scheduler中对进程p上的锁。如果这个函数是第一次执行，那么会初始化文件系统。之后执行usertrapret函数。</p>
@@ -285,7 +288,7 @@
   </li>
   <li class="post-copyright-link">
       <strong>本文链接：</strong>
-      <a href="http://kerolt.github.io/posts/26f22719/" title="xv6进程调度">http://kerolt.github.io/posts/26f22719/</a>
+      <a href="http://kerolt.github.io/posts/87bc2f7/" title="【MIT6.S081】xv6进程调度分析">http://kerolt.github.io/posts/87bc2f7/</a>
   </li>
   <li class="post-copyright-license">
       <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
@@ -295,8 +298,8 @@
 
           <div class="post-tags">
               <a href="/tags/MIT6-S081/" rel="tag"># MIT6-S081</a>
-              <a href="/tags/xv6/" rel="tag"># xv6</a>
               <a href="/tags/OS/" rel="tag"># OS</a>
+              <a href="/tags/xv6/" rel="tag"># xv6</a>
           </div>
 
         
@@ -341,13 +344,13 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-line"></i>
     </span>
-    <span title="站点总字数">22k</span>
+    <span title="站点总字数">23k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">1:21</span>
+    <span title="站点阅读时长">1:22</span>
   </span>
 </div>
   <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动

@@ -11,7 +11,7 @@
   </url>
   
   <url>
-    <loc>http://kerolt.github.io/posts/26f22719/</loc>
+    <loc>http://kerolt.github.io/posts/87bc2f7/</loc>
     
     <lastmod>2024-07-22</lastmod>
     
@@ -295,14 +295,14 @@
   </url>
   
   <url>
-    <loc>http://kerolt.github.io/tags/xv6/</loc>
+    <loc>http://kerolt.github.io/tags/OS/</loc>
     <lastmod>2024-07-22</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
-    <loc>http://kerolt.github.io/tags/OS/</loc>
+    <loc>http://kerolt.github.io/tags/xv6/</loc>
     <lastmod>2024-07-22</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
