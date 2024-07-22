@@ -2,15 +2,6 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
-    <loc>http://kerolt.github.io/posts/21251a7/</loc>
-    
-    <lastmod>2024-07-22</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
     <loc>http://kerolt.github.io/posts/87bc2f7/</loc>
     
     <lastmod>2024-07-22</lastmod>
@@ -21,6 +12,15 @@
   
   <url>
     <loc>http://kerolt.github.io/posts/cb4e63bc/</loc>
+    
+    <lastmod>2024-07-17</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>http://kerolt.github.io/posts/21251a7/</loc>
     
     <lastmod>2024-07-17</lastmod>
     
