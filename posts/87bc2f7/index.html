@@ -25,12 +25,12 @@
     <meta name="description" content="在做thread lab的时候，阅读xv6的源码后对于进程调度的实现有了大致的了解，但是其中锁的获取与释放顺序让我困惑了好久：在yield函数中，不是先获取了进程p的锁吗，那么之后在调度器中又获取p的锁，那不是会死锁吗？在调度器内使用swtch发生进程切换后，又会跳转到哪里？ 而在我观摩大佬的一些博客和视频后，发现我之前的想法有很大的问题，归根结底是没有弄明白xv6何时发生了切换，切换后应该从哪里">
 <meta property="og:type" content="article">
 <meta property="og:title" content="【MIT6.S081】xv6进程调度分析">
-<meta property="og:url" content="http://kerolt.github.io/posts/87bc2f7/index.html">
+<meta property="og:url" content="https://kerolt.github.io/posts/87bc2f7/index.html">
 <meta property="og:site_name" content="Kerolt&#39;s Blog">
 <meta property="og:description" content="在做thread lab的时候，阅读xv6的源码后对于进程调度的实现有了大致的了解，但是其中锁的获取与释放顺序让我困惑了好久：在yield函数中，不是先获取了进程p的锁吗，那么之后在调度器中又获取p的锁，那不是会死锁吗？在调度器内使用swtch发生进程切换后，又会跳转到哪里？ 而在我观摩大佬的一些博客和视频后，发现我之前的想法有很大的问题，归根结底是没有弄明白xv6何时发生了切换，切换后应该从哪里">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="http://kerolt.github.io/images/Pasted%20image%2020240722165522.png">
-<meta property="og:image" content="http://kerolt.github.io/images/Pasted%20image%2020240722165543.png">
+<meta property="og:image" content="https://kerolt.github.io/images/Pasted%20image%2020240722165522.png">
+<meta property="og:image" content="https://kerolt.github.io/images/Pasted%20image%2020240722165543.png">
 <meta property="article:published_time" content="2024-07-22T00:00:00.000Z">
 <meta property="article:modified_time" content="2024-07-22T00:00:00.000Z">
 <meta property="article:author" content="Kerolt">
@@ -38,14 +38,14 @@
 <meta property="article:tag" content="OS">
 <meta property="article:tag" content="xv6">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="http://kerolt.github.io/images/Pasted%20image%2020240722165522.png">
+<meta name="twitter:image" content="https://kerolt.github.io/images/Pasted%20image%2020240722165522.png">
 
 
-<link rel="canonical" href="http://kerolt.github.io/posts/87bc2f7/">
+<link rel="canonical" href="https://kerolt.github.io/posts/87bc2f7/">
 
 
 
-<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://kerolt.github.io/posts/87bc2f7/","path":"posts/87bc2f7/","title":"【MIT6.S081】xv6进程调度分析"}</script>
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://kerolt.github.io/posts/87bc2f7/","path":"posts/87bc2f7/","title":"【MIT6.S081】xv6进程调度分析"}</script>
 
 <script class="next-config" data-name="calendar" type="application/json">""</script>
 <title>【MIT6.S081】xv6进程调度分析 | Kerolt's Blog</title>
@@ -128,7 +128,7 @@
     <img class="site-author-image" itemprop="image" alt="Kerolt"
       src="https://pic1.zhimg.com/v2-829cb240844085fa008301e0ba981090_l.jpg">
   <p class="site-author-name" itemprop="name">Kerolt</p>
-  <div class="site-description" itemprop="description"></div>
+  <div class="site-description" itemprop="description">Kerolt的个人博客</div>
 </div>
 <div class="site-state-wrap animated">
   <nav class="site-state">
@@ -183,7 +183,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://kerolt.github.io/posts/87bc2f7/">
+    <link itemprop="mainEntityOfPage" href="https://kerolt.github.io/posts/87bc2f7/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="https://pic1.zhimg.com/v2-829cb240844085fa008301e0ba981090_l.jpg">
@@ -192,7 +192,7 @@
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
       <meta itemprop="name" content="Kerolt's Blog">
-      <meta itemprop="description" content="">
+      <meta itemprop="description" content="Kerolt的个人博客">
     </span>
 
     <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
@@ -289,7 +289,7 @@
   </li>
   <li class="post-copyright-link">
       <strong>本文链接：</strong>
-      <a href="http://kerolt.github.io/posts/87bc2f7/" title="【MIT6.S081】xv6进程调度分析">http://kerolt.github.io/posts/87bc2f7/</a>
+      <a href="https://kerolt.github.io/posts/87bc2f7/" title="【MIT6.S081】xv6进程调度分析">https://kerolt.github.io/posts/87bc2f7/</a>
   </li>
   <li class="post-copyright-license">
       <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！

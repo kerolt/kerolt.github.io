@@ -25,11 +25,11 @@
     <meta name="description" content="前言 页表是最常用的机制，操作系统通过它为每个进程提供自己的私有地址空间和内存。页表决定了内存地址的含义，以及可以访问物理内存的哪些部分。在本文中，记录了Lab: page tables的前两个实验：加速系统调用和打印页表。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="【MIT6.S081】Lab3 page tables（上）">
-<meta property="og:url" content="http://kerolt.github.io/posts/9a98c9ba/index.html">
+<meta property="og:url" content="https://kerolt.github.io/posts/9a98c9ba/index.html">
 <meta property="og:site_name" content="Kerolt&#39;s Blog">
 <meta property="og:description" content="前言 页表是最常用的机制，操作系统通过它为每个进程提供自己的私有地址空间和内存。页表决定了内存地址的含义，以及可以访问物理内存的哪些部分。在本文中，记录了Lab: page tables的前两个实验：加速系统调用和打印页表。">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="http://kerolt.github.io/images/Pasted%20image%2020240623170452.png">
+<meta property="og:image" content="https://kerolt.github.io/images/Pasted%20image%2020240623170452.png">
 <meta property="article:published_time" content="2024-06-23T00:00:00.000Z">
 <meta property="article:modified_time" content="2024-06-23T00:00:00.000Z">
 <meta property="article:author" content="Kerolt">
@@ -37,14 +37,14 @@
 <meta property="article:tag" content="OS">
 <meta property="article:tag" content="xv6">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="http://kerolt.github.io/images/Pasted%20image%2020240623170452.png">
+<meta name="twitter:image" content="https://kerolt.github.io/images/Pasted%20image%2020240623170452.png">
 
 
-<link rel="canonical" href="http://kerolt.github.io/posts/9a98c9ba/">
+<link rel="canonical" href="https://kerolt.github.io/posts/9a98c9ba/">
 
 
 
-<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://kerolt.github.io/posts/9a98c9ba/","path":"posts/9a98c9ba/","title":"【MIT6.S081】Lab3 page tables（上）"}</script>
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://kerolt.github.io/posts/9a98c9ba/","path":"posts/9a98c9ba/","title":"【MIT6.S081】Lab3 page tables（上）"}</script>
 
 <script class="next-config" data-name="calendar" type="application/json">""</script>
 <title>【MIT6.S081】Lab3 page tables（上） | Kerolt's Blog</title>
@@ -128,7 +128,7 @@
     <img class="site-author-image" itemprop="image" alt="Kerolt"
       src="https://pic1.zhimg.com/v2-829cb240844085fa008301e0ba981090_l.jpg">
   <p class="site-author-name" itemprop="name">Kerolt</p>
-  <div class="site-description" itemprop="description"></div>
+  <div class="site-description" itemprop="description">Kerolt的个人博客</div>
 </div>
 <div class="site-state-wrap animated">
   <nav class="site-state">
@@ -183,7 +183,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://kerolt.github.io/posts/9a98c9ba/">
+    <link itemprop="mainEntityOfPage" href="https://kerolt.github.io/posts/9a98c9ba/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="https://pic1.zhimg.com/v2-829cb240844085fa008301e0ba981090_l.jpg">
@@ -192,7 +192,7 @@
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
       <meta itemprop="name" content="Kerolt's Blog">
-      <meta itemprop="description" content="">
+      <meta itemprop="description" content="Kerolt的个人博客">
     </span>
 
     <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
@@ -301,7 +301,7 @@
   </li>
   <li class="post-copyright-link">
       <strong>本文链接：</strong>
-      <a href="http://kerolt.github.io/posts/9a98c9ba/" title="【MIT6.S081】Lab3 page tables（上）">http://kerolt.github.io/posts/9a98c9ba/</a>
+      <a href="https://kerolt.github.io/posts/9a98c9ba/" title="【MIT6.S081】Lab3 page tables（上）">https://kerolt.github.io/posts/9a98c9ba/</a>
   </li>
   <li class="post-copyright-license">
       <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
