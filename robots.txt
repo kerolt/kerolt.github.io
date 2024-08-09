@@ -1,0 +1,13 @@
+User-agent: *
+Allow: /
+Allow: /p/
+Allow: /post/
+Allow: /archives/
+Allow: /categories/
+Allow: /tags/ 
+Allow: /resources/
+Disallow: /js/
+Disallow: /css/
+Disallow: /fonts/
+
+Sitemap: https://kerolt.github.io/sitemap.xml
