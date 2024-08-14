@@ -22,16 +22,16 @@
 
 <script class="next-config" data-name="main" type="application/json">{"hostname":"kerolt.github.io","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.19.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":true,"style":"flat"},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
 
-    <meta name="description" content="前言 首先，我们要清楚这个实验的目的是什么：  In this assignment you will add a system call tracing feature that may help you when debugging later labs. You’ll create a new trace system call that will control tracing. It s">
+    <meta name="description" content="前言 这个lab开始我们就正式进入了xv6的世界了，这一次我们可以了解到内核中系统调用的注册和运行原理，这可以说是之后lab的一个基石。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="【MIT6.S081】Lab2 trace">
 <meta property="og:url" content="https://kerolt.github.io/posts/18ad9abb/index.html">
 <meta property="og:site_name" content="Kerolt&#39;s Blog">
-<meta property="og:description" content="前言 首先，我们要清楚这个实验的目的是什么：  In this assignment you will add a system call tracing feature that may help you when debugging later labs. You’ll create a new trace system call that will control tracing. It s">
+<meta property="og:description" content="前言 这个lab开始我们就正式进入了xv6的世界了，这一次我们可以了解到内核中系统调用的注册和运行原理，这可以说是之后lab的一个基石。">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://kerolt.github.io/images/Pasted%20image%2020240510183553.png">
 <meta property="article:published_time" content="2024-05-10T00:00:00.000Z">
-<meta property="article:modified_time" content="2024-06-24T00:00:00.000Z">
+<meta property="article:modified_time" content="2024-08-14T00:00:00.000Z">
 <meta property="article:author" content="Kerolt">
 <meta property="article:tag" content="MIT6-S081">
 <meta property="article:tag" content="OS">
@@ -119,7 +119,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#mask%E6%98%AF%E4%BB%80%E4%B9%88%EF%BC%9F"><span class="nav-number">2.</span> <span class="nav-text">mask是什么？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%BF%9B%E7%A8%8B%E5%8F%8A%E5%85%B6%E5%AD%90%E8%BF%9B%E7%A8%8B%E5%A6%82%E4%BD%95%E8%8E%B7%E5%8F%96mask%EF%BC%9F"><span class="nav-number">3.</span> <span class="nav-text">进程及其子进程如何获取mask？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E8%B7%9F%E8%B8%AA%E7%B3%BB%E7%BB%9F%E8%B0%83%E7%94%A8%EF%BC%9F"><span class="nav-number">4.</span> <span class="nav-text">如何跟踪系统调用？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9C%80%E5%90%8E"><span class="nav-number">5.</span> <span class="nav-text">最后</span></a></li></ol></div>
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#trace"><span class="nav-number">2.</span> <span class="nav-text">trace</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#mask%E6%98%AF%E4%BB%80%E4%B9%88%EF%BC%9F"><span class="nav-number">2.1.</span> <span class="nav-text">mask是什么？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BF%9B%E7%A8%8B%E5%8F%8A%E5%85%B6%E5%AD%90%E8%BF%9B%E7%A8%8B%E5%A6%82%E4%BD%95%E8%8E%B7%E5%8F%96mask%EF%BC%9F"><span class="nav-number">2.2.</span> <span class="nav-text">进程及其子进程如何获取mask？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E8%B7%9F%E8%B8%AA%E7%B3%BB%E7%BB%9F%E8%B0%83%E7%94%A8%EF%BC%9F"><span class="nav-number">2.3.</span> <span class="nav-text">如何跟踪系统调用？</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#sysinfo"><span class="nav-number">3.</span> <span class="nav-text">sysinfo</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AE%A1%E7%AE%97%E5%8F%AF%E7%94%A8%E5%86%85%E5%AD%98%E5%AD%97%E8%8A%82%E6%95%B0"><span class="nav-number">3.1.</span> <span class="nav-text">计算可用内存字节数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AE%A1%E7%AE%97%E7%8A%B6%E6%80%81%E4%B8%BA%E6%9C%AA%E4%B8%BA%E4%BD%BF%E7%94%A8%E8%BF%9B%E7%A8%8B%E6%95%B0"><span class="nav-number">3.2.</span> <span class="nav-text">计算状态为未为使用进程数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%8C%E6%88%90%E7%B3%BB%E7%BB%9F%E8%B0%83%E7%94%A8"><span class="nav-number">3.3.</span> <span class="nav-text">完成系统调用</span></a></li></ol></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -219,7 +219,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-06-24 00:00:00" itemprop="dateModified" datetime="2024-06-24T00:00:00+00:00">2024-06-24</time>
+      <time title="修改时间：2024-08-14 00:00:00" itemprop="dateModified" datetime="2024-08-14T00:00:00+00:00">2024-08-14</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -238,14 +238,14 @@
         <i class="far fa-file-word"></i>
       </span>
       <span class="post-meta-item-text">本文字数：</span>
-      <span>2.6k</span>
+      <span>3.4k</span>
     </span>
     <span class="post-meta-item" title="阅读时长">
       <span class="post-meta-item-icon">
         <i class="far fa-clock"></i>
       </span>
       <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>9 分钟</span>
+      <span>12 分钟</span>
     </span>
 </div>
 
@@ -256,14 +256,16 @@
     
     
     <div class="post-body" itemprop="articleBody"><h2 id="前言">前言<a class="anchor" href="#前言"></a></h2>
+<p>这个lab开始我们就正式进入了xv6的世界了，这一次我们可以了解到内核中系统调用的注册和运行原理，这可以说是之后lab的一个基石。</p>
+<span id="more"></span>
+<h2 id="trace">trace<a class="anchor" href="#trace"></a></h2>
 <p>首先，我们要清楚这个实验的目的是什么：</p>
 <blockquote>
 <p>In this assignment you will add a system call tracing feature that may help you when debugging later labs. You’ll create a new trace system call that will control tracing. It should take one argument, an integer “mask”, whose bits specify which system calls to trace. For example, to trace the fork system call, a program calls trace(1 &lt;&lt; SYS_fork), where SYS_fork is a syscall number from kernel/syscall.h. You have to modify the xv6 kernel to print out a line when each system call is about to return, if the system call’s number is set in the mask. The line should contain the process id, the name of the system call and the return value; you don’t need to print the system call arguments. The trace system call should enable tracing for the process that calls it and any children that it subsequently forks, but should not affect other processes.</p>
 </blockquote>
 <p>译：在Xv6的trace命令中，它应该有一个参数，一个整数“掩码”，其位指定要跟踪的系统调用。例如，要跟踪fork系统调用，程序调用<code>trace(1&lt;&lt;SYS_fork)</code>，其中SYS_fork是<code>kernel/syscall.h</code>中的系统调用编号。如果系统调用的编号在掩码中设置，则必须修改xv6内核，以便在每个系统调用即将返回时打印出一行。该行应包含<strong>进程id</strong>、<strong>系统调用的名称</strong>和<strong>返回值</strong>；您不需要打印系统调用参数。跟踪系统调用应启用对调用它的进程及其随后分叉的任何<strong>子进程</strong>的跟踪，但不应影响其他进程。</p>
 <p>注意，在该实验的初始阶段，xv6已经为我们提供了trace命令的用户态实现，但是其底层的系统调用需要我们自己实现。</p>
-<span id="more"></span>
-<h2 id="mask是什么？">mask是什么？<a class="anchor" href="#mask是什么？"></a></h2>
+<h3 id="mask是什么？">mask是什么？<a class="anchor" href="#mask是什么？"></a></h3>
 <p>在使用trace命令时用到的掩码，是用来跟踪之后使用的命令用到了哪些系统调用。例如实验中给出的例子：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">$ trace 32 grep hello README</span><br><span class="line">3: syscall <span class="built_in">read</span> -&gt; 1023</span><br><span class="line">3: syscall <span class="built_in">read</span> -&gt; 966</span><br><span class="line">3: syscall <span class="built_in">read</span> -&gt; 70</span><br><span class="line">3: syscall <span class="built_in">read</span> -&gt; 0</span><br></pre></td></tr></table></figure>
 <p>这个32就是掩码，其跟踪到了grep命令中使用到了read系统调用（为什么是read？马上就说到了）。在xv6的<code>kernel/syscall.h</code>中有所有系统调用的编号：</p>
@@ -273,7 +275,7 @@
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// user/user.h</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// ...</span></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">trace</span><span class="params">(<span class="type">int</span>)</span>; </span><br><span class="line"></span><br><span class="line"><span class="comment">// ...</span></span><br></pre></td></tr></table></figure>
 <p>这个trace底层其实调用的应该是sys_trace（这个函数名不是固定的，但是源码中其他的系统调用的命名都为sys_*，故trace对应的系统调用写成sys_trace更加合理）。sys_trace需要做的是将用户传入的mask再传给当前进程及其子进程。</p>
 <p>我们这里<strong>将系统调用sys_trace的编号设置为22</strong>。</p>
-<h2 id="进程及其子进程如何获取mask？">进程及其子进程如何获取mask？<a class="anchor" href="#进程及其子进程如何获取mask？"></a></h2>
+<h3 id="进程及其子进程如何获取mask？">进程及其子进程如何获取mask？<a class="anchor" href="#进程及其子进程如何获取mask？"></a></h3>
 <p>在xv6 book的4.3节中，有这么一段话：</p>
 <figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">syscall (kernel/syscall.c:132) retrieves the system call number from the saved a7 in the trapframe and uses it to index into syscalls. For the first system call, a7 contains SYS_exec (kernel/syscall.h:8),  resulting in a call to the system call implementation function sys_exec.</span><br><span class="line"></span><br><span class="line">When sys_exec returns, syscall records its return value in p-&gt;trapframe-&gt;a0. This will cause the original user-space call to exec() to return that value, since the C calling convention on RISC-V places return values in a0. System calls conventionally return negative numbers to indicate errors, and zero or positive numbers for success. If the system call number is invalid, syscall prints an error and returns −1.</span><br></pre></td></tr></table></figure>
 <p>即系统调用的编号会保存在进程的trapframe中，根据a7寄存器即可获得，系统调用的返回值可通过a0寄存器获得。欸！这两个值可不就是实验实现中需要的吗！那么理所当然，实验中需要打印的语句应该就在这个函数中添加。</p>
@@ -294,7 +296,7 @@
 <p>完成好以上内容后，就可以<strong>实现sys_trace</strong>了：</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// kernel/sysproc.c</span></span><br><span class="line"></span><br><span class="line">uint64 <span class="title function_">sys_trace</span><span class="params">(<span class="type">void</span>)</span> &#123;</span><br><span class="line">  <span class="type">int</span> mask;</span><br><span class="line">  argint(<span class="number">0</span>, &amp;mask);</span><br><span class="line">  <span class="keyword">if</span> (mask &lt; <span class="number">0</span>) <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">proc</span> *<span class="title">p</span> =</span> myproc();</span><br><span class="line">  p-&gt;trace_mask = mask;</span><br><span class="line">  <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>这样，当前进程就可以获取了到mask，当其创建子进程时，子进程也可获取到mask~</p>
-<h2 id="如何跟踪系统调用？">如何跟踪系统调用？<a class="anchor" href="#如何跟踪系统调用？"></a></h2>
+<h3 id="如何跟踪系统调用？">如何跟踪系统调用？<a class="anchor" href="#如何跟踪系统调用？"></a></h3>
 <p>刚刚我们说了mask的作用，还有进程及其子进程如何获取mask，那么我们又应该如何跟踪系统调用呢？</p>
 <p>xv6中所用的系统调用都是在 <code>kernel/syscall.c</code> 中的 <code>syscall</code> 函数中调用的，为了能在syscall.c中调用sys_trace，需要在其中<strong>添加extern声明</strong>（其定义在刚刚已经实现，位于kernel/sysproc.c）：</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">extern</span> uint64 <span class="title function_">sys_trace</span><span class="params">(<span class="type">void</span>)</span>;</span><br></pre></td></tr></table></figure>
@@ -312,9 +314,36 @@
 <p>这样，当前进程就可以通过a7寄存器拿到sys_trace的系统调用编号了，也就是说，<code>syscall</code> 函数可以调用 <code>sys_trace</code> 了。</p>
 <p>OK，那么一个大致的框架就出来了：</p>
 <p><img src="../../images/Pasted%20image%2020240510183553.png" alt=""></p>
-<h2 id="最后">最后<a class="anchor" href="#最后"></a></h2>
 <p>完成上面的步骤后，最后只要在<code>Makefile</code>中的<code>UPROGS</code>加上<code>$U/_trace</code>即可。</p>
 <figure class="highlight diff"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">UPROGS=\</span><br><span class="line">	$U/_cat\</span><br><span class="line">	$U/_echo\</span><br><span class="line">	$U/_forktest\</span><br><span class="line">	$U/_grep\</span><br><span class="line">	$U/_init\</span><br><span class="line">	$U/_kill\</span><br><span class="line">	$U/_ln\</span><br><span class="line">	$U/_ls\</span><br><span class="line">	$U/_mkdir\</span><br><span class="line">	$U/_rm\</span><br><span class="line">	$U/_sh\</span><br><span class="line">	$U/_stressfs\</span><br><span class="line">	$U/_usertests\</span><br><span class="line">	$U/_grind\</span><br><span class="line">	$U/_wc\</span><br><span class="line">	$U/_zombie\</span><br><span class="line"><span class="addition">++	$U/_trace</span></span><br></pre></td></tr></table></figure>
+<p>在这个lab中，我们需要添加一个系统调用sysinfo，用于收集有关正在运行的系统的信息。</p>
+<!--more-->
+<p>系统调用的声明为：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> <span class="title function_">sysinfo</span><span class="params">(<span class="keyword">struct</span> sysinfo*)</span>;</span><br></pre></td></tr></table></figure>
+<p>这个系统调用接受一个指向结构体sysinfo的指针，其定义为：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// kernel/sysinfo.h</span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">sysinfo</span> &#123;</span></span><br><span class="line">  uint64 freemem;   <span class="comment">// amount of free memory (bytes)</span></span><br><span class="line">  uint64 nproc;     <span class="comment">// number of process</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>内核应填写此结构的字段：freemem字段应设置为可用内存的<strong>字节数</strong>，nproc字段应设为<strong>状态未使用</strong>的进程数。</p>
+<h2 id="sysinfo">sysinfo<a class="anchor" href="#sysinfo"></a></h2>
+<p>在这个part中，我们需要添加一个系统调用sysinfo，用于收集有关正在运行的系统的信息。</p>
+<h3 id="计算可用内存字节数">计算可用内存字节数<a class="anchor" href="#计算可用内存字节数"></a></h3>
+<p>我们可以通过内核中的<code>kmem</code>来获取可用的内存块的数量：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> &#123;</span></span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">spinlock</span> <span class="title">lock</span>;</span></span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">run</span> *<span class="title">freelist</span>;</span></span><br><span class="line">&#125; kmem;</span><br></pre></td></tr></table></figure>
+<p><code>kmem.freelist</code>是一个链表，保存了所有<strong>可用</strong>的内存块的地址，我们遍历这个链表即可获取可用内存块数量，又一个内存块的大小为4KB，那么<code>系统可用的内存字节数 = 可用内存块数量 * 4KB</code>：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// kernel/kalloc.c</span></span><br><span class="line"></span><br><span class="line">uint64 <span class="title function_">freemem</span><span class="params">()</span> &#123;</span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">run</span>* <span class="title">r</span>;</span></span><br><span class="line">  uint64 free_page = <span class="number">0</span>;</span><br><span class="line">  acquire(&amp;kmem.lock);</span><br><span class="line">  r = kmem.freelist;</span><br><span class="line">  <span class="keyword">while</span> (r) &#123;</span><br><span class="line">    free_page++;</span><br><span class="line">    r = r-&gt;next;</span><br><span class="line">  &#125;</span><br><span class="line">  release(&amp;kmem.lock);</span><br><span class="line">  <span class="comment">// 4K = 2^12，左移操作相当于对2的乘法</span></span><br><span class="line">  <span class="keyword">return</span> (free_page &lt;&lt; <span class="number">12</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="计算状态为未为使用进程数">计算状态为未为使用进程数<a class="anchor" href="#计算状态为未为使用进程数"></a></h3>
+<p>内核中有一个全局数组，其中每一项为系统中的进程，xv6中设置最多进程数为64个：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">proc</span> <span class="title">proc</span>[<span class="title">NPROC</span>];</span></span><br></pre></td></tr></table></figure>
+<p>在表示进程的结构体中，有一个成员表示这个进程的状态：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">enum</span> <span class="title">procstate</span> &#123;</span> UNUSED, USED, SLEEPING, RUNNABLE, RUNNING, ZOMBIE &#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Per-process state</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">proc</span> &#123;</span></span><br><span class="line">  ...</span><br><span class="line">  <span class="comment">// p-&gt;lock must be held when using these:</span></span><br><span class="line">  <span class="class"><span class="keyword">enum</span> <span class="title">procstate</span> <span class="title">state</span>;</span> </span><br><span class="line">  ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>我们可以遍历proc数组，找到所有<code>state != UNUSED</code>的进程的数量（这里一定要看清楚，是<strong>状态为未使用</strong>的进程数，而不是未使用的进程数）：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// kernel/proc.c</span></span><br><span class="line"></span><br><span class="line">uint64 <span class="title function_">nproc</span><span class="params">()</span> &#123;</span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">proc</span>* <span class="title">p</span>;</span></span><br><span class="line">  uint64 not_unused = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">for</span> (p = proc; p &lt; &amp;proc[NPROC]; p++) &#123;</span><br><span class="line">    <span class="keyword">if</span> (p-&gt;state != UNUSED) &#123;</span><br><span class="line">      not_unused++;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> not_unused;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="完成系统调用">完成系统调用<a class="anchor" href="#完成系统调用"></a></h3>
+<blockquote>
+<p>如何获取用户态传递过来的参数和注册系统调用可以参考这篇<a href="https://kerolt.github.io/posts/18ad9abb/#%E5%A6%82%E4%BD%95%E8%B7%9F%E8%B8%AA%E7%B3%BB%E7%BB%9F%E8%B0%83%E7%94%A8%EF%BC%9F">博客</a>，这里就不赘述了</p>
+</blockquote>
+<p>我们创建了<code>struct sysinfo</code>结构体变量<code>info</code>后，使用刚刚的<code>freemem</code>和<code>nproc</code>函数来为结构体变量赋值，之后通过<code>copyout</code>函数将内核态中的<code>info</code>拷贝给用户态的<code>struct sysinfo</code>结构体变量。</p>
+<p>这里的实现原理是：用户态下我们使用系统调用传递了一个<code>struct sysinfo</code>指针，其实就是传递了一个内存地址<code>addr</code>；内核态下我们将<code>info</code>中的数据原封不动地搬一份到<code>addr</code>处。这样当用户态访问<code>addr</code>处的内存时就可以获取到想要的数据了。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">uint64 <span class="title function_">sys_sysinfo</span><span class="params">()</span> &#123;</span><br><span class="line">  uint64 addr;</span><br><span class="line">  argaddr(<span class="number">0</span>, &amp;addr);</span><br><span class="line">  <span class="keyword">if</span> (addr &lt; <span class="number">0</span>) &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">proc</span>* <span class="title">p</span> =</span> myproc();</span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">sysinfo</span> <span class="title">info</span>;</span></span><br><span class="line"></span><br><span class="line">  info.freemem = freemem();</span><br><span class="line">  info.nproc = nproc();</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (copyout(p-&gt;pagetable, addr, (<span class="type">char</span>*)&amp;info, <span class="keyword">sizeof</span>(info))) &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
     </div>
 
     
@@ -387,13 +416,13 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-line"></i>
     </span>
-    <span title="站点总字数">32k</span>
+    <span title="站点总字数">33k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">1:56</span>
+    <span title="站点阅读时长">1:59</span>
   </span>
 </div>
   <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动

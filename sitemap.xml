@@ -2,7 +2,7 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
-    <loc>https://kerolt.github.io/posts/50c5c1b7/</loc>
+    <loc>https://kerolt.github.io/posts/18ad9abb/</loc>
     
     <lastmod>2024-08-14</lastmod>
     
@@ -101,15 +101,6 @@
   </url>
   
   <url>
-    <loc>https://kerolt.github.io/posts/18ad9abb/</loc>
-    
-    <lastmod>2024-06-24</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
     <loc>https://kerolt.github.io/posts/9a98c9ba/</loc>
     
     <lastmod>2024-06-23</lastmod>
@@ -185,6 +176,15 @@
     <loc>https://kerolt.github.io/posts/c40430e5/</loc>
     
     <lastmod>2024-03-21</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://kerolt.github.io/posts/50c5c1b7/</loc>
+    
+    <lastmod>2024-03-07</lastmod>
     
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
