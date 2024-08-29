@@ -22,28 +22,28 @@
 
 <script class="next-config" data-name="main" type="application/json">{"hostname":"kerolt.github.io","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.19.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":true,"style":"flat"},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"utterances","storage":true,"lazyload":false,"nav":null,"activeClass":"utterances"},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
 
-    <meta name="description" content="简记 靠右的const是顶层const，靠左的const是底层const 顶层const 即指针本身是个常量 12345int a &#x3D; 1;int b &#x3D; 2;int* const pa1 &#x3D; &amp;a;pa1 &#x3D; &amp;b; &#x2F;&#x2F; 编译出错 出错原因是因为pa1是一个顶层const，即其只能指向a，无法修改其指向b。 底层const 即指针所指的的对象是个常量 123456int a &#x3D;">
+    <meta name="description" content="在使用手机浏览器搜索时为了免于CSDN垃圾信息的影响，我们可以使用Bing（其他搜索引擎也有类似的功能，但是国内不借助其他方法的情况下体验感最好的也只有Bing了）的“-site:*.csdn.net”来屏蔽CSDN，但是每次输入搜索内容后还要加这么一个字符串真是太麻烦了，因此可以写一个浏览器脚本来完成这一操作。">
 <meta property="og:type" content="article">
-<meta property="og:title" content="顶层const与底层const">
-<meta property="og:url" content="https://kerolt.github.io/posts/89f520c5/index.html">
+<meta property="og:title" content="写一个简单的浏览器插件来屏蔽CSDN">
+<meta property="og:url" content="https://kerolt.github.io/posts/4c793fc2/index.html">
 <meta property="og:site_name" content="Kerolt&#39;s Blog">
-<meta property="og:description" content="简记 靠右的const是顶层const，靠左的const是底层const 顶层const 即指针本身是个常量 12345int a &#x3D; 1;int b &#x3D; 2;int* const pa1 &#x3D; &amp;a;pa1 &#x3D; &amp;b; &#x2F;&#x2F; 编译出错 出错原因是因为pa1是一个顶层const，即其只能指向a，无法修改其指向b。 底层const 即指针所指的的对象是个常量 123456int a &#x3D;">
+<meta property="og:description" content="在使用手机浏览器搜索时为了免于CSDN垃圾信息的影响，我们可以使用Bing（其他搜索引擎也有类似的功能，但是国内不借助其他方法的情况下体验感最好的也只有Bing了）的“-site:*.csdn.net”来屏蔽CSDN，但是每次输入搜索内容后还要加这么一个字符串真是太麻烦了，因此可以写一个浏览器脚本来完成这一操作。">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2023-12-26T00:00:00.000Z">
-<meta property="article:modified_time" content="2023-12-26T00:00:00.000Z">
+<meta property="article:published_time" content="2024-08-29T00:00:00.000Z">
+<meta property="article:modified_time" content="2024-08-29T00:00:00.000Z">
 <meta property="article:author" content="Kerolt">
-<meta property="article:tag" content="cpp">
+<meta property="article:tag" content="Browser">
 <meta name="twitter:card" content="summary">
 
 
-<link rel="canonical" href="https://kerolt.github.io/posts/89f520c5/">
+<link rel="canonical" href="https://kerolt.github.io/posts/4c793fc2/">
 
 
 
-<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://kerolt.github.io/posts/89f520c5/","path":"posts/89f520c5/","title":"顶层const与底层const"}</script>
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://kerolt.github.io/posts/4c793fc2/","path":"posts/4c793fc2/","title":"写一个简单的浏览器插件来屏蔽CSDN"}</script>
 
 <script class="next-config" data-name="calendar" type="application/json">""</script>
-<title>顶层const与底层const | Kerolt's Blog</title>
+<title>写一个简单的浏览器插件来屏蔽CSDN | Kerolt's Blog</title>
   
 
 
@@ -102,7 +102,7 @@
   
   <aside class="sidebar">
 
-    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+    <div class="sidebar-inner sidebar-overview-active">
       <ul class="sidebar-nav">
         <li class="sidebar-nav-toc">
           文章目录
@@ -115,7 +115,6 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AE%80%E8%AE%B0"><span class="nav-number">1.</span> <span class="nav-text">简记</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%A1%B6%E5%B1%82const"><span class="nav-number">2.</span> <span class="nav-text">顶层const</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BA%95%E5%B1%82const"><span class="nav-number">3.</span> <span class="nav-text">底层const</span></a></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -130,7 +129,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">31</span>
+          <span class="site-state-item-count">32</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -179,7 +178,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://kerolt.github.io/posts/89f520c5/">
+    <link itemprop="mainEntityOfPage" href="https://kerolt.github.io/posts/4c793fc2/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="https://pic1.zhimg.com/v2-829cb240844085fa008301e0ba981090_l.jpg">
@@ -192,12 +191,12 @@
     </span>
 
     <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="顶层const与底层const | Kerolt's Blog">
+      <meta itemprop="name" content="写一个简单的浏览器插件来屏蔽CSDN | Kerolt's Blog">
       <meta itemprop="description" content="">
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          顶层const与底层const
+          写一个简单的浏览器插件来屏蔽CSDN
         </h1>
 
         <div class="post-meta-container">
@@ -208,7 +207,7 @@
       </span>
       <span class="post-meta-item-text">发表于</span>
 
-      <time title="创建时间：2023-12-26 00:00:00" itemprop="dateCreated datePublished" datetime="2023-12-26T00:00:00+00:00">2023-12-26</time>
+      <time title="创建时间：2024-08-29 00:00:00" itemprop="dateCreated datePublished" datetime="2024-08-29T00:00:00+00:00">2024-08-29</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -216,7 +215,7 @@
       </span>
       <span class="post-meta-item-text">分类于</span>
         <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/cpp/" itemprop="url" rel="index"><span itemprop="name">C++</span></a>
+          <a href="/categories/frontend/" itemprop="url" rel="index"><span itemprop="name">前端</span></a>
         </span>
     </span>
 
@@ -227,14 +226,14 @@
         <i class="far fa-file-word"></i>
       </span>
       <span class="post-meta-item-text">本文字数：</span>
-      <span>162</span>
+      <span>413</span>
     </span>
     <span class="post-meta-item" title="阅读时长">
       <span class="post-meta-item-icon">
         <i class="far fa-clock"></i>
       </span>
       <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>1 分钟</span>
+      <span>2 分钟</span>
     </span>
 </div>
 
@@ -244,20 +243,11 @@
     
     
     
-    <div class="post-body" itemprop="articleBody"><h2 id="简记">简记<a class="anchor" href="#简记"></a></h2>
-<p><strong>靠右</strong>的const是<strong>顶层</strong>const，<strong>靠左</strong>的const是<strong>底层</strong>const</p>
-<h2 id="顶层const">顶层const<a class="anchor" href="#顶层const"></a></h2>
-<p>即指针<strong>本身</strong>是个常量</p>
-<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> a = <span class="number">1</span>;</span><br><span class="line"><span class="type">int</span> b = <span class="number">2</span>;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span>* <span class="type">const</span> pa1 = &amp;a;</span><br><span class="line">pa1 = &amp;b; <span class="comment">// 编译出错</span></span><br></pre></td></tr></table></figure>
-<p>出错原因是因为pa1是一个顶层const，即其只能指向a，无法修改其指向b。</p>
-<h2 id="底层const">底层const<a class="anchor" href="#底层const"></a></h2>
-<p>即指针<strong>所指的的对象</strong>是个常量</p>
-<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> a = <span class="number">1</span>;</span><br><span class="line"><span class="type">int</span> b = <span class="number">2</span>;</span><br><span class="line"></span><br><span class="line"><span class="type">const</span> <span class="type">int</span>* pa2 = &amp;a;</span><br><span class="line">pa2 = &amp;b; <span class="comment">// 没问题，OK</span></span><br><span class="line">*pa2 = <span class="number">3</span>; <span class="comment">// 编译出错</span></span><br></pre></td></tr></table></figure>
-<p>pa2是一个底层const，即pa2所指对象的值不可改变，但是pa2所指向的对象可以改变</p>
-<blockquote>
-<p>注意：用于声明引用的const都是底层const</p>
-</blockquote>
-
+    <div class="post-body" itemprop="articleBody"><p>在使用手机浏览器搜索时为了免于CSDN垃圾信息的影响，我们可以使用Bing（其他搜索引擎也有类似的功能，但是国内不借助其他方法的情况下体验感最好的也只有Bing了）的“<code>-site:*.csdn.net</code>”来屏蔽CSDN，但是每次输入搜索内容后还要加这么一个字符串真是太麻烦了，因此可以写一个浏览器脚本来完成这一操作。</p>
+<span id="more"></span>
+<p>在PC上可以直接使用油猴中其他大佬写的脚本，而我在手机上使用Via浏览器时不一定能用（可能可以，不过我还没试～）这些脚本，同时我需要的功能比较简单，故写一个Via浏览器的脚本。</p>
+<p>其实主要就是一个立即执行函数，其中对于输入框注册了<code>keydown</code>的事件，当按下回车键时可以在输入框的文本后添加<code>-site:*.csdn.net</code>。需要注意的是需要使用<code>preventDefault()</code>方法来防止默认的表单提交动作：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// ==UserScript==</span></span><br><span class="line"><span class="comment">// @name         Bing CSDN Filter</span></span><br><span class="line"><span class="comment">// @namespace    https://viayoo.com/</span></span><br><span class="line"><span class="comment">// @version      0.0</span></span><br><span class="line"><span class="comment">// @description  自动在Bing搜索框输入内容后添加-csdn，屏蔽CSDN内容</span></span><br><span class="line"><span class="comment">// @author       kerolt</span></span><br><span class="line"><span class="comment">// @match        https://*.bing.com/*</span></span><br><span class="line"><span class="comment">// @grant        none</span></span><br><span class="line"><span class="comment">// ==/UserScript==</span></span><br><span class="line"></span><br><span class="line">(<span class="keyword">function</span>(<span class="params"></span>) &#123;</span><br><span class="line">    <span class="string">&#x27;use strict&#x27;</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 获取搜索框中的textarea元素</span></span><br><span class="line">    <span class="keyword">let</span> searchInput = <span class="variable language_">document</span>.<span class="title function_">querySelector</span>(<span class="string">&#x27;textarea[name=&quot;q&quot;]&#x27;</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (searchInput) &#123;</span><br><span class="line">        <span class="comment">// 监听搜索框中的按键事件</span></span><br><span class="line">        searchInput.<span class="title function_">addEventListener</span>(<span class="string">&#x27;keydown&#x27;</span>, <span class="keyword">function</span>(<span class="params">event</span>) &#123;</span><br><span class="line">            <span class="comment">// 检查是否按下回车键</span></span><br><span class="line">            <span class="keyword">if</span> (event.<span class="property">key</span> === <span class="string">&#x27;Enter&#x27;</span>) &#123;</span><br><span class="line">                <span class="comment">// 如果输入中没有-site:*.csdn.net，自动添加</span></span><br><span class="line">                <span class="keyword">if</span> (!searchInput.<span class="property">value</span>.<span class="title function_">includes</span>(<span class="string">&#x27;-site:*.csdn.net&#x27;</span>)) &#123;</span><br><span class="line">                    searchInput.<span class="property">value</span> += <span class="string">&#x27; -site:*.csdn.net&#x27;</span>;</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="comment">// 提交表单，进行搜索</span></span><br><span class="line">                event.<span class="title function_">preventDefault</span>(); <span class="comment">// 防止默认的表单提交动作</span></span><br><span class="line">                <span class="keyword">let</span> searchForm = searchInput.<span class="title function_">closest</span>(<span class="string">&#x27;form&#x27;</span>);</span><br><span class="line">                <span class="keyword">if</span> (searchForm) &#123;</span><br><span class="line">                    searchForm.<span class="title function_">submit</span>(); <span class="comment">// 手动提交表单</span></span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;)();</span><br></pre></td></tr></table></figure>
     </div>
 
     
@@ -274,7 +264,7 @@
   </li>
   <li class="post-copyright-link">
       <strong>本文链接：</strong>
-      <a href="https://kerolt.github.io/posts/89f520c5/" title="顶层const与底层const">https://kerolt.github.io/posts/89f520c5/</a>
+      <a href="https://kerolt.github.io/posts/4c793fc2/" title="写一个简单的浏览器插件来屏蔽CSDN">https://kerolt.github.io/posts/4c793fc2/</a>
   </li>
   <li class="post-copyright-license">
       <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
@@ -283,20 +273,20 @@
 </div>
 
           <div class="post-tags">
-              <a href="/tags/cpp/" rel="tag"># cpp</a>
+              <a href="/tags/Browser/" rel="tag"># Browser</a>
           </div>
 
         
 
           <div class="post-nav">
             <div class="post-nav-item">
-                <a href="/posts/be7ff390/" rel="prev" title="Vue3封装el-upload">
-                  <i class="fa fa-angle-left"></i> Vue3封装el-upload
+                <a href="/posts/f663291a/" rel="prev" title="【协程】C++20协程初体验">
+                  <i class="fa fa-angle-left"></i> 【协程】C++20协程初体验
                 </a>
             </div>
             <div class="post-nav-item">
-                <a href="/posts/dd35cbb6/" rel="next" title="muduo网络库的安装">
-                  muduo网络库的安装 <i class="fa fa-angle-right"></i>
+                <a href="/posts/63513b30/" rel="next" title="C++中如何使用lambda实现递归">
+                  C++中如何使用lambda实现递归 <i class="fa fa-angle-right"></i>
                 </a>
             </div>
           </div>
@@ -329,13 +319,13 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-line"></i>
     </span>
-    <span title="站点总字数">34k</span>
+    <span title="站点总字数">35k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">2:05</span>
+    <span title="站点阅读时长">2:08</span>
   </span>
 </div>
   <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
