@@ -137,7 +137,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">34</span>
+          <span class="site-state-item-count">35</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -277,7 +277,7 @@
 <p>首先说一下大致思路：</p>
 <p>在使用fork系统调用创建子进程时，我们不用去额外拷贝父进程的内存，而是将子进程的虚拟内存映射到和父进程相同的物理内存，并且此时应该将父子进程对这块内存的<strong>访问权限设置为只读，并且添加一个用于识别<code>COW（copy on write）</code>的标志</strong>：</p>
 <p><img src="../../images/Pasted%20image%2020240712153722.png" alt=""></p>
-<p>当子进程需要对内存进行写操作时，<strong>RISC-V会检测到这一块物理地址的权限为只写，触发Page Fault</strong>，这时我们可以为子进程重新分配一块内存空间（取消之前的映射，分配内存后重新映射至新内存），并将父子进程的对应物理页的识别标志位进行修改，<strong>去除cow标志<code>PTE_COW</code>，添加写权限标志<code>PTE_W</code></strong>：</p>
+<p>当子进程需要对内存进行写操作时，<strong>RISC-V会检测到这一块物理地址的权限为只读，触发Page Fault</strong>，这时我们可以为子进程重新分配一块内存空间（取消之前的映射，分配内存后重新映射至新内存），并将父子进程的对应物理页的识别标志位进行修改，<strong>去除cow标志<code>PTE_COW</code>，添加写权限标志<code>PTE_W</code></strong>：</p>
 <p><img src="../../images/Pasted%20image%2020240712154121.png" alt=""></p>
 <h2 id="具体实现">具体实现<a class="anchor" href="#具体实现"></a></h2>
 <h3 id="COW标志位">COW标志位<a class="anchor" href="#COW标志位"></a></h3>
@@ -394,13 +394,13 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-line"></i>
     </span>
-    <span title="站点总字数">36k</span>
+    <span title="站点总字数">37k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">2:12</span>
+    <span title="站点阅读时长">2:13</span>
   </span>
 </div>
   <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
