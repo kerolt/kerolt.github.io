@@ -22,12 +22,12 @@
 
 <script class="next-config" data-name="main" type="application/json">{"hostname":"kerolt.github.io","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.19.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":true,"style":"flat"},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"disqus","storage":true,"lazyload":false,"nav":null,"activeClass":"disqus"},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
 
-    <meta name="description" content="再见，是为了再次相见">
+    <meta name="description" content="To the time to life, rather than to life in time.">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Kerolt&#39;s Blog">
 <meta property="og:url" content="https://kerolt.github.io/page/4/index.html">
 <meta property="og:site_name" content="Kerolt&#39;s Blog">
-<meta property="og:description" content="再见，是为了再次相见">
+<meta property="og:description" content="To the time to life, rather than to life in time.">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:author" content="Kerolt">
 <meta property="article:tag" content="Linux, OS, C&#x2F;C++, 前端, 数据库">
@@ -121,13 +121,13 @@
     <img class="site-author-image" itemprop="image" alt="Kerolt"
       src="https://pic1.zhimg.com/v2-829cb240844085fa008301e0ba981090_l.jpg">
   <p class="site-author-name" itemprop="name">Kerolt</p>
-  <div class="site-description" itemprop="description">再见，是为了再次相见</div>
+  <div class="site-description" itemprop="description">To the time to life, rather than to life in time.</div>
 </div>
 <div class="site-state-wrap animated">
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">35</span>
+          <span class="site-state-item-count">37</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -175,6 +175,241 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://kerolt.github.io/posts/2a4bdcb8/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://pic1.zhimg.com/v2-829cb240844085fa008301e0ba981090_l.jpg">
+      <meta itemprop="name" content="Kerolt">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Kerolt's Blog">
+      <meta itemprop="description" content="To the time to life, rather than to life in time.">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | Kerolt's Blog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/posts/2a4bdcb8/" class="post-title-link" itemprop="url">纠正一下对cpp移动语义的错误理解</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2024-02-18 00:00:00" itemprop="dateCreated datePublished" datetime="2024-02-18T00:00:00+00:00">2024-02-18</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/cpp/" itemprop="url" rel="index"><span itemprop="name">C++</span></a>
+        </span>
+    </span>
+
+  
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus：</span>
+    
+    <a title="disqus" href="/posts/2a4bdcb8/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="posts/2a4bdcb8/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>513</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>2 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>之前对于移动语义的理解就是使用std::move将一个对象所占有的资源的所有权转移给另一个对象，但是只要使用std::move就足够了吗？这显然是错误的。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/posts/2a4bdcb8/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://kerolt.github.io/posts/3096ce14/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://pic1.zhimg.com/v2-829cb240844085fa008301e0ba981090_l.jpg">
+      <meta itemprop="name" content="Kerolt">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Kerolt's Blog">
+      <meta itemprop="description" content="To the time to life, rather than to life in time.">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | Kerolt's Blog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/posts/3096ce14/" class="post-title-link" itemprop="url">C++中lambda与priority_queue一起使用</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2024-02-14 21:00:14" itemprop="dateCreated datePublished" datetime="2024-02-14T21:00:14+00:00">2024-02-14</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/cpp/" itemprop="url" rel="index"><span itemprop="name">C++</span></a>
+        </span>
+    </span>
+
+  
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus：</span>
+    
+    <a title="disqus" href="/posts/3096ce14/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="posts/3096ce14/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>415</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>2 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>想写这篇博客的原因是在刷力扣的 <a target="_blank" rel="noopener" href="https://leetcode.cn/problems/top-k-frequent-elements/">347. 前 K 个高频元素</a> 一题时，需要使用到优先队列<code>priority_queue</code>，其定义如下：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span>&lt;</span><br><span class="line">    <span class="keyword">class</span> <span class="title class_">T</span>,</span><br><span class="line">    <span class="keyword">class</span> <span class="title class_">Container</span> = std::vector&lt;T&gt;,</span><br><span class="line">    <span class="keyword">class</span> Compare = std::less&lt;<span class="keyword">typename</span> Container::value_type&gt;</span><br><span class="line">&gt; <span class="keyword">class</span> priority_queue;</span><br></pre></td></tr></table></figure>
+<p>第三个参数是一个可以自定义的比较类型，其必须满足<a target="_blank" rel="noopener" href="https://zh.cppreference.com/w/cpp/named_req/BinaryPredicate">二元谓词</a>，通常可以使用如下两种方法：</p>
+<ol>
+<li>使用自定义的函数对象</li>
+<li>lambda表达式</li>
+<li>使用<code>std::greater</code>或<code>std::less</code>（这里就不介绍这种方法了）</li>
+</ol>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/posts/3096ce14/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
     <link itemprop="mainEntityOfPage" href="https://kerolt.github.io/posts/50cb0d54/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -184,7 +419,7 @@
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
       <meta itemprop="name" content="Kerolt's Blog">
-      <meta itemprop="description" content="再见，是为了再次相见">
+      <meta itemprop="description" content="To the time to life, rather than to life in time.">
     </span>
 
     <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
@@ -300,7 +535,7 @@
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
       <meta itemprop="name" content="Kerolt's Blog">
-      <meta itemprop="description" content="再见，是为了再次相见">
+      <meta itemprop="description" content="To the time to life, rather than to life in time.">
     </span>
 
     <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
@@ -415,7 +650,7 @@
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
       <meta itemprop="name" content="Kerolt's Blog">
-      <meta itemprop="description" content="再见，是为了再次相见">
+      <meta itemprop="description" content="To the time to life, rather than to life in time.">
     </span>
 
     <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
@@ -530,7 +765,7 @@
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
       <meta itemprop="name" content="Kerolt's Blog">
-      <meta itemprop="description" content="再见，是为了再次相见">
+      <meta itemprop="description" content="To the time to life, rather than to life in time.">
     </span>
 
     <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
@@ -646,7 +881,7 @@
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
       <meta itemprop="name" content="Kerolt's Blog">
-      <meta itemprop="description" content="再见，是为了再次相见">
+      <meta itemprop="description" content="To the time to life, rather than to life in time.">
     </span>
 
     <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
@@ -773,13 +1008,13 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-line"></i>
     </span>
-    <span title="站点总字数">37k</span>
+    <span title="站点总字数">40k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">2:13</span>
+    <span title="站点阅读时长">2:24</span>
   </span>
 </div>
   <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
