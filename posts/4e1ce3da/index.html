@@ -24,8 +24,8 @@
 
     <meta name="description" content="【动手写协程库】系列笔记是学习sylar的协程库时的记录，参考了从零开始重写sylar C++高性能分布式服务器框架和代码随想录中的文档。文章并不是对所有代码的详细解释，而是为了自己理解一些片段所做的笔记。 Scheduler类中其他函数的定义可以在这里查看：Github: src&#x2F;scheduler.cpp  Sylar的协程调度器是一个N-M模型，意味着N个线程可以运行M个协程，协程能够在线">
 <meta property="og:type" content="article">
-<meta property="og:title" content="动手写一个协程库">
-<meta property="og:url" content="https://kerolt.github.io/posts/d7ec8cb5/index.html">
+<meta property="og:title" content="【动手写协程库】（二）协程调度器">
+<meta property="og:url" content="https://kerolt.github.io/posts/4e1ce3da/index.html">
 <meta property="og:site_name" content="Kerolt&#39;s Blog">
 <meta property="og:description" content="【动手写协程库】系列笔记是学习sylar的协程库时的记录，参考了从零开始重写sylar C++高性能分布式服务器框架和代码随想录中的文档。文章并不是对所有代码的详细解释，而是为了自己理解一些片段所做的笔记。 Scheduler类中其他函数的定义可以在这里查看：Github: src&#x2F;scheduler.cpp  Sylar的协程调度器是一个N-M模型，意味着N个线程可以运行M个协程，协程能够在线">
 <meta property="og:locale" content="zh_CN">
@@ -39,14 +39,14 @@
 <meta name="twitter:image" content="https://kerolt.github.io/images/Pasted%20image%2020240911153700.png">
 
 
-<link rel="canonical" href="https://kerolt.github.io/posts/d7ec8cb5/">
+<link rel="canonical" href="https://kerolt.github.io/posts/4e1ce3da/">
 
 
 
-<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://kerolt.github.io/posts/d7ec8cb5/","path":"posts/d7ec8cb5/","title":"动手写一个协程库"}</script>
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://kerolt.github.io/posts/4e1ce3da/","path":"posts/4e1ce3da/","title":"【动手写协程库】（二）协程调度器"}</script>
 
 <script class="next-config" data-name="calendar" type="application/json">""</script>
-<title>动手写一个协程库 | Kerolt's Blog</title>
+<title>【动手写协程库】（二）协程调度器 | Kerolt's Blog</title>
   
 
 
@@ -126,7 +126,7 @@
     <img class="site-author-image" itemprop="image" alt="Kerolt"
       src="https://pic1.zhimg.com/v2-829cb240844085fa008301e0ba981090_l.jpg">
   <p class="site-author-name" itemprop="name">Kerolt</p>
-  <div class="site-description" itemprop="description">To the time to life, rather than to life in time.</div>
+  <div class="site-description" itemprop="description">给岁月以文明，给时光以生命</div>
 </div>
 <div class="site-state-wrap animated">
   <nav class="site-state">
@@ -181,7 +181,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://kerolt.github.io/posts/d7ec8cb5/">
+    <link itemprop="mainEntityOfPage" href="https://kerolt.github.io/posts/4e1ce3da/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="https://pic1.zhimg.com/v2-829cb240844085fa008301e0ba981090_l.jpg">
@@ -190,16 +190,16 @@
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
       <meta itemprop="name" content="Kerolt's Blog">
-      <meta itemprop="description" content="To the time to life, rather than to life in time.">
+      <meta itemprop="description" content="给岁月以文明，给时光以生命">
     </span>
 
     <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="动手写一个协程库 | Kerolt's Blog">
+      <meta itemprop="name" content="【动手写协程库】（二）协程调度器 | Kerolt's Blog">
       <meta itemprop="description" content="">
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          动手写一个协程库
+          【动手写协程库】（二）协程调度器
         </h1>
 
         <div class="post-meta-container">
@@ -231,8 +231,8 @@
       </span>
       <span class="post-meta-item-text">Disqus：</span>
     
-    <a title="disqus" href="/posts/d7ec8cb5/#disqus_thread" itemprop="discussionUrl">
-      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="posts/d7ec8cb5/" itemprop="commentCount"></span>
+    <a title="disqus" href="/posts/4e1ce3da/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="posts/4e1ce3da/" itemprop="commentCount"></span>
     </a>
   </span>
   
@@ -300,7 +300,7 @@
   </li>
   <li class="post-copyright-link">
       <strong>本文链接：</strong>
-      <a href="https://kerolt.github.io/posts/d7ec8cb5/" title="动手写一个协程库">https://kerolt.github.io/posts/d7ec8cb5/</a>
+      <a href="https://kerolt.github.io/posts/4e1ce3da/" title="【动手写协程库】（二）协程调度器">https://kerolt.github.io/posts/4e1ce3da/</a>
   </li>
   <li class="post-copyright-license">
       <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
