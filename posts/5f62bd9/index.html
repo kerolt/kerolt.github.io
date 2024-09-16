@@ -22,28 +22,28 @@
 
 <script class="next-config" data-name="main" type="application/json">{"hostname":"kerolt.github.io","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.19.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":true,"style":"flat"},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"disqus","storage":true,"lazyload":false,"nav":null,"activeClass":"disqus"},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
 
-    <meta name="description" content="难度：Hard 标签：哈希表、字符串、滑动窗口 链接：https:&#x2F;&#x2F;leetcode.cn&#x2F;problems&#x2F;substring-with-concatenation-of-all-words&#x2F;description&#x2F;">
+    <meta name="description" content="C++ 中，std::enable_shared_from_this类模板和shared_from_this成员函数主要用于在一个类的成员函数中安全地获取指向自身的std::shared_ptr。它们的作用更多是为了确保资源正确管理。">
 <meta property="og:type" content="article">
-<meta property="og:title" content="30. 串联所有单词的子串">
-<meta property="og:url" content="https://kerolt.github.io/posts/831a363d/index.html">
+<meta property="og:title" content="enable_shared_from_this的作用">
+<meta property="og:url" content="https://kerolt.github.io/posts/5f62bd9/index.html">
 <meta property="og:site_name" content="Kerolt&#39;s Blog">
-<meta property="og:description" content="难度：Hard 标签：哈希表、字符串、滑动窗口 链接：https:&#x2F;&#x2F;leetcode.cn&#x2F;problems&#x2F;substring-with-concatenation-of-all-words&#x2F;description&#x2F;">
+<meta property="og:description" content="C++ 中，std::enable_shared_from_this类模板和shared_from_this成员函数主要用于在一个类的成员函数中安全地获取指向自身的std::shared_ptr。它们的作用更多是为了确保资源正确管理。">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2024-06-07T00:00:00.000Z">
-<meta property="article:modified_time" content="2024-06-07T00:00:00.000Z">
+<meta property="article:published_time" content="2024-09-16T00:00:00.000Z">
+<meta property="article:modified_time" content="2024-09-16T00:00:00.000Z">
 <meta property="article:author" content="Kerolt">
-<meta property="article:tag" content="Linux, OS, C&#x2F;C++, 前端, 数据库">
+<meta property="article:tag" content="CPlusPlus">
 <meta name="twitter:card" content="summary">
 
 
-<link rel="canonical" href="https://kerolt.github.io/posts/831a363d/">
+<link rel="canonical" href="https://kerolt.github.io/posts/5f62bd9/">
 
 
 
-<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://kerolt.github.io/posts/831a363d/","path":"posts/831a363d/","title":"30. 串联所有单词的子串"}</script>
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://kerolt.github.io/posts/5f62bd9/","path":"posts/5f62bd9/","title":"enable_shared_from_this的作用"}</script>
 
 <script class="next-config" data-name="calendar" type="application/json">""</script>
-<title>30. 串联所有单词的子串 | Kerolt's Blog</title>
+<title>enable_shared_from_this的作用 | Kerolt's Blog</title>
   
 
 
@@ -178,7 +178,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://kerolt.github.io/posts/831a363d/">
+    <link itemprop="mainEntityOfPage" href="https://kerolt.github.io/posts/5f62bd9/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="https://pic1.zhimg.com/v2-829cb240844085fa008301e0ba981090_l.jpg">
@@ -191,12 +191,12 @@
     </span>
 
     <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="30. 串联所有单词的子串 | Kerolt's Blog">
+      <meta itemprop="name" content="enable_shared_from_this的作用 | Kerolt's Blog">
       <meta itemprop="description" content="">
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          30. 串联所有单词的子串
+          enable_shared_from_this的作用
         </h1>
 
         <div class="post-meta-container">
@@ -207,7 +207,7 @@
       </span>
       <span class="post-meta-item-text">发表于</span>
 
-      <time title="创建时间：2024-06-07 00:00:00" itemprop="dateCreated datePublished" datetime="2024-06-07T00:00:00+00:00">2024-06-07</time>
+      <time title="创建时间：2024-09-16 00:00:00" itemprop="dateCreated datePublished" datetime="2024-09-16T00:00:00+00:00">2024-09-16</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -215,7 +215,7 @@
       </span>
       <span class="post-meta-item-text">分类于</span>
         <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/Algorithm/" itemprop="url" rel="index"><span itemprop="name">算法</span></a>
+          <a href="/categories/CPP/" itemprop="url" rel="index"><span itemprop="name">C++</span></a>
         </span>
     </span>
 
@@ -228,8 +228,8 @@
       </span>
       <span class="post-meta-item-text">Disqus：</span>
     
-    <a title="disqus" href="/posts/831a363d/#disqus_thread" itemprop="discussionUrl">
-      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="posts/831a363d/" itemprop="commentCount"></span>
+    <a title="disqus" href="/posts/5f62bd9/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="posts/5f62bd9/" itemprop="commentCount"></span>
     </a>
   </span>
   
@@ -240,14 +240,14 @@
         <i class="far fa-file-word"></i>
       </span>
       <span class="post-meta-item-text">本文字数：</span>
-      <span>422</span>
+      <span>376</span>
     </span>
     <span class="post-meta-item" title="阅读时长">
       <span class="post-meta-item-icon">
         <i class="far fa-clock"></i>
       </span>
       <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>2 分钟</span>
+      <span>1 分钟</span>
     </span>
 </div>
 
@@ -257,15 +257,15 @@
     
     
     
-    <div class="post-body" itemprop="articleBody"><blockquote>
-<p>难度：Hard</p>
-<p>标签：哈希表、字符串、滑动窗口</p>
-<p>链接：https://leetcode.cn/problems/substring-with-concatenation-of-all-words/description/</p>
-</blockquote>
+    <div class="post-body" itemprop="articleBody"><p>C++ 中，<code>std::enable_shared_from_this</code>类模板和<code>shared_from_this</code>成员函数主要用于在一个类的成员函数中安全地获取指向自身的<code>std::shared_ptr</code>。它们的作用更多是为了确保资源正确管理。</p>
 <span id="more"></span>
-<p>在B站上看见一个up的视频，感觉说的很清晰，言简意赅：<a target="_blank" rel="noopener" href="https://www.bilibili.com/video/BV1Tg4y1z7jR/?share_source=copy_web&amp;vd_source=158b66457253e14c958ac7e040b420c9">【五分钟力扣 Leetcode 第30题 串联所有单词的子串除 Python入门算法刷题 极简解法 23行代码 97%】</a> 。</p>
-<p>看完视频后，我觉得关键点在于，可以通过<strong>比较两个哈希表是否“相等”</strong> 来判断子串是否满足要求。</p>
-<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Solution</span> &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function">vector&lt;<span class="type">int</span>&gt; <span class="title">findSubstring</span><span class="params">(string s, vector&lt;string&gt;&amp; words)</span> </span>&#123;</span><br><span class="line">        <span class="type">int</span> words_num = words.<span class="built_in">size</span>();</span><br><span class="line">        <span class="type">int</span> uni_len = words[<span class="number">0</span>].<span class="built_in">size</span>();</span><br><span class="line">        <span class="type">int</span> n = s.<span class="built_in">size</span>();</span><br><span class="line">        vector&lt;<span class="type">int</span>&gt; res;</span><br><span class="line">        unordered_map&lt;string, <span class="type">int</span>&gt; dict;</span><br><span class="line">        <span class="comment">// 记录每个单词的出现次数</span></span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">auto</span>&amp; w : words) &#123;</span><br><span class="line">            dict[w]++;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 外循环遍历的次数为单个单词的长度</span></span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; uni_len; i++) &#123;</span><br><span class="line">            <span class="type">int</span> start = i; <span class="comment">// start为子串开始的索引</span></span><br><span class="line">            unordered_map&lt;string, <span class="type">int</span>&gt; cache; <span class="comment">// cache用于记录内循环中，位于dict中的单词的出现次数</span></span><br><span class="line">            <span class="comment">// 内循环，每次增加一个单词长度（即以一个单词长度为最小单位）</span></span><br><span class="line">            <span class="keyword">for</span> (<span class="type">int</span> j = i; j &lt; n; j += uni_len) &#123;</span><br><span class="line">                string sub = s.<span class="built_in">substr</span>(j, uni_len);</span><br><span class="line">                <span class="comment">// 判断当前截取的字符串是否存在于dict中</span></span><br><span class="line">                <span class="keyword">if</span> (dict.<span class="built_in">find</span>(sub) != dict.<span class="built_in">end</span>()) &#123;</span><br><span class="line">                    cache[sub]++;</span><br><span class="line">                    <span class="comment">// 当sub在cache中出现次数大于dict中，说明当前start不可能为子串的开始索引（因为单词数目都不相等了），不断移动start位置（移动单元为uni_len），直到cache[sub] &lt;= dict[sub]</span></span><br><span class="line">                    <span class="keyword">while</span> (cache[sub] &gt; dict[sub]) &#123;</span><br><span class="line">                        string remove_str = s.<span class="built_in">substr</span>(start, uni_len);</span><br><span class="line">                        cache[remove_str]--;</span><br><span class="line">                        start += uni_len;</span><br><span class="line">                    &#125;</span><br><span class="line">                    <span class="comment">// 若cache和dict中内容一致，说明找到了一个符合要求的子串</span></span><br><span class="line">                    <span class="keyword">if</span> (dict == cache) &#123;</span><br><span class="line">                        res.<span class="built_in">push_back</span>(start);</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                    <span class="comment">// 若当前截取字符串不存在于dict中，跳过这个单词</span></span><br><span class="line">                    start = j + uni_len;</span><br><span class="line">                    cache.<span class="built_in">clear</span>();</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> res;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>当一个对象被多个<code>std::shared_ptr</code>管理时，如果在对象内部的成员函数中直接创建新的<code>std::shared_ptr</code>指向自身（也就是<code>this</code>），可能会导致多个独立的引用计数，从而无法正确管理对象的生命周期。而使用<code>shared_from_this</code>可以确保所有指向该对象的<code>std::shared_ptr</code>共享同一个引用计数，从而正确管理对象的生命周期。</p>
+<p>例如：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;memory&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">MyClass</span> : <span class="keyword">public</span> std::enable_shared_from_this&lt;MyClass&gt; &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">print</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        std::shared_ptr&lt;MyClass&gt; ptr = <span class="built_in">shared_from_this</span>();</span><br><span class="line">        std::cout &lt;&lt; <span class="string">&quot;Use count: &quot;</span> &lt;&lt; ptr.<span class="built_in">use_count</span>() &lt;&lt; std::endl;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    std::shared_ptr&lt;MyClass&gt; obj = std::<span class="built_in">make_shared</span>&lt;MyClass&gt;();</span><br><span class="line">    obj-&gt;<span class="built_in">print</span>();</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>print</code>函数中使用<code>shared_from_this</code>获取指向自身的<code>std::shared_ptr</code>，确保了与外部创建的<code>std::shared_ptr</code>共享同一个引用计数。</p>
+<p>如果在对象内部的成员函数中直接返回一个指向自身的普通指针，当外部的<code>std::shared_ptr</code>被销毁后，这个普通指针就会变成悬空指针。而使用<code>shared_from_this</code>可以避免这种情况，因为它返回的<code>std::shared_ptr</code>会在引用计数为零时自动释放对象所占用的内存。例如这里不使用<code>enable_shared_from_this</code>和<code>shared_from_this</code>，则对象会多次释放，导致程序出错。</p>
+<p>代码及其执行结果可参见：<a target="_blank" rel="noopener" href="https://godbolt.org/z/7rr5zMW63">这里</a></p>
+
     </div>
 
     
@@ -282,7 +282,7 @@
   </li>
   <li class="post-copyright-link">
       <strong>本文链接：</strong>
-      <a href="https://kerolt.github.io/posts/831a363d/" title="30. 串联所有单词的子串">https://kerolt.github.io/posts/831a363d/</a>
+      <a href="https://kerolt.github.io/posts/5f62bd9/" title="enable_shared_from_this的作用">https://kerolt.github.io/posts/5f62bd9/</a>
   </li>
   <li class="post-copyright-license">
       <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
@@ -290,19 +290,19 @@
 </ul>
 </div>
 
+          <div class="post-tags">
+              <a href="/tags/CPlusPlus/" rel="tag"><i class="fa fa-tag"></i> CPlusPlus</a>
+          </div>
 
         
 
           <div class="post-nav">
             <div class="post-nav-item">
-                <a href="/posts/4be0a7a8/" rel="prev" title="VMware17.5.2启动踩坑">
-                  <i class="fa fa-angle-left"></i> VMware17.5.2启动踩坑
+                <a href="/posts/4e1ce3da/" rel="prev" title="【动手写协程库】（二）协程调度器">
+                  <i class="fa fa-angle-left"></i> 【动手写协程库】（二）协程调度器
                 </a>
             </div>
             <div class="post-nav-item">
-                <a href="/posts/4976678f/" rel="next" title="用uni-cli创建项目后使用eslint">
-                  用uni-cli创建项目后使用eslint <i class="fa fa-angle-right"></i>
-                </a>
             </div>
           </div>
     </footer>
