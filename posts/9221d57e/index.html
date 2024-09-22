@@ -22,28 +22,28 @@
 
 <script class="next-config" data-name="main" type="application/json">{"hostname":"kerolt.github.io","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.19.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":true,"style":"flat"},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"disqus","storage":true,"lazyload":false,"nav":null,"activeClass":"disqus"},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
 
-    <meta name="description" content="C++ 中，std::enable_shared_from_this类模板和shared_from_this成员函数主要用于在一个类的成员函数中安全地获取指向自身的std::shared_ptr。它们的作用更多是为了确保资源正确管理。">
+    <meta name="description" content="最近的练手项目web-terminal中（也就是一个网页终端，可执行一些命令），在按下键盘后会显示可能匹配的命令列表（假设对应的函数是setHintList），这不仅是按下字母按键会触发，按下删除键、tab键都会触发。那就不得不考虑一个问题，如果我们手速太快，那么setHintList就会频繁触发，但我们只需要响应用户最后一次输入的命令即可，虽然在这个小项目中没啥问题，但是由此可以引出一些对于以后">
 <meta property="og:type" content="article">
-<meta property="og:title" content="enable_shared_from_this的作用">
-<meta property="og:url" content="https://kerolt.github.io/posts/5f62bd9/index.html">
+<meta property="og:title" content="函数防抖">
+<meta property="og:url" content="https://kerolt.github.io/posts/9221d57e/index.html">
 <meta property="og:site_name" content="Kerolt&#39;s Blog">
-<meta property="og:description" content="C++ 中，std::enable_shared_from_this类模板和shared_from_this成员函数主要用于在一个类的成员函数中安全地获取指向自身的std::shared_ptr。它们的作用更多是为了确保资源正确管理。">
+<meta property="og:description" content="最近的练手项目web-terminal中（也就是一个网页终端，可执行一些命令），在按下键盘后会显示可能匹配的命令列表（假设对应的函数是setHintList），这不仅是按下字母按键会触发，按下删除键、tab键都会触发。那就不得不考虑一个问题，如果我们手速太快，那么setHintList就会频繁触发，但我们只需要响应用户最后一次输入的命令即可，虽然在这个小项目中没啥问题，但是由此可以引出一些对于以后">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2024-09-16T00:00:00.000Z">
-<meta property="article:modified_time" content="2024-09-16T00:00:00.000Z">
+<meta property="article:published_time" content="2024-09-22T00:00:00.000Z">
+<meta property="article:modified_time" content="2024-09-22T00:00:00.000Z">
 <meta property="article:author" content="Kerolt">
-<meta property="article:tag" content="CPlusPlus">
+<meta property="article:tag" content="FrontEnd">
 <meta name="twitter:card" content="summary">
 
 
-<link rel="canonical" href="https://kerolt.github.io/posts/5f62bd9/">
+<link rel="canonical" href="https://kerolt.github.io/posts/9221d57e/">
 
 
 
-<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://kerolt.github.io/posts/5f62bd9/","path":"posts/5f62bd9/","title":"enable_shared_from_this的作用"}</script>
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://kerolt.github.io/posts/9221d57e/","path":"posts/9221d57e/","title":"函数防抖"}</script>
 
 <script class="next-config" data-name="calendar" type="application/json">""</script>
-<title>enable_shared_from_this的作用 | Kerolt's Blog</title>
+<title>函数防抖 | Kerolt's Blog</title>
   
 
 
@@ -178,7 +178,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://kerolt.github.io/posts/5f62bd9/">
+    <link itemprop="mainEntityOfPage" href="https://kerolt.github.io/posts/9221d57e/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="https://pic1.zhimg.com/v2-829cb240844085fa008301e0ba981090_l.jpg">
@@ -191,12 +191,12 @@
     </span>
 
     <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="enable_shared_from_this的作用 | Kerolt's Blog">
+      <meta itemprop="name" content="函数防抖 | Kerolt's Blog">
       <meta itemprop="description" content="">
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          enable_shared_from_this的作用
+          函数防抖
         </h1>
 
         <div class="post-meta-container">
@@ -207,7 +207,7 @@
       </span>
       <span class="post-meta-item-text">发表于</span>
 
-      <time title="创建时间：2024-09-16 00:00:00" itemprop="dateCreated datePublished" datetime="2024-09-16T00:00:00+00:00">2024-09-16</time>
+      <time title="创建时间：2024-09-22 00:00:00" itemprop="dateCreated datePublished" datetime="2024-09-22T00:00:00+00:00">2024-09-22</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -215,7 +215,7 @@
       </span>
       <span class="post-meta-item-text">分类于</span>
         <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/CPP/" itemprop="url" rel="index"><span itemprop="name">C++</span></a>
+          <a href="/categories/FrontEnd/" itemprop="url" rel="index"><span itemprop="name">前端</span></a>
         </span>
     </span>
 
@@ -228,8 +228,8 @@
       </span>
       <span class="post-meta-item-text">Disqus：</span>
     
-    <a title="disqus" href="/posts/5f62bd9/#disqus_thread" itemprop="discussionUrl">
-      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="posts/5f62bd9/" itemprop="commentCount"></span>
+    <a title="disqus" href="/posts/9221d57e/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="posts/9221d57e/" itemprop="commentCount"></span>
     </a>
   </span>
   
@@ -240,14 +240,14 @@
         <i class="far fa-file-word"></i>
       </span>
       <span class="post-meta-item-text">本文字数：</span>
-      <span>376</span>
+      <span>657</span>
     </span>
     <span class="post-meta-item" title="阅读时长">
       <span class="post-meta-item-icon">
         <i class="far fa-clock"></i>
       </span>
       <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>1 分钟</span>
+      <span>2 分钟</span>
     </span>
 </div>
 
@@ -257,15 +257,21 @@
     
     
     
-    <div class="post-body" itemprop="articleBody"><p>C++ 中，<code>std::enable_shared_from_this</code>类模板和<code>shared_from_this</code>成员函数主要用于在一个类的成员函数中安全地获取指向自身的<code>std::shared_ptr</code>。它们的作用更多是为了确保资源正确管理。</p>
+    <div class="post-body" itemprop="articleBody"><p>最近的练手项目web-terminal中（也就是一个网页终端，可执行一些命令），在按下键盘后会显示可能匹配的命令列表（假设对应的函数是<code>setHintList</code>），这不仅是按下字母按键会触发，按下删除键、tab键都会触发。那就不得不考虑一个问题，如果我们手速太快，那么<code>setHintList</code>就会频繁触发，但我们只需要响应用户最后一次输入的命令即可，虽然在这个小项目中没啥问题，但是由此可以引出一些对于以后大项目的考虑：如何减小这种多次频繁执行函数带来的性能开销问题？那就是函数防抖~</p>
 <span id="more"></span>
-<p>当一个对象被多个<code>std::shared_ptr</code>管理时，如果在对象内部的成员函数中直接创建新的<code>std::shared_ptr</code>指向自身（也就是<code>this</code>），可能会导致多个独立的引用计数，从而无法正确管理对象的生命周期。而使用<code>shared_from_this</code>可以确保所有指向该对象的<code>std::shared_ptr</code>共享同一个引用计数，从而正确管理对象的生命周期。</p>
-<p>例如：</p>
-<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;memory&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">MyClass</span> : <span class="keyword">public</span> std::enable_shared_from_this&lt;MyClass&gt; &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">print</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        std::shared_ptr&lt;MyClass&gt; ptr = <span class="built_in">shared_from_this</span>();</span><br><span class="line">        std::cout &lt;&lt; <span class="string">&quot;Use count: &quot;</span> &lt;&lt; ptr.<span class="built_in">use_count</span>() &lt;&lt; std::endl;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    std::shared_ptr&lt;MyClass&gt; obj = std::<span class="built_in">make_shared</span>&lt;MyClass&gt;();</span><br><span class="line">    obj-&gt;<span class="built_in">print</span>();</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p><code>print</code>函数中使用<code>shared_from_this</code>获取指向自身的<code>std::shared_ptr</code>，确保了与外部创建的<code>std::shared_ptr</code>共享同一个引用计数。</p>
-<p>如果在对象内部的成员函数中直接返回一个指向自身的普通指针，当外部的<code>std::shared_ptr</code>被销毁后，这个普通指针就会变成悬空指针。而使用<code>shared_from_this</code>可以避免这种情况，因为它返回的<code>std::shared_ptr</code>会在引用计数为零时自动释放对象所占用的内存。例如这里不使用<code>enable_shared_from_this</code>和<code>shared_from_this</code>，则对象会多次释放，导致程序出错。</p>
-<p>代码及其执行结果可参见：<a target="_blank" rel="noopener" href="https://godbolt.org/z/7rr5zMW63">这里</a></p>
-
+<p>函数防抖是一种优化技术，用来限制某个函数在一定时间内被调用的频率。当事件被触发后，它会等待一段时间，如果在这段时间内再次被触发，那么它会重新开始等待。</p>
+<p>下面是一种实现方式：</p>
+<figure class="highlight ts"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">export</span> <span class="keyword">function</span> <span class="title function_">buildDebounce</span>(<span class="params"><span class="attr">fn</span>: (...arg: <span class="built_in">any</span>[]) =&gt; <span class="built_in">any</span>, <span class="attr">duration</span>: <span class="built_in">number</span> = <span class="number">300</span></span>) &#123;</span><br><span class="line">  <span class="keyword">let</span> timer = -<span class="number">1</span>;</span><br><span class="line">  <span class="keyword">return</span> <span class="keyword">function</span> (<span class="params"><span class="attr">this</span>: <span class="built_in">unknown</span>, ...<span class="attr">args</span>: <span class="built_in">any</span>[]</span>) &#123;</span><br><span class="line">    <span class="keyword">if</span> (timer &gt; -<span class="number">1</span>) &#123;</span><br><span class="line">      <span class="built_in">clearTimeout</span>(timer);</span><br><span class="line">    &#125;</span><br><span class="line">    timer = <span class="variable language_">window</span>.<span class="built_in">setTimeout</span>(<span class="function">() =&gt;</span> &#123;</span><br><span class="line">      fn.<span class="title function_">bind</span>(<span class="variable language_">this</span>)(...args);</span><br><span class="line">      timer = -<span class="number">1</span>;</span><br><span class="line">    &#125;, duration);</span><br><span class="line">  &#125;;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>buildDebounce</code>接受一个函数<code>fn</code>和一个可选的时间间隔<code>duration</code>（默认为 300 毫秒）作为参数，并返回一个新的函数。</p>
+<ol>
+<li>内部使用了一个变量<code>timer</code>来跟踪定时器的引用。初始值为 -1，表示没有定时器在运行。</li>
+<li>返回的函数在被调用时，首先检查<code>timer</code>是否大于 -1。如果是，说明之前已经有一个定时器在运行，此时会调用<code>clearTimeout</code>清除这个定时器，以取消之前可能正在等待执行的函数调用。</li>
+<li>然后，使用<code>window.setTimeout</code>创建一个新的定时器，在<code>duration</code>毫秒后执行传入的函数<code>fn</code>，并通过<code>bind</code>方法确保函数在正确的上下文中执行。</li>
+<li>当定时器执行完函数后，将<code>timer</code>重置为 -1，表示没有定时器在运行。</li>
+</ol>
+<p>在<code>(this: unknown, ...args: any[])</code>中，<code>this</code>的值是在调用由<code>buildDebounce</code>返回的函数时，根据调用的上下文确定的。也就是当这个返回的函数被调用时，通过保留传入的 <code>this</code> 值，可以确保在最终执行被包裹的函数 <code>fn</code> 时，<code>fn</code> 能够在正确的上下文中执行。</p>
+<p><code>buildDebounce</code>的使用如下：</p>
+<figure class="highlight ts"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">printMessage</span>(<span class="params">message</span>) &#123;</span><br><span class="line">  <span class="variable language_">console</span>.<span class="title function_">log</span>(message);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> debouncedPrint = <span class="title function_">buildDebounce</span>(printMessage);</span><br><span class="line"></span><br><span class="line"><span class="title function_">debouncedPrint</span>(<span class="string">&#x27;Hello&#x27;</span>);</span><br><span class="line"><span class="title function_">debouncedPrint</span>(<span class="string">&#x27;World&#x27;</span>);</span><br><span class="line"><span class="comment">// 如果在 300 毫秒内连续调用 debouncedPrint，只有最后一次调用会在 300 毫秒后执行打印操作。</span></span><br></pre></td></tr></table></figure>
     </div>
 
     
@@ -282,7 +288,7 @@
   </li>
   <li class="post-copyright-link">
       <strong>本文链接：</strong>
-      <a href="https://kerolt.github.io/posts/5f62bd9/" title="enable_shared_from_this的作用">https://kerolt.github.io/posts/5f62bd9/</a>
+      <a href="https://kerolt.github.io/posts/9221d57e/" title="函数防抖">https://kerolt.github.io/posts/9221d57e/</a>
   </li>
   <li class="post-copyright-license">
       <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
@@ -291,21 +297,18 @@
 </div>
 
           <div class="post-tags">
-              <a href="/tags/CPlusPlus/" rel="tag"><i class="fa fa-tag"></i> CPlusPlus</a>
+              <a href="/tags/FrontEnd/" rel="tag"><i class="fa fa-tag"></i> FrontEnd</a>
           </div>
 
         
 
           <div class="post-nav">
             <div class="post-nav-item">
-                <a href="/posts/4e1ce3da/" rel="prev" title="【动手写协程库】（二）协程调度器">
-                  <i class="fa fa-angle-left"></i> 【动手写协程库】（二）协程调度器
+                <a href="/posts/5f62bd9/" rel="prev" title="enable_shared_from_this的作用">
+                  <i class="fa fa-angle-left"></i> enable_shared_from_this的作用
                 </a>
             </div>
             <div class="post-nav-item">
-                <a href="/posts/9221d57e/" rel="next" title="函数防抖">
-                  函数防抖 <i class="fa fa-angle-right"></i>
-                </a>
             </div>
           </div>
     </footer>
