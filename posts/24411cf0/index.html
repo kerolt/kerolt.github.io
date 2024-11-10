@@ -24,7 +24,7 @@
 
     <meta name="description" content="【动手写协程库】系列笔记是学习sylar的协程库时的记录，参考了从零开始重写sylar C++高性能分布式服务器框架和代码随想录中的文档。文章并不是对所有代码的详细解释，而是为了自己理解一些片段所做的笔记。 Coroutine类中其他函数的定义可以在这里查看：Github: src&#x2F;coroutine.cpp  对于什么是协程，为什么要使用协程，可以看看之前的笔记：【协程】C++20协程初体验。">
 <meta property="og:type" content="article">
-<meta property="og:title" content="【动手写协程库】（一）协程定义">
+<meta property="og:title" content="【动手写协程库 1】协程定义">
 <meta property="og:url" content="https://kerolt.github.io/posts/24411cf0/index.html">
 <meta property="og:site_name" content="Kerolt&#39;s Blog">
 <meta property="og:description" content="【动手写协程库】系列笔记是学习sylar的协程库时的记录，参考了从零开始重写sylar C++高性能分布式服务器框架和代码随想录中的文档。文章并不是对所有代码的详细解释，而是为了自己理解一些片段所做的笔记。 Coroutine类中其他函数的定义可以在这里查看：Github: src&#x2F;coroutine.cpp  对于什么是协程，为什么要使用协程，可以看看之前的笔记：【协程】C++20协程初体验。">
@@ -41,10 +41,10 @@
 
 
 
-<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://kerolt.github.io/posts/24411cf0/","path":"posts/24411cf0/","title":"【动手写协程库】（一）协程定义"}</script>
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://kerolt.github.io/posts/24411cf0/","path":"posts/24411cf0/","title":"【动手写协程库 1】协程定义"}</script>
 
 <script class="next-config" data-name="calendar" type="application/json">""</script>
-<title>【动手写协程库】（一）协程定义 | Kerolt's Blog</title>
+<title>【动手写协程库 1】协程定义 | Kerolt's Blog</title>
   
 
 
@@ -91,7 +91,7 @@
 
 
 <nav class="site-nav">
-  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
   </ul>
 </nav>
 
@@ -122,7 +122,7 @@
         <div class="site-overview-wrap sidebar-panel">
           <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
     <img class="site-author-image" itemprop="image" alt="Kerolt"
-      src="https://pic1.zhimg.com/v2-829cb240844085fa008301e0ba981090_l.jpg">
+      src="/images/avatar.jpg">
   <p class="site-author-name" itemprop="name">Kerolt</p>
   <div class="site-description" itemprop="description">给岁月以文明，给时光以生命</div>
 </div>
@@ -136,7 +136,7 @@
       </div>
       <div class="site-state-item site-state-categories">
           <a href="/categories/">
-        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-count">8</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
@@ -182,7 +182,7 @@
     <link itemprop="mainEntityOfPage" href="https://kerolt.github.io/posts/24411cf0/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="https://pic1.zhimg.com/v2-829cb240844085fa008301e0ba981090_l.jpg">
+      <meta itemprop="image" content="/images/avatar.jpg">
       <meta itemprop="name" content="Kerolt">
     </span>
 
@@ -192,12 +192,12 @@
     </span>
 
     <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="【动手写协程库】（一）协程定义 | Kerolt's Blog">
+      <meta itemprop="name" content="【动手写协程库 1】协程定义 | Kerolt's Blog">
       <meta itemprop="description" content="">
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          【动手写协程库】（一）协程定义
+          【动手写协程库 1】协程定义
         </h1>
 
         <div class="post-meta-container">
@@ -216,7 +216,7 @@
       </span>
       <span class="post-meta-item-text">分类于</span>
         <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/CPP/" itemprop="url" rel="index"><span itemprop="name">C++</span></a>
+          <a href="/categories/Project/" itemprop="url" rel="index"><span itemprop="name">项目</span></a>
         </span>
     </span>
 
@@ -290,7 +290,7 @@
   </li>
   <li class="post-copyright-link">
       <strong>本文链接：</strong>
-      <a href="https://kerolt.github.io/posts/24411cf0/" title="【动手写协程库】（一）协程定义">https://kerolt.github.io/posts/24411cf0/</a>
+      <a href="https://kerolt.github.io/posts/24411cf0/" title="【动手写协程库 1】协程定义">https://kerolt.github.io/posts/24411cf0/</a>
   </li>
   <li class="post-copyright-license">
       <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
@@ -312,8 +312,8 @@
                 </a>
             </div>
             <div class="post-nav-item">
-                <a href="/posts/4e1ce3da/" rel="next" title="【动手写协程库】（二）协程调度器">
-                  【动手写协程库】（二）协程调度器 <i class="fa fa-angle-right"></i>
+                <a href="/posts/4e1ce3da/" rel="next" title="【动手写协程库 2】协程调度器">
+                  【动手写协程库 2】协程调度器 <i class="fa fa-angle-right"></i>
                 </a>
             </div>
           </div>
