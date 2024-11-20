@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <meta name="google-site-verification" content="G2bBvIdEL2IvKAU2atPObrKeGOZYYjla4BUoKafFos0">
+  <meta name="msvalidate.01" content="2300A23B82DB579A2DEA6261191AD771">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+CJK+SC:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&family=JetBrains+Mono:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap&subset=latin,latin-ext">
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha256-5eIC48iZUHmSlSUz9XtjRyK2mzQkHScZY1WdMaoz74E=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancyapps-ui/5.0.31/fancybox/fancybox.css" integrity="sha256-gkQVf8UKZgQ0HyuxL/VnacadJ+D2Kox2TCEBuNQg5+w=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/pace/1.2.4/themes/blue/pace-theme-minimal.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pace/1.2.4/pace.min.js" integrity="sha256-gqd7YTjg/BtfqWSwsJOvndl0Bxc8gFImLEkXQT8+qj0=" crossorigin="anonymous"></script>
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"kerolt.github.io","root":"/","images":"/images","scheme":"Mist","darkmode":false,"version":"8.21.1","exturl":false,"sidebar":{"position":"right","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"copycode":{"enable":true,"style":"flat"},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"disqus","storage":true,"lazyload":false,"nav":null,"activeClass":"disqus"},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false,"trigger":"auto"}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="【动手写协程库】系列笔记是学习sylar的协程库时的记录，参考了从零开始重写sylar C++高性能分布式服务器框架和代码随想录中的文档。文章并不是对所有代码的详细解释，而是为了自己理解一些片段所做的笔记。 Scheduler类中其他函数的定义可以在这里查看：Github: src&#x2F;scheduler.cpp  Sylar的协程调度器是一个N-M模型，意味着N个线程可以运行M个协程，协程能够在线">
+<meta property="og:type" content="article">
+<meta property="og:title" content="【动手写协程库 2】协程调度器">
+<meta property="og:url" content="https://kerolt.github.io/posts/4e1ce3da/index.html">
+<meta property="og:site_name" content="Kerolt&#39;s Blog">
+<meta property="og:description" content="【动手写协程库】系列笔记是学习sylar的协程库时的记录，参考了从零开始重写sylar C++高性能分布式服务器框架和代码随想录中的文档。文章并不是对所有代码的详细解释，而是为了自己理解一些片段所做的笔记。 Scheduler类中其他函数的定义可以在这里查看：Github: src&#x2F;scheduler.cpp  Sylar的协程调度器是一个N-M模型，意味着N个线程可以运行M个协程，协程能够在线">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://kerolt.github.io/images/Pasted%20image%2020240911153700.png">
+<meta property="article:published_time" content="2024-09-11T00:00:00.000Z">
+<meta property="article:modified_time" content="2024-09-11T00:00:00.000Z">
+<meta property="article:author" content="Kerolt">
+<meta property="article:tag" content="CPlusPlus">
+<meta property="article:tag" content="Coroutine">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://kerolt.github.io/images/Pasted%20image%2020240911153700.png">
+
+
+<link rel="canonical" href="https://kerolt.github.io/posts/4e1ce3da/">
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://kerolt.github.io/posts/4e1ce3da/","path":"posts/4e1ce3da/","title":"【动手写协程库 2】协程调度器"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>【动手写协程库 2】协程调度器 | Kerolt's Blog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Kerolt's Blog</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="搜索..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-overview-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Kerolt"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">Kerolt</p>
+  <div class="site-description" itemprop="description">给岁月以文明，给时光以生命</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">40</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/kerolt" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;kerolt" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:kerolt@qq.com" title="E-Mail → mailto:kerolt@qq.com" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i></a>
+      </span>
+  </div>
+  <div class="cc-license animated" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="https://cdnjs.cloudflare.com/ajax/libs/creativecommons-vocabulary/2020.11.3/assets/license_badges/small/by_nc_sa.svg" alt="Creative Commons"></a>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://kerolt.github.io/posts/4e1ce3da/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="Kerolt">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Kerolt's Blog">
+      <meta itemprop="description" content="给岁月以文明，给时光以生命">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="【动手写协程库 2】协程调度器 | Kerolt's Blog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          【动手写协程库 2】协程调度器
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2024-09-11 00:00:00" itemprop="dateCreated datePublished" datetime="2024-09-11T00:00:00+00:00">2024-09-11</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Project/" itemprop="url" rel="index"><span itemprop="name">项目</span></a>
+        </span>
+    </span>
+
+  
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus：</span>
+    
+    <a title="disqus" href="/posts/4e1ce3da/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="posts/4e1ce3da/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>2.1k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>8 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><blockquote>
+<p>【动手写协程库】系列笔记是学习sylar的协程库时的记录，参考了<a target="_blank" rel="noopener" href="https://www.midlane.top/wiki/pages/viewpage.action?pageId=10060952">从零开始重写sylar C++高性能分布式服务器框架</a>和代码随想录中的<a target="_blank" rel="noopener" href="https://www.programmercarl.com/other/project_coroutine.html#%E4%B8%8B%E8%BD%BD%E6%96%B9%E5%BC%8F">文档</a>。文章并不是对所有代码的详细解释，而是为了自己理解一些片段所做的笔记。</p>
+<p><code>Scheduler</code>类中其他函数的定义可以在这里查看：<a target="_blank" rel="noopener" href="https://github.com/kerolt/coroutine-lib/blob/master/src/scheduler.cpp">Github: src/scheduler.cpp</a></p>
+</blockquote>
+<p>Sylar的协程调度器是一个N-M模型，意味着N个线程可以运行M个协程，协程能够在线程之间进行切换，也可以被绑定到特定的线程上执行。</p>
+<p>调度器可以由应用程序中的任何线程创建，但创建它的线程（称为caller线程）可以选择是否参与协程的调度。如果caller线程参与调度，那么调度器的线程数会相应减少一个，因为caller线程本身也会作为一个调度线程。</p>
+<span id="more"></span>
+<p>Scheduler相关API如下：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">ifndef</span> SCHEDULER_H_</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SCHEDULER_H_</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;atomic&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;cstddef&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;functional&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;list&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;memory&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;mutex&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;thread&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;utility&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;vector&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;coroutine.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;util.h&quot;</span></span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 协程调度器</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Scheduler</span> &#123;</span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">    <span class="comment">// 调度任务，任务类型可以是协程/函数二选一，并且可指定调度线程</span></span><br><span class="line">    <span class="keyword">using</span> ThreadIdPtr = std::shared_ptr&lt;std::thread::id&gt;;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">struct</span> <span class="title class_">SchedulerTask</span> &#123;</span><br><span class="line">        ThreadIdPtr thread_id_;</span><br><span class="line">        Coroutine::Ptr coroutine_;</span><br><span class="line">        std::function&lt;<span class="type">void</span>()&gt; callback_;</span><br><span class="line"></span><br><span class="line">        <span class="built_in">SchedulerTask</span>() &#123;&#125;</span><br><span class="line"></span><br><span class="line">        <span class="built_in">SchedulerTask</span>(Coroutine::Ptr co, ThreadIdPtr id)</span><br><span class="line">            : <span class="built_in">coroutine_</span>(co)</span><br><span class="line">            , <span class="built_in">thread_id_</span>(std::<span class="built_in">move</span>(id)) &#123;&#125;</span><br><span class="line"></span><br><span class="line">        <span class="built_in">SchedulerTask</span>(std::function&lt;<span class="built_in">void</span>()&gt; callback, ThreadIdPtr id)</span><br><span class="line">            : <span class="built_in">callback_</span>(callback)</span><br><span class="line">            , <span class="built_in">thread_id_</span>(std::<span class="built_in">move</span>(id)) &#123;&#125;</span><br><span class="line"></span><br><span class="line">        <span class="function"><span class="type">void</span> <span class="title">Reset</span><span class="params">()</span> </span>&#123;</span><br><span class="line">            thread_id_.<span class="built_in">reset</span>();</span><br><span class="line">            callback_ = <span class="literal">nullptr</span>;</span><br><span class="line">            coroutine_ = <span class="literal">nullptr</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="built_in">Scheduler</span>(<span class="type">size_t</span> threads = <span class="number">1</span>, <span class="type">bool</span> use_caller = <span class="literal">true</span>, <span class="type">const</span> std::string&amp; name = <span class="string">&quot;scheduler&quot;</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">virtual</span> ~<span class="built_in">Scheduler</span>();</span><br><span class="line"></span><br><span class="line">    <span class="function">std::string <span class="title">GetName</span><span class="params">()</span> <span class="type">const</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> name_;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">Start</span><span class="params">()</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">Stop</span><span class="params">()</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">template</span> &lt;<span class="keyword">typename</span> TaskType&gt;</span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">Sched</span><span class="params">(TaskType t, ThreadIdPtr id = <span class="literal">nullptr</span>)</span> <span class="title">requires</span><span class="params">(std::invocable&lt;TaskType&gt; || std::same_as&lt;TaskType, Coroutine::Ptr&gt;)</span> </span>&#123;</span><br><span class="line">        <span class="type">bool</span> is_need_tick = <span class="literal">false</span>;</span><br><span class="line"></span><br><span class="line">        &#123;</span><br><span class="line">            <span class="function">std::lock_guard <span class="title">lock</span><span class="params">(mutex_)</span></span>;</span><br><span class="line">            is_need_tick = tasks_.<span class="built_in">empty</span>();</span><br><span class="line">            <span class="function">SchedulerTask <span class="title">task</span><span class="params">(t, id)</span></span>;</span><br><span class="line">            <span class="keyword">if</span> (task.callback_ || task.coroutine_) &#123;</span><br><span class="line">                tasks_.<span class="built_in">push_back</span>(task);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (is_need_tick) &#123;</span><br><span class="line">            <span class="built_in">Tickle</span>();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function"><span class="type">static</span> Scheduler* <span class="title">GetScheduler</span><span class="params">()</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="type">static</span> Coroutine* <span class="title">GetSchedCoroutine</span><span class="params">()</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">protected</span>:</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> <span class="type">void</span> <span class="title">Tickle</span><span class="params">()</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">Run</span><span class="params">()</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">SetThisAsScheduler</span><span class="params">()</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> <span class="type">void</span> <span class="title">Idle</span><span class="params">()</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> <span class="type">bool</span> <span class="title">IsStop</span><span class="params">()</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="type">bool</span> <span class="title">HasIdleThreads</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> idle_threads_ &gt; <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">    std::string name_;</span><br><span class="line">    std::mutex mutex_;</span><br><span class="line">    std::vector&lt;std::thread&gt; thread_pool_;</span><br><span class="line">    std::vector&lt;std::thread::id&gt; thread_ids_;</span><br><span class="line">    std::list&lt;SchedulerTask&gt; tasks_;</span><br><span class="line"></span><br><span class="line">    <span class="type">size_t</span> threads_size_;</span><br><span class="line">    std::<span class="type">atomic_size_t</span> active_threads_&#123;<span class="number">0</span>&#125;;</span><br><span class="line">    std::<span class="type">atomic_size_t</span> idle_threads_&#123;<span class="number">0</span>&#125;;</span><br><span class="line"></span><br><span class="line">    std::thread::id sched_id_; <span class="comment">// use_caller为true时，调度器所在的线程id</span></span><br><span class="line">    Coroutine::Ptr sched_co_;  <span class="comment">// use_caller为true时调度器所在线程的调度协程</span></span><br><span class="line">    <span class="type">bool</span> is_stop_;</span><br><span class="line">    <span class="type">bool</span> is_use_caller_;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">endif</span> <span class="comment">/* SCHEDULER_H_ */</span></span></span><br></pre></td></tr></table></figure>
+<p>调度器的工作流大致为：</p>
+<ul>
+<li><strong>协程调度器在初始化时</strong>可传入线程数和一个布尔型的<code>use_caller</code>参数，表示是否使用caller线程。在使用caller线程的情况下，线程数自动减一，并且调度器内部会初始化一个属于caller线程的调度协程并保存起来（比如，在main函数中创建的调度器，如果use_caller为true，那调度器会初始化一个属于main函数线程的调度协程）。</li>
+<li><strong>调度器创建好后</strong> ，即可调用调度器的<code>Sched</code>函数向调度器添加调度任务，但此时调度器并不会立刻执行这些任务，而是将它们保存到内部的一个任务队列中。</li>
+<li><strong>调用<code>Scheduler::Start()</code>函数启动调度</strong> 。调用Start会创建调度线程池，线程数量由初始化时的线程数和use_caller确定。调度线程一旦创建，就会<strong>立刻</strong>从任务队列里取任务执行。比较特殊的一点是，如果初始化时指定线程数为1且use_caller为true，那么Start方法什么也不做，因为不需要创建新线程用于调度。并且，由于没有创建新的调度线程，那只能由caller线程的调度协程来负责调度协程（这里有点绕），而caller线程的调度协程的执行时机与Start函数并不在同一个地方。caller线程的调度协程的执行时机在Stop函数中。</li>
+<li><strong>接下来是调度协程，对应<code>Scheduler::Run()</code></strong> 。调度协程负责从调度器的任务队列中取任务执行。取出的任务即子协程，每个子协程执行完后都必须返回调度协程，由调度协程重新从任务队列中取新的协程并执行。如果任务队列空了，那么调度协程会切换到一个idle协程，等有新任务进来时，idle协程才会退出并回到调度协程，重新开始下一轮调度。（在Scheduler中，idle函数的定义十分简单粗暴，因为实际使用协程库时并不是直接使用Scheduler类，而是使用它的派生类，在派生类中将会实现更为完善的调度）</li>
+<li><strong>接下来是添加调度任务，对应<code>Scheduler::Sched()</code></strong> ，这个方法支持传入协程或函数，并且支持一个线程id参数，表示是否将这个协程或函数绑定到一个具体的线程上执行。如果任务队列为空，那么在添加任务之后，要调用一次tickle方法以通知各调度线程的调度协程有新任务来了。在执行调度任务时，还可以通过调度器的<code>GetScheduler()</code>获取到当前调度器，再通过<code>Sched</code>函数继续添加新的任务，这就变相实现了在子协程中创建并运行新的子协程的功能。</li>
+<li><strong>接下来是调度器的停止</strong>。调度器的停止行为要分两种情况讨论，首先是use_caller为false的情况，这种情况下，由于没有使用caller线程进行调度，那么只需要简单地等各个调度线程的调度协程退出就行了。如果use_caller为true，表示caller线程也要参于调度，这时，调度器初始化时记录的属于caller线程的调度协程就要起作用了，在调度器停止前，应该让这个caller线程的调度协程也运行一次，让caller线程完成调度工作后再退出。如果调度器只使用了caller线程进行调度，那么所有的调度任务要在调度器停止时才会被调度。</li>
+</ul>
+<p>调度器中最重要的一个函数我认为就是<code>Run()</code>函数了，这个函数用于协程的调度，或者，你可以将他理解为是一个调度协程（名词）。</p>
+<p>创建Scheduler时会为每一个内部线程池中的每一个线程都绑定一个调度协程，线程数量默认为1，此时也默认会使用caller线程，也就是使用的主线程。调度协程<code>Scheduler::Run()</code>会从任务队列Task Queue中不断去取任务去执行。如果有任务可执行，那就切换至任务协程执行，任务协程执行完毕后又切换回调度协程；无任务执行时，调度协程切换至Idle协程进行等待。</p>
+<p><img src="../../images/Pasted%20image%2020240911153700.png" alt=""></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 用于协程的调度</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">Scheduler::Run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    LOG &lt;&lt; <span class="string">&quot;Scheduler running...\n&quot;</span>;</span><br><span class="line">    <span class="built_in">SetThisAsScheduler</span>();</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 如果当前线程不是调度器所在线程，设置调度的协程为当前线程运行的协程</span></span><br><span class="line">    <span class="keyword">if</span> (std::this_thread::<span class="built_in">get_id</span>() != sched_id_) &#123;</span><br><span class="line">        sched_coroutine = Coroutine::<span class="built_in">GetNowCoroutine</span>().<span class="built_in">get</span>();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    Coroutine::Ptr idle_co = std::<span class="built_in">make_shared</span>&lt;Coroutine&gt;([<span class="keyword">this</span>] &#123; <span class="keyword">this</span>-&gt;<span class="built_in">Idle</span>(); &#125;);</span><br><span class="line">    Coroutine::Ptr callback_co;</span><br><span class="line"></span><br><span class="line">    SchedulerTask task;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">while</span> (<span class="literal">true</span>) &#123;</span><br><span class="line">        task.<span class="built_in">Reset</span>();</span><br><span class="line">        <span class="type">bool</span> tickle = <span class="literal">false</span>;</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="function">std::lock_guard <span class="title">lock</span><span class="params">(mutex_)</span></span>;</span><br><span class="line">            <span class="keyword">auto</span> iter = tasks_.<span class="built_in">begin</span>();</span><br><span class="line">            <span class="keyword">while</span> (iter != tasks_.<span class="built_in">end</span>()) &#123;</span><br><span class="line">                <span class="comment">// 当前遍历的task已经分配了线程去执行且这个线程不是当前线程，则不用管</span></span><br><span class="line">                <span class="keyword">if</span> (iter-&gt;thread_id_ &amp;&amp; *iter-&gt;thread_id_ != std::this_thread::<span class="built_in">get_id</span>()) &#123;</span><br><span class="line">                    ++iter;</span><br><span class="line">                    tickle = <span class="literal">true</span>;</span><br><span class="line">                    <span class="keyword">continue</span>;</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="keyword">if</span> (iter-&gt;coroutine_ &amp;&amp; iter-&gt;coroutine_-&gt;<span class="built_in">GetState</span>() != Coroutine::READY) &#123;</span><br><span class="line">                    LOG &lt;&lt; <span class="string">&quot;Coroutine task&#x27;s state should be READY!\n&quot;</span>;</span><br><span class="line">                    <span class="built_in">assert</span>(<span class="literal">false</span>);</span><br><span class="line">                &#125;</span><br><span class="line">                task = *iter;</span><br><span class="line">                tasks_.<span class="built_in">erase</span>(iter++);</span><br><span class="line">                active_threads_++;</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="comment">// 有任务可以去执行，需要tickle一下</span></span><br><span class="line">            tickle |= (iter != tasks_.<span class="built_in">end</span>());</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (tickle) &#123;</span><br><span class="line">            <span class="built_in">Tickle</span>();</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 子协程执行完毕后yield会回到Run()中</span></span><br><span class="line">        <span class="keyword">if</span> (task.coroutine_) &#123;</span><br><span class="line">            <span class="comment">// 任务类型为协程</span></span><br><span class="line">            task.coroutine_-&gt;<span class="built_in">Resume</span>();</span><br><span class="line">            active_threads_--;</span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (task.callback_) &#123;</span><br><span class="line">            <span class="comment">// 任务类型为回调函数</span></span><br><span class="line">            <span class="keyword">if</span> (callback_co) &#123;</span><br><span class="line">                callback_co-&gt;<span class="built_in">Reset</span>(task.callback_);</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                callback_co = std::<span class="built_in">make_shared</span>&lt;Coroutine&gt;(task.callback_);</span><br><span class="line">            &#125;</span><br><span class="line">            callback_co-&gt;<span class="built_in">Resume</span>();</span><br><span class="line">            active_threads_--;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="comment">// 无任务，任务队列为空</span></span><br><span class="line">            <span class="keyword">if</span> (idle_co-&gt;<span class="built_in">GetState</span>() == Coroutine::FINISH) &#123;</span><br><span class="line">                LOG &lt;&lt; <span class="string">&quot;Idle coroutine finish\n&quot;</span>;</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            idle_threads_++;</span><br><span class="line">            idle_co-&gt;<span class="built_in">Resume</span>(); <span class="comment">// Idle最后Yeild时回到这里</span></span><br><span class="line">            idle_threads_--;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    LOG &lt;&lt; <span class="string">&quot;Scheduler Run() exit\n&quot;</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这个Scheduler是一个很简单的调度器，要对任务做更好的调度，少不了Idle协程的帮助。Idle协程的具体实现要在之后的IOManager中，其继承自Scheduler，重写了<code>Tickle()</code>、<code>Idle()</code>等函数，并且使用epoll来实现在不同的 I/O 事件发生时，触发相应的处理逻辑。这使得程序可以以非阻塞的方式处理多个 I/O 操作，而不必等待每个操作完成后再进行下一个操作。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          
+
+<div class="post-copyright">
+<ul>
+  <li class="post-copyright-author">
+      <strong>本文作者： </strong>Kerolt
+  </li>
+  <li class="post-copyright-link">
+      <strong>本文链接：</strong>
+      <a href="https://kerolt.github.io/posts/4e1ce3da/" title="【动手写协程库 2】协程调度器">https://kerolt.github.io/posts/4e1ce3da/</a>
+  </li>
+  <li class="post-copyright-license">
+      <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/CPlusPlus/" rel="tag"><i class="fa fa-tag"></i> CPlusPlus</a>
+              <a href="/tags/Coroutine/" rel="tag"><i class="fa fa-tag"></i> Coroutine</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/posts/24411cf0/" rel="prev" title="【动手写协程库 1】协程定义">
+                  <i class="fa fa-angle-left"></i> 【动手写协程库 1】协程定义
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/posts/5f62bd9/" rel="next" title="enable_shared_from_this的作用">
+                  enable_shared_from_this的作用 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+    
+  <div class="comments" id="disqus_thread">
+    <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+  </div>
+  
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 2023 – 
+    <span itemprop="copyrightYear">2024</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Kerolt</span>
+  </div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+    <span title="站点总字数">40k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">2:24</span>
+  </span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/mist/" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/fancyapps-ui/5.0.31/fancybox/fancybox.umd.js" integrity="sha256-a+H7FYzJv6oU2hfsfDGM2Ohw/cR9v+hPfxHCLdmCrE8=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/sidebar.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+  <script src="/js/third-party/fancybox.js"></script>
+
+  <script src="/js/third-party/pace.js"></script>
+
+
+  
+
+
+
+
+<script class="next-config" data-name="disqus" type="application/json">{"enable":true,"shortname":"kerolt","count":true,"i18n":{"disqus":"disqus"}}</script>
+<script src="/js/third-party/comments/disqus.js"></script>
+
+</body>
+</html>
