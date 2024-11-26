@@ -838,7 +838,7 @@ https://www.cnblogs.com/conefirst/articles/15224039.html</p>
 <p>这个lab的代码还是比较多的，不过它还给我们放了些水，只让我们实现一些基础的功能。在lab中更重要的是要搞清楚mmap的实现原理，一定要去理解其中的细节。</p>
 ]]></content>
       <categories>
-        <category>Lab</category>
+        <category>操作系统</category>
       </categories>
       <tags>
         <tag>MIT6-S081</tag>
@@ -1283,7 +1283,7 @@ https://www.cnblogs.com/conefirst/articles/15224039.html</p>
 </ol>
 ]]></content>
       <categories>
-        <category>Lab</category>
+        <category>操作系统</category>
       </categories>
       <tags>
         <tag>MIT6-S081</tag>
@@ -1360,7 +1360,7 @@ https://www.cnblogs.com/conefirst/articles/15224039.html</p>
 </ul>
 ]]></content>
       <categories>
-        <category>Lab</category>
+        <category>操作系统</category>
       </categories>
       <tags>
         <tag>MIT6-S081</tag>
@@ -1460,7 +1460,7 @@ https://www.cnblogs.com/conefirst/articles/15224039.html</p>
 <p>文件系统是一个有意思的东西，同时也很复杂，xv6中设计了一个简化的文件系统，并采用了分层的设计。虽然这里将实验做完了，但是我觉得自己还有很多细节没有搞懂。例如其中的日志层，其是如何实现crash之后能恢复过来的代码是如何设计编写的，还有其中的锁的获取与释放等等。希望之后能结合实际再分析分析。</p>
 ]]></content>
       <categories>
-        <category>Lab</category>
+        <category>操作系统</category>
       </categories>
       <tags>
         <tag>MIT6-S081</tag>
@@ -1497,7 +1497,7 @@ https://www.cnblogs.com/conefirst/articles/15224039.html</p>
 <p>可以看到，在yield函数中，进程p的锁的使用顺序并不是<code>acquire() 获取锁-&gt; 执行shed()函数 -&gt; release()释放锁</code>这样线性的，在其中会发生进程切换因此锁的“获取、释放”逻辑并不发生在一个函数中。</p>
 ]]></content>
       <categories>
-        <category>Lab</category>
+        <category>操作系统</category>
       </categories>
       <tags>
         <tag>MIT6-S081</tag>
