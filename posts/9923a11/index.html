@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <meta name="google-site-verification" content="G2bBvIdEL2IvKAU2atPObrKeGOZYYjla4BUoKafFos0">
+  <meta name="msvalidate.01" content="2300A23B82DB579A2DEA6261191AD771">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+CJK+SC:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&family=JetBrains+Mono:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap&subset=latin,latin-ext">
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha256-5eIC48iZUHmSlSUz9XtjRyK2mzQkHScZY1WdMaoz74E=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancyapps-ui/5.0.31/fancybox/fancybox.css" integrity="sha256-gkQVf8UKZgQ0HyuxL/VnacadJ+D2Kox2TCEBuNQg5+w=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/pace/1.2.4/themes/blue/pace-theme-minimal.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pace/1.2.4/pace.min.js" integrity="sha256-gqd7YTjg/BtfqWSwsJOvndl0Bxc8gFImLEkXQT8+qj0=" crossorigin="anonymous"></script>
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"kerolt.github.io","root":"/","images":"/images","scheme":"Mist","darkmode":false,"version":"8.21.1","exturl":false,"sidebar":{"position":"right","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"copycode":{"enable":true,"style":"flat"},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"disqus","storage":true,"lazyload":false,"nav":null,"activeClass":"disqus"},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false,"trigger":"auto"}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="Intro 这个实验个人感觉挺难的，需要我们重新设计数据结构，还要考虑在并发（并行）情况下对于锁的操作，以减少多核情况下对于锁的竞争。其中主要涉及内存分配和IO缓冲块分配，在这个lab之前，xv6对于这两个分配都是使用的全局对象，并只有一把全局锁进行操作，这样的话在并行情况下锁的竞争是很激烈的，我们的任务就是重新设计这两个分配器，它们的重构思路并不完全一致，需要具体问题具体分析。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="【MIT6.S081】Lab8 lock">
+<meta property="og:url" content="https://kerolt.github.io/posts/9923a11/index.html">
+<meta property="og:site_name" content="Kerolt&#39;s Blog">
+<meta property="og:description" content="Intro 这个实验个人感觉挺难的，需要我们重新设计数据结构，还要考虑在并发（并行）情况下对于锁的操作，以减少多核情况下对于锁的竞争。其中主要涉及内存分配和IO缓冲块分配，在这个lab之前，xv6对于这两个分配都是使用的全局对象，并只有一把全局锁进行操作，这样的话在并行情况下锁的竞争是很激烈的，我们的任务就是重新设计这两个分配器，它们的重构思路并不完全一致，需要具体问题具体分析。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://kerolt.github.io/images/Pasted%20image%2020240728201657.png">
+<meta property="og:image" content="https://kerolt.github.io/images/Pasted%20image%2020240728232702.png">
+<meta property="article:published_time" content="2024-11-17T00:00:00.000Z">
+<meta property="article:modified_time" content="2024-11-17T00:00:00.000Z">
+<meta property="article:author" content="Kerolt">
+<meta property="article:tag" content="MIT6-S081">
+<meta property="article:tag" content="OS">
+<meta property="article:tag" content="xv6">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://kerolt.github.io/images/Pasted%20image%2020240728201657.png">
+
+
+<link rel="canonical" href="https://kerolt.github.io/posts/9923a11/">
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://kerolt.github.io/posts/9923a11/","path":"posts/9923a11/","title":"【MIT6.S081】Lab8 lock"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>【MIT6.S081】Lab8 lock | Kerolt's Blog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Kerolt's Blog</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="搜索..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Intro"><span class="nav-number">1.</span> <span class="nav-text">Intro</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Memory-Allocator"><span class="nav-number">2.</span> <span class="nav-text">Memory Allocator</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Buffer-Cache"><span class="nav-number">3.</span> <span class="nav-text">Buffer Cache</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Code-Details"><span class="nav-number">4.</span> <span class="nav-text">Code Details</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Reference"><span class="nav-number">5.</span> <span class="nav-text">Reference</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Kerolt"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">Kerolt</p>
+  <div class="site-description" itemprop="description">给岁月以文明，给时光以生命</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">45</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">9</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/kerolt" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;kerolt" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:kerolt@qq.com" title="E-Mail → mailto:kerolt@qq.com" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i></a>
+      </span>
+  </div>
+  <div class="cc-license animated" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="https://cdnjs.cloudflare.com/ajax/libs/creativecommons-vocabulary/2020.11.3/assets/license_badges/small/by_nc_sa.svg" alt="Creative Commons"></a>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://kerolt.github.io/posts/9923a11/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="Kerolt">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Kerolt's Blog">
+      <meta itemprop="description" content="给岁月以文明，给时光以生命">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="【MIT6.S081】Lab8 lock | Kerolt's Blog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          【MIT6.S081】Lab8 lock
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2024-11-17 00:00:00" itemprop="dateCreated datePublished" datetime="2024-11-17T00:00:00+00:00">2024-11-17</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Lab/" itemprop="url" rel="index"><span itemprop="name">Lab</span></a>
+        </span>
+    </span>
+
+  
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus：</span>
+    
+    <a title="disqus" href="/posts/9923a11/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="posts/9923a11/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>3k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>11 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h2 id="Intro">Intro<a class="anchor" href="#Intro"></a></h2>
+<p>这个实验个人感觉挺难的，需要我们重新设计数据结构，还要考虑在并发（并行）情况下对于锁的操作，以减少多核情况下对于锁的竞争。其中主要涉及内存分配和IO缓冲块分配，在这个lab之前，xv6对于这两个分配都是使用的全局对象，并只有一把全局锁进行操作，这样的话在并行情况下锁的竞争是很激烈的，我们的任务就是重新设计这两个分配器，它们的重构思路并不完全一致，需要具体问题具体分析。</p>
+<span id="more"></span>
+<h2 id="Memory-Allocator">Memory Allocator<a class="anchor" href="#Memory-Allocator"></a></h2>
+<p>在xv6中，内存通过<code>kalloc()</code>来分配，在其内部，会使用一个<code>kmem</code>的结构体变量：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// kernel/kalloc.c</span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">run</span> &#123;</span></span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">run</span> *<span class="title">next</span>;</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">struct</span> &#123;</span></span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">spinlock</span> <span class="title">lock</span>;</span></span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">run</span> *<span class="title">freelist</span>;</span></span><br><span class="line">&#125; kmem;</span><br></pre></td></tr></table></figure>
+<p><code>kmem.freelist</code>保存着未使用的内存块（每块大小为4KB），在内核初始化时，会通过<code>kinit()</code>将地址<code>KERNBASE ~ PHYSTOP</code>的物理内存（一共128MB）放入freelist中：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span></span><br><span class="line"><span class="title function_">kinit</span><span class="params">()</span></span><br><span class="line">&#123;</span><br><span class="line">  initlock(&amp;kmem.lock, <span class="string">&quot;kmem&quot;</span>);</span><br><span class="line">  freerange(end, (<span class="type">void</span>*)PHYSTOP); <span class="comment">// end为kernel.ld中定义的，值为0x80000000，即KERNBASE</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span></span><br><span class="line"><span class="title function_">freerange</span><span class="params">(<span class="type">void</span> *pa_start, <span class="type">void</span> *pa_end)</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="type">char</span> *p;</span><br><span class="line">  p = (<span class="type">char</span>*)PGROUNDUP((uint64)pa_start);</span><br><span class="line">  <span class="keyword">for</span>(; p + PGSIZE &lt;= (<span class="type">char</span>*)pa_end; p += PGSIZE)</span><br><span class="line">    kfree(p); <span class="comment">// 使用kfree将内存块放入freelist中</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>通过上面的源码分析我们可以看到，整个xv6内核都是通过一个全局的<code>kmem</code>来分配和回收内存块，那么如果当多个CPU（多个core）需要操作内存块时，就必须得用锁才能保证整体的稳定和正确。</p>
+<p>但是这样做又会有一个大问题，那就是一个cpu在操作<code>kmem</code>时，另一个CPU即便想获取内存块或释放内存块，因为锁的缘故也只能等待。故我们的解决方案是为每个CPU都设置一个<code>kmem</code>，这样，哪个CPU需要操作内存块时就可以只锁上它自己的kmem，其他CPU受到的干扰会大大减少。</p>
+<p>为什么说是大大减少而不是完全减少呢？这是因为当某个CPU的<code>kmem.freelist</code>中没有可分配的内存块时，需要去其他CPU的<code>kmem.freelist</code>中去拿一个过来，这时就需要处理好这两个CPU的锁的处理了。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> &#123;</span></span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">spinlock</span> <span class="title">lock</span>;</span></span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">run</span> *<span class="title">freelist</span>;</span></span><br><span class="line">  <span class="type">char</span> lock_name[<span class="number">8</span>]; <span class="comment">// 每个kmem的锁的名称</span></span><br><span class="line">&#125; kmem[NCPU]; <span class="comment">// 为每个CPU都设置一个kmem</span></span><br><span class="line"></span><br><span class="line"><span class="type">void</span></span><br><span class="line"><span class="title function_">kinit</span><span class="params">()</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="comment">// 初始化时要对每个kmem都初始锁</span></span><br><span class="line">  <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; NCPU; i++) &#123;</span><br><span class="line">    initlock(&amp;kmem[i].lock, <span class="string">&quot;kmem&quot;</span>);</span><br><span class="line">    <span class="built_in">snprintf</span>(kmem[i].lock_name, <span class="keyword">sizeof</span>(kmem[i].lock_name), <span class="string">&quot;kmem%d&quot;</span>, i);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="comment">// 这里会先将所有内存块都分配给kmem[0]，因为内核启动时是cpus[0]在做初始化操作</span></span><br><span class="line">  <span class="comment">// 之后其他CPU需要内存块时，从cpus[0]这里拿</span></span><br><span class="line">  freerange(end, (<span class="type">void</span>*)PHYSTOP);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span></span><br><span class="line"><span class="title function_">kfree</span><span class="params">(<span class="type">void</span> *pa)</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">run</span> *<span class="title">r</span>;</span></span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span>(((uint64)pa % PGSIZE) != <span class="number">0</span> || (<span class="type">char</span>*)pa &lt; end || (uint64)pa &gt;= PHYSTOP)</span><br><span class="line">    panic(<span class="string">&quot;kfree&quot;</span>);</span><br><span class="line"></span><br><span class="line">  <span class="comment">// Fill with junk to catch dangling refs.</span></span><br><span class="line">  <span class="built_in">memset</span>(pa, <span class="number">1</span>, PGSIZE);</span><br><span class="line"></span><br><span class="line">  r = (<span class="keyword">struct</span> run*)pa;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// ----------------------------------------</span></span><br><span class="line">  <span class="comment">// kfree时只需要将内存块放到自己所属cpu的kmem.freelist中</span></span><br><span class="line">  push_off();</span><br><span class="line"></span><br><span class="line">  <span class="type">int</span> cid = cpuid();</span><br><span class="line">  acquire(&amp;kmem[cid].lock);</span><br><span class="line">  r-&gt;next = kmem[cid].freelist;</span><br><span class="line">  kmem[cid].freelist = r;</span><br><span class="line">  release(&amp;kmem[cid].lock);</span><br><span class="line"></span><br><span class="line">  pop_off();</span><br><span class="line">  <span class="comment">// ----------------------------------------</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> *</span><br><span class="line"><span class="title function_">kalloc</span><span class="params">(<span class="type">void</span>)</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">run</span> *<span class="title">r</span>;</span></span><br><span class="line"></span><br><span class="line">  <span class="comment">// ----------------------------------------</span></span><br><span class="line">  push_off();</span><br><span class="line"></span><br><span class="line">  <span class="type">int</span> cid = cpuid();</span><br><span class="line">  acquire(&amp;kmem[cid].lock);</span><br><span class="line">  r = kmem[cid].freelist;</span><br><span class="line">  <span class="keyword">if</span> (r) &#123;</span><br><span class="line">    <span class="comment">// 如果当前的freelist中还有内存块，则直接用</span></span><br><span class="line">    kmem[cid].freelist = r-&gt;next;</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="comment">// 没有？那就拿！</span></span><br><span class="line">    <span class="comment">// 遍历一下其他CPU的kmem，如果找到的freelist中还有内存块，就拿它的</span></span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> next_cid = <span class="number">0</span>; next_cid &lt; NCPU; next_cid++) &#123;</span><br><span class="line">      <span class="comment">// 不找自己</span></span><br><span class="line">      <span class="keyword">if</span> (next_cid == cid)</span><br><span class="line">        <span class="keyword">continue</span>;</span><br><span class="line"></span><br><span class="line">      acquire(&amp;kmem[next_cid].lock);</span><br><span class="line">      r = kmem[next_cid].freelist;</span><br><span class="line">      <span class="keyword">if</span> (r) &#123;</span><br><span class="line">        kmem[next_cid].freelist = r-&gt;next;</span><br><span class="line">        release(&amp;kmem[next_cid].lock);</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">      &#125;</span><br><span class="line">      release(&amp;kmem[next_cid].lock);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  release(&amp;kmem[cid].lock);</span><br><span class="line"></span><br><span class="line">  pop_off();</span><br><span class="line">  <span class="comment">// ----------------------------------------</span></span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span>(r)</span><br><span class="line">    <span class="built_in">memset</span>((<span class="type">char</span>*)r, <span class="number">5</span>, PGSIZE); <span class="comment">// fill with junk</span></span><br><span class="line">  <span class="keyword">return</span> (<span class="type">void</span>*)r;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h2 id="Buffer-Cache">Buffer Cache<a class="anchor" href="#Buffer-Cache"></a></h2>
+<p>先介绍下实验初始的bcache：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> &#123;</span></span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">spinlock</span> <span class="title">lock</span>;</span></span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">buf</span> <span class="title">buf</span>[<span class="title">NBUF</span>];</span></span><br><span class="line"></span><br><span class="line">  <span class="comment">// Linked list of all buffers, through prev/next.</span></span><br><span class="line">  <span class="comment">// Sorted by how recently the buffer was used.</span></span><br><span class="line">  <span class="comment">// head.next is most recent, head.prev is least.</span></span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">buf</span> <span class="title">head</span>;</span></span><br><span class="line">&#125; bcache;</span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>struct spinlock lock</code>：bcache的全局锁</li>
+<li><code>struct buf buf[NBUF]</code>：缓冲块池，即包含了所有的buffer cache</li>
+<li><code>struct buf head</code>：一个LRU链表，用于操作缓冲块，使用head.next获取的是最近刚使用过的buffer，head.prev获取的是最近未使用时间最久的buffer（或者说是未被使用的buffer，即引用计数为0）</li>
+</ul>
+<p><img src="../../images/Pasted%20image%2020240728201657.png" alt=""></p>
+<p>原来的bcache中的buf数组在binit时就给LRU链表初始化用了：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span></span><br><span class="line"><span class="title function_">binit</span><span class="params">(<span class="type">void</span>)</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">buf</span> *<span class="title">b</span>;</span></span><br><span class="line"></span><br><span class="line">  initlock(&amp;bcache.lock, <span class="string">&quot;bcache&quot;</span>);</span><br><span class="line"></span><br><span class="line">  <span class="comment">// Create linked list of buffers</span></span><br><span class="line">  bcache.head.prev = &amp;bcache.head;</span><br><span class="line">  bcache.head.next = &amp;bcache.head;</span><br><span class="line">  <span class="keyword">for</span>(b = bcache.buf; b &lt; bcache.buf+NBUF; b++)&#123;</span><br><span class="line">    b-&gt;next = bcache.head.next;</span><br><span class="line">    b-&gt;prev = &amp;bcache.head;</span><br><span class="line">    initsleeplock(&amp;b-&gt;lock, <span class="string">&quot;buffer&quot;</span>);</span><br><span class="line">    bcache.head.next-&gt;prev = b;</span><br><span class="line">    bcache.head.next = b;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>而这样设计的buffer cache有一个问题，由于buffer cache只有一个全局锁，当在高并发的情况下，进程需要并发访问bcache时，无法达到多进程带来的优势，一个进程必须要先等前一个进程释放锁后才可以操作。</p>
+<p>考虑前一个实验中的kalloc，我们能否也使用那样的策略？</p>
+<blockquote>
+<p>Reducing contention in the block cache is more tricky than for kalloc, because bcache buffers are truly shared among processes (and thus CPUs). For kalloc, one could eliminate most contention by giving each CPU its own allocator; that won’t work for the block cache.</p>
+</blockquote>
+<p>为什么这么说呢？是因为block cache并不像内存页那样具有通用性。block cache对应着真实的物理外存块，每一个CPU都可能使用同一个block cache，所以无法像kalloc中那样为每个CPU分配其对应的cache。</p>
+<p>既然我们无法分别为每个CPU分配，那么我们可以换一个角度，对所有的block块进行分组：我们可以创建一个哈希桶hash buckets（这里使用的容量为13），那么对每个block块的块号进行取余操作（mod 13）即可将它们映射到其中一个哈希桶中。这样一来，我们需要使用标号为blockno的块时，到其映射的哈希桶中去寻找即可，并且，在并发情况下，我们一般上锁的单位从整个bcache变为了其中的一个桶，锁的粒度大大减小了。</p>
+<p>那么我们修改一下bcache的数据结构：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> NBUCKET 13</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> BLOCK_HASH(blockno) (blockno % NBUCKET)</span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">struct</span> &#123;</span></span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">spinlock</span> <span class="title">g_lock</span>;</span> <span class="comment">// 全局锁，这里相较之前只是改了个名字</span></span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">buf</span> <span class="title">buf</span>[<span class="title">NBUF</span>];</span></span><br><span class="line"></span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">spinlock</span> <span class="title">bk_lock</span>[<span class="title">NBUCKET</span>];</span> <span class="comment">// 每个hash bucket都对应有一把锁</span></span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">buf</span> <span class="title">bucket</span>[<span class="title">NBUCKET</span>];</span>       <span class="comment">// hash bucket</span></span><br><span class="line">  <span class="type">int</span> size; <span class="comment">// 缓冲块池（buf[NBUF]）中已使用的块数</span></span><br><span class="line">&#125; bcache;</span><br></pre></td></tr></table></figure>
+<p><img src="../../images/Pasted%20image%2020240728232702.png" alt=""></p>
+<p>我们在重构的方案中，不再使用LRU链表，但还是使用了LRU算法的思想，只是用时间戳来代替LRU链表：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">buf</span> &#123;</span></span><br><span class="line">  <span class="type">int</span> valid;   <span class="comment">// has data been read from disk?</span></span><br><span class="line">  <span class="type">int</span> disk;    <span class="comment">// does disk &quot;own&quot; buf?</span></span><br><span class="line">  uint dev;</span><br><span class="line">  uint blockno;</span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">sleeplock</span> <span class="title">lock</span>;</span></span><br><span class="line">  uint refcnt;</span><br><span class="line">  <span class="comment">// struct buf *prev; // LRU cache list</span></span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">buf</span> *<span class="title">next</span>;</span></span><br><span class="line">  uchar data[BSIZE];</span><br><span class="line">  uint timestamp;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>这个时间戳通过一个全局变量<code>ticks</code>（trap.c）来获取：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">extern</span> uint ticks;</span><br></pre></td></tr></table></figure>
+<p>那么在初始化bcache时，我们只需要初始化其中的锁和bcache.size即可：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span></span><br><span class="line"><span class="title function_">binit</span><span class="params">(<span class="type">void</span>)</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">buf</span> *<span class="title">b</span>;</span></span><br><span class="line"></span><br><span class="line">  bcache.size = <span class="number">0</span>;</span><br><span class="line">  initlock(&amp;bcache.g_lock, <span class="string">&quot;bcache&quot;</span>);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; NBUCKET; i++) &#123;</span><br><span class="line">    initlock(&amp;bcache.bk_lock[i], <span class="string">&quot;bk_lock&quot;</span>);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">for</span>(b = bcache.buf; b &lt; bcache.buf+NBUF; b++)&#123;</span><br><span class="line">    initsleeplock(&amp;b-&gt;lock, <span class="string">&quot;buffer&quot;</span>);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>由于我们对于锁的操作单位变为了bucket，所以下面两个函数也需要修改：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span></span><br><span class="line"><span class="title function_">bpin</span><span class="params">(<span class="keyword">struct</span> buf *b)</span> &#123;</span><br><span class="line">  <span class="type">int</span> idx = BLOCK_HASH(b-&gt;blockno);</span><br><span class="line">  acquire(&amp;bcache.bk_lock[idx]);</span><br><span class="line">  b-&gt;refcnt++;</span><br><span class="line">  release(&amp;bcache.bk_lock[idx]);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span></span><br><span class="line"><span class="title function_">bunpin</span><span class="params">(<span class="keyword">struct</span> buf *b)</span> &#123;</span><br><span class="line">  <span class="type">int</span> idx = BLOCK_HASH(b-&gt;blockno);</span><br><span class="line">  acquire(&amp;bcache.bk_lock[idx]);</span><br><span class="line">  b-&gt;refcnt--;</span><br><span class="line">  release(&amp;bcache.bk_lock[idx]);</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>在原先的释放buffer块的<code>brelse(struct buf *b)</code>函数中，会先对<code>b</code>的引用计数-1，当其值为0时，将其转移至LRU链表的<code>head-&gt;prev</code>位置，说明这个buffer没有被任何进程使用了。而在重构方案中，我们使用时间戳代替了LRU链表，每个bucket中我们并没有维护一个LRU链表，而是认为引用计数为0且时间戳最小的的buffer是没有被任何进程使用的，故在引用计数为0时，只需要更新buffer的时间戳即可：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span></span><br><span class="line"><span class="title function_">brelse</span><span class="params">(<span class="keyword">struct</span> buf *b)</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="keyword">if</span>(!holdingsleep(&amp;b-&gt;lock))</span><br><span class="line">    panic(<span class="string">&quot;brelse&quot;</span>);</span><br><span class="line"></span><br><span class="line">  releasesleep(&amp;b-&gt;lock);</span><br><span class="line"></span><br><span class="line">  <span class="type">int</span> idx = BLOCK_HASH(b-&gt;blockno);</span><br><span class="line">  acquire(&amp;bcache.bk_lock[idx]);</span><br><span class="line">  b-&gt;refcnt--;</span><br><span class="line">  <span class="keyword">if</span> (b-&gt;refcnt == <span class="number">0</span>) &#123;</span><br><span class="line">    <span class="comment">// no one is waiting for it.</span></span><br><span class="line">    b-&gt;timestamp = ticks; <span class="comment">// 未使用的buffer的时间戳一定是最小的</span></span><br><span class="line">  &#125;</span><br><span class="line">  </span><br><span class="line">  release(&amp;bcache.bk_lock[idx]);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>对于bcache最重要的<code>bget()</code>函数，我们重构的思路为：</p>
+<ol>
+<li>检查标号为blockno的块的缓存是否在cache中，如果在，则其引用计数+1，返回该缓存块</li>
+<li>在缓存中没有找到，先在缓冲块池中寻找还未分配给bucket的缓存块</li>
+<li>如果缓冲块池中都分配出去了，就到每个bucket中去找。如果当前遍历的bucket中有buffer的引用计数为0，拿到其中时间戳最小的buffer（这也就是说这个buffer是距离现在最久没有使用的合法块）
+<ul>
+<li>如果这个buffer在原先的bucket中，返回这个buffer</li>
+<li>否则需要将这个buffer从当前bucket中转移到目标bucket中</li>
+</ul>
+</li>
+</ol>
+<p>这是一个大致的思路，具体细节参考如下代码：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">static</span> <span class="keyword">struct</span> buf*</span><br><span class="line"><span class="title function_">bget</span><span class="params">(uint dev, uint blockno)</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">buf</span> *<span class="title">b</span>;</span></span><br><span class="line">  <span class="type">int</span> bucket_idx = BLOCK_HASH(blockno);</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 先对blockno对应的bucket上锁即可</span></span><br><span class="line">  acquire(&amp;bcache.bk_lock[bucket_idx]);</span><br><span class="line"></span><br><span class="line">  <span class="comment">// Is the block already cached?</span></span><br><span class="line">  <span class="keyword">for</span>(b = &amp;bcache.bucket[bucket_idx]; b; b = b-&gt;next)&#123;</span><br><span class="line">    <span class="keyword">if</span>(b-&gt;dev == dev &amp;&amp; b-&gt;blockno == blockno)&#123;</span><br><span class="line">      b-&gt;refcnt++;</span><br><span class="line">      release(&amp;bcache.bk_lock[bucket_idx]);</span><br><span class="line">      acquiresleep(&amp;b-&gt;lock);</span><br><span class="line">      <span class="keyword">return</span> b;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 在缓存中没有找到，先在缓冲块池中寻找还未分配给bucket的缓存块</span></span><br><span class="line">  <span class="comment">// 需要使用全局锁来保证bcache.size++的原子性</span></span><br><span class="line">  <span class="comment">// 这里也是为什么buffer时间戳不需要初始化的原因：每一次需要使用buffer时（会调用bget），</span></span><br><span class="line">  <span class="comment">// 如果buffer池中还有空闲buffer，则会直接使用这个buffer，完成操作后会调用relese释放buffer，此时就会更新buffer的时间戳</span></span><br><span class="line">  acquire(&amp;bcache.g_lock);</span><br><span class="line">  <span class="keyword">if</span> (bcache.size &lt; NBUF) &#123;</span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">buf</span> *<span class="title">b</span> =</span> &amp;bcache.buf[bcache.size++];</span><br><span class="line">    b-&gt;next = bcache.bucket[bucket_idx].next;</span><br><span class="line">    bcache.bucket[bucket_idx].next = b;</span><br><span class="line">    b-&gt;dev = dev;</span><br><span class="line">    b-&gt;blockno = blockno;</span><br><span class="line">    b-&gt;valid = <span class="number">0</span>;</span><br><span class="line">    b-&gt;refcnt = <span class="number">1</span>;</span><br><span class="line">    release(&amp;bcache.g_lock);</span><br><span class="line">    acquiresleep(&amp;b-&gt;lock);</span><br><span class="line">    <span class="keyword">return</span> b;</span><br><span class="line">  &#125;</span><br><span class="line">  release(&amp;bcache.g_lock);</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 在这时才能释放该bucket的锁，假设在检查缓存是否存在后释放：</span></span><br><span class="line">  <span class="comment">// 如果有两个进程1和2，此时缓冲块池还有多个未分配的块，进程1检查bucket，发现没有缓存，释放锁，准备去缓冲块池中拿</span></span><br><span class="line">  <span class="comment">// 此时切换到进程2，进程2检查bucket,发现没有缓存，也去缓冲块池中拿</span></span><br><span class="line">  <span class="comment">// 这样就会导致bucket会添加两个blockno的缓冲块</span></span><br><span class="line">  release(&amp;bcache.bk_lock[bucket_idx]);</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 在每个bucket中去找可用的buffer cache</span></span><br><span class="line">  <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; NBUCKET; i++) &#123;</span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">buf</span> *<span class="title">cur_buf</span>, *<span class="title">pre_buf</span>, *<span class="title">min_buf</span>, *<span class="title">min_pre_buf</span>;</span></span><br><span class="line">    uint min_timestamp = <span class="number">-1</span>;</span><br><span class="line"></span><br><span class="line">    acquire(&amp;bcache.bk_lock[bucket_idx]);</span><br><span class="line">    pre_buf = &amp;bcache.bucket[bucket_idx];</span><br><span class="line">    cur_buf = pre_buf-&gt;next;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 遍历bcache.bucket[bucket_idx]</span></span><br><span class="line">    <span class="keyword">while</span> (cur_buf) &#123;</span><br><span class="line">      <span class="comment">// 为什么这里需要重新检查？考虑这样一种情况：</span></span><br><span class="line">      <span class="comment">// 假设缓冲块池中还有一个未分配的，此时有两个进程，进程1和2都需要访问同一个标号blockno的块</span></span><br><span class="line">      <span class="comment">// 进程1先拿到这个未分配的，并将其放入了对应的bucket中</span></span><br><span class="line">      <span class="comment">// 之后进程2发现池中没有未分配的了，开始遍历所有bucket，</span></span><br><span class="line">      <span class="comment">// 如果这时不重新检查一下blockno对应的bucket，则会导致一个bucket中有两个blockno的块</span></span><br><span class="line">      <span class="keyword">if</span> (bucket_idx == BLOCK_HASH(blockno) &amp;&amp; cur_buf-&gt;blockno == blockno &amp;&amp;</span><br><span class="line">          cur_buf-&gt;dev == dev) &#123;</span><br><span class="line">        cur_buf-&gt;refcnt++;</span><br><span class="line">        release(&amp;bcache.bk_lock[bucket_idx]);</span><br><span class="line">        acquiresleep(&amp;cur_buf-&gt;lock);</span><br><span class="line">        <span class="keyword">return</span> cur_buf;</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">      <span class="comment">// 只有引用计数为0,并且时间戳最小的缓冲块才可被重新分配</span></span><br><span class="line">      <span class="keyword">if</span> (cur_buf-&gt;refcnt == <span class="number">0</span> &amp;&amp; cur_buf-&gt;timestamp &lt; min_timestamp) &#123;</span><br><span class="line">        min_pre_buf = pre_buf;</span><br><span class="line">        min_buf = cur_buf;</span><br><span class="line">        min_timestamp = cur_buf-&gt;timestamp;</span><br><span class="line">      &#125;</span><br><span class="line">      </span><br><span class="line">      pre_buf = cur_buf;</span><br><span class="line">      cur_buf = cur_buf-&gt;next;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 在本轮中找到了可重新分配的缓冲块</span></span><br><span class="line">    <span class="keyword">if</span> (min_buf) &#123;</span><br><span class="line">      min_buf-&gt;dev = dev;</span><br><span class="line">      min_buf-&gt;blockno = blockno;</span><br><span class="line">      min_buf-&gt;valid = <span class="number">0</span>;</span><br><span class="line">      min_buf-&gt;refcnt = <span class="number">1</span>;</span><br><span class="line"></span><br><span class="line">      <span class="comment">// 是自身bucket中的，不用做转移操作</span></span><br><span class="line">      <span class="keyword">if</span> (bucket_idx == BLOCK_HASH(blockno)) &#123;</span><br><span class="line">        <span class="comment">// release(&amp;bcache.hash_lock);</span></span><br><span class="line">        release(&amp;bcache.bk_lock[bucket_idx]);</span><br><span class="line">        acquiresleep(&amp;min_buf-&gt;lock);</span><br><span class="line">        <span class="keyword">return</span> min_buf;</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">      <span class="comment">// 是其他bucket中的，需要转移</span></span><br><span class="line">      <span class="comment">// 先将目标bucket中的buffer移除，然后释放锁</span></span><br><span class="line">      min_pre_buf-&gt;next = min_buf-&gt;next;</span><br><span class="line">      release(&amp;bcache.bk_lock[bucket_idx]);</span><br><span class="line"></span><br><span class="line">      <span class="comment">// 接着获取blockno对应的锁，并将从目标bucket中移除的buffer放至blockno对应的bucket，返回该buffer</span></span><br><span class="line">      bucket_idx = BLOCK_HASH(blockno);</span><br><span class="line">      acquire(&amp;bcache.bk_lock[bucket_idx]);</span><br><span class="line">      min_buf-&gt;next = bcache.bucket[bucket_idx].next;</span><br><span class="line">      bcache.bucket[bucket_idx].next = min_buf;</span><br><span class="line">      release(&amp;bcache.bk_lock[bucket_idx]);</span><br><span class="line">      acquiresleep(&amp;min_buf-&gt;lock);</span><br><span class="line">      <span class="keyword">return</span> min_buf;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    release(&amp;bcache.bk_lock[bucket_idx]);</span><br><span class="line">    <span class="comment">// 如果到底了，从头来，保证遍历每一个bucket</span></span><br><span class="line">    <span class="keyword">if</span> (++bucket_idx == NBUCKET) &#123;</span><br><span class="line">      bucket_idx = <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  </span><br><span class="line">  panic(<span class="string">&quot;bget: no buffers&quot;</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>bget是这个lab中最复杂的地方，其处理逻辑虽然较好理解，但是多个锁的操作顺序很让人头疼，需要考虑到多种并发情况。</p>
+<h2 id="Code-Details">Code Details<a class="anchor" href="#Code-Details"></a></h2>
+<p>代码实现详情请见Github：<a target="_blank" rel="noopener" href="https://github.com/kerolt/xv6-labs-2023/commit/ccac48e8ae6b6dde3e7c747a77f4149232420901">https://github.com/kerolt/xv6-labs-2023/commit/ccac48e8ae6b6dde3e7c747a77f4149232420901</a></p>
+<h2 id="Reference">Reference<a class="anchor" href="#Reference"></a></h2>
+<ul>
+<li>https://github.com/whileskies/xv6-labs-2020/blob/main/doc/Lab8-locks.md</li>
+<li>https://blog.csdn.net/LostUnravel/article/details/121430900</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          
+
+<div class="post-copyright">
+<ul>
+  <li class="post-copyright-author">
+      <strong>本文作者： </strong>Kerolt
+  </li>
+  <li class="post-copyright-link">
+      <strong>本文链接：</strong>
+      <a href="https://kerolt.github.io/posts/9923a11/" title="【MIT6.S081】Lab8 lock">https://kerolt.github.io/posts/9923a11/</a>
+  </li>
+  <li class="post-copyright-license">
+      <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/MIT6-S081/" rel="tag"><i class="fa fa-tag"></i> MIT6-S081</a>
+              <a href="/tags/OS/" rel="tag"><i class="fa fa-tag"></i> OS</a>
+              <a href="/tags/xv6/" rel="tag"><i class="fa fa-tag"></i> xv6</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/posts/87bc2f7/" rel="prev" title="【MIT6.S081】xv6进程调度分析">
+                  <i class="fa fa-angle-left"></i> 【MIT6.S081】xv6进程调度分析
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/posts/60ccf224/" rel="next" title="【MIT6.S081】Lab9 file system">
+                  【MIT6.S081】Lab9 file system <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+    
+  <div class="comments" id="disqus_thread">
+    <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+  </div>
+  
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 2023 – 
+    <span itemprop="copyrightYear">2024</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Kerolt</span>
+  </div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+    <span title="站点总字数">52k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">3:11</span>
+  </span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/mist/" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/fancyapps-ui/5.0.31/fancybox/fancybox.umd.js" integrity="sha256-a+H7FYzJv6oU2hfsfDGM2Ohw/cR9v+hPfxHCLdmCrE8=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/sidebar.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+  <script src="/js/third-party/fancybox.js"></script>
+
+  <script src="/js/third-party/pace.js"></script>
+
+
+  
+
+
+
+
+<script class="next-config" data-name="disqus" type="application/json">{"enable":true,"shortname":"kerolt","count":true,"i18n":{"disqus":"disqus"}}</script>
+<script src="/js/third-party/comments/disqus.js"></script>
+
+</body>
+</html>
