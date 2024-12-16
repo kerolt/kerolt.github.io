@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width">
+<meta name="referrer" content="no-referrer">
 <meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.3.0">
 
   <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
@@ -14,7 +15,7 @@
 
 <link rel="stylesheet" href="/css/main.css">
 
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+CJK+SC:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&family=JetBrains+Mono:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+Mono+TC:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&family=JetBrains+Mono:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap&subset=latin,latin-ext">
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha256-5eIC48iZUHmSlSUz9XtjRyK2mzQkHScZY1WdMaoz74E=" crossorigin="anonymous">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
@@ -22,7 +23,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/pace/1.2.4/themes/blue/pace-theme-minimal.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pace/1.2.4/pace.min.js" integrity="sha256-gqd7YTjg/BtfqWSwsJOvndl0Bxc8gFImLEkXQT8+qj0=" crossorigin="anonymous"></script>
 
-<script class="next-config" data-name="main" type="application/json">{"hostname":"kerolt.github.io","root":"/","images":"/images","scheme":"Mist","darkmode":false,"version":"8.21.1","exturl":false,"sidebar":{"position":"right","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"copycode":{"enable":true,"style":"flat"},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"disqus","storage":true,"lazyload":false,"nav":null,"activeClass":"disqus"},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false,"trigger":"auto"}}</script><script src="/js/config.js"></script>
+<script class="next-config" data-name="main" type="application/json">{"hostname":"kerolt.github.io","root":"/","images":"/images","scheme":"Mist","darkmode":false,"version":"8.21.1","exturl":false,"sidebar":{"position":"right","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12,"width":300},"hljswrap":true,"copycode":{"enable":true,"style":"flat"},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"disqus","storage":true,"lazyload":false,"nav":null,"activeClass":"disqus"},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.json","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false,"trigger":"auto"}}</script><script src="/js/config.js"></script>
 
     <meta name="description" content="本篇文章思路来源于 @bilibili&#x2F;灵茶山艾府  题目描述：https:&#x2F;&#x2F;leetcode.cn&#x2F;problems&#x2F;best-time-to-buy-and-sell-stock-ii 相对于买卖股票的最佳时机I，该问题可以多次买入和卖出股票以获取最大利益">
 <meta property="og:type" content="article">
@@ -31,15 +32,15 @@
 <meta property="og:site_name" content="Kerolt&#39;s Blog">
 <meta property="og:description" content="本篇文章思路来源于 @bilibili&#x2F;灵茶山艾府  题目描述：https:&#x2F;&#x2F;leetcode.cn&#x2F;problems&#x2F;best-time-to-buy-and-sell-stock-ii 相对于买卖股票的最佳时机I，该问题可以多次买入和卖出股票以获取最大利益">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://kerolt.github.io/images/Pasted%20image%2020240411111533.png">
-<meta property="og:image" content="https://kerolt.github.io/images/Pasted%20image%2020240411161133.png">
-<meta property="og:image" content="https://kerolt.github.io/images/Pasted%20image%2020240411163713.png">
+<meta property="og:image" content="https://gitee.com/kerolt/picture/raw/main/20241216-143734.png">
+<meta property="og:image" content="https://gitee.com/kerolt/picture/raw/main/20241216-143734-1.png">
+<meta property="og:image" content="https://gitee.com/kerolt/picture/raw/main/20241216-143734-2.png">
 <meta property="article:published_time" content="2024-04-11T00:00:00.000Z">
 <meta property="article:modified_time" content="2024-04-11T00:00:00.000Z">
 <meta property="article:author" content="Kerolt">
 <meta property="article:tag" content="Linux, OS, C&#x2F;C++, 前端, 数据库">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://kerolt.github.io/images/Pasted%20image%2020240411111533.png">
+<meta name="twitter:image" content="https://gitee.com/kerolt/picture/raw/main/20241216-143734.png">
 
 
 <link rel="canonical" href="https://kerolt.github.io/posts/d925b9f8/">
@@ -154,7 +155,7 @@
         <div class="site-overview-wrap sidebar-panel">
           <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
     <img class="site-author-image" itemprop="image" alt="Kerolt"
-      src="/images/avatar.jpg">
+      src="/images/avatar.png">
   <p class="site-author-name" itemprop="name">Kerolt</p>
   <div class="site-description" itemprop="description">给岁月以文明，给时光以生命</div>
 </div>
@@ -214,7 +215,7 @@
     <link itemprop="mainEntityOfPage" href="https://kerolt.github.io/posts/d925b9f8/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="image" content="/images/avatar.png">
       <meta itemprop="name" content="Kerolt">
     </span>
 
@@ -314,7 +315,7 @@
 <p>问题：第i天结束，持有/未持有股票的最大利润子问题：第i - 1天结束，持有/未持有股票的最大利润</p>
 <h2 id="状态机">状态机<a class="anchor" href="#状态机"></a></h2>
 <p>简单的理解就是状态的转换，如下图就是本题的状态机</p>
-<p><img src="../../images/Pasted%20image%2020240411111533.png" alt=""></p>
+<p><img src="https://gitee.com/kerolt/picture/raw/main/20241216-143734.png" alt=""></p>
 <p>那么如何将状态机与思路结合起来呢？</p>
 <p>我们可以这么想：</p>
 <ul>
@@ -322,7 +323,7 @@
 <li>第i天未持有股票的情况为：第i-1天未持有股票或者第i-1天拥有股票但是第i天时<strong>卖出</strong>了股票。这时第i天未持有股票的最大利润为<code>f(i, false) = max(f(i - 1, false), f(i - 1, true) + prices[i])</code></li>
 <li>第i天持有股票的情况未：第i-1天持有股票或者第i-1天未拥有股票但是第i天时<strong>买入</strong>了股票。这时第i天持有股票的最大利润为<code>f(i, true) = max(f(i - 1, true), f(i - 1, false) - prices[i])</code></li>
 </ul>
-<p><img src="../../images/Pasted%20image%2020240411161133.png" alt=""></p>
+<p><img src="https://gitee.com/kerolt/picture/raw/main/20241216-143734-1.png" alt=""></p>
 <h2 id="记忆化搜索">记忆化搜索<a class="anchor" href="#记忆化搜索"></a></h2>
 <p>使用上面的思路，采用递归的方法，不难写出下面的算法：</p>
 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Solution</span> &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function"><span class="type">int</span> <span class="title">maxProfit</span><span class="params">(vector&lt;<span class="type">int</span>&gt;&amp; prices)</span> </span>&#123;</span><br><span class="line">        <span class="type">int</span> n = prices.<span class="built_in">size</span>();</span><br><span class="line">        function&lt;<span class="type">int</span>(<span class="type">int</span>, <span class="type">bool</span>)&gt; dfs = [&amp;](<span class="type">int</span> i , <span class="type">bool</span> hold) &#123;</span><br><span class="line">            <span class="keyword">if</span> (i &lt; <span class="number">0</span>) &#123;</span><br><span class="line">                <span class="keyword">return</span> hold ? INT_MIN : <span class="number">0</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">if</span> (hold) &#123;</span><br><span class="line">                <span class="comment">// 第i天持有</span></span><br><span class="line">                <span class="keyword">return</span> <span class="built_in">max</span>(<span class="built_in">dfs</span>(i - <span class="number">1</span>, <span class="literal">true</span>), <span class="built_in">dfs</span>(i - <span class="number">1</span>, <span class="literal">false</span>) - prices[i]);</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="comment">// 第i天未持有</span></span><br><span class="line">            <span class="keyword">return</span> <span class="built_in">max</span>(<span class="built_in">dfs</span>(i - <span class="number">1</span>, <span class="literal">false</span>), <span class="built_in">dfs</span>(i - <span class="number">1</span>, <span class="literal">true</span>) + prices[i]);</span><br><span class="line">        &#125;;</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">dfs</span>(n - <span class="number">1</span>, <span class="literal">false</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
@@ -332,7 +333,7 @@
 <li>为什么最后只要返回<code>dfs(n - 1, false)</code>？这时因为最后一天卖出去（也就是未持有股票，false）所拥有的利润一定比最后一天不卖出去（持有股票，true）所拥有的利润高，因此也每次要返回<code>max(dfs(n - 1, false), dfs(n - 1, true))</code>了</li>
 </ul>
 <p>好，这时点击提交！会发现超时了！这时因为我们在递归的过程中重复计算了子问题，造成了不必要的开销</p>
-<p><img src="../../images/Pasted%20image%2020240411163713.png" alt=""></p>
+<p><img src="https://gitee.com/kerolt/picture/raw/main/20241216-143734-2.png" alt=""></p>
 <p>如图，以上红色的部分都是重复的，我们应该在计算的时候保存它们，这就是记忆化搜索</p>
 <p>需要注意的是，记忆化数组cache初始化应该为-1而不是0,是因为计算的利润有可能是0</p>
 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Solution</span> &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function"><span class="type">int</span> <span class="title">maxProfit</span><span class="params">(vector&lt;<span class="type">int</span>&gt;&amp; prices)</span> </span>&#123;</span><br><span class="line">        <span class="type">int</span> n = prices.<span class="built_in">size</span>();</span><br><span class="line">        vector&lt;vector&lt;<span class="type">int</span>&gt;&gt; <span class="built_in">cache</span>(n, <span class="built_in">vector</span>&lt;<span class="type">int</span>&gt;(<span class="number">2</span>, <span class="number">-1</span>));</span><br><span class="line">        function&lt;<span class="type">int</span>(<span class="type">int</span>, <span class="type">bool</span>)&gt; dfs = [&amp;](<span class="type">int</span> i , <span class="type">bool</span> hold) &#123;</span><br><span class="line">            <span class="keyword">if</span> (i &lt; <span class="number">0</span>) &#123;</span><br><span class="line">                <span class="keyword">return</span> hold ? INT_MIN : <span class="number">0</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="type">int</span> res = cache[i][hold];</span><br><span class="line">            <span class="keyword">if</span> (res != <span class="number">-1</span>) &#123;</span><br><span class="line">                <span class="keyword">return</span> res;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">if</span> (hold) &#123;</span><br><span class="line">                <span class="comment">// 第i天持有</span></span><br><span class="line">                res = <span class="built_in">max</span>(<span class="built_in">dfs</span>(i - <span class="number">1</span>, <span class="literal">true</span>), <span class="built_in">dfs</span>(i - <span class="number">1</span>, <span class="literal">false</span>) - prices[i]);</span><br><span class="line">                cache[i][hold] = res;</span><br><span class="line">                <span class="keyword">return</span> res;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="comment">// 第i天未持有</span></span><br><span class="line">            res = <span class="built_in">max</span>(<span class="built_in">dfs</span>(i - <span class="number">1</span>, <span class="literal">false</span>), <span class="built_in">dfs</span>(i - <span class="number">1</span>, <span class="literal">true</span>) + prices[i]);</span><br><span class="line">            cache[i][hold] = res;</span><br><span class="line">            <span class="keyword">return</span> res;</span><br><span class="line">        &#125;;</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">dfs</span>(n - <span class="number">1</span>, <span class="literal">false</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
@@ -364,6 +365,8 @@
 </ul>
 </div>
 
+
+        
 
         
 

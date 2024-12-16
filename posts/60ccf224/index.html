@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width">
+<meta name="referrer" content="no-referrer">
 <meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.3.0">
 
   <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
@@ -14,7 +15,7 @@
 
 <link rel="stylesheet" href="/css/main.css">
 
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+CJK+SC:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&family=JetBrains+Mono:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+Mono+TC:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&family=JetBrains+Mono:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap&subset=latin,latin-ext">
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha256-5eIC48iZUHmSlSUz9XtjRyK2mzQkHScZY1WdMaoz74E=" crossorigin="anonymous">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
@@ -22,7 +23,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/pace/1.2.4/themes/blue/pace-theme-minimal.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pace/1.2.4/pace.min.js" integrity="sha256-gqd7YTjg/BtfqWSwsJOvndl0Bxc8gFImLEkXQT8+qj0=" crossorigin="anonymous"></script>
 
-<script class="next-config" data-name="main" type="application/json">{"hostname":"kerolt.github.io","root":"/","images":"/images","scheme":"Mist","darkmode":false,"version":"8.21.1","exturl":false,"sidebar":{"position":"right","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"copycode":{"enable":true,"style":"flat"},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"disqus","storage":true,"lazyload":false,"nav":null,"activeClass":"disqus"},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false,"trigger":"auto"}}</script><script src="/js/config.js"></script>
+<script class="next-config" data-name="main" type="application/json">{"hostname":"kerolt.github.io","root":"/","images":"/images","scheme":"Mist","darkmode":false,"version":"8.21.1","exturl":false,"sidebar":{"position":"right","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12,"width":300},"hljswrap":true,"copycode":{"enable":true,"style":"flat"},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"disqus","storage":true,"lazyload":false,"nav":null,"activeClass":"disqus"},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.json","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false,"trigger":"auto"}}</script><script src="/js/config.js"></script>
 
     <meta name="description" content="Intro 在这个实验中，我们需要让xv6支持更大的文件和软链接。实验总体不是特别难，不过需要我们理解好文件系统是如何工作的。Lab8 lock中的Buffer Cache也是文件系统的一部分，不过它位于文件系统的下层，这里我们需要处理的更多在上层，偏应用层。">
 <meta property="og:type" content="article">
@@ -31,8 +32,8 @@
 <meta property="og:site_name" content="Kerolt&#39;s Blog">
 <meta property="og:description" content="Intro 在这个实验中，我们需要让xv6支持更大的文件和软链接。实验总体不是特别难，不过需要我们理解好文件系统是如何工作的。Lab8 lock中的Buffer Cache也是文件系统的一部分，不过它位于文件系统的下层，这里我们需要处理的更多在上层，偏应用层。">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://kerolt.github.io/images/Pasted%20image%2020240803100926.png">
-<meta property="og:image" content="https://kerolt.github.io/images/Pasted%20image%2020240804170348.png">
+<meta property="og:image" content="https://gitee.com/kerolt/picture/raw/main/20241215-134854.png">
+<meta property="og:image" content="https://gitee.com/kerolt/picture/raw/main/20241215-134854-1.png">
 <meta property="article:published_time" content="2024-11-19T00:00:00.000Z">
 <meta property="article:modified_time" content="2024-11-19T00:00:00.000Z">
 <meta property="article:author" content="Kerolt">
@@ -40,7 +41,7 @@
 <meta property="article:tag" content="OS">
 <meta property="article:tag" content="xv6">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://kerolt.github.io/images/Pasted%20image%2020240803100926.png">
+<meta name="twitter:image" content="https://gitee.com/kerolt/picture/raw/main/20241215-134854.png">
 
 
 <link rel="canonical" href="https://kerolt.github.io/posts/60ccf224/">
@@ -155,7 +156,7 @@
         <div class="site-overview-wrap sidebar-panel">
           <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
     <img class="site-author-image" itemprop="image" alt="Kerolt"
-      src="/images/avatar.jpg">
+      src="/images/avatar.png">
   <p class="site-author-name" itemprop="name">Kerolt</p>
   <div class="site-description" itemprop="description">给岁月以文明，给时光以生命</div>
 </div>
@@ -215,7 +216,7 @@
     <link itemprop="mainEntityOfPage" href="https://kerolt.github.io/posts/60ccf224/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="image" content="/images/avatar.png">
       <meta itemprop="name" content="Kerolt">
     </span>
 
@@ -250,6 +251,23 @@
       <span class="post-meta-item-text">分类于</span>
         <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
           <a href="/categories/OS/" itemprop="url" rel="index"><span itemprop="name">操作系统</span></a>
+        </span>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-tags"></i>
+      </span>
+      <span class="post-meta-item-text">标签</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/tags/MIT6-S081/" itemprop="url" rel="index"><span itemprop="name">MIT6-S081</span></a>
+        </span>
+          ,
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/tags/OS/" itemprop="url" rel="index"><span itemprop="name">OS</span></a>
+        </span>
+          ,
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/tags/xv6/" itemprop="url" rel="index"><span itemprop="name">xv6</span></a>
         </span>
     </span>
 
@@ -297,7 +315,7 @@
 <h2 id="Large-files">Large files<a class="anchor" href="#Large-files"></a></h2>
 <h3 id="如何扩大单个文件的大小上限？">如何扩大单个文件的大小上限？<a class="anchor" href="#如何扩大单个文件的大小上限？"></a></h3>
 <p>要求我们扩大单个文件的大小，实现机制就是通过修改inode的块索引，将原来的12个直接索引和一个一级间接索引变为11个直接索引、一个一级间接索引和一个二级间接索引。</p>
-<p><img src="../../images/Pasted%20image%2020240803100926.png" alt=""></p>
+<p><img src="https://gitee.com/kerolt/picture/raw/main/20241215-134854.png" alt=""></p>
 <p>在xv6中，一个数据块的大小为<code>1KB</code>，由于间接块中存放的是下一个块的地址（其实个人认为更准确的说是块号），使用的类型是<code>uint</code>，那么一个间接块能存放这样的地址共<code>1KB / sizeof(uint) = 1KB / 4B = 256</code>个。</p>
 <p>这样的话，单个文件大小最大为<code>12 * 1KB + 256 * 1KB = 268KB</code>变为了<code>11 * 1KB + 256 * 1KB + 256 * 256 * 1KB = 65803KB</code>。</p>
 <h3 id="修改inode结构体">修改inode结构体<a class="anchor" href="#修改inode结构体"></a></h3>
@@ -319,7 +337,7 @@
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">static</span> uint</span><br><span class="line"><span class="title function_">bmap</span><span class="params">(<span class="keyword">struct</span> inode *ip, uint bn)</span></span><br><span class="line">&#123;</span><br><span class="line">  ...</span><br><span class="line">  <span class="comment">// 如果bn超出了11个，也就说明需要通过一级间接块去获取</span></span><br><span class="line">  <span class="keyword">if</span>(bn &lt; NINDIRECT)&#123;</span><br><span class="line">    ...</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="comment">// 如果运行到了这里，说明要从二级间接块中寻找，这里减去NINDIRECT（256）也是像之前一样方便计算</span></span><br><span class="line">  bn -= NINDIRECT;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 从二级间接块中找</span></span><br><span class="line">  <span class="keyword">if</span> (bn &lt; NINDIRECT * NINDIRECT) &#123;</span><br><span class="line">    <span class="comment">// inode的二级间接块还未分配</span></span><br><span class="line">    <span class="keyword">if</span> ((addr = ip-&gt;addrs[NDIRECT + <span class="number">1</span>]) == <span class="number">0</span>) &#123;</span><br><span class="line">      addr = balloc(ip-&gt;dev);</span><br><span class="line">      <span class="keyword">if</span>(addr == <span class="number">0</span>)</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">      ip-&gt;addrs[NDIRECT + <span class="number">1</span>] = addr;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="type">int</span> level1 = bn / NINDIRECT;</span><br><span class="line">    <span class="type">int</span> level2 = bn % NINDIRECT;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 读取二级间接块</span></span><br><span class="line">    bp = bread(ip-&gt;dev, addr);</span><br><span class="line">    a = (uint *)bp-&gt;data;</span><br><span class="line">    <span class="keyword">if</span> ((addr = a[level1]) == <span class="number">0</span>)&#123;</span><br><span class="line">      a[level1] = addr = balloc(ip-&gt;dev);</span><br><span class="line">      log_write(bp); <span class="comment">// 修改了就要记录日志</span></span><br><span class="line">    &#125;</span><br><span class="line">    brelse(bp);</span><br><span class="line"></span><br><span class="line">    bp = bread(ip-&gt;dev, addr);</span><br><span class="line">    a = (uint *)bp-&gt;data;</span><br><span class="line">    <span class="keyword">if</span> ((addr = a[level2]) == <span class="number">0</span>) &#123;</span><br><span class="line">      a[level2] = addr = balloc(ip-&gt;dev);</span><br><span class="line">      log_write(bp); <span class="comment">// 修改了就要记录日志</span></span><br><span class="line">    &#125;</span><br><span class="line">    brelse(bp);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> addr;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>多的步骤就是二级间接索引需要多一次读取数据块和查找：</p>
 <p>假设传入bmap的块号为524，那么其不在直接块中，也不在一级间接块中，而是在二级间接块中。通过bmap中的前两个if之后对于bn的减法操作，此时的bn = 524 - 11 - 256 = 257。那么在二级间接块的第一层中（level1），索引为257 / 256 = 1，在第二层中（level2）索引为257 % 256 = 1 。如下图所示：</p>
-<p><img src="../../images/Pasted%20image%2020240804170348.png" alt=""></p>
+<p><img src="https://gitee.com/kerolt/picture/raw/main/20241215-134854-1.png" alt=""></p>
 <h2 id="Symbolic-links">Symbolic links<a class="anchor" href="#Symbolic-links"></a></h2>
 <p>首先要搞清楚软硬链接的区别：</p>
 <ul>
@@ -403,11 +421,8 @@
 </ul>
 </div>
 
-          <div class="post-tags">
-              <a href="/tags/MIT6-S081/" rel="tag"><i class="fa fa-tag"></i> MIT6-S081</a>
-              <a href="/tags/OS/" rel="tag"><i class="fa fa-tag"></i> OS</a>
-              <a href="/tags/xv6/" rel="tag"><i class="fa fa-tag"></i> xv6</a>
-          </div>
+
+        
 
         
 
