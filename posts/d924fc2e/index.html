@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="referrer" content="no-referrer">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <meta name="google-site-verification" content="G2bBvIdEL2IvKAU2atPObrKeGOZYYjla4BUoKafFos0">
+  <meta name="msvalidate.01" content="2300A23B82DB579A2DEA6261191AD771">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+Mono+TC:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&family=JetBrains+Mono:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap&subset=latin,latin-ext">
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha256-5eIC48iZUHmSlSUz9XtjRyK2mzQkHScZY1WdMaoz74E=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancyapps-ui/5.0.31/fancybox/fancybox.css" integrity="sha256-gkQVf8UKZgQ0HyuxL/VnacadJ+D2Kox2TCEBuNQg5+w=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/pace/1.2.4/themes/blue/pace-theme-minimal.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pace/1.2.4/pace.min.js" integrity="sha256-gqd7YTjg/BtfqWSwsJOvndl0Bxc8gFImLEkXQT8+qj0=" crossorigin="anonymous"></script>
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"kerolt.github.io","root":"/","images":"/images","scheme":"Mist","darkmode":false,"version":"8.21.1","exturl":false,"sidebar":{"position":"right","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12,"width":300},"hljswrap":true,"copycode":{"enable":true,"style":"flat"},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"disqus","storage":true,"lazyload":false,"nav":null,"activeClass":"disqus"},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.json","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false,"trigger":"auto"}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="该系列博客只是为了记录自己在写Lab时的思路，按照课程要求不会在Github和博客中公开源代码。欢迎与我一起讨论交流！  这个project和之前就不一样了，开始深入数据库内核的实现了。需要理清楚一条sql语句是如何被执行的，方才能写出代码。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="【CMU15-445 Fall2023】Project3 Query Execution 小结">
+<meta property="og:url" content="https://kerolt.github.io/posts/d924fc2e/index.html">
+<meta property="og:site_name" content="Kerolt&#39;s Blog">
+<meta property="og:description" content="该系列博客只是为了记录自己在写Lab时的思路，按照课程要求不会在Github和博客中公开源代码。欢迎与我一起讨论交流！  这个project和之前就不一样了，开始深入数据库内核的实现了。需要理清楚一条sql语句是如何被执行的，方才能写出代码。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://15445.courses.cs.cmu.edu/fall2023/project3/img/project-structure.svg">
+<meta property="og:image" content="https://fastly.jsdelivr.net/gh/Angelia-Wang/blogImage/img/image-20230415234907799.png">
+<meta property="og:image" content="https://i2.kknews.cc/xGbg60mPdeRNfqICEnjrmqLM9nGZdeKcOg/0.jpg">
+<meta property="og:image" content="https://gitee.com/kerolt/picture/raw/main/20241216-180505.png">
+<meta property="article:published_time" content="2024-12-16T00:00:00.000Z">
+<meta property="article:modified_time" content="2024-12-16T00:00:00.000Z">
+<meta property="article:author" content="Kerolt">
+<meta property="article:tag" content="CPlusPlus">
+<meta property="article:tag" content="Database">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://15445.courses.cs.cmu.edu/fall2023/project3/img/project-structure.svg">
+
+
+<link rel="canonical" href="https://kerolt.github.io/posts/d924fc2e/">
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://kerolt.github.io/posts/d924fc2e/","path":"posts/d924fc2e/","title":"【CMU15-445 Fall2023】Project3 Query Execution 小结"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>【CMU15-445 Fall2023】Project3 Query Execution 小结 | Kerolt's Blog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Kerolt's Blog</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="搜索..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E7%BD%AE%E5%A5%B6%E9%85%AA"><span class="nav-number">1.</span> <span class="nav-text">前置奶酪</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%80%E6%9D%A1SQL%E8%AF%AD%E5%8F%A5%E7%9A%84%E6%89%A7%E8%A1%8C"><span class="nav-number">1.1.</span> <span class="nav-text">一条SQL语句的执行</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Iterator-Model"><span class="nav-number">1.2.</span> <span class="nav-text">Iterator Model</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Catalog-Table-and-Index"><span class="nav-number">1.3.</span> <span class="nav-text">Catalog, Table and Index</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%B4%A2%E5%BC%95index"><span class="nav-number">1.4.</span> <span class="nav-text">索引index</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BB%93%E6%9E%84"><span class="nav-number">1.4.1.</span> <span class="nav-text">结构</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%9B%B4%E6%96%B0%E7%B4%A2%E5%BC%95"><span class="nav-number">1.4.2.</span> <span class="nav-text">更新索引</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E7%90%86%E8%A7%A3%E7%B4%A2%E5%BC%95"><span class="nav-number">1.4.3.</span> <span class="nav-text">如何理解索引</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%89%A7%E8%A1%8C%E5%99%A8%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8%E7%B4%A2%E5%BC%95%E8%8E%B7%E5%8F%96%E6%95%B0%E6%8D%AE"><span class="nav-number">1.4.4.</span> <span class="nav-text">执行器如何使用索引获取数据</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%B0%93%E8%AF%8D%E4%B8%8B%E6%8E%A8"><span class="nav-number">1.5.</span> <span class="nav-text">谓词下推</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Task1-Access-Method-Executors"><span class="nav-number">2.</span> <span class="nav-text">Task1 - Access Method Executors</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#SeqScan"><span class="nav-number">2.1.</span> <span class="nav-text">SeqScan</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Insert"><span class="nav-number">2.2.</span> <span class="nav-text">Insert</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88Insert%E7%AD%89Executor%E6%9C%89child%E8%80%8CSeqScan%E6%B2%A1%E6%9C%89%EF%BC%9F"><span class="nav-number">2.2.1.</span> <span class="nav-text">为什么Insert等Executor有child而SeqScan没有？</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%B2%A1%E6%9C%89%E5%AD%90%E6%93%8D%E4%BD%9C%E6%97%B6%EF%BC%8C%E9%9C%80%E8%A6%81%E6%8F%92%E5%85%A5%E7%9A%84%E6%95%B0%E6%8D%AE%E4%BB%8E%E5%93%AA%E9%87%8C%E8%8E%B7%E5%8F%96%EF%BC%9F"><span class="nav-number">2.2.2.</span> <span class="nav-text">没有子操作时，需要插入的数据从哪里获取？</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Delete"><span class="nav-number">2.3.</span> <span class="nav-text">Delete</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Update"><span class="nav-number">2.4.</span> <span class="nav-text">Update</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#IndexScan"><span class="nav-number">2.5.</span> <span class="nav-text">IndexScan</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Task2-Aggregation-Join-Executors"><span class="nav-number">3.</span> <span class="nav-text">Task2 - Aggregation &amp; Join Executors</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Aggregation"><span class="nav-number">3.1.</span> <span class="nav-text">Aggregation</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#NestedLoopJoin"><span class="nav-number">3.2.</span> <span class="nav-text">NestedLoopJoin</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Reference"><span class="nav-number">4.</span> <span class="nav-text">Reference</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Kerolt"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">Kerolt</p>
+  <div class="site-description" itemprop="description">给岁月以文明，给时光以生命</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">48</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/kerolt" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;kerolt" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:kerolt@qq.com" title="E-Mail → mailto:kerolt@qq.com" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i></a>
+      </span>
+  </div>
+  <div class="cc-license animated" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="https://cdnjs.cloudflare.com/ajax/libs/creativecommons-vocabulary/2020.11.3/assets/license_badges/small/by_nc_sa.svg" alt="Creative Commons"></a>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://kerolt.github.io/posts/d924fc2e/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="Kerolt">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Kerolt's Blog">
+      <meta itemprop="description" content="给岁月以文明，给时光以生命">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="【CMU15-445 Fall2023】Project3 Query Execution 小结 | Kerolt's Blog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          【CMU15-445 Fall2023】Project3 Query Execution 小结
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2024-12-16 00:00:00" itemprop="dateCreated datePublished" datetime="2024-12-16T00:00:00+00:00">2024-12-16</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Database/" itemprop="url" rel="index"><span itemprop="name">数据库</span></a>
+        </span>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-tags"></i>
+      </span>
+      <span class="post-meta-item-text">标签</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/tags/CPlusPlus/" itemprop="url" rel="index"><span itemprop="name">CPlusPlus</span></a>
+        </span>
+          ,
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/tags/Database/" itemprop="url" rel="index"><span itemprop="name">Database</span></a>
+        </span>
+    </span>
+
+  
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus：</span>
+    
+    <a title="disqus" href="/posts/d924fc2e/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="posts/d924fc2e/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>6.4k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>23 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><blockquote>
+<p>该系列博客只是为了记录自己在写Lab时的思路，按照课程要求不会在Github和博客中公开源代码。欢迎与我一起讨论交流！</p>
+</blockquote>
+<p>这个project和之前就不一样了，开始深入数据库内核的实现了。需要理清楚一条sql语句是如何被执行的，方才能写出代码。</p>
+<span id="more"></span>
+<h2 id="前置奶酪">前置奶酪<a class="anchor" href="#前置奶酪"></a></h2>
+<h3 id="一条SQL语句的执行">一条SQL语句的执行<a class="anchor" href="#一条SQL语句的执行"></a></h3>
+<p><img src="https://15445.courses.cs.cmu.edu/fall2023/project3/img/project-structure.svg" alt=""></p>
+<p>这里需要去看看一条sql语句传入bustub内部之后的代码：<code>src/common/bustub_instance.cpp:ExecuteSqlTxn</code>：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">auto</span> <span class="title">BustubInstance::ExecuteSqlTxn</span><span class="params">(<span class="type">const</span> std::string &amp;sql, ResultWriter &amp;writer, Transaction *txn,</span></span></span><br><span class="line"><span class="params"><span class="function">                                   std::shared_ptr&lt;CheckOptions&gt; check_options)</span> -&gt; <span class="type">bool</span> </span>&#123;</span><br><span class="line">  <span class="keyword">if</span> (!sql.<span class="built_in">empty</span>() &amp;&amp; sql[<span class="number">0</span>] == <span class="string">&#x27;\\&#x27;</span>) &#123;</span><br><span class="line">    <span class="comment">// 处理元命令</span></span><br><span class="line">    ... </span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// binder，但是在其中会使用libpg_query来解析sql语句</span></span><br><span class="line">  <span class="function">bustub::Binder <span class="title">binder</span><span class="params">(*catalog_)</span></span>;</span><br><span class="line">  binder.<span class="built_in">ParseAndSave</span>(sql);</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 经过上一步后，binder中的statement_nodes_存储着所有的语句解析节点</span></span><br><span class="line">  <span class="keyword">for</span> (<span class="keyword">auto</span> *stmt : binder.statement_nodes_) &#123;</span><br><span class="line">    <span class="comment">// 将stmt转换成BoundStatement对象，方便后面处理数据</span></span><br><span class="line">    <span class="keyword">auto</span> statement = binder.<span class="built_in">BindStatement</span>(stmt);</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 只有不需要构建plan树、不需要进行优化的sql语句才会在switch之后继续执行</span></span><br><span class="line">    <span class="keyword">switch</span> (statement-&gt;type_) &#123;</span><br><span class="line">      ...</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 生成初步的执行计划</span></span><br><span class="line">    <span class="function">bustub::Planner <span class="title">planner</span><span class="params">(*catalog_)</span></span>;</span><br><span class="line">    planner.<span class="built_in">PlanQuery</span>(*statement);</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 优化刚刚的执行计划</span></span><br><span class="line">    <span class="function">bustub::Optimizer <span class="title">optimizer</span><span class="params">(*catalog_, IsForceStarterRule())</span></span>;</span><br><span class="line">    <span class="keyword">auto</span> optimized_plan = optimizer.<span class="built_in">Optimize</span>(planner.plan_);</span><br><span class="line"></span><br><span class="line">	...</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 执行优化后的plan，这里会使用火山模型去根据下面节点的Next函数来执行相应的算子</span></span><br><span class="line">	execution_engine_-&gt;<span class="built_in">Execute</span>(optimized_plan, &amp;result_set, txn, exec_ctx.<span class="built_in">get</span>());</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 将执行结果输出至指定位置</span></span><br><span class="line">	...</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> 是否执行成功;	</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在binder之后，我们就有了一条sql的语句解析节点，例如执行<code>select * from (select * from test_2 where colA &gt; 10) where colB &gt; 2;</code>，其statement node如下：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">BoundSelect &#123;</span><br><span class="line">  table=BoundSubqueryRef &#123;</span><br><span class="line">    alias=__subquery#<span class="number">0</span>,</span><br><span class="line">    subquery=BoundSelect &#123;</span><br><span class="line">      table=BoundBaseTableRef &#123; table=test_2, oid=<span class="number">23</span> &#125;,</span><br><span class="line">      columns=[<span class="string">&quot;test_2.colA&quot;</span>, <span class="string">&quot;test_2.colB&quot;</span>, <span class="string">&quot;test_2.colC&quot;</span>],</span><br><span class="line">      groupBy=[],</span><br><span class="line">      having=,</span><br><span class="line">      where=(test_<span class="number">2.</span>colA&gt;<span class="number">10</span>),</span><br><span class="line">      limit=,</span><br><span class="line">      offset=,</span><br><span class="line">      order_by=[],</span><br><span class="line">      is_distinct=<span class="literal">false</span>,</span><br><span class="line">      ctes=,</span><br><span class="line">    &#125;,</span><br><span class="line">    columns=[<span class="string">&quot;test_2.colA&quot;</span>, <span class="string">&quot;test_2.colB&quot;</span>, <span class="string">&quot;test_2.colC&quot;</span>],</span><br><span class="line">  &#125;,</span><br><span class="line">  columns=[<span class="string">&quot;__subquery#0.test_2.colA&quot;</span>, <span class="string">&quot;__subquery#0.test_2.colB&quot;</span>, <span class="string">&quot;__subquery#0.test_2.colC&quot;</span>],</span><br><span class="line">  groupBy=[],</span><br><span class="line">  having=,</span><br><span class="line">  where=(__subquery#<span class="number">0.</span>test_<span class="number">2.</span>colB&gt;<span class="number">2</span>),</span><br><span class="line">  limit=,</span><br><span class="line">  offset=,</span><br><span class="line">  order_by=[],</span><br><span class="line">  is_distinct=<span class="literal">false</span>,</span><br><span class="line">  ctes=,</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>其中的子查询和where的条件还有需要哪些列都能非常清楚的看到。</p>
+<h3 id="Iterator-Model">Iterator Model<a class="anchor" href="#Iterator-Model"></a></h3>
+<p>通常一个 SQL 会被组织成树状的查询计划，数据从叶子节点流到根节点，查询结果在根节点中得出。</p>
+<p>bustub中采用的数据库查询执行模型叫做迭代器模型，也叫火山模型。</p>
+<p>查询计划（query plan）中的每步operator对应的executor都实现一个<code>next</code>函数，每次调用时，operator返回一个<code>tuple</code>或者 null，后者表示数据已经遍历完毕。operator 本身实现一个循环，每次调用其 child operators 的 next 函数，从它们那边获取下一条数据供自己操作，这样整个 query plan 就被从上至下地串联起来。</p>
+<p>但是像Joins, Aggregates, Subqueries, Order By这样的操作需要等所有children返回它们的tuple。虽然一次调用请求一条数据，占用内存较小，但函数调用开销大。</p>
+<h3 id="Catalog-Table-and-Index">Catalog, Table and Index<a class="anchor" href="#Catalog-Table-and-Index"></a></h3>
+<p>下图出处：https://www.cnblogs.com/joey-wang/p/17351258.html</p>
+<p><img src="https://fastly.jsdelivr.net/gh/Angelia-Wang/blogImage/img/image-20230415234907799.png" alt=""></p>
+<h3 id="索引index">索引index<a class="anchor" href="#索引index"></a></h3>
+<p>在Bustub中，索引用于加速数据访问。索引通过维护表中数据的有序结构，使得查询可以更快地定位到所需的记录。</p>
+<h4 id="结构">结构<a class="anchor" href="#结构"></a></h4>
+<p>索引的结构图和上面表的结构图类似。在catalog中，可以获取到一个表对应的<strong>所有</strong><code>IndexInfo</code>，每个<code>IndexInfo</code>中包含着这个索引的信息，这里讲两个个我认为比较重要的成员变量：</p>
+<ul>
+<li><code>key_schema_</code>：索引对应的列的结构，例如使用其<code>ToString()</code>函数时，其会返回<code>(添加了索引的列的名称:该列的数据类型)</code></li>
+<li><code>index_</code>：这是一个指针，指向一个<code>Index</code>类的对象，也就是真正的索引</li>
+</ul>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// catalog.h</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Catalog</span> &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="keyword">template</span> &lt;<span class="keyword">class</span> <span class="title class_">KeyType</span>, <span class="keyword">class</span> <span class="title class_">ValueType</span>, <span class="keyword">class</span> <span class="title class_">KeyComparator</span>&gt;</span><br><span class="line">  <span class="function"><span class="keyword">auto</span> <span class="title">CreateIndex</span><span class="params">(Transaction *txn, <span class="type">const</span> std::string &amp;index_name, <span class="type">const</span> std::string &amp;table_name, <span class="type">const</span> Schema &amp;schema,</span></span></span><br><span class="line"><span class="params"><span class="function">                   <span class="type">const</span> Schema &amp;key_schema, <span class="type">const</span> std::vector&lt;<span class="type">uint32_t</span>&gt; &amp;key_attrs, std::<span class="type">size_t</span> keysize,</span></span></span><br><span class="line"><span class="params"><span class="function">                   HashFunction&lt;KeyType&gt; hash_function, <span class="type">bool</span> is_primary_key = <span class="literal">false</span>,</span></span></span><br><span class="line"><span class="params"><span class="function">                   IndexType index_type = IndexType::HashTableIndex)</span> -&gt; IndexInfo *</span>;</span><br><span class="line">  <span class="function"><span class="keyword">auto</span> <span class="title">GetIndex</span><span class="params">(<span class="type">const</span> std::string &amp;index_name, <span class="type">const</span> std::string &amp;table_name)</span> -&gt; IndexInfo *</span>;</span><br><span class="line">  <span class="function"><span class="keyword">auto</span> <span class="title">GetIndex</span><span class="params">(<span class="type">const</span> std::string &amp;index_name, <span class="type">const</span> <span class="type">table_oid_t</span> table_oid)</span> -&gt; IndexInfo *</span>;</span><br><span class="line">  <span class="function"><span class="keyword">auto</span> <span class="title">GetIndex</span><span class="params">(<span class="type">index_oid_t</span> index_oid)</span> -&gt; IndexInfo *</span>;</span><br><span class="line">  <span class="function"><span class="keyword">auto</span> <span class="title">GetTableIndexes</span><span class="params">(<span class="type">const</span> std::string &amp;table_name)</span> <span class="type">const</span> -&gt; std::vector&lt;IndexInfo *&gt;</span>;</span><br><span class="line">  ...</span><br><span class="line"></span><br><span class="line"> <span class="keyword">private</span>:</span><br><span class="line">  ...</span><br><span class="line">  </span><br><span class="line">  <span class="comment">/**</span></span><br><span class="line"><span class="comment">   * Map index identifier -&gt; index metadata.</span></span><br><span class="line"><span class="comment">   *</span></span><br><span class="line"><span class="comment">   * <span class="doctag">NOTE:</span> that `indexes_` owns all index metadata.</span></span><br><span class="line"><span class="comment">   */</span></span><br><span class="line">  std::unordered_map&lt;<span class="type">index_oid_t</span>, std::unique_ptr&lt;IndexInfo&gt;&gt; indexes_;</span><br><span class="line"></span><br><span class="line">  <span class="comment">/** Map table name -&gt; index names -&gt; index identifiers. */</span></span><br><span class="line">  std::unordered_map&lt;std::string, std::unordered_map&lt;std::string, <span class="type">index_oid_t</span>&gt;&gt; index_names_;</span><br><span class="line"></span><br><span class="line">  <span class="comment">/** The next index identifier to be used. */</span></span><br><span class="line">  std::atomic&lt;<span class="type">index_oid_t</span>&gt; next_index_oid_&#123;<span class="number">0</span>&#125;;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">IndexInfo</span> &#123;</span><br><span class="line">  ...</span><br><span class="line">  <span class="comment">/** The schema for the index key */</span></span><br><span class="line">  Schema key_schema_;</span><br><span class="line">  <span class="comment">/** The name of the index */</span></span><br><span class="line">  std::string name_;</span><br><span class="line">  <span class="comment">/** An owning pointer to the index */</span></span><br><span class="line">  std::unique_ptr&lt;Index&gt; index_;</span><br><span class="line">  <span class="comment">/** The unique OID for the index */</span></span><br><span class="line">  <span class="type">index_oid_t</span> index_oid_;</span><br><span class="line">  <span class="comment">/** The name of the table on which the index is created */</span></span><br><span class="line">  std::string table_name_;</span><br><span class="line">  <span class="comment">/** The size of the index key, in bytes */</span></span><br><span class="line">  <span class="type">const</span> <span class="type">size_t</span> key_size_;</span><br><span class="line">  <span class="comment">/** Is primary key index? */</span></span><br><span class="line">  <span class="type">bool</span> is_primary_key_;</span><br><span class="line">  <span class="comment">/** The index type */</span></span><br><span class="line">  [[maybe_unused]] IndexType index_type_&#123;IndexType::BPlusTreeIndex&#125;;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p><code>Index</code>中有着三个虚函数供其派生类去实现，其唯一的成员变量的类型为<code>IndexMeta</code>，用来存储一些元信息，例如这个索引的名称，它所属的表的名称，最重要的还有一个<code>key_attrs_</code>，稍后就说谈论它。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// index.h</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">IndexMeta</span> &#123;</span><br><span class="line"> ...</span><br><span class="line"> <span class="keyword">private</span>:</span><br><span class="line">  <span class="comment">/** The name of the index */</span></span><br><span class="line">  std::string name_;</span><br><span class="line">  <span class="comment">/** The name of the table on which the index is created */</span></span><br><span class="line">  std::string table_name_;</span><br><span class="line">  <span class="comment">/** The mapping relation between key schema and tuple schema */</span></span><br><span class="line">  <span class="type">const</span> std::vector&lt;<span class="type">uint32_t</span>&gt; key_attrs_;</span><br><span class="line">  <span class="comment">/** The schema of the indexed key */</span></span><br><span class="line">  std::shared_ptr&lt;Schema&gt; key_schema_;</span><br><span class="line">  <span class="comment">/** Is primary key? */</span></span><br><span class="line">  <span class="type">bool</span> is_primary_key_;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Index</span> &#123;</span><br><span class="line"> ...</span><br><span class="line"> <span class="keyword">private</span>:</span><br><span class="line">  <span class="comment">/** The Index structure owns its metadata */</span></span><br><span class="line">  std::unique_ptr&lt;IndexMetadata&gt; metadata_;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>fall2023我们使用的是哈希索引，底层使用的就是在project2中实现的可拓展哈希。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// extendible_hash_table_index.h</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> HASH_TABLE_INDEX_TYPE ExtendibleHashTableIndex<span class="string">&lt;KeyType, ValueType, KeyComparator&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">typename</span> KeyType, <span class="keyword">typename</span> ValueType, <span class="keyword">typename</span> KeyComparator&gt;</span><br><span class="line"><span class="keyword">class</span> <span class="title class_">ExtendibleHashTableIndex</span> : <span class="keyword">public</span> Index &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="built_in">ExtendibleHashTableIndex</span>(std::unique_ptr&lt;IndexMetadata&gt; &amp;&amp;metadata, BufferPoolManager *buffer_pool_manager,</span><br><span class="line">                           <span class="type">const</span> HashFunction&lt;KeyType&gt; &amp;hash_fn);</span><br><span class="line"></span><br><span class="line">  ~<span class="built_in">ExtendibleHashTableIndex</span>() <span class="keyword">override</span> = <span class="keyword">default</span>;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="keyword">auto</span> <span class="title">InsertEntry</span><span class="params">(<span class="type">const</span> Tuple &amp;key, RID rid, Transaction *transaction)</span> -&gt; <span class="type">bool</span> <span class="keyword">override</span></span>;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">DeleteEntry</span><span class="params">(<span class="type">const</span> Tuple &amp;key, RID rid, Transaction *transaction)</span> <span class="keyword">override</span></span>;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">ScanKey</span><span class="params">(<span class="type">const</span> Tuple &amp;key, std::vector&lt;RID&gt; *result, Transaction *transaction)</span> <span class="keyword">override</span></span>;</span><br><span class="line"></span><br><span class="line"> <span class="keyword">protected</span>:</span><br><span class="line">  <span class="comment">// comparator for key</span></span><br><span class="line">  KeyComparator comparator_;</span><br><span class="line">  <span class="comment">// container</span></span><br><span class="line">  DiskExtendibleHashTable&lt;KeyType, ValueType, KeyComparator&gt; container_;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<h4 id="更新索引">更新索引<a class="anchor" href="#更新索引"></a></h4>
+<p>当插入新记录时，不仅需要将记录插入到表中，还需要将相应的索引条目插入到索引中。这样，后续的查询操作可以利用索引快速定位到目标记录。如果不更新索引，后续的查询操作可能会错过新插入的记录，导致查询结果不准确。</p>
+<p>bustub中有哈希索引和B+Tree索引，fall2023版本使用的是可拓展哈希作为作为索引。不过这两个具体的实现都有一个基类<code>Index</code>，其中有以下虚函数需要子类去实现：</p>
+<ul>
+<li><code>InsertEntry(const Tuple &amp;key, RID rid, Transaction *transaction)</code>: 插入一个索引条目。</li>
+<li><code>DeleteEntry(const Tuple &amp;key, RID rid, Transaction *transaction)</code>: 删除一个索引条目。</li>
+<li><code>ScanKey(const Tuple &amp;key, std::vector&lt;RID&gt; *result, Transaction *transaction)</code>: 根据索引键搜索记录，并将结果RID存储在指定的向量中。</li>
+</ul>
+<p>所以不管用的是哈希还是B+Tree，在操作索引时用的接口都相同。</p>
+<h4 id="如何理解索引">如何理解索引<a class="anchor" href="#如何理解索引"></a></h4>
+<p>就如网上很多介绍索引的博客所描述的那样，数据库索引是用来加速检索速度的，就如同新华字典中的音节索引一样：</p>
+<p><img src="https://i2.kknews.cc/xGbg60mPdeRNfqICEnjrmqLM9nGZdeKcOg/0.jpg" alt=""></p>
+<p>如同table_info，catalog中也有许多的index_info，每个index_info就如同上图音节表中的一个字母。我们对一个字段（列）构建一个索引，就如同在上图中音节表中多加一个字母（例如X）。</p>
+<ul>
+<li>需要插入一条记录时，就往对应的索引下插入<code>(记录， 对应记录的地址)</code>这样的键值对，例如上图的<code>(xian, 519)</code>，这里的地址为<code>RID</code>。</li>
+<li>需要删除一条记录时，在对应的索引下删掉匹配的键值对。</li>
+<li>需要更新一条记录时，由于bustub没有提供更新索引的API，所以可以用先删除再插入的方式模拟更新。</li>
+</ul>
+<h4 id="执行器如何使用索引获取数据">执行器如何使用索引获取数据<a class="anchor" href="#执行器如何使用索引获取数据"></a></h4>
+<p>当执行器需要从表中获取数据时，如果查询计划中包含索引扫描操作，执行器会通过索引来快速定位数据。以下是具体的步骤：</p>
+<ol>
+<li><strong>解析查询计划</strong>：
+<ul>
+<li>执行器根据查询计划确定需要使用的索引。</li>
+<li>获取索引的元数据，包括索引键的模式和表列的映射关系。</li>
+</ul>
+</li>
+<li><strong>构建索引键</strong>：
+<ul>
+<li>根据查询条件和索引的元数据，构建索引键。这通常涉及到从查询条件中提取列值，并根据索引键的模式进行转换。</li>
+</ul>
+</li>
+<li><strong>使用索引进行搜索</strong>：
+<ul>
+<li>调用索引的 <code>ScanKey</code> 方法，传入构建好的索引键和一个结果RID向量。</li>
+<li>索引会根据键值查找对应的记录，并将找到的RID存储在结果向量中。</li>
+</ul>
+</li>
+<li><strong>读取数据页</strong>：
+<ul>
+<li>使用结果向量中的RID，从缓冲池中查找对应的页。如果页不在缓冲池中，则从磁盘加载到缓冲池。</li>
+<li>从页中读取数据并创建 <code>Tuple</code> 对象。</li>
+</ul>
+</li>
+<li><strong>处理和返回结果</strong>：
+<ul>
+<li>使用 <code>Tuple</code> 对象的方法（如 <code>GetValue</code>、<code>IsNull</code> 等）访问和处理元组中的数据。</li>
+<li>将处理后的数据作为结果返回给用户或进一步处理。</li>
+</ul>
+</li>
+</ol>
+<h3 id="谓词下推">谓词下推<a class="anchor" href="#谓词下推"></a></h3>
+<p>谓词下推（Predicate Pushdown）是数据库查询优化中的一种技术，其核心思想是将查询中的过滤条件（即谓词）尽可能早地应用到查询执行计划的底部，也就是数据生成的地方。这样做的目的是为了减少数据的传输量和处理量，从而提高查询效率。</p>
+<p>具体来说，谓词下推包括以下几个方面：</p>
+<ol>
+<li><strong>过滤条件前移</strong>：在查询执行的过程中，尽早地对数据进行过滤，这样不需要将所有数据都传递到上层操作中，只传递满足条件的数据。</li>
+<li><strong>减少数据传输</strong>：通过在数据生成的阶段就进行过滤，可以减少从数据库存储引擎到查询处理引擎之间的数据传输量。</li>
+<li><strong>减少CPU处理</strong>：不需要对所有数据进行后续的处理，只需要处理已经过滤的数据，这样可以减少CPU的工作量。</li>
+<li><strong>利用索引</strong>：如果过滤条件可以利用现有的索引，谓词下推可以使得查询直接利用索引来快速定位数据，而不是扫描整个表。</li>
+<li><strong>优化查询计划</strong>：数据库优化器会根据谓词下推的原则重新规划查询的执行步骤，生成更高效的查询计划。</li>
+</ol>
+<p>例如：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> employees <span class="keyword">WHERE</span> department_id <span class="operator">=</span> <span class="number">5</span> <span class="keyword">AND</span> salary <span class="operator">&gt;</span> <span class="number">50000</span>;</span><br></pre></td></tr></table></figure>
+<p>在这个查询中，<code>WHERE</code>子句包含了两个过滤条件。如果不进行谓词下推，数据库可能会先扫描整个<code>employees</code>表，然后将所有行传递给上层操作，之后再应用过滤条件。而通过谓词下推，数据库可以在扫描表的时候直接应用这些过滤条件，只返回部门ID为5且薪资大于50000的员工记录。</p>
+<p>谓词下推是数据库查询优化中非常重要的一环，它有助于提高查询性能，特别是在处理大规模数据集时。数据库优化器会尝试自动应用谓词下推，但有时开发者也可以通过编写更优化的查询条件来帮助优化器更好地进行谓词下推。</p>
+<h2 id="Task1-Access-Method-Executors">Task1 - Access Method Executors<a class="anchor" href="#Task1-Access-Method-Executors"></a></h2>
+<h3 id="SeqScan">SeqScan<a class="anchor" href="#SeqScan"></a></h3>
+<p>顺序扫描指定的表，表的遍历可以使用<code>TableIterator</code>。</p>
+<p>每次找到一条没有被标记为“删除”或者不是where之类的过滤子句匹配（这里会在delete操作中说明）的tuple（记录）就并返回，如果已经扫描到了表的结束位置则返回false。</p>
+<h3 id="Insert">Insert<a class="anchor" href="#Insert"></a></h3>
+<h4 id="为什么Insert等Executor有child而SeqScan没有？">为什么Insert等Executor有child而SeqScan没有？<a class="anchor" href="#为什么Insert等Executor有child而SeqScan没有？"></a></h4>
+<p><code>InsertExecutor</code> 的主要职责是将一条或多条记录插入到指定的表中。它可能需要依赖于其他 <code>Executor</code> 来获取要插入的数据。例如，如果 <code>INSERT</code> 操作是从一个 <code>SELECT</code> 查询的结果集中插入数据，那么 <code>InsertExecutor</code> 可能会有一个子 <code>Executor</code>（如 <code>SeqScanExecutor</code> 或其他类型的 <code>Executor</code>），该子 <code>Executor</code> 负责执行 <code>SELECT</code> 操作并提供数据给 <code>InsertExecutor</code>。</p>
+<p>因此，<code>InsertExecutor</code> 有 child 是因为它可能需要从另一个查询的结果中获取数据。</p>
+<p><code>SeqScanExecutor</code>的主要职责是对表进行全表扫描，即按顺序读取表中的所有记录。这是一个基本的操作，通常不需要其他 <code>Executor</code> 的支持来完成其工作。</p>
+<p>它直接作用于存储层，遍历表中的每一行数据，因此没有子 <code>Executor</code>。它的任务相对简单，就是遍历和返回表中的所有记录。</p>
+<p>简而言之，<code>InsertExecutor</code> 需要 child 是<strong>因为它的操作可能涉及从其他查询结果中获取数据</strong>，而 <code>SeqScanExecutor</code> 不需要 child 是因为它的任务是独立完成的，只需遍历表中的所有记录即可。这反映了数据库执行计划中不同操作之间的依赖关系和交互方式。其他Executor同理。</p>
+<p>举个批量插入的🌰：</p>
+<p>假设我们有一个 <code>orders</code> 表，包含以下列：</p>
+<ul>
+<li><code>order_id</code> (主键)</li>
+<li><code>customer_id</code></li>
+<li><code>product_id</code></li>
+<li><code>quantity</code></li>
+<li><code>order_date</code></li>
+</ul>
+<p>我们希望通过一个子查询（select）来获取一批订单记录，并将这些记录插入到 <code>orders</code> 表中：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">INSERT INTO</span> orders (customer_id, product_id, quantity, order_date)</span><br><span class="line"><span class="keyword">SELECT</span> customer_id, product_id, quantity, order_date</span><br><span class="line"><span class="keyword">FROM</span> pending_orders</span><br><span class="line"><span class="keyword">WHERE</span> status <span class="operator">=</span> <span class="string">&#x27;approved&#x27;</span>;</span><br></pre></td></tr></table></figure>
+<p>很明显，我们在插入之前要从select子句中获取数据，因此这个子查询操作就是insert操作的<code>child_executor</code>。</p>
+<h4 id="没有子操作时，需要插入的数据从哪里获取？">没有子操作时，需要插入的数据从哪里获取？<a class="anchor" href="#没有子操作时，需要插入的数据从哪里获取？"></a></h4>
+<p>比如执行如下SQL时：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">insert into</span> test_1 <span class="keyword">values</span> (<span class="number">202</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>);</span><br></pre></td></tr></table></figure>
+<p>从肉眼看可以知道需要插入的数据为<code>(202, 1, 2, 3)</code>，但是在代码中又是从哪里获取的呢？</p>
+<p>让我们使用一下<code>explain</code>工具来看看这条SQL语句在bustub内部做了什么：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">bustub<span class="operator">&gt;</span> explain <span class="keyword">insert into</span> test_1 <span class="keyword">values</span> (<span class="number">202</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>);</span><br><span class="line"><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span> BINDER <span class="operator">=</span><span class="operator">=</span><span class="operator">=</span></span><br><span class="line">BoundInsert &#123;</span><br><span class="line">  <span class="keyword">table</span><span class="operator">=</span>BoundBaseTableRef &#123; <span class="keyword">table</span><span class="operator">=</span>test_1, oid<span class="operator">=</span><span class="number">22</span> &#125;,</span><br><span class="line">  <span class="keyword">select</span><span class="operator">=</span>  BoundSelect &#123;</span><br><span class="line">    <span class="keyword">table</span><span class="operator">=</span>BoundExpressionListRef &#123; identifier<span class="operator">=</span>__values#<span class="number">0</span>, <span class="keyword">values</span><span class="operator">=</span>[[&quot;202&quot;, &quot;1&quot;, &quot;2&quot;, &quot;3&quot;]] &#125;,</span><br><span class="line">    columns<span class="operator">=</span>[&quot;__values#0.0&quot;, &quot;__values#0.1&quot;, &quot;__values#0.2&quot;, &quot;__values#0.3&quot;],</span><br><span class="line">    groupBy<span class="operator">=</span>[],</span><br><span class="line">    <span class="keyword">having</span><span class="operator">=</span>,</span><br><span class="line">    <span class="keyword">where</span><span class="operator">=</span>,</span><br><span class="line">    limit<span class="operator">=</span>,</span><br><span class="line">    <span class="keyword">offset</span><span class="operator">=</span>,</span><br><span class="line">    order_by<span class="operator">=</span>[],</span><br><span class="line">    is_distinct<span class="operator">=</span><span class="literal">false</span>,</span><br><span class="line">    ctes<span class="operator">=</span>,</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span> PLANNER <span class="operator">=</span><span class="operator">=</span><span class="operator">=</span></span><br><span class="line"><span class="keyword">Insert</span> &#123; table_oid<span class="operator">=</span><span class="number">22</span> &#125; <span class="operator">|</span> (__bustub_internal.insert_rows:<span class="type">INTEGER</span>)</span><br><span class="line">  Projection &#123; exprs<span class="operator">=</span>[&quot;#0.0&quot;, &quot;#0.1&quot;, &quot;#0.2&quot;, &quot;#0.3&quot;] &#125; <span class="operator">|</span> (__values#<span class="number">0.0</span>:<span class="type">INTEGER</span>, __values#<span class="number">0.1</span>:<span class="type">INTEGER</span>, __values#<span class="number">0.2</span>:<span class="type">INTEGER</span>, __values#<span class="number">0.3</span>:<span class="type">INTEGER</span>)</span><br><span class="line">    <span class="keyword">Values</span> &#123; <span class="keyword">rows</span><span class="operator">=</span><span class="number">1</span> &#125; <span class="operator">|</span> (__values#<span class="number">0.0</span>:<span class="type">INTEGER</span>, __values#<span class="number">0.1</span>:<span class="type">INTEGER</span>, __values#<span class="number">0.2</span>:<span class="type">INTEGER</span>, __values#<span class="number">0.3</span>:<span class="type">INTEGER</span>)</span><br><span class="line"><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span> OPTIMIZER <span class="operator">=</span><span class="operator">=</span><span class="operator">=</span></span><br><span class="line"><span class="keyword">Insert</span> &#123; table_oid<span class="operator">=</span><span class="number">22</span> &#125; <span class="operator">|</span> (__bustub_internal.insert_rows:<span class="type">INTEGER</span>)</span><br><span class="line">  <span class="keyword">Values</span> &#123; <span class="keyword">rows</span><span class="operator">=</span><span class="number">1</span> &#125; <span class="operator">|</span> (__values#<span class="number">0.0</span>:<span class="type">INTEGER</span>, __values#<span class="number">0.1</span>:<span class="type">INTEGER</span>, __values#<span class="number">0.2</span>:<span class="type">INTEGER</span>, __values#<span class="number">0.3</span>:<span class="type">INTEGER</span>)</span><br></pre></td></tr></table></figure>
+<p>将目标聚焦在生成的查询计划上，从上到下，在一个<code>Insert</code>的查询计划中，使用<code>Projection</code>从其输入源（如表扫描、索引扫描、连接等）中提取所需的列，最下层使用<code>Value</code>获取到要操作的数据！</p>
+<p>所以对应的，<code>InsertExecutor</code>的<code>child_executor</code>为<code>ProjectionExecutor</code>，而<code>ProjectionExecutor</code>的<code>child_executor</code>为<code>ValuesExecutor</code>，使用迭代器模型就能很方便的获取到数据了（<code>ValuesExecutor</code>就是最后的Executor，其<code>Next</code>函数不会再往下调用，其所做的只是根据在解析SQL及其之后的一些步骤中得到的需要操作的数据封装成一个tuple进行返回）。</p>
+<h3 id="Delete">Delete<a class="anchor" href="#Delete"></a></h3>
+<p>需要写的代码和insert操作的基本相同。但有个地方需要注意一下，在执行一条delete语句时，让我们看看做了些什么：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">bustub<span class="operator">&gt;</span> explain <span class="keyword">delete</span> <span class="keyword">from</span> test_1 <span class="keyword">where</span> colA <span class="operator">=</span> <span class="number">999</span>;</span><br><span class="line"><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span> BINDER <span class="operator">=</span><span class="operator">=</span><span class="operator">=</span></span><br><span class="line"><span class="keyword">Delete</span> &#123; <span class="keyword">table</span><span class="operator">=</span>BoundBaseTableRef &#123; <span class="keyword">table</span><span class="operator">=</span>test_1, oid<span class="operator">=</span><span class="number">22</span> &#125;, expr<span class="operator">=</span>(test_1.colA<span class="operator">=</span><span class="number">999</span>) &#125;</span><br><span class="line"><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span> PLANNER <span class="operator">=</span><span class="operator">=</span><span class="operator">=</span></span><br><span class="line"><span class="keyword">Delete</span> &#123; table_oid<span class="operator">=</span><span class="number">22</span> &#125; <span class="operator">|</span> (__bustub_internal.delete_rows:<span class="type">INTEGER</span>)</span><br><span class="line">  <span class="keyword">Filter</span> &#123; predicate<span class="operator">=</span>(#<span class="number">0.0</span><span class="operator">=</span><span class="number">999</span>) &#125; <span class="operator">|</span> (test_1.colA:<span class="type">INTEGER</span>, test_1.colB:<span class="type">INTEGER</span>, test_1.colC:<span class="type">INTEGER</span>, test_1.colD:<span class="type">INTEGER</span>)</span><br><span class="line">    SeqScan &#123; <span class="keyword">table</span><span class="operator">=</span>test_1 &#125; <span class="operator">|</span> (test_1.colA:<span class="type">INTEGER</span>, test_1.colB:<span class="type">INTEGER</span>, test_1.colC:<span class="type">INTEGER</span>, test_1.colD:<span class="type">INTEGER</span>)</span><br><span class="line"><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span> OPTIMIZER <span class="operator">=</span><span class="operator">=</span><span class="operator">=</span></span><br><span class="line"><span class="keyword">Delete</span> &#123; table_oid<span class="operator">=</span><span class="number">22</span> &#125; <span class="operator">|</span> (__bustub_internal.delete_rows:<span class="type">INTEGER</span>)</span><br><span class="line">  SeqScan &#123; <span class="keyword">table</span><span class="operator">=</span>test_1, <span class="keyword">filter</span><span class="operator">=</span>(#<span class="number">0.0</span><span class="operator">=</span><span class="number">999</span>) &#125; <span class="operator">|</span> (test_1.colA:<span class="type">INTEGER</span>, test_1.colB:<span class="type">INTEGER</span>, test_1.colC:<span class="type">INTEGER</span>, test_1.colD:<span class="type">INTEGER</span>)</span><br></pre></td></tr></table></figure>
+<p>可以看到，在optimizer阶段，where子句的filter下放至SeqScan处与其合并了，也就是说，我们需要在实现<code>SeqScanExecutor</code>时注意处理一下filter。这里提示一下：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">while</span> (cur_tuple.first.is_deleted_ ||</span><br><span class="line">	    (plan_-&gt;filter_predicate_ &amp;&amp; !(plan_-&gt;filter_predicate_-&gt;<span class="built_in">Evaluate</span>(tuple, <span class="built_in">GetOutputSchema</span>()).<span class="built_in">GetAs</span>&lt;<span class="type">bool</span>&gt;())))</span><br></pre></td></tr></table></figure>
+<p>如果其返回true，说明filter匹配到了数据（就如例子中匹配到了colA列为999的tuple），如果此时这个tuple没有被标记为删除，那么就说明找到了我们需要删除的tuple。</p>
+<h3 id="Update">Update<a class="anchor" href="#Update"></a></h3>
+<p>我们如何知道update需要更新的数据从哪里取呢？</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">bustub<span class="operator">&gt;</span> explain(p, o) <span class="keyword">update</span> test_1 <span class="keyword">set</span> colB <span class="operator">=</span> <span class="number">15445</span>;</span><br><span class="line"><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span> PLANNER <span class="operator">=</span><span class="operator">=</span><span class="operator">=</span></span><br><span class="line"><span class="keyword">Update</span> &#123; table_oid<span class="operator">=</span><span class="number">22</span>, target_exprs<span class="operator">=</span>[&quot;#0.0&quot;, &quot;15445&quot;, &quot;#0.2&quot;, &quot;#0.3&quot;] &#125;</span><br><span class="line">  <span class="keyword">Filter</span> &#123; predicate<span class="operator">=</span><span class="literal">true</span> &#125;</span><br><span class="line">    SeqScan &#123; <span class="keyword">table</span><span class="operator">=</span>test_1 &#125;</span><br><span class="line"><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span> OPTIMIZER <span class="operator">=</span><span class="operator">=</span><span class="operator">=</span></span><br><span class="line"><span class="keyword">Update</span> &#123; table_oid<span class="operator">=</span><span class="number">22</span>, target_exprs<span class="operator">=</span>[&quot;#0.0&quot;, &quot;15445&quot;, &quot;#0.2&quot;, &quot;#0.3&quot;] &#125;</span><br><span class="line">  SeqScan &#123; <span class="keyword">table</span><span class="operator">=</span>test_1, <span class="keyword">filter</span><span class="operator">=</span><span class="literal">true</span> &#125;</span><br></pre></td></tr></table></figure>
+<p>看看Update中，有一个<code>target_exprs</code>数组，这个数组可不就是我们的一行数据吗，并且是需要更新的那行数据：update语句可以不加where子句，这样就是选中表中的所有行，也就是这里将表中colB列的数据都update为15445！</p>
+<p>对于<code>target_exprs</code>这个数组，我们可以通过<code>plan_-&gt;target_expressions_</code>获取，然后用其构建一个新的tuple。</p>
+<p>需要注意的是，这里并没有提供直接更新tuple的操作，所以我们的update操作可以用先删除后插入的方式来模拟。</p>
+<h3 id="IndexScan">IndexScan<a class="anchor" href="#IndexScan"></a></h3>
+<p>我们首先需要完成<code>OptimizeSeqScanAsIndexScan</code>这个优化步骤。</p>
+<p>假设现在我们有一个表叫“test_1”，其列如下：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="operator">+</span><span class="comment">-------------+-------------+-------------+-------------+</span></span><br><span class="line"><span class="operator">|</span> test_1.colA <span class="operator">|</span> test_1.colB <span class="operator">|</span> test_1.colC <span class="operator">|</span> test_1.colD <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">-------------+-------------+-------------+-------------+</span></span><br></pre></td></tr></table></figure>
+<p>现在我们希望这条SQL能执行的更快：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> test_1 <span class="keyword">where</span> colB <span class="operator">=</span> <span class="number">11</span>;</span><br></pre></td></tr></table></figure>
+<p>那比较不错的方法就是给<code>colB</code>列加上索引：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">create</span> index v1 <span class="keyword">on</span> test_1(colB);</span><br></pre></td></tr></table></figure>
+<p>这样在执行时可以更快速的查找数据。</p>
+<p>那么为了实现这一目标，我们需要通过<code>OptimizeSeqScanAsIndexScan</code>将plan树中的<code>SeqScanPlanNode</code>转换成<code>IndexScanPlanNode</code>，这样我们才能使用IndexScanPlanNode对应的算子—<code>IndexScanExecutor</code>去使用索引。但是由于bustub的一些设计，需要遵循以下规则才可以转化：</p>
+<ol>
+<li>当前的节点的类型必须是<code>PlanType::SeqScan</code></li>
+<li>当前节点必须有filter谓词，如果只是<code>select * from test_1;</code>这样的是不需要使用索引的</li>
+<li>当前表中必须有索引，没有索引还玩啥呢</li>
+<li>fileter谓词中的逻辑表达式只能有一个，并且其类型必须是<code>ComparisonType::Equal</code>（我想这里必须是“等于”是不是因为fall2023使用的索引是哈希索引）</li>
+<li>在当前表的索引信息中找到与filter谓词相对应的索引后才能返回一个<code>IndexScanPlanNode</code></li>
+</ol>
+<p>在<code>select * from test_1 where colB = 11;</code>中，加了索引后，最需要关注的就是<code>where colB = 11</code>这一个过滤条件。bustub中要求<code>IndexScan</code>过滤运算符必须是<code>=</code>，且只能有一个条件。如果<code>colA</code>和<code>colB</code>都是索引，然后执行<code>select * from test_1 where colB = 11 and colA = 1;</code>，这样是不会走索引优化的。</p>
+<p>我们将查询计划中的过滤谓词转化成<code>ComparisonExpression</code>类型，据我的理解，其可通过<code>GetChildAt</code>函数获取比较谓词左边的列名表达式（即这里的“colB”，有了这个列名的表达式，我们就可以获取到这个列的col_id值）和右边的值（即“11”）。之后需要去这张表中的所有索引中去找是否有colB的索引，怎么确定是否有呢，那就要看这个表中的每个<code>Index</code>的<code>key_attrs_</code>：</p>
+<p>在<code>Index</code>中，<code>key_attrs_</code>决定了索引的关键字由哪些列组成，对应了每个列的下标。例如：</p>
+<ul>
+<li>如果表的 schema 定义有 5 列，分别为 <code>A</code>, <code>B</code>, <code>C</code>, <code>D</code>, <code>E</code>。</li>
+<li>某个索引的 <code>key_attrs_</code> 是 <code>[0, 2]</code>，则表示该索引使用了第 0 列（<code>A</code>）和第 2 列（<code>C</code>）作为其关键字。</li>
+</ul>
+<p>如果之前我们获取的列的col_id值和某个<code>Index</code>的<code>key_attrs_</code>中的值相同，那么就存在相应的索引！这时构造一个<code>IndexScanPlanNode</code>返回即可（参考<code>merge_filter_scan.cpp</code>中是如何做的）。</p>
+<p>当优化器成功更换节点后，在执行时就会走索引，其底层算子就会使用到<code>IndexScanExecutor</code>。到这里，这个算子需要做的事情就很简单了，就是调用哈希索引的<code>ScanKey</code>进行查找，不过这里有3点需要注意：</p>
+<ol>
+<li>在project2中，我们实现的索引引擎只支持一个键对应一个值（不只是这个版本的可拓展哈希，其他版本中的B+Tree也只要求这样实现），也就是我们的这个算子在底层索引引擎不扩展的情况下最多查到一条记录，这样的话就可以在算子的<code>Init</code>函数中调用<code>ScanKey</code>查找记录就行。</li>
+<li>可拓展哈希中是将一个Tuple的data转化一下当作key，所以在索引中，其是将索引列的值作为key，其对应的oid作为值。在使用<code>ScanKey</code>时，第一个参数需要的tuple将用查询计划节点<code>IndexScanPlanNode</code>中的<code>pred_key_</code>构造。</li>
+<li>表中的tuple的元数据中，其<code>is_deleted_</code>可能为true，这说明这个tuple在逻辑上已经删除了，所以如果我们通过2中获取的oid对应的tuple是这种情况，就不用向上返回数据。</li>
+</ol>
+<h2 id="Task2-Aggregation-Join-Executors">Task2 - Aggregation &amp; Join Executors<a class="anchor" href="#Task2-Aggregation-Join-Executors"></a></h2>
+<h3 id="Aggregation">Aggregation<a class="anchor" href="#Aggregation"></a></h3>
+<p>分析一个例子：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">bustub<span class="operator">&gt;</span> EXPLAIN <span class="keyword">SELECT</span> <span class="built_in">MAX</span>(colC), <span class="built_in">MIN</span>(colB) <span class="keyword">FROM</span> test_1 <span class="keyword">GROUP</span> <span class="keyword">BY</span> colA <span class="keyword">HAVING</span> <span class="built_in">MAX</span>(colB) <span class="operator">&gt;</span> <span class="number">10</span>;</span><br><span class="line"><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span> BINDER <span class="operator">=</span><span class="operator">=</span><span class="operator">=</span></span><br><span class="line">BoundSelect &#123;</span><br><span class="line">  <span class="keyword">table</span><span class="operator">=</span>BoundBaseTableRef &#123; <span class="keyword">table</span><span class="operator">=</span>test_1, oid<span class="operator">=</span><span class="number">22</span> &#125;,</span><br><span class="line">  columns<span class="operator">=</span>[&quot;max([\&quot;test_1.colC\&quot;])&quot;, &quot;min([\&quot;test_1.colB\&quot;])&quot;],</span><br><span class="line">  groupBy<span class="operator">=</span>[&quot;test_1.colA&quot;],</span><br><span class="line">  <span class="keyword">having</span><span class="operator">=</span>(<span class="built_in">max</span>([&quot;test_1.colB&quot;])<span class="operator">&gt;</span><span class="number">10</span>),</span><br><span class="line">  <span class="keyword">where</span><span class="operator">=</span>,</span><br><span class="line">  limit<span class="operator">=</span>,</span><br><span class="line">  <span class="keyword">offset</span><span class="operator">=</span>,</span><br><span class="line">  order_by<span class="operator">=</span>[],</span><br><span class="line">  is_distinct<span class="operator">=</span><span class="literal">false</span>,</span><br><span class="line">  ctes<span class="operator">=</span>,</span><br><span class="line">&#125;</span><br><span class="line"><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span> PLANNER <span class="operator">=</span><span class="operator">=</span><span class="operator">=</span></span><br><span class="line">Projection &#123; exprs<span class="operator">=</span>[&quot;#0.2&quot;, &quot;#0.3&quot;] &#125; <span class="operator">|</span> (<span class="operator">&lt;</span>unnamed<span class="operator">&gt;</span>:<span class="type">INTEGER</span>, <span class="operator">&lt;</span>unnamed<span class="operator">&gt;</span>:<span class="type">INTEGER</span>)</span><br><span class="line">  <span class="keyword">Filter</span> &#123; predicate<span class="operator">=</span>(#<span class="number">0.1</span><span class="operator">&gt;</span><span class="number">10</span>) &#125; <span class="operator">|</span> (test_1.colA:<span class="type">INTEGER</span>, agg#<span class="number">0</span>:<span class="type">INTEGER</span>, agg#<span class="number">1</span>:<span class="type">INTEGER</span>, agg#<span class="number">2</span>:<span class="type">INTEGER</span>)</span><br><span class="line">    Agg &#123; types<span class="operator">=</span>[&quot;max&quot;, &quot;max&quot;, &quot;min&quot;], aggregates<span class="operator">=</span>[&quot;#0.1&quot;, &quot;#0.2&quot;, &quot;#0.1&quot;], group_by<span class="operator">=</span>[&quot;#0.0&quot;] &#125; <span class="operator">|</span> (test_1.colA:<span class="type">INTEGER</span>, agg#<span class="number">0</span>:<span class="type">INTEGER</span>, agg#<span class="number">1</span>:<span class="type">INTEGER</span>, agg#<span class="number">2</span>:<span class="type">INTEGER</span>)</span><br><span class="line">      SeqScan &#123; <span class="keyword">table</span><span class="operator">=</span>test_1 &#125; <span class="operator">|</span> (test_1.colA:<span class="type">INTEGER</span>, test_1.colB:<span class="type">INTEGER</span>, test_1.colC:<span class="type">INTEGER</span>, test_1.colD:<span class="type">INTEGER</span>)</span><br><span class="line"><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span> OPTIMIZER <span class="operator">=</span><span class="operator">=</span><span class="operator">=</span></span><br><span class="line">Projection &#123; exprs<span class="operator">=</span>[&quot;#0.2&quot;, &quot;#0.3&quot;] &#125; <span class="operator">|</span> (<span class="operator">&lt;</span>unnamed<span class="operator">&gt;</span>:<span class="type">INTEGER</span>, <span class="operator">&lt;</span>unnamed<span class="operator">&gt;</span>:<span class="type">INTEGER</span>)</span><br><span class="line">  <span class="keyword">Filter</span> &#123; predicate<span class="operator">=</span>(#<span class="number">0.1</span><span class="operator">&gt;</span><span class="number">10</span>) &#125; <span class="operator">|</span> (test_1.colA:<span class="type">INTEGER</span>, agg#<span class="number">0</span>:<span class="type">INTEGER</span>, agg#<span class="number">1</span>:<span class="type">INTEGER</span>, agg#<span class="number">2</span>:<span class="type">INTEGER</span>)</span><br><span class="line">    Agg &#123; types<span class="operator">=</span>[&quot;max&quot;, &quot;max&quot;, &quot;min&quot;], aggregates<span class="operator">=</span>[&quot;#0.1&quot;, &quot;#0.2&quot;, &quot;#0.1&quot;], group_by<span class="operator">=</span>[&quot;#0.0&quot;] &#125; <span class="operator">|</span> (test_1.colA:<span class="type">INTEGER</span>, agg#<span class="number">0</span>:<span class="type">INTEGER</span>, agg#<span class="number">1</span>:<span class="type">INTEGER</span>, agg#<span class="number">2</span>:<span class="type">INTEGER</span>)</span><br><span class="line">      SeqScan &#123; <span class="keyword">table</span><span class="operator">=</span>test_1 &#125; <span class="operator">|</span> (test_1.colA:<span class="type">INTEGER</span>, test_1.colB:<span class="type">INTEGER</span>, test_1.colC:<span class="type">INTEGER</span>, test_1.colD:<span class="type">INTEGER</span>)</span><br></pre></td></tr></table></figure>
+<p>对于AggregationExecutor，我们可以获取到SQL语句中：</p>
+<ol>
+<li>聚合操作的<code>types</code>（进行聚合操作的类型）和<code>aggregates</code>（需要聚合操作的列），二者一一对应</li>
+<li>需要group by进行分组的列</li>
+</ol>
+<p><img src="https://gitee.com/kerolt/picture/raw/main/20241216-180505.png" alt=""></p>
+<p>再看看lecture中的这个例子，其对列cid使用group by进行分组，其中涉及的聚合操作为<code>AVG</code>，可转换成<code>COUNT</code>和<code>SUM</code>操作。这里相当于：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">types = [&#x27;count&#x27;, &#x27;sum&#x27;]</span><br><span class="line">aggregates = [&#x27;s.gpa&#x27;, &#x27;s.gpa&#x27;]</span><br></pre></td></tr></table></figure>
+<p>我的理解是根据group by的字段的值进行hash函数处理作为哈希表的键，例如图中的“15-445”，“15-826”等；然后哈希表的值为一个集合，这个集合的大小和<code>types</code>和<code>aggregates</code>的大小相同，并且对应的位置就为aggregates的值：例如图中键“15-445”的值中，第一个元素就为<code>COUNT</code>操作下<code>s.gpa</code>为15-445的个数。</p>
+<p>在lab中需要实现<code>count</code>、<code>sum</code>、<code>max</code>、<code>min</code>操作，其实就是在<code>SimpleAggregationHashTable：：CombineAggregateValues</code>中实现对应的操作即可，本质上是对哈希表的几个很简单的操作。</p>
+<p><code>aggregation</code>通常需要对一组数据进行计算，这些计算具有以下特点：</p>
+<ol>
+<li><strong>需要完整输入</strong>：Aggregation 通常需要从下层拉取所有相关数据才能计算结果，例如计算 <code>SUM</code> 需要遍历所有行。</li>
+<li><strong>阻塞性</strong>：在传统实现中，Aggregation 算子通常被称为“阻塞算子”，因为它必须等待所有输入数据都拉取完成才能产出结果。这意味着 <code>next()</code> 调用会被延迟，直到聚合计算完成。</li>
+</ol>
+<p>在我们的火山模型中 <code>aggregation</code> 是阻塞算子：</p>
+<ul>
+<li>当上层算子调用 <code>next()</code> 时，<code>aggregation</code> 会向下层算子连续调用 <code>next()</code>，直到拉取完全部数据并完成聚合。</li>
+<li>在数据尚未完全拉取并聚合完成之前，上层的 <code>next()</code> 调用无法直接返回结果。</li>
+</ul>
+<p>需要注意的是：</p>
+<ul>
+<li>SQL中进行<code>group by</code>后使用<code>count</code>，统计的是<strong>每组数据中的记录数</strong>，而非分组后新表的行数。</li>
+<li><code>distinct</code>其实就是对某个字段进行<code>group by</code>操作</li>
+<li><code>count(*)</code>统计null，而<code>count(字段)</code>不统计null</li>
+</ul>
+<h3 id="NestedLoopJoin">NestedLoopJoin<a class="anchor" href="#NestedLoopJoin"></a></h3>
+<p>Inner Join：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">bustub<span class="operator">&gt;</span> EXPLAIN <span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> __mock_table_1, __mock_table_3 <span class="keyword">WHERE</span> colA <span class="operator">=</span> colE;</span><br><span class="line"><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span> BINDER <span class="operator">=</span><span class="operator">=</span><span class="operator">=</span></span><br><span class="line">BoundSelect &#123;</span><br><span class="line">  <span class="keyword">table</span><span class="operator">=</span>BoundCrossProductRef &#123; <span class="keyword">left</span><span class="operator">=</span>BoundBaseTableRef &#123; <span class="keyword">table</span><span class="operator">=</span>__mock_table_1, oid<span class="operator">=</span><span class="number">0</span> &#125;, <span class="keyword">right</span><span class="operator">=</span>BoundBaseTableRef &#123; <span class="keyword">table</span><span class="operator">=</span>__mock_table_3, oid<span class="operator">=</span><span class="number">2</span> &#125; &#125;,</span><br><span class="line">  columns<span class="operator">=</span>[&quot;__mock_table_1.colA&quot;, &quot;__mock_table_1.colB&quot;, &quot;__mock_table_3.colE&quot;, &quot;__mock_table_3.colF&quot;],</span><br><span class="line">  groupBy<span class="operator">=</span>[],</span><br><span class="line">  <span class="keyword">having</span><span class="operator">=</span>,</span><br><span class="line">  <span class="keyword">where</span><span class="operator">=</span>(__mock_table_1.colA<span class="operator">=</span>__mock_table_3.colE),</span><br><span class="line">  limit<span class="operator">=</span>,</span><br><span class="line">  <span class="keyword">offset</span><span class="operator">=</span>,</span><br><span class="line">  order_by<span class="operator">=</span>[],</span><br><span class="line">  is_distinct<span class="operator">=</span><span class="literal">false</span>,</span><br><span class="line">  ctes<span class="operator">=</span>,</span><br><span class="line">&#125;</span><br><span class="line"><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span> PLANNER <span class="operator">=</span><span class="operator">=</span><span class="operator">=</span></span><br><span class="line">Projection &#123; exprs<span class="operator">=</span>[&quot;#0.0&quot;, &quot;#0.1&quot;, &quot;#0.2&quot;, &quot;#0.3&quot;] &#125; <span class="operator">|</span> (__mock_table_1.colA:<span class="type">INTEGER</span>, __mock_table_1.colB:<span class="type">INTEGER</span>, __mock_table_3.colE:<span class="type">INTEGER</span>, __mock_table_3.colF:<span class="type">VARCHAR</span>)</span><br><span class="line">  <span class="keyword">Filter</span> &#123; predicate<span class="operator">=</span>(#<span class="number">0.0</span><span class="operator">=</span>#<span class="number">0.2</span>) &#125; <span class="operator">|</span> (__mock_table_1.colA:<span class="type">INTEGER</span>, __mock_table_1.colB:<span class="type">INTEGER</span>, __mock_table_3.colE:<span class="type">INTEGER</span>, __mock_table_3.colF:<span class="type">VARCHAR</span>)</span><br><span class="line">    NestedLoopJoin &#123; type<span class="operator">=</span><span class="keyword">Inner</span>, predicate<span class="operator">=</span><span class="literal">true</span> &#125; <span class="operator">|</span> (__mock_table_1.colA:<span class="type">INTEGER</span>, __mock_table_1.colB:<span class="type">INTEGER</span>, __mock_table_3.colE:<span class="type">INTEGER</span>, __mock_table_3.colF:<span class="type">VARCHAR</span>)</span><br><span class="line">      MockScan &#123; <span class="keyword">table</span><span class="operator">=</span>__mock_table_1 &#125; <span class="operator">|</span> (__mock_table_1.colA:<span class="type">INTEGER</span>, __mock_table_1.colB:<span class="type">INTEGER</span>)</span><br><span class="line">      MockScan &#123; <span class="keyword">table</span><span class="operator">=</span>__mock_table_3 &#125; <span class="operator">|</span> (__mock_table_3.colE:<span class="type">INTEGER</span>, __mock_table_3.colF:<span class="type">VARCHAR</span>)</span><br><span class="line"><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span> OPTIMIZER <span class="operator">=</span><span class="operator">=</span><span class="operator">=</span></span><br><span class="line">NestedLoopJoin &#123; type<span class="operator">=</span><span class="keyword">Inner</span>, predicate<span class="operator">=</span>(#<span class="number">0.0</span><span class="operator">=</span>#<span class="number">1.0</span>) &#125; <span class="operator">|</span> (__mock_table_1.colA:<span class="type">INTEGER</span>, __mock_table_1.colB:<span class="type">INTEGER</span>, __mock_table_3.colE:<span class="type">INTEGER</span>, __mock_table_3.colF:<span class="type">VARCHAR</span>)</span><br><span class="line">  MockScan &#123; <span class="keyword">table</span><span class="operator">=</span>__mock_table_1 &#125; <span class="operator">|</span> (__mock_table_1.colA:<span class="type">INTEGER</span>, __mock_table_1.colB:<span class="type">INTEGER</span>)</span><br><span class="line">  MockScan &#123; <span class="keyword">table</span><span class="operator">=</span>__mock_table_3 &#125; <span class="operator">|</span> (__mock_table_3.colE:<span class="type">INTEGER</span>, __mock_table_3.colF:<span class="type">VARCHAR</span>)</span><br></pre></td></tr></table></figure>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">bustub<span class="operator">&gt;</span> EXPLAIN <span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> __mock_table_1 <span class="keyword">INNER</span> <span class="keyword">JOIN</span> __mock_table_3 <span class="keyword">ON</span> colA <span class="operator">=</span> colE;</span><br><span class="line"><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span> BINDER <span class="operator">=</span><span class="operator">=</span><span class="operator">=</span></span><br><span class="line">BoundSelect &#123;</span><br><span class="line">  <span class="keyword">table</span><span class="operator">=</span>BoundJoin &#123; type<span class="operator">=</span><span class="keyword">Inner</span>, <span class="keyword">left</span><span class="operator">=</span>BoundBaseTableRef &#123; <span class="keyword">table</span><span class="operator">=</span>__mock_table_1, oid<span class="operator">=</span><span class="number">0</span> &#125;, <span class="keyword">right</span><span class="operator">=</span>BoundBaseTableRef &#123; <span class="keyword">table</span><span class="operator">=</span>__mock_table_3, oid<span class="operator">=</span><span class="number">2</span> &#125;, <span class="keyword">condition</span><span class="operator">=</span>(__mock_table_1.colA<span class="operator">=</span>__mock_table_3.colE) &#125;,</span><br><span class="line">  columns<span class="operator">=</span>[&quot;__mock_table_1.colA&quot;, &quot;__mock_table_1.colB&quot;, &quot;__mock_table_3.colE&quot;, &quot;__mock_table_3.colF&quot;],</span><br><span class="line">  groupBy<span class="operator">=</span>[],</span><br><span class="line">  <span class="keyword">having</span><span class="operator">=</span>,</span><br><span class="line">  <span class="keyword">where</span><span class="operator">=</span>,</span><br><span class="line">  limit<span class="operator">=</span>,</span><br><span class="line">  <span class="keyword">offset</span><span class="operator">=</span>,</span><br><span class="line">  order_by<span class="operator">=</span>[],</span><br><span class="line">  is_distinct<span class="operator">=</span><span class="literal">false</span>,</span><br><span class="line">  ctes<span class="operator">=</span>,</span><br><span class="line">&#125;</span><br><span class="line"><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span> PLANNER <span class="operator">=</span><span class="operator">=</span><span class="operator">=</span></span><br><span class="line">Projection &#123; exprs<span class="operator">=</span>[&quot;#0.0&quot;, &quot;#0.1&quot;, &quot;#0.2&quot;, &quot;#0.3&quot;] &#125; <span class="operator">|</span> (__mock_table_1.colA:<span class="type">INTEGER</span>, __mock_table_1.colB:<span class="type">INTEGER</span>, __mock_table_3.colE:<span class="type">INTEGER</span>, __mock_table_3.colF:<span class="type">VARCHAR</span>)</span><br><span class="line">  NestedLoopJoin &#123; type<span class="operator">=</span><span class="keyword">Inner</span>, predicate<span class="operator">=</span>(#<span class="number">0.0</span><span class="operator">=</span>#<span class="number">1.0</span>) &#125; <span class="operator">|</span> (__mock_table_1.colA:<span class="type">INTEGER</span>, __mock_table_1.colB:<span class="type">INTEGER</span>, __mock_table_3.colE:<span class="type">INTEGER</span>, __mock_table_3.colF:<span class="type">VARCHAR</span>)</span><br><span class="line">    MockScan &#123; <span class="keyword">table</span><span class="operator">=</span>__mock_table_1 &#125; <span class="operator">|</span> (__mock_table_1.colA:<span class="type">INTEGER</span>, __mock_table_1.colB:<span class="type">INTEGER</span>)</span><br><span class="line">    MockScan &#123; <span class="keyword">table</span><span class="operator">=</span>__mock_table_3 &#125; <span class="operator">|</span> (__mock_table_3.colE:<span class="type">INTEGER</span>, __mock_table_3.colF:<span class="type">VARCHAR</span>)</span><br><span class="line"><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span> OPTIMIZER <span class="operator">=</span><span class="operator">=</span><span class="operator">=</span></span><br><span class="line">NestedLoopJoin &#123; type<span class="operator">=</span><span class="keyword">Inner</span>, predicate<span class="operator">=</span>(#<span class="number">0.0</span><span class="operator">=</span>#<span class="number">1.0</span>) &#125; <span class="operator">|</span> (__mock_table_1.colA:<span class="type">INTEGER</span>, __mock_table_1.colB:<span class="type">INTEGER</span>, __mock_table_3.colE:<span class="type">INTEGER</span>, __mock_table_3.colF:<span class="type">VARCHAR</span>)</span><br><span class="line">  MockScan &#123; <span class="keyword">table</span><span class="operator">=</span>__mock_table_1 &#125; <span class="operator">|</span> (__mock_table_1.colA:<span class="type">INTEGER</span>, __mock_table_1.colB:<span class="type">INTEGER</span>)</span><br><span class="line">  MockScan &#123; <span class="keyword">table</span><span class="operator">=</span>__mock_table_3 &#125; <span class="operator">|</span> (__mock_table_3.colE:<span class="type">INTEGER</span>, __mock_table_3.colF:<span class="type">VARCHAR</span>)</span><br></pre></td></tr></table></figure>
+<p>可以看到，即便我们不加<code>inner join</code>，默认情况下也是使用的Inner Join：<code>NestedLoopJoin</code>中的type均为<code>Inner</code>。</p>
+<p>Left Join：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">bustub<span class="operator">&gt;</span> EXPLAIN <span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> __mock_table_1 <span class="keyword">LEFT</span> <span class="keyword">OUTER</span> <span class="keyword">JOIN</span> __mock_table_3 <span class="keyword">ON</span> colA <span class="operator">=</span> colE;</span><br><span class="line"><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span> BINDER <span class="operator">=</span><span class="operator">=</span><span class="operator">=</span></span><br><span class="line">BoundSelect &#123;</span><br><span class="line">  <span class="keyword">table</span><span class="operator">=</span>BoundJoin &#123; type<span class="operator">=</span><span class="keyword">Left</span>, <span class="keyword">left</span><span class="operator">=</span>BoundBaseTableRef &#123; <span class="keyword">table</span><span class="operator">=</span>__mock_table_1, oid<span class="operator">=</span><span class="number">0</span> &#125;, <span class="keyword">right</span><span class="operator">=</span>BoundBaseTableRef &#123; <span class="keyword">table</span><span class="operator">=</span>__mock_table_3, oid<span class="operator">=</span><span class="number">2</span> &#125;, <span class="keyword">condition</span><span class="operator">=</span>(__mock_table_1.colA<span class="operator">=</span>__mock_table_3.colE) &#125;,</span><br><span class="line">  columns<span class="operator">=</span>[&quot;__mock_table_1.colA&quot;, &quot;__mock_table_1.colB&quot;, &quot;__mock_table_3.colE&quot;, &quot;__mock_table_3.colF&quot;],</span><br><span class="line">  groupBy<span class="operator">=</span>[],</span><br><span class="line">  <span class="keyword">having</span><span class="operator">=</span>,</span><br><span class="line">  <span class="keyword">where</span><span class="operator">=</span>,</span><br><span class="line">  limit<span class="operator">=</span>,</span><br><span class="line">  <span class="keyword">offset</span><span class="operator">=</span>,</span><br><span class="line">  order_by<span class="operator">=</span>[],</span><br><span class="line">  is_distinct<span class="operator">=</span><span class="literal">false</span>,</span><br><span class="line">  ctes<span class="operator">=</span>,</span><br><span class="line">&#125;</span><br><span class="line"><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span> PLANNER <span class="operator">=</span><span class="operator">=</span><span class="operator">=</span></span><br><span class="line">Projection &#123; exprs<span class="operator">=</span>[&quot;#0.0&quot;, &quot;#0.1&quot;, &quot;#0.2&quot;, &quot;#0.3&quot;] &#125; <span class="operator">|</span> (__mock_table_1.colA:<span class="type">INTEGER</span>, __mock_table_1.colB:<span class="type">INTEGER</span>, __mock_table_3.colE:<span class="type">INTEGER</span>, __mock_table_3.colF:<span class="type">VARCHAR</span>)</span><br><span class="line">  NestedLoopJoin &#123; type<span class="operator">=</span><span class="keyword">Left</span>, predicate<span class="operator">=</span>(#<span class="number">0.0</span><span class="operator">=</span>#<span class="number">1.0</span>) &#125; <span class="operator">|</span> (__mock_table_1.colA:<span class="type">INTEGER</span>, __mock_table_1.colB:<span class="type">INTEGER</span>, __mock_table_3.colE:<span class="type">INTEGER</span>, __mock_table_3.colF:<span class="type">VARCHAR</span>)</span><br><span class="line">    MockScan &#123; <span class="keyword">table</span><span class="operator">=</span>__mock_table_1 &#125; <span class="operator">|</span> (__mock_table_1.colA:<span class="type">INTEGER</span>, __mock_table_1.colB:<span class="type">INTEGER</span>)</span><br><span class="line">    MockScan &#123; <span class="keyword">table</span><span class="operator">=</span>__mock_table_3 &#125; <span class="operator">|</span> (__mock_table_3.colE:<span class="type">INTEGER</span>, __mock_table_3.colF:<span class="type">VARCHAR</span>)</span><br><span class="line"><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span> OPTIMIZER <span class="operator">=</span><span class="operator">=</span><span class="operator">=</span></span><br><span class="line">NestedLoopJoin &#123; type<span class="operator">=</span><span class="keyword">Left</span>, predicate<span class="operator">=</span>(#<span class="number">0.0</span><span class="operator">=</span>#<span class="number">1.0</span>) &#125; <span class="operator">|</span> (__mock_table_1.colA:<span class="type">INTEGER</span>, __mock_table_1.colB:<span class="type">INTEGER</span>, __mock_table_3.colE:<span class="type">INTEGER</span>, __mock_table_3.colF:<span class="type">VARCHAR</span>)</span><br><span class="line">  MockScan &#123; <span class="keyword">table</span><span class="operator">=</span>__mock_table_1 &#125; <span class="operator">|</span> (__mock_table_1.colA:<span class="type">INTEGER</span>, __mock_table_1.colB:<span class="type">INTEGER</span>)</span><br><span class="line">  MockScan &#123; <span class="keyword">table</span><span class="operator">=</span>__mock_table_3 &#125; <span class="operator">|</span> (__mock_table_3.colE:<span class="type">INTEGER</span>, __mock_table_3.colF:<span class="type">VARCHAR</span>)</span><br></pre></td></tr></table></figure>
+<p>由于火山模型中的Next每次返回一条tuple，所以我们需要在Init中得到join后的所有tuple。Nested Loop Join其实就是用两个for循环去遍历两张表，保存满足筛选条件的tuple。</p>
+<p><code>inner join</code>只会返回两个表中满足连接条件的tuple；而<code>left join</code>会返回左表中的所有记录，以及右表中满足条件的tuple。所以在嵌套for循环中，如果右表中有未能满足条件的tuple，那么就保存左表中的每一列的值，并且加上右表中每一列的null值。</p>
+<h2 id="Reference">Reference<a class="anchor" href="#Reference"></a></h2>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          
+
+<div class="post-copyright">
+<ul>
+  <li class="post-copyright-author">
+      <strong>本文作者： </strong>Kerolt
+  </li>
+  <li class="post-copyright-link">
+      <strong>本文链接：</strong>
+      <a href="https://kerolt.github.io/posts/d924fc2e/" title="【CMU15-445 Fall2023】Project3 Query Execution 小结">https://kerolt.github.io/posts/d924fc2e/</a>
+  </li>
+  <li class="post-copyright-license">
+      <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+        
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/posts/b98bd372/" rel="prev" title="【MIT6.S081】Lab10 mmap">
+                  <i class="fa fa-angle-left"></i> 【MIT6.S081】Lab10 mmap
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/posts/e976e5d7/" rel="next" title="在vscode中配置lldb">
+                  在vscode中配置lldb <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+    
+  <div class="comments" id="disqus_thread">
+    <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+  </div>
+  
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 2023 – 
+    <span itemprop="copyrightYear">2025</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Kerolt</span>
+  </div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+    <span title="站点总字数">59k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">3:34</span>
+  </span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/mist/" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/fancyapps-ui/5.0.31/fancybox/fancybox.umd.js" integrity="sha256-a+H7FYzJv6oU2hfsfDGM2Ohw/cR9v+hPfxHCLdmCrE8=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/sidebar.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+  <script src="/js/third-party/fancybox.js"></script>
+
+  <script src="/js/third-party/pace.js"></script>
+
+
+  
+
+
+
+
+<script class="next-config" data-name="disqus" type="application/json">{"enable":true,"shortname":"kerolt","count":true,"i18n":{"disqus":"disqus"}}</script>
+<script src="/js/third-party/comments/disqus.js"></script>
+
+</body>
+</html>
