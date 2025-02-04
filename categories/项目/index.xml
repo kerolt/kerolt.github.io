@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>项目 on Kerolt&#39;s Blog</title>
+    <link>https://kerolt.github.io/categories/%E9%A1%B9%E7%9B%AE/</link>
+    <description>Recent content in 项目 on Kerolt&#39;s Blog</description>
+    <image>
+      <title>Kerolt&#39;s Blog</title>
+      <url>https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</url>
+      <link>https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</link>
+    </image>
+    <generator>Hugo -- 0.126.2</generator>
+    <language>en</language>
+    <lastBuildDate>Mon, 30 Sep 2024 00:00:00 +0000</lastBuildDate>
+    <atom:link href="https://kerolt.github.io/categories/%E9%A1%B9%E7%9B%AE/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>【动手写协程库 5】常用IO函数的HOOK功能</title>
+      <link>https://kerolt.github.io/posts/%E9%A1%B9%E7%9B%AE/%E5%8A%A8%E6%89%8B%E5%86%99%E5%8D%8F%E7%A8%8B%E5%BA%93-5%E5%B8%B8%E7%94%A8io%E5%87%BD%E6%95%B0%E7%9A%84hook%E5%8A%9F%E8%83%BD/</link>
+      <pubDate>Mon, 30 Sep 2024 00:00:00 +0000</pubDate>
+      <guid>https://kerolt.github.io/posts/%E9%A1%B9%E7%9B%AE/%E5%8A%A8%E6%89%8B%E5%86%99%E5%8D%8F%E7%A8%8B%E5%BA%93-5%E5%B8%B8%E7%94%A8io%E5%87%BD%E6%95%B0%E7%9A%84hook%E5%8A%9F%E8%83%BD/</guid>
+      <description>&lt;blockquote&gt;
+&lt;p&gt;【动手写协程库】系列笔记是学习sylar的协程库时的记录，参考了&lt;a href=&#34;https://www.midlane.top/wiki/pages/viewpage.action?pageId=10060952&#34;&gt;从零开始重写sylar C++高性能分布式服务器框架&lt;/a&gt;和代码随想录中的&lt;a href=&#34;https://www.programmercarl.com/other/project_coroutine.html#%E4%B8%8B%E8%BD%BD%E6%96%B9%E5%BC%8F&#34;&gt;文档&lt;/a&gt;。文章并不是对所有代码的详细解释，而是为了自己理解一些片段所做的笔记。&lt;/p&gt;
+&lt;p&gt;hook函数的具体定义实现可以在这里查看：&lt;a href=&#34;https://github.com/kerolt/coroutine-lib/blob/master/src/hook.cpp&#34;&gt;Github: src/hook.cpp&lt;/a&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;该协程库框架的目标并不是做成类似goroutine那样，而是希望能够通过协程来提高IO处理的效率。因此，对于每个文件描述符fd，我们都希望它有一个读写IO的超时时间。&lt;/p&gt;
+&lt;p&gt;hook的目的是在不重新编写代码的情况下，把老代码中的socket IO相关的API都&lt;strong&gt;转成异步&lt;/strong&gt;，以提高性能。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>【动手写协程库 4】IO协程调度器</title>
+      <link>https://kerolt.github.io/posts/%E9%A1%B9%E7%9B%AE/%E5%8A%A8%E6%89%8B%E5%86%99%E5%8D%8F%E7%A8%8B%E5%BA%93-4io%E5%8D%8F%E7%A8%8B%E8%B0%83%E5%BA%A6%E5%99%A8/</link>
+      <pubDate>Sun, 29 Sep 2024 00:00:00 +0000</pubDate>
+      <guid>https://kerolt.github.io/posts/%E9%A1%B9%E7%9B%AE/%E5%8A%A8%E6%89%8B%E5%86%99%E5%8D%8F%E7%A8%8B%E5%BA%93-4io%E5%8D%8F%E7%A8%8B%E8%B0%83%E5%BA%A6%E5%99%A8/</guid>
+      <description>&lt;blockquote&gt;
+&lt;p&gt;【动手写协程库】系列笔记是学习sylar的协程库时的记录，参考了&lt;a href=&#34;https://www.midlane.top/wiki/pages/viewpage.action?pageId=10060952&#34;&gt;从零开始重写sylar C++高性能分布式服务器框架&lt;/a&gt;和代码随想录中的&lt;a href=&#34;https://www.programmercarl.com/other/project_coroutine.html#%E4%B8%8B%E8%BD%BD%E6%96%B9%E5%BC%8F&#34;&gt;文档&lt;/a&gt;。文章并不是对所有代码的详细解释，而是为了自己理解一些片段所做的笔记。&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;IOManager&lt;/code&gt;类中具体定义实现可以在这里查看：&lt;a href=&#34;https://github.com/kerolt/coroutine-lib/blob/master/src/iomanager.cpp&#34;&gt;Github: src/iomanager.cpp&lt;/a&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;之前实现的协程调度器的功能其实非常简单，当添加任务后调度器只是单纯的从任务队列中取出任务交给协程去执行。sylar的协程库的关注对象是网络IO，如果采用这么简单的调度就根本没有用到协程的精髓。&lt;/p&gt;
+&lt;p&gt;sylar的IO协程调度解决了之前调度器在idle状态下忙等待导致CPU占用率高的问题。IO协程调度器使用一对管道fd来tickle调度协程，当调度器空闲时，idle协程通过epoll_wait阻塞在管道的读描述符上，等管道的可读事件。添加新任务时，tickle方法写管道，idle协程检测到管道可读后退出，调度器执行调度。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>【动手写协程库 3】定时器</title>
+      <link>https://kerolt.github.io/posts/%E9%A1%B9%E7%9B%AE/%E5%8A%A8%E6%89%8B%E5%86%99%E5%8D%8F%E7%A8%8B%E5%BA%93-3%E5%AE%9A%E6%97%B6%E5%99%A8/</link>
+      <pubDate>Sat, 28 Sep 2024 00:00:00 +0000</pubDate>
+      <guid>https://kerolt.github.io/posts/%E9%A1%B9%E7%9B%AE/%E5%8A%A8%E6%89%8B%E5%86%99%E5%8D%8F%E7%A8%8B%E5%BA%93-3%E5%AE%9A%E6%97%B6%E5%99%A8/</guid>
+      <description>&lt;blockquote&gt;
+&lt;p&gt;【动手写协程库】系列笔记是学习sylar的协程库时的记录，参考了&lt;a href=&#34;https://www.midlane.top/wiki/pages/viewpage.action?pageId=10060952&#34;&gt;从零开始重写sylar C++高性能分布式服务器框架&lt;/a&gt;和代码随想录中的&lt;a href=&#34;https://www.programmercarl.com/other/project_coroutine.html#%E4%B8%8B%E8%BD%BD%E6%96%B9%E5%BC%8F&#34;&gt;文档&lt;/a&gt;。文章并不是对所有代码的详细解释，而是为了自己理解一些片段所做的笔记。&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;TimerManager&lt;/code&gt;类中具体定义实现可以在这里查看：&lt;a href=&#34;https://github.com/kerolt/coroutine-lib/blob/master/src/timer.cpp&#34;&gt;Github: src/timer.cpp&lt;/a&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;通过定时器，我们可以实现给服务器注册定时事件。sylar的定时器采用最小堆设计，所有定时器根据绝对的超时时间点（也就是超时到期的具体时间戳）进行排序，每次取出离当前时间&lt;strong&gt;最近的一个超时时间点&lt;/strong&gt;，计算出超时需要等待的时间，然后等待超时。超时时间到后，获取当前的绝对时间点，然后&lt;strong&gt;把最小堆里超时时间点小于这个时间点的定时器都收集起来&lt;/strong&gt;，执行它们的回调函数。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>【动手写协程库 2】协程调度器</title>
+      <link>https://kerolt.github.io/posts/%E9%A1%B9%E7%9B%AE/%E5%8A%A8%E6%89%8B%E5%86%99%E5%8D%8F%E7%A8%8B%E5%BA%93-2%E5%8D%8F%E7%A8%8B%E8%B0%83%E5%BA%A6%E5%99%A8/</link>
+      <pubDate>Wed, 11 Sep 2024 00:00:00 +0000</pubDate>
+      <guid>https://kerolt.github.io/posts/%E9%A1%B9%E7%9B%AE/%E5%8A%A8%E6%89%8B%E5%86%99%E5%8D%8F%E7%A8%8B%E5%BA%93-2%E5%8D%8F%E7%A8%8B%E8%B0%83%E5%BA%A6%E5%99%A8/</guid>
+      <description>&lt;blockquote&gt;
+&lt;p&gt;【动手写协程库】系列笔记是学习sylar的协程库时的记录，参考了&lt;a href=&#34;https://www.midlane.top/wiki/pages/viewpage.action?pageId=10060952&#34;&gt;从零开始重写sylar C++高性能分布式服务器框架&lt;/a&gt;和代码随想录中的&lt;a href=&#34;https://www.programmercarl.com/other/project_coroutine.html#%E4%B8%8B%E8%BD%BD%E6%96%B9%E5%BC%8F&#34;&gt;文档&lt;/a&gt;。文章并不是对所有代码的详细解释，而是为了自己理解一些片段所做的笔记。&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;Scheduler&lt;/code&gt;类中其他函数的定义可以在这里查看：&lt;a href=&#34;https://github.com/kerolt/coroutine-lib/blob/master/src/scheduler.cpp&#34;&gt;Github: src/scheduler.cpp&lt;/a&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;Sylar的协程调度器是一个N-M模型，意味着N个线程可以运行M个协程，协程能够在线程之间进行切换，也可以被绑定到特定的线程上执行。&lt;/p&gt;
+&lt;p&gt;调度器可以由应用程序中的任何线程创建，但创建它的线程（称为caller线程）可以选择是否参与协程的调度。如果caller线程参与调度，那么调度器的线程数会相应减少一个，因为caller线程本身也会作为一个调度线程。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>【动手写协程库 1】协程定义</title>
+      <link>https://kerolt.github.io/posts/%E9%A1%B9%E7%9B%AE/%E5%8A%A8%E6%89%8B%E5%86%99%E5%8D%8F%E7%A8%8B%E5%BA%93-1%E5%8D%8F%E7%A8%8B%E5%AE%9A%E4%B9%89/</link>
+      <pubDate>Tue, 10 Sep 2024 00:00:00 +0000</pubDate>
+      <guid>https://kerolt.github.io/posts/%E9%A1%B9%E7%9B%AE/%E5%8A%A8%E6%89%8B%E5%86%99%E5%8D%8F%E7%A8%8B%E5%BA%93-1%E5%8D%8F%E7%A8%8B%E5%AE%9A%E4%B9%89/</guid>
+      <description>&lt;blockquote&gt;
+&lt;p&gt;【动手写协程库】系列笔记是学习sylar的协程库时的记录，参考了&lt;a href=&#34;https://www.midlane.top/wiki/pages/viewpage.action?pageId=10060952&#34;&gt;从零开始重写sylar C++高性能分布式服务器框架&lt;/a&gt;和代码随想录中的&lt;a href=&#34;https://www.programmercarl.com/other/project_coroutine.html#%E4%B8%8B%E8%BD%BD%E6%96%B9%E5%BC%8F&#34;&gt;文档&lt;/a&gt;。文章并不是对所有代码的详细解释，而是为了自己理解一些片段所做的笔记。&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;Coroutine&lt;/code&gt;类中其他函数的定义可以在这里查看：&lt;a href=&#34;https://github.com/kerolt/coroutine-lib/blob/master/src/coroutine.cpp&#34;&gt;Github: src/coroutine.cpp&lt;/a&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;对于什么是协程，为什么要使用协程，可以看看之前的笔记：&lt;a href=&#34;https://kerolt.github.io/posts/f663291a/&#34;&gt;【协程】C++20协程初体验&lt;/a&gt;。&lt;/p&gt;
+&lt;p&gt;对于我们自己来实现协程，其实在之前Xv6的Lab中就有做过：&lt;a href=&#34;https://kerolt.github.io/posts/cb4e63bc/#Uthread-switching-between-threads&#34;&gt;【MIT6.S081】Lab6 multithreading&lt;/a&gt;，当初做这个lab的时候没有意识到这就是协程。协程的切换最重要的就是要保存和恢复上下文，在这个lab中，我们通过保存每个协程在切换之前的寄存器的值，以此可用来恢复原来的执行流。&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>CPlusPlus on Kerolt&#39;s Blog</title>
+    <link>https://kerolt.github.io/tags/cplusplus/</link>
+    <description>Recent content in CPlusPlus on Kerolt&#39;s Blog</description>
+    <image>
+      <title>Kerolt&#39;s Blog</title>
+      <url>https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</url>
+      <link>https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</link>
+    </image>
+    <generator>Hugo -- 0.126.2</generator>
+    <language>en</language>
+    <lastBuildDate>Mon, 16 Dec 2024 00:00:00 +0000</lastBuildDate>
+    <atom:link href="https://kerolt.github.io/tags/cplusplus/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>【CMU15-445 Fall2023】Project3 Query Execution 小结</title>
+      <link>https://kerolt.github.io/posts/%E6%95%B0%E6%8D%AE%E5%BA%93/cmu15-445-fall2023project3-query-execution-%E5%B0%8F%E7%BB%93/</link>
+      <pubDate>Mon, 16 Dec 2024 00:00:00 +0000</pubDate>
+      <guid>https://kerolt.github.io/posts/%E6%95%B0%E6%8D%AE%E5%BA%93/cmu15-445-fall2023project3-query-execution-%E5%B0%8F%E7%BB%93/</guid>
+      <description>&lt;blockquote&gt;
+&lt;p&gt;该系列博客只是为了记录自己在写Lab时的思路，按照课程要求不会在Github和博客中公开源代码。欢迎与我一起讨论交流！&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;这个project和之前就不一样了，开始深入数据库内核的实现了。需要理清楚一条sql语句是如何被执行的，方才能写出代码。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>【CMU15-445 Fall2023】Project2 Extendible Hash Index 小结</title>
+      <link>https://kerolt.github.io/posts/%E6%95%B0%E6%8D%AE%E5%BA%93/cmu15-445-fall2023project2-extendible-hash-index-%E5%B0%8F%E7%BB%93/</link>
+      <pubDate>Tue, 12 Nov 2024 00:00:00 +0000</pubDate>
+      <guid>https://kerolt.github.io/posts/%E6%95%B0%E6%8D%AE%E5%BA%93/cmu15-445-fall2023project2-extendible-hash-index-%E5%B0%8F%E7%BB%93/</guid>
+      <description>&lt;blockquote&gt;
+&lt;p&gt;该系列博客只是为了记录自己在写Lab时的思路，按照课程要求不会在Github和博客中公开源代码。欢迎与我一起讨论交流！&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;太菜了，从没打过这么艰难的仗QAQ。由于课程的要求不能公开源代码，所以网上的资源会少很多，平台上的测试案例比较全面，有的还比较刁钻，需要考虑到可拓展哈希的实现细节。在自认为写完了后，提交了近40来次总有几个测试集过不了，还好没有崩溃，在看了几篇博客的方法后，加上自己画图理解，最后终于过了😭。不过回头写博客的时候再去看代码，也没有特别的复杂，还是得明白其中的算法逻辑是如何实现的。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>【CMU15-445 Fall2023】Project1 Buffer Pool 小结</title>
+      <link>https://kerolt.github.io/posts/%E6%95%B0%E6%8D%AE%E5%BA%93/cmu15-445-fall2023project1-buffer-pool-%E5%B0%8F%E7%BB%93/</link>
+      <pubDate>Sat, 12 Oct 2024 00:00:00 +0000</pubDate>
+      <guid>https://kerolt.github.io/posts/%E6%95%B0%E6%8D%AE%E5%BA%93/cmu15-445-fall2023project1-buffer-pool-%E5%B0%8F%E7%BB%93/</guid>
+      <description>&lt;blockquote&gt;
+&lt;p&gt;该系列博客只是为了记录自己在写Lab时的思路，按照课程要求不会在Github和博客中公开源代码。欢迎与我一起讨论交流！&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;这个Project需要我们实现一个缓存池，减少对于磁盘的频繁IO。开始慢慢上强度了，细节拉满！&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>【CMU15-445 Fall2023】Project0 C&#43;&#43; Primer 小结</title>
+      <link>https://kerolt.github.io/posts/%E6%95%B0%E6%8D%AE%E5%BA%93/cmu15-445-fall2023project0-c&#43;&#43;-primer-%E5%B0%8F%E7%BB%93/</link>
+      <pubDate>Sun, 06 Oct 2024 00:00:00 +0000</pubDate>
+      <guid>https://kerolt.github.io/posts/%E6%95%B0%E6%8D%AE%E5%BA%93/cmu15-445-fall2023project0-c&#43;&#43;-primer-%E5%B0%8F%E7%BB%93/</guid>
+      <description>&lt;blockquote&gt;
+&lt;p&gt;该系列博客只是为了记录自己在写Lab时的思路，按照课程要求不会在Github和博客中公开源代码。欢迎与我一起讨论交流！&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;project0只在task4中浅浅涉及了一点BusTub的内容，其他都是检测我们对于C++的一个掌握，主要涉及智能指针和C++的常用特性（dynamic_cast、std::move、并发与锁等）。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>【动手写协程库 5】常用IO函数的HOOK功能</title>
+      <link>https://kerolt.github.io/posts/%E9%A1%B9%E7%9B%AE/%E5%8A%A8%E6%89%8B%E5%86%99%E5%8D%8F%E7%A8%8B%E5%BA%93-5%E5%B8%B8%E7%94%A8io%E5%87%BD%E6%95%B0%E7%9A%84hook%E5%8A%9F%E8%83%BD/</link>
+      <pubDate>Mon, 30 Sep 2024 00:00:00 +0000</pubDate>
+      <guid>https://kerolt.github.io/posts/%E9%A1%B9%E7%9B%AE/%E5%8A%A8%E6%89%8B%E5%86%99%E5%8D%8F%E7%A8%8B%E5%BA%93-5%E5%B8%B8%E7%94%A8io%E5%87%BD%E6%95%B0%E7%9A%84hook%E5%8A%9F%E8%83%BD/</guid>
+      <description>&lt;blockquote&gt;
+&lt;p&gt;【动手写协程库】系列笔记是学习sylar的协程库时的记录，参考了&lt;a href=&#34;https://www.midlane.top/wiki/pages/viewpage.action?pageId=10060952&#34;&gt;从零开始重写sylar C++高性能分布式服务器框架&lt;/a&gt;和代码随想录中的&lt;a href=&#34;https://www.programmercarl.com/other/project_coroutine.html#%E4%B8%8B%E8%BD%BD%E6%96%B9%E5%BC%8F&#34;&gt;文档&lt;/a&gt;。文章并不是对所有代码的详细解释，而是为了自己理解一些片段所做的笔记。&lt;/p&gt;
+&lt;p&gt;hook函数的具体定义实现可以在这里查看：&lt;a href=&#34;https://github.com/kerolt/coroutine-lib/blob/master/src/hook.cpp&#34;&gt;Github: src/hook.cpp&lt;/a&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;该协程库框架的目标并不是做成类似goroutine那样，而是希望能够通过协程来提高IO处理的效率。因此，对于每个文件描述符fd，我们都希望它有一个读写IO的超时时间。&lt;/p&gt;
+&lt;p&gt;hook的目的是在不重新编写代码的情况下，把老代码中的socket IO相关的API都&lt;strong&gt;转成异步&lt;/strong&gt;，以提高性能。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>【动手写协程库 4】IO协程调度器</title>
+      <link>https://kerolt.github.io/posts/%E9%A1%B9%E7%9B%AE/%E5%8A%A8%E6%89%8B%E5%86%99%E5%8D%8F%E7%A8%8B%E5%BA%93-4io%E5%8D%8F%E7%A8%8B%E8%B0%83%E5%BA%A6%E5%99%A8/</link>
+      <pubDate>Sun, 29 Sep 2024 00:00:00 +0000</pubDate>
+      <guid>https://kerolt.github.io/posts/%E9%A1%B9%E7%9B%AE/%E5%8A%A8%E6%89%8B%E5%86%99%E5%8D%8F%E7%A8%8B%E5%BA%93-4io%E5%8D%8F%E7%A8%8B%E8%B0%83%E5%BA%A6%E5%99%A8/</guid>
+      <description>&lt;blockquote&gt;
+&lt;p&gt;【动手写协程库】系列笔记是学习sylar的协程库时的记录，参考了&lt;a href=&#34;https://www.midlane.top/wiki/pages/viewpage.action?pageId=10060952&#34;&gt;从零开始重写sylar C++高性能分布式服务器框架&lt;/a&gt;和代码随想录中的&lt;a href=&#34;https://www.programmercarl.com/other/project_coroutine.html#%E4%B8%8B%E8%BD%BD%E6%96%B9%E5%BC%8F&#34;&gt;文档&lt;/a&gt;。文章并不是对所有代码的详细解释，而是为了自己理解一些片段所做的笔记。&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;IOManager&lt;/code&gt;类中具体定义实现可以在这里查看：&lt;a href=&#34;https://github.com/kerolt/coroutine-lib/blob/master/src/iomanager.cpp&#34;&gt;Github: src/iomanager.cpp&lt;/a&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;之前实现的协程调度器的功能其实非常简单，当添加任务后调度器只是单纯的从任务队列中取出任务交给协程去执行。sylar的协程库的关注对象是网络IO，如果采用这么简单的调度就根本没有用到协程的精髓。&lt;/p&gt;
+&lt;p&gt;sylar的IO协程调度解决了之前调度器在idle状态下忙等待导致CPU占用率高的问题。IO协程调度器使用一对管道fd来tickle调度协程，当调度器空闲时，idle协程通过epoll_wait阻塞在管道的读描述符上，等管道的可读事件。添加新任务时，tickle方法写管道，idle协程检测到管道可读后退出，调度器执行调度。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>【动手写协程库 3】定时器</title>
+      <link>https://kerolt.github.io/posts/%E9%A1%B9%E7%9B%AE/%E5%8A%A8%E6%89%8B%E5%86%99%E5%8D%8F%E7%A8%8B%E5%BA%93-3%E5%AE%9A%E6%97%B6%E5%99%A8/</link>
+      <pubDate>Sat, 28 Sep 2024 00:00:00 +0000</pubDate>
+      <guid>https://kerolt.github.io/posts/%E9%A1%B9%E7%9B%AE/%E5%8A%A8%E6%89%8B%E5%86%99%E5%8D%8F%E7%A8%8B%E5%BA%93-3%E5%AE%9A%E6%97%B6%E5%99%A8/</guid>
+      <description>&lt;blockquote&gt;
+&lt;p&gt;【动手写协程库】系列笔记是学习sylar的协程库时的记录，参考了&lt;a href=&#34;https://www.midlane.top/wiki/pages/viewpage.action?pageId=10060952&#34;&gt;从零开始重写sylar C++高性能分布式服务器框架&lt;/a&gt;和代码随想录中的&lt;a href=&#34;https://www.programmercarl.com/other/project_coroutine.html#%E4%B8%8B%E8%BD%BD%E6%96%B9%E5%BC%8F&#34;&gt;文档&lt;/a&gt;。文章并不是对所有代码的详细解释，而是为了自己理解一些片段所做的笔记。&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;TimerManager&lt;/code&gt;类中具体定义实现可以在这里查看：&lt;a href=&#34;https://github.com/kerolt/coroutine-lib/blob/master/src/timer.cpp&#34;&gt;Github: src/timer.cpp&lt;/a&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;通过定时器，我们可以实现给服务器注册定时事件。sylar的定时器采用最小堆设计，所有定时器根据绝对的超时时间点（也就是超时到期的具体时间戳）进行排序，每次取出离当前时间&lt;strong&gt;最近的一个超时时间点&lt;/strong&gt;，计算出超时需要等待的时间，然后等待超时。超时时间到后，获取当前的绝对时间点，然后&lt;strong&gt;把最小堆里超时时间点小于这个时间点的定时器都收集起来&lt;/strong&gt;，执行它们的回调函数。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>enable_shared_from_this的作用</title>
+      <link>https://kerolt.github.io/posts/c&#43;&#43;/enable_shared_from_this%E7%9A%84%E4%BD%9C%E7%94%A8/</link>
+      <pubDate>Mon, 16 Sep 2024 00:00:00 +0000</pubDate>
+      <guid>https://kerolt.github.io/posts/c&#43;&#43;/enable_shared_from_this%E7%9A%84%E4%BD%9C%E7%94%A8/</guid>
+      <description>&lt;p&gt;C++ 中，&lt;code&gt;std::enable_shared_from_this&lt;/code&gt;类模板和&lt;code&gt;shared_from_this&lt;/code&gt;成员函数主要用于在一个类的成员函数中安全地获取指向自身的&lt;code&gt;std::shared_ptr&lt;/code&gt;。它们的作用更多是为了确保资源正确管理。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>【动手写协程库 2】协程调度器</title>
+      <link>https://kerolt.github.io/posts/%E9%A1%B9%E7%9B%AE/%E5%8A%A8%E6%89%8B%E5%86%99%E5%8D%8F%E7%A8%8B%E5%BA%93-2%E5%8D%8F%E7%A8%8B%E8%B0%83%E5%BA%A6%E5%99%A8/</link>
+      <pubDate>Wed, 11 Sep 2024 00:00:00 +0000</pubDate>
+      <guid>https://kerolt.github.io/posts/%E9%A1%B9%E7%9B%AE/%E5%8A%A8%E6%89%8B%E5%86%99%E5%8D%8F%E7%A8%8B%E5%BA%93-2%E5%8D%8F%E7%A8%8B%E8%B0%83%E5%BA%A6%E5%99%A8/</guid>
+      <description>&lt;blockquote&gt;
+&lt;p&gt;【动手写协程库】系列笔记是学习sylar的协程库时的记录，参考了&lt;a href=&#34;https://www.midlane.top/wiki/pages/viewpage.action?pageId=10060952&#34;&gt;从零开始重写sylar C++高性能分布式服务器框架&lt;/a&gt;和代码随想录中的&lt;a href=&#34;https://www.programmercarl.com/other/project_coroutine.html#%E4%B8%8B%E8%BD%BD%E6%96%B9%E5%BC%8F&#34;&gt;文档&lt;/a&gt;。文章并不是对所有代码的详细解释，而是为了自己理解一些片段所做的笔记。&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;Scheduler&lt;/code&gt;类中其他函数的定义可以在这里查看：&lt;a href=&#34;https://github.com/kerolt/coroutine-lib/blob/master/src/scheduler.cpp&#34;&gt;Github: src/scheduler.cpp&lt;/a&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;Sylar的协程调度器是一个N-M模型，意味着N个线程可以运行M个协程，协程能够在线程之间进行切换，也可以被绑定到特定的线程上执行。&lt;/p&gt;
+&lt;p&gt;调度器可以由应用程序中的任何线程创建，但创建它的线程（称为caller线程）可以选择是否参与协程的调度。如果caller线程参与调度，那么调度器的线程数会相应减少一个，因为caller线程本身也会作为一个调度线程。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>【动手写协程库 1】协程定义</title>
+      <link>https://kerolt.github.io/posts/%E9%A1%B9%E7%9B%AE/%E5%8A%A8%E6%89%8B%E5%86%99%E5%8D%8F%E7%A8%8B%E5%BA%93-1%E5%8D%8F%E7%A8%8B%E5%AE%9A%E4%B9%89/</link>
+      <pubDate>Tue, 10 Sep 2024 00:00:00 +0000</pubDate>
+      <guid>https://kerolt.github.io/posts/%E9%A1%B9%E7%9B%AE/%E5%8A%A8%E6%89%8B%E5%86%99%E5%8D%8F%E7%A8%8B%E5%BA%93-1%E5%8D%8F%E7%A8%8B%E5%AE%9A%E4%B9%89/</guid>
+      <description>&lt;blockquote&gt;
+&lt;p&gt;【动手写协程库】系列笔记是学习sylar的协程库时的记录，参考了&lt;a href=&#34;https://www.midlane.top/wiki/pages/viewpage.action?pageId=10060952&#34;&gt;从零开始重写sylar C++高性能分布式服务器框架&lt;/a&gt;和代码随想录中的&lt;a href=&#34;https://www.programmercarl.com/other/project_coroutine.html#%E4%B8%8B%E8%BD%BD%E6%96%B9%E5%BC%8F&#34;&gt;文档&lt;/a&gt;。文章并不是对所有代码的详细解释，而是为了自己理解一些片段所做的笔记。&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;Coroutine&lt;/code&gt;类中其他函数的定义可以在这里查看：&lt;a href=&#34;https://github.com/kerolt/coroutine-lib/blob/master/src/coroutine.cpp&#34;&gt;Github: src/coroutine.cpp&lt;/a&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;对于什么是协程，为什么要使用协程，可以看看之前的笔记：&lt;a href=&#34;https://kerolt.github.io/posts/f663291a/&#34;&gt;【协程】C++20协程初体验&lt;/a&gt;。&lt;/p&gt;
+&lt;p&gt;对于我们自己来实现协程，其实在之前Xv6的Lab中就有做过：&lt;a href=&#34;https://kerolt.github.io/posts/cb4e63bc/#Uthread-switching-between-threads&#34;&gt;【MIT6.S081】Lab6 multithreading&lt;/a&gt;，当初做这个lab的时候没有意识到这就是协程。协程的切换最重要的就是要保存和恢复上下文，在这个lab中，我们通过保存每个协程在切换之前的寄存器的值，以此可用来恢复原来的执行流。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>【协程】C&#43;&#43;是如何通过SFINAE来检查promise_type的</title>
+      <link>https://kerolt.github.io/posts/c&#43;&#43;/%E5%8D%8F%E7%A8%8Bc&#43;&#43;%E6%98%AF%E5%A6%82%E4%BD%95%E9%80%9A%E8%BF%87sfinae%E6%9D%A5%E6%A3%80%E6%9F%A5promise_type%E7%9A%84/</link>
+      <pubDate>Sun, 01 Sep 2024 00:00:00 +0000</pubDate>
+      <guid>https://kerolt.github.io/posts/c&#43;&#43;/%E5%8D%8F%E7%A8%8Bc&#43;&#43;%E6%98%AF%E5%A6%82%E4%BD%95%E9%80%9A%E8%BF%87sfinae%E6%9D%A5%E6%A3%80%E6%9F%A5promise_type%E7%9A%84/</guid>
+      <description>&lt;p&gt;我们知道在C++20的协程中，自己实现的Coroutine中必须包含一个&lt;code&gt;Promise&lt;/code&gt;，并且这个&lt;code&gt;Promise&lt;/code&gt;必须要实现：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;get_return_object()&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;initial_suspend()&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;final_suspend()&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;unhandled_exception()&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;少了其中任何一个，编译器都会报错。那这是怎么实现的呢？如果是像java那样是一个接口而没有对应的实现从而报错还能理解，但是我们的代码中的&lt;code&gt;Promise&lt;/code&gt;完完全全是我们自己写的，也没有使用继承，编译器你怎么知道我在实现协程时少了什么东西呢？&lt;/p&gt;
+&lt;p&gt;答案就是：&lt;strong&gt;SFINAE&lt;/strong&gt;（Substitution Failure Is Not An Error，替换失败不是错误）。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>C&#43;&#43;中如何使用lambda实现递归</title>
+      <link>https://kerolt.github.io/posts/c&#43;&#43;/c&#43;&#43;%E4%B8%AD%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8lambda%E5%AE%9E%E7%8E%B0%E9%80%92%E5%BD%92/</link>
+      <pubDate>Tue, 27 Aug 2024 00:00:00 +0000</pubDate>
+      <guid>https://kerolt.github.io/posts/c&#43;&#43;/c&#43;&#43;%E4%B8%AD%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8lambda%E5%AE%9E%E7%8E%B0%E9%80%92%E5%BD%92/</guid>
+      <description>&lt;p&gt;在用C++刷leetcode时，我希望把一个递归函数像js、python那样写在运行函数内部，那么可以使用&lt;code&gt;function&lt;/code&gt;和&lt;code&gt;lambda表达式&lt;/code&gt;来实现。但如果这个递归函数的参数比较多，那么function的模板参数同样需要写很多，能不能用&lt;code&gt;auto&lt;/code&gt;来实现得简单一点呢？&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>【协程】C&#43;&#43;20协程初体验</title>
+      <link>https://kerolt.github.io/posts/c&#43;&#43;/%E5%8D%8F%E7%A8%8Bc&#43;&#43;20%E5%8D%8F%E7%A8%8B%E5%88%9D%E4%BD%93%E9%AA%8C/</link>
+      <pubDate>Sun, 18 Aug 2024 00:00:00 +0000</pubDate>
+      <guid>https://kerolt.github.io/posts/c&#43;&#43;/%E5%8D%8F%E7%A8%8Bc&#43;&#43;20%E5%8D%8F%E7%A8%8B%E5%88%9D%E4%BD%93%E9%AA%8C/</guid>
+      <description>&lt;h2 id=&#34;为什么我们需要协程&#34;&gt;为什么我们需要协程？&lt;/h2&gt;
+&lt;p&gt;为什么我们有了线程还需要协程呢？（其实这个问题不应该这么问，协程的出现在线程之前）在一个进程中虽然我们可以创建多个线程，但是在一个进程中能创建的线程数量是有限制的，并且线程的调度仍然受操作系统控制，也就是说线程何时抢占、何时被抢占对于开发者来说都是透明的，并且在调度的过程中还可能涉及到用户态和内核态的切换开销。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>避免cout线程不安全的一个做法</title>
+      <link>https://kerolt.github.io/posts/c&#43;&#43;/%E9%81%BF%E5%85%8Dcout%E7%BA%BF%E7%A8%8B%E4%B8%8D%E5%AE%89%E5%85%A8%E7%9A%84%E4%B8%80%E4%B8%AA%E5%81%9A%E6%B3%95/</link>
+      <pubDate>Wed, 21 Feb 2024 00:00:00 +0000</pubDate>
+      <guid>https://kerolt.github.io/posts/c&#43;&#43;/%E9%81%BF%E5%85%8Dcout%E7%BA%BF%E7%A8%8B%E4%B8%8D%E5%AE%89%E5%85%A8%E7%9A%84%E4%B8%80%E4%B8%AA%E5%81%9A%E6%B3%95/</guid>
+      <description>&lt;h2 id=&#34;前言&#34;&gt;前言&lt;/h2&gt;
+&lt;p&gt;&lt;code&gt;std::cout&lt;/code&gt;重载了&lt;code&gt;&amp;lt;&amp;lt;&lt;/code&gt;运算符，这使得写一些很短的代码时很方便。但是如果在多线程的条件下，cout并不是线程安全的。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>纠正一下对cpp移动语义的错误理解</title>
+      <link>https://kerolt.github.io/posts/c&#43;&#43;/%E7%BA%A0%E6%AD%A3%E4%B8%80%E4%B8%8B%E5%AF%B9cpp%E7%A7%BB%E5%8A%A8%E8%AF%AD%E4%B9%89%E7%9A%84%E9%94%99%E8%AF%AF%E7%90%86%E8%A7%A3/</link>
+      <pubDate>Sun, 18 Feb 2024 00:00:00 +0000</pubDate>
+      <guid>https://kerolt.github.io/posts/c&#43;&#43;/%E7%BA%A0%E6%AD%A3%E4%B8%80%E4%B8%8B%E5%AF%B9cpp%E7%A7%BB%E5%8A%A8%E8%AF%AD%E4%B9%89%E7%9A%84%E9%94%99%E8%AF%AF%E7%90%86%E8%A7%A3/</guid>
+      <description>&lt;p&gt;之前对于移动语义的理解就是使用std::move将一个对象所占有的资源的所有权转移给另一个对象，但是只要使用std::move就足够了吗？这显然是错误的。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>C&#43;&#43;中lambda与priority_queue一起使用</title>
+      <link>https://kerolt.github.io/posts/c&#43;&#43;/c&#43;&#43;%E4%B8%ADlambda%E4%B8%8Epriority_queue%E4%B8%80%E8%B5%B7%E4%BD%BF%E7%94%A8/</link>
+      <pubDate>Wed, 14 Feb 2024 21:00:14 +0000</pubDate>
+      <guid>https://kerolt.github.io/posts/c&#43;&#43;/c&#43;&#43;%E4%B8%ADlambda%E4%B8%8Epriority_queue%E4%B8%80%E8%B5%B7%E4%BD%BF%E7%94%A8/</guid>
+      <description>&lt;p&gt;想写这篇博客的原因是在刷力扣的 &lt;a href=&#34;https://leetcode.cn/problems/top-k-frequent-elements/&#34;&gt;347. 前 K 个高频元素&lt;/a&gt; 一题时，需要使用到优先队列&lt;code&gt;priority_queue&lt;/code&gt;，其定义如下：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-cpp&#34; data-lang=&#34;cpp&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;k&#34;&gt;template&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;&amp;lt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;k&#34;&gt;class&lt;/span&gt; &lt;span class=&#34;nc&#34;&gt;T&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;k&#34;&gt;class&lt;/span&gt; &lt;span class=&#34;nc&#34;&gt;Container&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;std&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;::&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;vector&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;T&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;k&#34;&gt;class&lt;/span&gt; &lt;span class=&#34;nc&#34;&gt;Compare&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;std&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;::&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;less&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;typename&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;Container&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;::&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;value_type&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;o&#34;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;class&lt;/span&gt; &lt;span class=&#34;nc&#34;&gt;priority_queue&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;第三个参数是一个可以自定义的比较类型，其必须满足&lt;a href=&#34;https://zh.cppreference.com/w/cpp/named_req/BinaryPredicate&#34;&gt;二元谓词&lt;/a&gt;，通常可以使用如下两种方法：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;使用自定义的函数对象&lt;/li&gt;
+&lt;li&gt;lambda表达式&lt;/li&gt;
+&lt;li&gt;使用&lt;code&gt;std::greater&lt;/code&gt;或&lt;code&gt;std::less&lt;/code&gt;（这里就不介绍这种方法了）&lt;/li&gt;
+&lt;/ol&gt;</description>
+    </item>
+    <item>
+      <title>muduo网络库的安装</title>
+      <link>https://kerolt.github.io/posts/c&#43;&#43;/muduo%E7%BD%91%E7%BB%9C%E5%BA%93%E7%9A%84%E5%AE%89%E8%A3%85/</link>
+      <pubDate>Sat, 20 Jan 2024 00:00:00 +0000</pubDate>
+      <guid>https://kerolt.github.io/posts/c&#43;&#43;/muduo%E7%BD%91%E7%BB%9C%E5%BA%93%E7%9A%84%E5%AE%89%E8%A3%85/</guid>
+      <description>&lt;h2 id=&#34;下载源码&#34;&gt;下载源码&lt;/h2&gt;
+&lt;p&gt;链接：&lt;a href=&#34;https://github.com/chenshuo/muduo/releases/tag/v2.0.2&#34;&gt;https://github.com/chenshuo/muduo/releases/tag/v2.0.2&lt;/a&gt;&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

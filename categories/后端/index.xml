@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>后端 on Kerolt&#39;s Blog</title>
+    <link>https://kerolt.github.io/categories/%E5%90%8E%E7%AB%AF/</link>
+    <description>Recent content in 后端 on Kerolt&#39;s Blog</description>
+    <image>
+      <title>Kerolt&#39;s Blog</title>
+      <url>https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</url>
+      <link>https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</link>
+    </image>
+    <generator>Hugo -- 0.126.2</generator>
+    <language>en</language>
+    <lastBuildDate>Thu, 21 Mar 2024 00:00:00 +0000</lastBuildDate>
+    <atom:link href="https://kerolt.github.io/categories/%E5%90%8E%E7%AB%AF/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>API开放平台</title>
+      <link>https://kerolt.github.io/posts/%E5%90%8E%E7%AB%AF/api%E5%BC%80%E6%94%BE%E5%B9%B3%E5%8F%B0/</link>
+      <pubDate>Thu, 21 Mar 2024 00:00:00 +0000</pubDate>
+      <guid>https://kerolt.github.io/posts/%E5%90%8E%E7%AB%AF/api%E5%BC%80%E6%94%BE%E5%B9%B3%E5%8F%B0/</guid>
+      <description>&lt;h2 id=&#34;前言&#34;&gt;前言&lt;/h2&gt;
+&lt;p&gt;通过一个项目来学习一下如何设计一个多服务的系统。同时也能学习Spring Cloud Gateway、Dubbo、API签名等一些知识。&lt;/p&gt;
+&lt;h2 id=&#34;项目架构&#34;&gt;项目架构&lt;/h2&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;https://gitee.com/kerolt/picture/raw/main/20241216-143608.png&#34;&gt;&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

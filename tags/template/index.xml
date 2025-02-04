@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Template on Kerolt&#39;s Blog</title>
+    <link>https://kerolt.github.io/tags/template/</link>
+    <description>Recent content in Template on Kerolt&#39;s Blog</description>
+    <image>
+      <title>Kerolt&#39;s Blog</title>
+      <url>https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</url>
+      <link>https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</link>
+    </image>
+    <generator>Hugo -- 0.126.2</generator>
+    <language>en</language>
+    <lastBuildDate>Sun, 01 Sep 2024 00:00:00 +0000</lastBuildDate>
+    <atom:link href="https://kerolt.github.io/tags/template/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>【协程】C&#43;&#43;是如何通过SFINAE来检查promise_type的</title>
+      <link>https://kerolt.github.io/posts/c&#43;&#43;/%E5%8D%8F%E7%A8%8Bc&#43;&#43;%E6%98%AF%E5%A6%82%E4%BD%95%E9%80%9A%E8%BF%87sfinae%E6%9D%A5%E6%A3%80%E6%9F%A5promise_type%E7%9A%84/</link>
+      <pubDate>Sun, 01 Sep 2024 00:00:00 +0000</pubDate>
+      <guid>https://kerolt.github.io/posts/c&#43;&#43;/%E5%8D%8F%E7%A8%8Bc&#43;&#43;%E6%98%AF%E5%A6%82%E4%BD%95%E9%80%9A%E8%BF%87sfinae%E6%9D%A5%E6%A3%80%E6%9F%A5promise_type%E7%9A%84/</guid>
+      <description>&lt;p&gt;我们知道在C++20的协程中，自己实现的Coroutine中必须包含一个&lt;code&gt;Promise&lt;/code&gt;，并且这个&lt;code&gt;Promise&lt;/code&gt;必须要实现：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;get_return_object()&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;initial_suspend()&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;final_suspend()&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;unhandled_exception()&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;少了其中任何一个，编译器都会报错。那这是怎么实现的呢？如果是像java那样是一个接口而没有对应的实现从而报错还能理解，但是我们的代码中的&lt;code&gt;Promise&lt;/code&gt;完完全全是我们自己写的，也没有使用继承，编译器你怎么知道我在实现协程时少了什么东西呢？&lt;/p&gt;
+&lt;p&gt;答案就是：&lt;strong&gt;SFINAE&lt;/strong&gt;（Substitution Failure Is Not An Error，替换失败不是错误）。&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

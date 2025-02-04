@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>C&#43;&#43; on Kerolt&#39;s Blog</title>
+    <link>https://kerolt.github.io/categories/c&#43;&#43;/</link>
+    <description>Recent content in C&#43;&#43; on Kerolt&#39;s Blog</description>
+    <image>
+      <title>Kerolt&#39;s Blog</title>
+      <url>https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</url>
+      <link>https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</link>
+    </image>
+    <generator>Hugo -- 0.126.2</generator>
+    <language>en</language>
+    <lastBuildDate>Mon, 16 Sep 2024 00:00:00 +0000</lastBuildDate>
+    <atom:link href="https://kerolt.github.io/categories/c++/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>enable_shared_from_this的作用</title>
+      <link>https://kerolt.github.io/posts/c&#43;&#43;/enable_shared_from_this%E7%9A%84%E4%BD%9C%E7%94%A8/</link>
+      <pubDate>Mon, 16 Sep 2024 00:00:00 +0000</pubDate>
+      <guid>https://kerolt.github.io/posts/c&#43;&#43;/enable_shared_from_this%E7%9A%84%E4%BD%9C%E7%94%A8/</guid>
+      <description>&lt;p&gt;C++ 中，&lt;code&gt;std::enable_shared_from_this&lt;/code&gt;类模板和&lt;code&gt;shared_from_this&lt;/code&gt;成员函数主要用于在一个类的成员函数中安全地获取指向自身的&lt;code&gt;std::shared_ptr&lt;/code&gt;。它们的作用更多是为了确保资源正确管理。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>【协程】C&#43;&#43;是如何通过SFINAE来检查promise_type的</title>
+      <link>https://kerolt.github.io/posts/c&#43;&#43;/%E5%8D%8F%E7%A8%8Bc&#43;&#43;%E6%98%AF%E5%A6%82%E4%BD%95%E9%80%9A%E8%BF%87sfinae%E6%9D%A5%E6%A3%80%E6%9F%A5promise_type%E7%9A%84/</link>
+      <pubDate>Sun, 01 Sep 2024 00:00:00 +0000</pubDate>
+      <guid>https://kerolt.github.io/posts/c&#43;&#43;/%E5%8D%8F%E7%A8%8Bc&#43;&#43;%E6%98%AF%E5%A6%82%E4%BD%95%E9%80%9A%E8%BF%87sfinae%E6%9D%A5%E6%A3%80%E6%9F%A5promise_type%E7%9A%84/</guid>
+      <description>&lt;p&gt;我们知道在C++20的协程中，自己实现的Coroutine中必须包含一个&lt;code&gt;Promise&lt;/code&gt;，并且这个&lt;code&gt;Promise&lt;/code&gt;必须要实现：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;get_return_object()&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;initial_suspend()&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;final_suspend()&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;unhandled_exception()&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;少了其中任何一个，编译器都会报错。那这是怎么实现的呢？如果是像java那样是一个接口而没有对应的实现从而报错还能理解，但是我们的代码中的&lt;code&gt;Promise&lt;/code&gt;完完全全是我们自己写的，也没有使用继承，编译器你怎么知道我在实现协程时少了什么东西呢？&lt;/p&gt;
+&lt;p&gt;答案就是：&lt;strong&gt;SFINAE&lt;/strong&gt;（Substitution Failure Is Not An Error，替换失败不是错误）。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>C&#43;&#43;中如何使用lambda实现递归</title>
+      <link>https://kerolt.github.io/posts/c&#43;&#43;/c&#43;&#43;%E4%B8%AD%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8lambda%E5%AE%9E%E7%8E%B0%E9%80%92%E5%BD%92/</link>
+      <pubDate>Tue, 27 Aug 2024 00:00:00 +0000</pubDate>
+      <guid>https://kerolt.github.io/posts/c&#43;&#43;/c&#43;&#43;%E4%B8%AD%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8lambda%E5%AE%9E%E7%8E%B0%E9%80%92%E5%BD%92/</guid>
+      <description>&lt;p&gt;在用C++刷leetcode时，我希望把一个递归函数像js、python那样写在运行函数内部，那么可以使用&lt;code&gt;function&lt;/code&gt;和&lt;code&gt;lambda表达式&lt;/code&gt;来实现。但如果这个递归函数的参数比较多，那么function的模板参数同样需要写很多，能不能用&lt;code&gt;auto&lt;/code&gt;来实现得简单一点呢？&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>【协程】C&#43;&#43;20协程初体验</title>
+      <link>https://kerolt.github.io/posts/c&#43;&#43;/%E5%8D%8F%E7%A8%8Bc&#43;&#43;20%E5%8D%8F%E7%A8%8B%E5%88%9D%E4%BD%93%E9%AA%8C/</link>
+      <pubDate>Sun, 18 Aug 2024 00:00:00 +0000</pubDate>
+      <guid>https://kerolt.github.io/posts/c&#43;&#43;/%E5%8D%8F%E7%A8%8Bc&#43;&#43;20%E5%8D%8F%E7%A8%8B%E5%88%9D%E4%BD%93%E9%AA%8C/</guid>
+      <description>&lt;h2 id=&#34;为什么我们需要协程&#34;&gt;为什么我们需要协程？&lt;/h2&gt;
+&lt;p&gt;为什么我们有了线程还需要协程呢？（其实这个问题不应该这么问，协程的出现在线程之前）在一个进程中虽然我们可以创建多个线程，但是在一个进程中能创建的线程数量是有限制的，并且线程的调度仍然受操作系统控制，也就是说线程何时抢占、何时被抢占对于开发者来说都是透明的，并且在调度的过程中还可能涉及到用户态和内核态的切换开销。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>避免cout线程不安全的一个做法</title>
+      <link>https://kerolt.github.io/posts/c&#43;&#43;/%E9%81%BF%E5%85%8Dcout%E7%BA%BF%E7%A8%8B%E4%B8%8D%E5%AE%89%E5%85%A8%E7%9A%84%E4%B8%80%E4%B8%AA%E5%81%9A%E6%B3%95/</link>
+      <pubDate>Wed, 21 Feb 2024 00:00:00 +0000</pubDate>
+      <guid>https://kerolt.github.io/posts/c&#43;&#43;/%E9%81%BF%E5%85%8Dcout%E7%BA%BF%E7%A8%8B%E4%B8%8D%E5%AE%89%E5%85%A8%E7%9A%84%E4%B8%80%E4%B8%AA%E5%81%9A%E6%B3%95/</guid>
+      <description>&lt;h2 id=&#34;前言&#34;&gt;前言&lt;/h2&gt;
+&lt;p&gt;&lt;code&gt;std::cout&lt;/code&gt;重载了&lt;code&gt;&amp;lt;&amp;lt;&lt;/code&gt;运算符，这使得写一些很短的代码时很方便。但是如果在多线程的条件下，cout并不是线程安全的。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>纠正一下对cpp移动语义的错误理解</title>
+      <link>https://kerolt.github.io/posts/c&#43;&#43;/%E7%BA%A0%E6%AD%A3%E4%B8%80%E4%B8%8B%E5%AF%B9cpp%E7%A7%BB%E5%8A%A8%E8%AF%AD%E4%B9%89%E7%9A%84%E9%94%99%E8%AF%AF%E7%90%86%E8%A7%A3/</link>
+      <pubDate>Sun, 18 Feb 2024 00:00:00 +0000</pubDate>
+      <guid>https://kerolt.github.io/posts/c&#43;&#43;/%E7%BA%A0%E6%AD%A3%E4%B8%80%E4%B8%8B%E5%AF%B9cpp%E7%A7%BB%E5%8A%A8%E8%AF%AD%E4%B9%89%E7%9A%84%E9%94%99%E8%AF%AF%E7%90%86%E8%A7%A3/</guid>
+      <description>&lt;p&gt;之前对于移动语义的理解就是使用std::move将一个对象所占有的资源的所有权转移给另一个对象，但是只要使用std::move就足够了吗？这显然是错误的。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>C&#43;&#43;中lambda与priority_queue一起使用</title>
+      <link>https://kerolt.github.io/posts/c&#43;&#43;/c&#43;&#43;%E4%B8%ADlambda%E4%B8%8Epriority_queue%E4%B8%80%E8%B5%B7%E4%BD%BF%E7%94%A8/</link>
+      <pubDate>Wed, 14 Feb 2024 21:00:14 +0000</pubDate>
+      <guid>https://kerolt.github.io/posts/c&#43;&#43;/c&#43;&#43;%E4%B8%ADlambda%E4%B8%8Epriority_queue%E4%B8%80%E8%B5%B7%E4%BD%BF%E7%94%A8/</guid>
+      <description>&lt;p&gt;想写这篇博客的原因是在刷力扣的 &lt;a href=&#34;https://leetcode.cn/problems/top-k-frequent-elements/&#34;&gt;347. 前 K 个高频元素&lt;/a&gt; 一题时，需要使用到优先队列&lt;code&gt;priority_queue&lt;/code&gt;，其定义如下：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-cpp&#34; data-lang=&#34;cpp&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;k&#34;&gt;template&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;&amp;lt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;k&#34;&gt;class&lt;/span&gt; &lt;span class=&#34;nc&#34;&gt;T&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;k&#34;&gt;class&lt;/span&gt; &lt;span class=&#34;nc&#34;&gt;Container&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;std&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;::&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;vector&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;T&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;k&#34;&gt;class&lt;/span&gt; &lt;span class=&#34;nc&#34;&gt;Compare&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;std&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;::&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;less&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;typename&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;Container&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;::&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;value_type&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;o&#34;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;class&lt;/span&gt; &lt;span class=&#34;nc&#34;&gt;priority_queue&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;第三个参数是一个可以自定义的比较类型，其必须满足&lt;a href=&#34;https://zh.cppreference.com/w/cpp/named_req/BinaryPredicate&#34;&gt;二元谓词&lt;/a&gt;，通常可以使用如下两种方法：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;使用自定义的函数对象&lt;/li&gt;
+&lt;li&gt;lambda表达式&lt;/li&gt;
+&lt;li&gt;使用&lt;code&gt;std::greater&lt;/code&gt;或&lt;code&gt;std::less&lt;/code&gt;（这里就不介绍这种方法了）&lt;/li&gt;
+&lt;/ol&gt;</description>
+    </item>
+    <item>
+      <title>muduo网络库的安装</title>
+      <link>https://kerolt.github.io/posts/c&#43;&#43;/muduo%E7%BD%91%E7%BB%9C%E5%BA%93%E7%9A%84%E5%AE%89%E8%A3%85/</link>
+      <pubDate>Sat, 20 Jan 2024 00:00:00 +0000</pubDate>
+      <guid>https://kerolt.github.io/posts/c&#43;&#43;/muduo%E7%BD%91%E7%BB%9C%E5%BA%93%E7%9A%84%E5%AE%89%E8%A3%85/</guid>
+      <description>&lt;h2 id=&#34;下载源码&#34;&gt;下载源码&lt;/h2&gt;
+&lt;p&gt;链接：&lt;a href=&#34;https://github.com/chenshuo/muduo/releases/tag/v2.0.2&#34;&gt;https://github.com/chenshuo/muduo/releases/tag/v2.0.2&lt;/a&gt;&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

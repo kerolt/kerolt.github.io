@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Linux on Kerolt&#39;s Blog</title>
+    <link>https://kerolt.github.io/tags/linux/</link>
+    <description>Recent content in Linux on Kerolt&#39;s Blog</description>
+    <image>
+      <title>Kerolt&#39;s Blog</title>
+      <url>https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</url>
+      <link>https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</link>
+    </image>
+    <generator>Hugo -- 0.126.2</generator>
+    <language>en</language>
+    <lastBuildDate>Tue, 03 Sep 2024 00:00:00 +0000</lastBuildDate>
+    <atom:link href="https://kerolt.github.io/tags/linux/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>解决X11下窗口拖动撕裂的一个方法</title>
+      <link>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95/%E8%A7%A3%E5%86%B3x11%E4%B8%8B%E7%AA%97%E5%8F%A3%E6%8B%96%E5%8A%A8%E6%92%95%E8%A3%82%E7%9A%84%E4%B8%80%E4%B8%AA%E6%96%B9%E6%B3%95/</link>
+      <pubDate>Tue, 03 Sep 2024 00:00:00 +0000</pubDate>
+      <guid>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95/%E8%A7%A3%E5%86%B3x11%E4%B8%8B%E7%AA%97%E5%8F%A3%E6%8B%96%E5%8A%A8%E6%92%95%E8%A3%82%E7%9A%84%E4%B8%80%E4%B8%AA%E6%96%B9%E6%B3%95/</guid>
+      <description>&lt;blockquote&gt;
+&lt;p&gt;Debian系Linux安装N卡驱动参考这篇&lt;a href=&#34;https://www.if-not-true-then-false.com/2021/debian-ubuntu-linux-mint-nvidia-guide/&#34;&gt;博客&lt;/a&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;最近Debian终于是装好nvidia的驱动了，但是只能用在X11上，并且相比于不用n卡驱动时的Wayland，X11下的窗口拖动和视频播放会有比较明显的撕裂感，以下是解决的一个方法。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Linux开放端口号</title>
+      <link>https://kerolt.github.io/posts/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/linux%E5%BC%80%E6%94%BE%E7%AB%AF%E5%8F%A3%E5%8F%B7/</link>
+      <pubDate>Mon, 17 Jun 2024 00:00:00 +0000</pubDate>
+      <guid>https://kerolt.github.io/posts/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/linux%E5%BC%80%E6%94%BE%E7%AB%AF%E5%8F%A3%E5%8F%B7/</guid>
+      <description>&lt;p&gt;假设使用vite启动项目后，希望在移动设备上通过ip和端口号来访问项目，通常需要在Linux上开放端口号。&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

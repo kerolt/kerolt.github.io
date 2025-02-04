@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Database on Kerolt&#39;s Blog</title>
+    <link>https://kerolt.github.io/tags/database/</link>
+    <description>Recent content in Database on Kerolt&#39;s Blog</description>
+    <image>
+      <title>Kerolt&#39;s Blog</title>
+      <url>https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</url>
+      <link>https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</link>
+    </image>
+    <generator>Hugo -- 0.126.2</generator>
+    <language>en</language>
+    <lastBuildDate>Mon, 16 Dec 2024 00:00:00 +0000</lastBuildDate>
+    <atom:link href="https://kerolt.github.io/tags/database/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>【CMU15-445 Fall2023】Project3 Query Execution 小结</title>
+      <link>https://kerolt.github.io/posts/%E6%95%B0%E6%8D%AE%E5%BA%93/cmu15-445-fall2023project3-query-execution-%E5%B0%8F%E7%BB%93/</link>
+      <pubDate>Mon, 16 Dec 2024 00:00:00 +0000</pubDate>
+      <guid>https://kerolt.github.io/posts/%E6%95%B0%E6%8D%AE%E5%BA%93/cmu15-445-fall2023project3-query-execution-%E5%B0%8F%E7%BB%93/</guid>
+      <description>&lt;blockquote&gt;
+&lt;p&gt;该系列博客只是为了记录自己在写Lab时的思路，按照课程要求不会在Github和博客中公开源代码。欢迎与我一起讨论交流！&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;这个project和之前就不一样了，开始深入数据库内核的实现了。需要理清楚一条sql语句是如何被执行的，方才能写出代码。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>【CMU15-445 Fall2023】Project2 Extendible Hash Index 小结</title>
+      <link>https://kerolt.github.io/posts/%E6%95%B0%E6%8D%AE%E5%BA%93/cmu15-445-fall2023project2-extendible-hash-index-%E5%B0%8F%E7%BB%93/</link>
+      <pubDate>Tue, 12 Nov 2024 00:00:00 +0000</pubDate>
+      <guid>https://kerolt.github.io/posts/%E6%95%B0%E6%8D%AE%E5%BA%93/cmu15-445-fall2023project2-extendible-hash-index-%E5%B0%8F%E7%BB%93/</guid>
+      <description>&lt;blockquote&gt;
+&lt;p&gt;该系列博客只是为了记录自己在写Lab时的思路，按照课程要求不会在Github和博客中公开源代码。欢迎与我一起讨论交流！&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;太菜了，从没打过这么艰难的仗QAQ。由于课程的要求不能公开源代码，所以网上的资源会少很多，平台上的测试案例比较全面，有的还比较刁钻，需要考虑到可拓展哈希的实现细节。在自认为写完了后，提交了近40来次总有几个测试集过不了，还好没有崩溃，在看了几篇博客的方法后，加上自己画图理解，最后终于过了😭。不过回头写博客的时候再去看代码，也没有特别的复杂，还是得明白其中的算法逻辑是如何实现的。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>【CMU15-445 Fall2023】Project1 Buffer Pool 小结</title>
+      <link>https://kerolt.github.io/posts/%E6%95%B0%E6%8D%AE%E5%BA%93/cmu15-445-fall2023project1-buffer-pool-%E5%B0%8F%E7%BB%93/</link>
+      <pubDate>Sat, 12 Oct 2024 00:00:00 +0000</pubDate>
+      <guid>https://kerolt.github.io/posts/%E6%95%B0%E6%8D%AE%E5%BA%93/cmu15-445-fall2023project1-buffer-pool-%E5%B0%8F%E7%BB%93/</guid>
+      <description>&lt;blockquote&gt;
+&lt;p&gt;该系列博客只是为了记录自己在写Lab时的思路，按照课程要求不会在Github和博客中公开源代码。欢迎与我一起讨论交流！&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;这个Project需要我们实现一个缓存池，减少对于磁盘的频繁IO。开始慢慢上强度了，细节拉满！&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>【CMU15-445 Fall2023】Project0 C&#43;&#43; Primer 小结</title>
+      <link>https://kerolt.github.io/posts/%E6%95%B0%E6%8D%AE%E5%BA%93/cmu15-445-fall2023project0-c&#43;&#43;-primer-%E5%B0%8F%E7%BB%93/</link>
+      <pubDate>Sun, 06 Oct 2024 00:00:00 +0000</pubDate>
+      <guid>https://kerolt.github.io/posts/%E6%95%B0%E6%8D%AE%E5%BA%93/cmu15-445-fall2023project0-c&#43;&#43;-primer-%E5%B0%8F%E7%BB%93/</guid>
+      <description>&lt;blockquote&gt;
+&lt;p&gt;该系列博客只是为了记录自己在写Lab时的思路，按照课程要求不会在Github和博客中公开源代码。欢迎与我一起讨论交流！&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;project0只在task4中浅浅涉及了一点BusTub的内容，其他都是检测我们对于C++的一个掌握，主要涉及智能指针和C++的常用特性（dynamic_cast、std::move、并发与锁等）。&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>
