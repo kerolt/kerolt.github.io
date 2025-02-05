@@ -3,21 +3,33 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>https://kerolt.github.io/categories/</loc>
-    <lastmod>2024-12-31T00:00:00+00:00</lastmod>
+    <lastmod>2025-02-04T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://kerolt.github.io/tags/github-action/</loc>
+    <lastmod>2025-02-04T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://kerolt.github.io/tags/hugo/</loc>
+    <lastmod>2025-02-04T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95/hugo%E9%85%8D%E7%BD%AEgithub-actions/</loc>
+    <lastmod>2025-02-04T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://kerolt.github.io/</loc>
-    <lastmod>2024-12-31T00:00:00+00:00</lastmod>
+    <lastmod>2025-02-04T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://kerolt.github.io/posts/</loc>
+    <lastmod>2025-02-04T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://kerolt.github.io/tags/</loc>
+    <lastmod>2025-02-04T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://kerolt.github.io/categories/%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95/</loc>
+    <lastmod>2025-02-04T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95/linux%E4%B8%8B%E5%BE%AE%E4%BF%A1%E6%97%A0%E6%B3%95%E4%BD%BF%E7%94%A8%E4%B8%AD%E6%96%87%E8%BE%93%E5%85%A5%E6%B3%95%E9%97%AE%E9%A2%98%E8%A7%A3%E5%86%B3/</loc>
     <lastmod>2024-12-31T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://kerolt.github.io/posts/</loc>
-    <lastmod>2024-12-31T00:00:00+00:00</lastmod>
-  </url><url>
     <loc>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95/%E5%9C%A8vscode%E4%B8%AD%E9%85%8D%E7%BD%AElldb/</loc>
-    <lastmod>2024-12-31T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>https://kerolt.github.io/categories/%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95/</loc>
     <lastmod>2024-12-31T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://kerolt.github.io/posts/%E6%95%B0%E6%8D%AE%E5%BA%93/cmu15-445-fall2023project3-query-execution-%E5%B0%8F%E7%BB%93/</loc>
@@ -27,9 +39,6 @@
     <lastmod>2024-12-16T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://kerolt.github.io/tags/database/</loc>
-    <lastmod>2024-12-16T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>https://kerolt.github.io/tags/</loc>
     <lastmod>2024-12-16T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://kerolt.github.io/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/</loc>
