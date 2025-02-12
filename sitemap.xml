@@ -3,28 +3,28 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>https://kerolt.github.io/categories/</loc>
-    <lastmod>2025-02-04T00:00:00+00:00</lastmod>
+    <lastmod>2025-02-07T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://kerolt.github.io/tags/github-action/</loc>
-    <lastmod>2025-02-04T00:00:00+00:00</lastmod>
+    <lastmod>2025-02-07T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://kerolt.github.io/tags/hugo/</loc>
-    <lastmod>2025-02-04T00:00:00+00:00</lastmod>
+    <lastmod>2025-02-07T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95/hugo%E9%85%8D%E7%BD%AEgithub-actions/</loc>
-    <lastmod>2025-02-04T00:00:00+00:00</lastmod>
+    <lastmod>2025-02-07T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://kerolt.github.io/</loc>
-    <lastmod>2025-02-04T00:00:00+00:00</lastmod>
+    <lastmod>2025-02-07T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://kerolt.github.io/posts/</loc>
-    <lastmod>2025-02-04T00:00:00+00:00</lastmod>
+    <lastmod>2025-02-07T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://kerolt.github.io/tags/</loc>
-    <lastmod>2025-02-04T00:00:00+00:00</lastmod>
+    <lastmod>2025-02-07T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://kerolt.github.io/categories/%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95/</loc>
-    <lastmod>2025-02-04T00:00:00+00:00</lastmod>
+    <lastmod>2025-02-07T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95/linux%E4%B8%8B%E5%BE%AE%E4%BF%A1%E6%97%A0%E6%B3%95%E4%BD%BF%E7%94%A8%E4%B8%AD%E6%96%87%E8%BE%93%E5%85%A5%E6%B3%95%E9%97%AE%E9%A2%98%E8%A7%A3%E5%86%B3/</loc>
     <lastmod>2024-12-31T00:00:00+00:00</lastmod>
@@ -247,7 +247,11 @@
   </url><url>
     <loc>https://kerolt.github.io/search/</loc>
   </url><url>
+    <loc>https://kerolt.github.io/drafts/</loc>
+  </url><url>
     <loc>https://kerolt.github.io/about/</loc>
+  </url><url>
+    <loc>https://kerolt.github.io/drafts/%E5%9F%8B%E7%82%B9sdk/</loc>
   </url><url>
     <loc>https://kerolt.github.io/archives/</loc>
   </url>
