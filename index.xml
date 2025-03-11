@@ -91,10 +91,20 @@ auto BustubInstance::ExecuteSqlTxn(const std::string &amp;amp;sql, ResultWriter 
       <link>https://kerolt.github.io/posts/%E6%95%B0%E6%8D%AE%E5%BA%93/cmu15-445-fall2023project2-extendible-hash-index-%E5%B0%8F%E7%BB%93/</link>
       <pubDate>Tue, 12 Nov 2024 00:00:00 +0000</pubDate>
       <guid>https://kerolt.github.io/posts/%E6%95%B0%E6%8D%AE%E5%BA%93/cmu15-445-fall2023project2-extendible-hash-index-%E5%B0%8F%E7%BB%93/</guid>
-      <description>&lt;blockquote&gt;
-&lt;p&gt;该系列博客只是为了记录自己在写Lab时的思路，按照课程要求不会在Github和博客中公开源代码。欢迎与我一起讨论交流！&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;p&gt;太菜了，从没打过这么艰难的仗QAQ。由于课程的要求不能公开源代码，所以网上的资源会少很多，平台上的测试案例比较全面，有的还比较刁钻，需要考虑到可拓展哈希的实现细节。在自认为写完了后，提交了近40来次总有几个测试集过不了，还好没有崩溃，在看了几篇博客的方法后，加上自己画图理解，最后终于过了😭。不过回头写博客的时候再去看代码，也没有特别的复杂，还是得明白其中的算法逻辑是如何实现的。&lt;/p&gt;</description>
+      <description>该系列博客只是为了记录自己在写Lab时的思路，按照课程要求不会在Github和博客中公开源代码。欢迎与我一起讨论交流！
+太菜了，从没打过这么艰难的仗QAQ。由于课程的要求不能公开源代码，所以网上的资源会少很多，平台上的测试案例比较全面，有的还比较刁钻，需要考虑到可拓展哈希的实现细节。在自认为写完了后，提交了近40来次总有几个测试集过不了，还好没有崩溃，在看了几篇博客的方法后，加上自己画图理解，最后终于过了😭。不过回头写博客的时候再去看代码，也没有特别的复杂，还是得明白其中的算法逻辑是如何实现的。
+Task1 - Read/Write Page Guards 简单来说，就是为Page实现一个RAII来自动管理资源。因为在BufferPoolManager::Unpin中，每次调用这个函数，都会让对应的page的pin_count_ - 1，当这个值为0时，这个page就可以被回收，或者说被替换了。但如果我们忘记去手动调用，该页面将永远不会被逐出缓冲池。由于缓冲池以更少的帧数运行，磁盘内外的页面交换将更多。不仅性能受到影响，而且很难检测到错误。
+主要需要考虑如何编写移动构造、移动赋值的逻辑。移动了一个对象后，原来的对象的资源应该转移到了新对象上，那么原来的对象无法再访问资源（将原来对象的资源重置nullptr或清空）。
+还有一个Drop()的接口，这是提供给使用者的释放资源的api，在实现虚构函数时可以直接调用它。Drop的实现就是调用Unpin，然后置空资源。需要注意的是，在进行移动赋值时，一开始也要Drop一下，考虑这样一种情况：
+auto p = std::move(basic_page_guard); p = std::move(basic_page_guard2); 这个时候同一个变量p接管了两个page，那么应该在第二个移动赋值时先drop掉第一个，因为第一个page不再使用了，自然要Unpin。
+还有就是在三个page guard类重载移动赋值时，如果需要移动的对象和自身是同一个，那么直接返回自己就好：
+auto BasicPageGuard::operator=(BasicPageGuard &amp;amp;&amp;amp;that) noexcept -&amp;gt; BasicPageGuard &amp;amp; { if (&amp;amp;that == this) { return *this; } // ... 其他操作 } 在ReadPageGuard和WritePageGuard的Drop()中，还需要考虑释放管理的page的锁。对应的，锁的获取发生在FetchPageWrite()和FetchPageWrite()中。
+Task2 - Extendible Hash Table Pages 为什么我们需要可扩展哈希？
+下图来源：https://www.bilibili.com/video/BV1Qt421w7JT
+在bustub的设计中，Header Page，Directory Page和Bucket Page都是无法直接构造出来的，即不能通过构造函数创建，只能通过各自的PageGuard中的As()或者AsMut()函数来转换。
+Header header page中有一个max_depth_的成员变量，1 &amp;lt;&amp;lt; max_depth_即为header page中能存放的目录的索引的数量。当我们有值需要放入哈希表时，获取hash(key)的二进制最高max_depth_位作为索引，再从header中对应位置去找到directory。对应的ExtendibleHTableHeaderPage中的功能实现并不难。
+Directory directory中有两个depth：
+Global Depth：若global depth为n，那么这个Directory就有2^n个entry（相当于指向2^n个bucket） Local Depth：若local depth为n，则在这个对应的bucket下，每个元素的key的最后n位都相同 类似header中获取下一级页的索引，directory获取hash(key)的二进制最低global_depth_位作为索引。那local depth的作用是什么呢？</description>
     </item>
     <item>
       <title>【MIT6.S081】Lab5 copy-on-write fork</title>
