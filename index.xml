@@ -11,8 +11,33 @@
     </image>
     <generator>Hugo -- 0.126.2</generator>
     <language>en</language>
-    <lastBuildDate>Fri, 07 Feb 2025 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Thu, 13 Mar 2025 00:00:00 +0000</lastBuildDate>
     <atom:link href="https://kerolt.github.io/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>C&#43;&#43;何时会阻止默认的特殊成员函数的生成</title>
+      <link>https://kerolt.github.io/posts/c&#43;&#43;/c&#43;&#43;%E4%BD%95%E6%97%B6%E4%BC%9A%E9%98%BB%E6%AD%A2%E9%BB%98%E8%AE%A4%E7%9A%84%E7%89%B9%E6%AE%8A%E6%88%90%E5%91%98%E5%87%BD%E6%95%B0%E7%9A%84%E7%94%9F%E6%88%90/</link>
+      <pubDate>Thu, 13 Mar 2025 00:00:00 +0000</pubDate>
+      <guid>https://kerolt.github.io/posts/c&#43;&#43;/c&#43;&#43;%E4%BD%95%E6%97%B6%E4%BC%9A%E9%98%BB%E6%AD%A2%E9%BB%98%E8%AE%A4%E7%9A%84%E7%89%B9%E6%AE%8A%E6%88%90%E5%91%98%E5%87%BD%E6%95%B0%E7%9A%84%E7%94%9F%E6%88%90/</guid>
+      <description>在C++中，编译器会根据类的定义情况自动决定是否生成默认的特殊成员函数（如构造函数、拷贝/移动操作、析构函数）。
+1. 用户显式声明相关成员函数 显式声明或删除某个函数：
+如果用户显式声明（即使使用 =default 或 =delete）某个特殊成员函数，编译器将不再生成默认版本。例如： class Example { public: Example() = default; // 允许生成默认构造函数 Example(const Example&amp;amp;) {} // 用户定义的拷贝构造函数 // 编译器不再生成默认的移动构造函数和移动赋值运算符 }; 2. 用户定义析构函数、拷贝/移动操作的影响 定义析构函数：
+如果用户定义了析构函数（即使为空），编译器会删除默认的移动操作（移动构造函数和移动赋值运算符），但拷贝操作仍可能生成（除非其他条件阻止）。
+class Example { public: ~Example() {} // 用户定义的析构函数 // 移动操作被隐式删除，拷贝操作可能生成（若无其他限制） }; 定义拷贝操作：
+如果用户定义了拷贝构造函数或拷贝赋值运算符，编译器会删除默认的移动操作。
+class Example { public: Example(const Example&amp;amp;) {} // 用户定义的拷贝构造函数 // 移动操作被隐式删除 }; 定义移动操作：
+如果用户定义了移动构造函数或移动赋值运算符，编译器会删除默认的拷贝操作。
+#include &amp;lt;utility&amp;gt; #include &amp;lt;string&amp;gt; #include &amp;lt;iostream&amp;gt; struct Example { std::string str; Example() = default; Example(const std::string&amp;amp; s): str(s) { std::cout &amp;lt;&amp;lt; &amp;#34;Example()\n&amp;#34;; } Example(Example&amp;amp;&amp;amp; other) { str = std::move(other.</description>
+    </item>
+    <item>
+      <title>【CMU15-445 Fall2023】Project3 Query Execution 小结</title>
+      <link>https://kerolt.github.io/posts/%E6%95%B0%E6%8D%AE%E5%BA%93/cmu15-445-fall2023project3-query-execution-%E5%B0%8F%E7%BB%93/</link>
+      <pubDate>Tue, 11 Mar 2025 00:00:00 +0000</pubDate>
+      <guid>https://kerolt.github.io/posts/%E6%95%B0%E6%8D%AE%E5%BA%93/cmu15-445-fall2023project3-query-execution-%E5%B0%8F%E7%BB%93/</guid>
+      <description>该系列博客只是为了记录自己在写Lab时的思路，按照课程要求不会在Github和博客中公开源代码。欢迎与我一起讨论交流！
+这个project和之前就不一样了，开始深入数据库内核的实现了。需要理清楚一条sql语句是如何被执行的，方才能写出代码。
+前置奶酪 一条SQL语句的执行 这里需要去看看一条sql语句传入bustub内部之后的代码：src/common/bustub_instance.cpp:ExecuteSqlTxn：
+auto BustubInstance::ExecuteSqlTxn(const std::string &amp;amp;sql, ResultWriter &amp;amp;writer, Transaction *txn, std::shared_ptr&amp;lt;CheckOptions&amp;gt; check_options) -&amp;gt; bool { if (!sql.empty() &amp;amp;&amp;amp; sql[0] == &amp;#39;\\&amp;#39;) { // 处理元命令 ... } // binder，但是在其中会使用libpg_query来解析sql语句 bustub::Binder binder(*catalog_); binder.ParseAndSave(sql); // 经过上一步后，binder中的statement_nodes_存储着所有的语句解析节点 for (auto *stmt : binder.statement_nodes_) { // 将stmt转换成BoundStatement对象，方便后面处理数据 auto statement = binder.BindStatement(stmt); // 只有不需要构建plan树、不需要进行优化的sql语句才会在switch之后继续执行 switch (statement-&amp;gt;type_) { ... } // 生成初步的执行计划 bustub::Planner planner(*catalog_); planner.PlanQuery(*statement); // 优化刚刚的执行计划 bustub::Optimizer optimizer(*catalog_, IsForceStarterRule()); auto optimized_plan = optimizer.Optimize(planner.plan_); .</description>
+    </item>
     <item>
       <title>Hugo配置Github Actions</title>
       <link>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95/hugo%E9%85%8D%E7%BD%AEgithub-actions/</link>
@@ -31,21 +56,12 @@ name: GitHub Pages on: push: branches: - master # 监听 master 分支的推送�
       <description>&lt;p&gt;微信在不久前终于有了Linux原生版本，我的电脑是Fedora41，之前安装的是flatpak打包的微信，现在在官网下载rpm包后运行发现无法使用fcitx的中文输入法，找了一下是环境遍历的问题。&lt;/p&gt;</description>
     </item>
     <item>
-      <title>在vscode中配置lldb</title>
+      <title>在VSCode中配置LLDB</title>
       <link>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95/%E5%9C%A8vscode%E4%B8%AD%E9%85%8D%E7%BD%AElldb/</link>
       <pubDate>Tue, 31 Dec 2024 00:00:00 +0000</pubDate>
       <guid>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95/%E5%9C%A8vscode%E4%B8%AD%E9%85%8D%E7%BD%AElldb/</guid>
-      <description>{ &amp;#34;version&amp;#34;: &amp;#34;0.2.0&amp;#34;, &amp;#34;configurations&amp;#34;: [ { &amp;#34;name&amp;#34;: &amp;#34;LLDB&amp;#34;, &amp;#34;type&amp;#34;: &amp;#34;lldb&amp;#34;, &amp;#34;request&amp;#34;: &amp;#34;launch&amp;#34;, &amp;#34;program&amp;#34;: &amp;#34;${command:cmake.launchTargetPath}&amp;#34;, &amp;#34;args&amp;#34;: [], &amp;#34;cwd&amp;#34;: &amp;#34;${workspaceFolder}&amp;#34;, } ] } </description>
-    </item>
-    <item>
-      <title>【CMU15-445 Fall2023】Project3 Query Execution 小结</title>
-      <link>https://kerolt.github.io/posts/%E6%95%B0%E6%8D%AE%E5%BA%93/cmu15-445-fall2023project3-query-execution-%E5%B0%8F%E7%BB%93/</link>
-      <pubDate>Mon, 16 Dec 2024 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E6%95%B0%E6%8D%AE%E5%BA%93/cmu15-445-fall2023project3-query-execution-%E5%B0%8F%E7%BB%93/</guid>
-      <description>该系列博客只是为了记录自己在写Lab时的思路，按照课程要求不会在Github和博客中公开源代码。欢迎与我一起讨论交流！
-这个project和之前就不一样了，开始深入数据库内核的实现了。需要理清楚一条sql语句是如何被执行的，方才能写出代码。
-前置奶酪 一条SQL语句的执行 这里需要去看看一条sql语句传入bustub内部之后的代码：src/common/bustub_instance.cpp:ExecuteSqlTxn：
-auto BustubInstance::ExecuteSqlTxn(const std::string &amp;amp;sql, ResultWriter &amp;amp;writer, Transaction *txn, std::shared_ptr&amp;lt;CheckOptions&amp;gt; check_options) -&amp;gt; bool { if (!sql.empty() &amp;amp;&amp;amp; sql[0] == &amp;#39;\\&amp;#39;) { // 处理元命令 ... } // binder，但是在其中会使用libpg_query来解析sql语句 bustub::Binder binder(*catalog_); binder.ParseAndSave(sql); // 经过上一步后，binder中的statement_nodes_存储着所有的语句解析节点 for (auto *stmt : binder.statement_nodes_) { // 将stmt转换成BoundStatement对象，方便后面处理数据 auto statement = binder.BindStatement(stmt); // 只有不需要构建plan树、不需要进行优化的sql语句才会在switch之后继续执行 switch (statement-&amp;gt;type_) { ... } // 生成初步的执行计划 bustub::Planner planner(*catalog_); planner.PlanQuery(*statement); // 优化刚刚的执行计划 bustub::Optimizer optimizer(*catalog_, IsForceStarterRule()); auto optimized_plan = optimizer.Optimize(planner.plan_); .</description>
+      <description>为了 CMake Tool 能调试代码，先装好 codelldb 插件，然后还需要一个 launch.json 文件，以下内容可以一键配置好调试：
+{ &amp;#34;version&amp;#34;: &amp;#34;0.2.0&amp;#34;, &amp;#34;configurations&amp;#34;: [ { &amp;#34;name&amp;#34;: &amp;#34;LLDB&amp;#34;, &amp;#34;type&amp;#34;: &amp;#34;lldb&amp;#34;, &amp;#34;request&amp;#34;: &amp;#34;launch&amp;#34;, &amp;#34;program&amp;#34;: &amp;#34;${command:cmake.launchTargetPath}&amp;#34;, &amp;#34;args&amp;#34;: [], &amp;#34;cwd&amp;#34;: &amp;#34;${workspaceFolder}&amp;#34;, } ] } </description>
     </item>
     <item>
       <title>【MIT6.S081】Lab10 mmap</title>

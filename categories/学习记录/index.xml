@@ -31,6 +31,14 @@ name: GitHub Pages on: push: branches: - master # 监听 master 分支的推送�
       <description>&lt;p&gt;微信在不久前终于有了Linux原生版本，我的电脑是Fedora41，之前安装的是flatpak打包的微信，现在在官网下载rpm包后运行发现无法使用fcitx的中文输入法，找了一下是环境遍历的问题。&lt;/p&gt;</description>
     </item>
     <item>
+      <title>在VSCode中配置LLDB</title>
+      <link>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95/%E5%9C%A8vscode%E4%B8%AD%E9%85%8D%E7%BD%AElldb/</link>
+      <pubDate>Tue, 31 Dec 2024 00:00:00 +0000</pubDate>
+      <guid>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95/%E5%9C%A8vscode%E4%B8%AD%E9%85%8D%E7%BD%AElldb/</guid>
+      <description>为了 CMake Tool 能调试代码，先装好 codelldb 插件，然后还需要一个 launch.json 文件，以下内容可以一键配置好调试：
+{ &amp;#34;version&amp;#34;: &amp;#34;0.2.0&amp;#34;, &amp;#34;configurations&amp;#34;: [ { &amp;#34;name&amp;#34;: &amp;#34;LLDB&amp;#34;, &amp;#34;type&amp;#34;: &amp;#34;lldb&amp;#34;, &amp;#34;request&amp;#34;: &amp;#34;launch&amp;#34;, &amp;#34;program&amp;#34;: &amp;#34;${command:cmake.launchTargetPath}&amp;#34;, &amp;#34;args&amp;#34;: [], &amp;#34;cwd&amp;#34;: &amp;#34;${workspaceFolder}&amp;#34;, } ] } </description>
+    </item>
+    <item>
       <title>解决X11下窗口拖动撕裂的一个方法</title>
       <link>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95/%E8%A7%A3%E5%86%B3x11%E4%B8%8B%E7%AA%97%E5%8F%A3%E6%8B%96%E5%8A%A8%E6%92%95%E8%A3%82%E7%9A%84%E4%B8%80%E4%B8%AA%E6%96%B9%E6%B3%95/</link>
       <pubDate>Tue, 03 Sep 2024 00:00:00 +0000</pubDate>
