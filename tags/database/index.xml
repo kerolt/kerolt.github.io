@@ -65,9 +65,9 @@ Global Depth：若global depth为n，那么这个Directory就有2^n个entry（�
     </item>
     <item>
       <title>【CMU15-445 Fall2023】Project4 Concurrency Control 小结</title>
-      <link>https://kerolt.github.io/posts/%E6%95%B0%E6%8D%AE%E5%BA%93/cmu15-445-fall2023project4-concurrency-control-%E5%B0%8F%E7%BB%93/</link>
+      <link>https://kerolt.github.io/drafts/cmu15-445-fall2023project4-concurrency-control-%E5%B0%8F%E7%BB%93/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E6%95%B0%E6%8D%AE%E5%BA%93/cmu15-445-fall2023project4-concurrency-control-%E5%B0%8F%E7%BB%93/</guid>
+      <guid>https://kerolt.github.io/drafts/cmu15-445-fall2023project4-concurrency-control-%E5%B0%8F%E7%BB%93/</guid>
       <description>Task 1 - Timestamps </description>
     </item>
     <item>

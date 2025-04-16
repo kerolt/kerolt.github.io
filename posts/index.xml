@@ -533,13 +533,6 @@ class Solution { public: bool isPalindrome(ListNode* head) { vector&amp;lt;int&a
 class Solution { private: ListNode* left_ = nullptr; bool Traverse(ListNode* right) { if (!</description>
     </item>
     <item>
-      <title>【CMU15-445 Fall2023】Project4 Concurrency Control 小结</title>
-      <link>https://kerolt.github.io/posts/%E6%95%B0%E6%8D%AE%E5%BA%93/cmu15-445-fall2023project4-concurrency-control-%E5%B0%8F%E7%BB%93/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E6%95%B0%E6%8D%AE%E5%BA%93/cmu15-445-fall2023project4-concurrency-control-%E5%B0%8F%E7%BB%93/</guid>
-      <description>Task 1 - Timestamps </description>
-    </item>
-    <item>
       <title>数据库并发控制</title>
       <link>https://kerolt.github.io/posts/%E6%95%B0%E6%8D%AE%E5%BA%93/%E6%95%B0%E6%8D%AE%E5%BA%93%E5%B9%B6%E5%8F%91%E6%8E%A7%E5%88%B6/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
