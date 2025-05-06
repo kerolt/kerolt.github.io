@@ -18,10 +18,10 @@
       <link>https://kerolt.github.io/posts/%E6%95%B0%E6%8D%AE%E5%BA%93/cmu15-445-fall2023project3-query-execution-%E5%B0%8F%E7%BB%93/</link>
       <pubDate>Tue, 11 Mar 2025 00:00:00 +0000</pubDate>
       <guid>https://kerolt.github.io/posts/%E6%95%B0%E6%8D%AE%E5%BA%93/cmu15-445-fall2023project3-query-execution-%E5%B0%8F%E7%BB%93/</guid>
-      <description>该系列博客只是为了记录自己在写Lab时的思路，按照课程要求不会在Github和博客中公开源代码。欢迎与我一起讨论交流！
-这个project和之前就不一样了，开始深入数据库内核的实现了。需要理清楚一条sql语句是如何被执行的，方才能写出代码。
-前置奶酪 一条SQL语句的执行 这里需要去看看一条sql语句传入bustub内部之后的代码：src/common/bustub_instance.cpp:ExecuteSqlTxn：
-auto BustubInstance::ExecuteSqlTxn(const std::string &amp;amp;sql, ResultWriter &amp;amp;writer, Transaction *txn, std::shared_ptr&amp;lt;CheckOptions&amp;gt; check_options) -&amp;gt; bool { if (!sql.empty() &amp;amp;&amp;amp; sql[0] == &amp;#39;\\&amp;#39;) { // 处理元命令 ... } // binder，但是在其中会使用libpg_query来解析sql语句 bustub::Binder binder(*catalog_); binder.ParseAndSave(sql); // 经过上一步后，binder中的statement_nodes_存储着所有的语句解析节点 for (auto *stmt : binder.statement_nodes_) { // 将stmt转换成BoundStatement对象，方便后面处理数据 auto statement = binder.BindStatement(stmt); // 只有不需要构建plan树、不需要进行优化的sql语句才会在switch之后继续执行 switch (statement-&amp;gt;type_) { ... } // 生成初步的执行计划 bustub::Planner planner(*catalog_); planner.PlanQuery(*statement); // 优化刚刚的执行计划 bustub::Optimizer optimizer(*catalog_, IsForceStarterRule()); auto optimized_plan = optimizer.Optimize(planner.plan_); .</description>
+      <description>该系列博客只是为了记录自己在写 Lab 时的思路，按照课程要求不会在 Github 和博客中公开源代码。欢迎与我一起讨论交流！
+这个 project 和之前就不一样了，开始深入数据库内核的实现了。需要理清楚一条 sql 语句是如何被执行的，方才能写出代码。
+前置奶酪 一条 SQL 语句的执行 这里需要去看看一条 sql 语句传入 bustub 内部之后的代码：src/common/bustub_instance.cpp:ExecuteSqlTxn：
+auto BustubInstance::ExecuteSqlTxn(const std::string &amp;amp;sql, ResultWriter &amp;amp;writer, Transaction *txn, std::shared_ptr&amp;lt;CheckOptions&amp;gt; check_options) -&amp;gt; bool { if (!sql.empty() &amp;amp;&amp;amp; sql[0] == &amp;#39;\\&amp;#39;) { // 处理元命令 ... } // binder，但是在其中会使用libpg_query来解析sql语句 bustub::Binder binder(*catalog_); binder.ParseAndSave(sql); // 经过上一步后，binder中的statement_nodes_存储着所有的语句解析节点 for (auto *stmt : binder.statement_nodes_) { // 将stmt转换成BoundStatement对象，方便后面处理数据 auto statement = binder.BindStatement(stmt); // 只有不需要构建plan树、不需要进行优化的sql语句才会在switch之后继续执行 switch (statement-&amp;gt;type_) { ... } // 生成初步的执行计划 bustub::Planner planner(*catalog_); planner.</description>
     </item>
     <item>
       <title>【CMU15-445 Fall2023】Project2 Extendible Hash Index 小结</title>
@@ -62,22 +62,6 @@ Global Depth：若global depth为n，那么这个Directory就有2^n个entry（�
 &lt;p&gt;该系列博客只是为了记录自己在写Lab时的思路，按照课程要求不会在Github和博客中公开源代码。欢迎与我一起讨论交流！&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;p&gt;project0只在task4中浅浅涉及了一点BusTub的内容，其他都是检测我们对于C++的一个掌握，主要涉及智能指针和C++的常用特性（dynamic_cast、std::move、并发与锁等）。&lt;/p&gt;</description>
-    </item>
-    <item>
-      <title>【CMU15-445 Fall2023】Project4 Concurrency Control 小结</title>
-      <link>https://kerolt.github.io/drafts/cmu15-445-fall2023project4-concurrency-control-%E5%B0%8F%E7%BB%93/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/drafts/cmu15-445-fall2023project4-concurrency-control-%E5%B0%8F%E7%BB%93/</guid>
-      <description>Task 1 - Timestamps </description>
-    </item>
-    <item>
-      <title>数据库并发控制</title>
-      <link>https://kerolt.github.io/posts/%E6%95%B0%E6%8D%AE%E5%BA%93/%E6%95%B0%E6%8D%AE%E5%BA%93%E5%B9%B6%E5%8F%91%E6%8E%A7%E5%88%B6/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E6%95%B0%E6%8D%AE%E5%BA%93/%E6%95%B0%E6%8D%AE%E5%BA%93%E5%B9%B6%E5%8F%91%E6%8E%A7%E5%88%B6/</guid>
-      <description>1 两阶段锁协议 阶段#1（Growing）：每个 txn 都要向 DBMS 的锁管理器请求它所需要的锁。锁管理器会授予/拒绝锁的请求 阶段#2（Shrinking）：txn 只允许释放/降级它之前获得的锁，之后它不能获得新的锁。 2 共享锁和排他锁 共享锁（Shared Lock，S 锁） 和 排他锁（Exclusive Lock，X 锁） 是数据库管理系统（DBMS）中用于控制并发事务对资源（如表、行）访问的两种核心锁机制。它们的目标是确保事务的 隔离性 和 一致性 ，避免脏读、不可重复读、幻读等问题。
-2.1 共享锁（S 锁） 作用 ：允许多个事务同时读取同一资源，但禁止任何事务对资源进行修改。 典型场景 ：事务执行 SELECT 查询时（在某些隔离级别下）。 特点 ： 兼容性 ：多个事务可以同时持有共享锁（读-读不冲突）。 冲突 ：如果资源已被共享锁持有，其他事务无法对其加排他锁（X 锁）。 释放时机 ：通常在事务结束（提交或回滚）时释放，但在某些隔离级别下可能提前释放（如读已提交）。 示例： 事务 A 对表 Users 加 S 锁后，事务 B 也可以对 Users 加 S 锁并读取数据，但事务 C 无法修改数据（需 X 锁）。
-2.2 排他锁（X 锁） 作用 ：独占资源，禁止其他事务对资源加任何锁（包括 S 锁和 X 锁）。 典型场景 ：事务执行 UPDATE、DELETE 或 INSERT 操作时。 特点 ： 独占性 ：同一时间只有一个事务可以持有 X 锁。 冲突 ：与其他所有锁（S 锁、X 锁）冲突。 释放时机 ：事务结束时释放。 示例： 事务 A 对表 Users 加 X 锁后，其他事务既不能读取（需 S 锁）也不能修改数据，直到事务 A 释放锁。</description>
     </item>
   </channel>
 </rss>

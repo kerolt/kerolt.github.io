@@ -11,8 +11,20 @@
     </image>
     <generator>Hugo -- 0.126.2</generator>
     <language>en</language>
-    <lastBuildDate>Tue, 03 Sep 2024 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Sun, 27 Apr 2025 00:00:00 +0000</lastBuildDate>
     <atom:link href="https://kerolt.github.io/tags/linux/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>【解决】Fedora42升级启动时显示kernel panic</title>
+      <link>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95/%E8%A7%A3%E5%86%B3fedora42%E5%8D%87%E7%BA%A7%E5%90%AF%E5%8A%A8%E6%97%B6%E6%98%BE%E7%A4%BAkernel-panic/</link>
+      <pubDate>Sun, 27 Apr 2025 00:00:00 +0000</pubDate>
+      <guid>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95/%E8%A7%A3%E5%86%B3fedora42%E5%8D%87%E7%BA%A7%E5%90%AF%E5%8A%A8%E6%97%B6%E6%98%BE%E7%A4%BAkernel-panic/</guid>
+      <description>最近 Fedora42 更新了，因此我打算升级一下玩玩。在执行完下面的命令后：
+sudo dnf upgrade --refresh sudo dnf system-upgrade download --releasever=42 sudo dnf system-upgrade reboot 重启开机成了这样:(
+在网上搜索一圈后，执行以下命令系统就 ok 了：
+sudo dracut --regenerate-all --force 错误的原因可能是更新内核后没有正确生成新的 initramfs 文件，系统可能会使用旧的、不兼容的 initramfs 文件，从而导致启动失败。
+而 dracut 是一个用于生成 Linux 系统 initramfs（初始内存文件系统）的工具。运行 这条命令后，dracut 会重新生成与当前系统中所有已安装内核对应的 initramfs 文件。
+参考：https://www.reddit.com/r/Fedora/comments/1hfkqnq/boot_error_after_updating_to_6124200</description>
+    </item>
     <item>
       <title>解决X11下窗口拖动撕裂的一个方法</title>
       <link>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95/%E8%A7%A3%E5%86%B3x11%E4%B8%8B%E7%AA%97%E5%8F%A3%E6%8B%96%E5%8A%A8%E6%92%95%E8%A3%82%E7%9A%84%E4%B8%80%E4%B8%AA%E6%96%B9%E6%B3%95/</link>

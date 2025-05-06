@@ -11,8 +11,30 @@
     </image>
     <generator>Hugo -- 0.126.2</generator>
     <language>en</language>
-    <lastBuildDate>Wed, 16 Apr 2025 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Mon, 28 Apr 2025 00:00:00 +0000</lastBuildDate>
     <atom:link href="https://kerolt.github.io/posts/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>使用 Concept 替代基于虚函数的接口</title>
+      <link>https://kerolt.github.io/posts/c&#43;&#43;/%E4%BD%BF%E7%94%A8-concept-%E6%9B%BF%E4%BB%A3%E5%9F%BA%E4%BA%8E%E8%99%9A%E5%87%BD%E6%95%B0%E7%9A%84%E6%8E%A5%E5%8F%A3%E8%AE%BE%E8%AE%A1/</link>
+      <pubDate>Mon, 28 Apr 2025 00:00:00 +0000</pubDate>
+      <guid>https://kerolt.github.io/posts/c&#43;&#43;/%E4%BD%BF%E7%94%A8-concept-%E6%9B%BF%E4%BB%A3%E5%9F%BA%E4%BA%8E%E8%99%9A%E5%87%BD%E6%95%B0%E7%9A%84%E6%8E%A5%E5%8F%A3%E8%AE%BE%E8%AE%A1/</guid>
+      <description>在 C++20 及更高版本中，可以使用 Concepts 来替代传统的基于虚函数的接口设计，这种方式提供了更好的编译时检查、更高效的代码生成和更灵活的接口约束。
+在之前，可能是这样的：
+class IDrawable { public: virtual ~IDrawable() = default; virtual void draw() const = 0; }; class Circle : public IDrawable { public: void draw() override { puts(&amp;#34;Circle::draw()&amp;#34;); } }; class Squre : public IDrawable { public: void draw() override { puts(&amp;#34;Squre::draw()&amp;#34;); } }; void render(IDrawable&amp;amp; drawable) { drawable.draw(); } 但是有了 Concept 后：
+template &amp;lt;typename T&amp;gt; concept Drawable = requires(T t) { { t.draw() } -&amp;gt; std::same_as&amp;lt;void&amp;gt;; }; class Circle { public: void draw() const { puts(&amp;#34;Circle::draw()&amp;#34;); } }; class Squre { public: void draw() { puts(&amp;#34;Squre::draw()&amp;#34;); } }; template &amp;lt;Drawable T&amp;gt; void render(T&amp;amp; drawable) { drawable.</description>
+    </item>
+    <item>
+      <title>【解决】Fedora42升级启动时显示kernel panic</title>
+      <link>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95/%E8%A7%A3%E5%86%B3fedora42%E5%8D%87%E7%BA%A7%E5%90%AF%E5%8A%A8%E6%97%B6%E6%98%BE%E7%A4%BAkernel-panic/</link>
+      <pubDate>Sun, 27 Apr 2025 00:00:00 +0000</pubDate>
+      <guid>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95/%E8%A7%A3%E5%86%B3fedora42%E5%8D%87%E7%BA%A7%E5%90%AF%E5%8A%A8%E6%97%B6%E6%98%BE%E7%A4%BAkernel-panic/</guid>
+      <description>最近 Fedora42 更新了，因此我打算升级一下玩玩。在执行完下面的命令后：
+sudo dnf upgrade --refresh sudo dnf system-upgrade download --releasever=42 sudo dnf system-upgrade reboot 重启开机成了这样:(
+在网上搜索一圈后，执行以下命令系统就 ok 了：
+sudo dracut --regenerate-all --force 错误的原因可能是更新内核后没有正确生成新的 initramfs 文件，系统可能会使用旧的、不兼容的 initramfs 文件，从而导致启动失败。
+而 dracut 是一个用于生成 Linux 系统 initramfs（初始内存文件系统）的工具。运行 这条命令后，dracut 会重新生成与当前系统中所有已安装内核对应的 initramfs 文件。
+参考：https://www.reddit.com/r/Fedora/comments/1hfkqnq/boot_error_after_updating_to_6124200</description>
+    </item>
     <item>
       <title>3488. 距离最小相等元素查询</title>
       <link>https://kerolt.github.io/posts/%E7%AE%97%E6%B3%95/%E4%BA%8C%E5%88%86/3488.-%E8%B7%9D%E7%A6%BB%E6%9C%80%E5%B0%8F%E7%9B%B8%E7%AD%89%E5%85%83%E7%B4%A0%E6%9F%A5%E8%AF%A2/</link>
@@ -46,10 +68,10 @@ class Example { public: Example(const Example&amp;amp;) {} // 用户定义的拷
       <link>https://kerolt.github.io/posts/%E6%95%B0%E6%8D%AE%E5%BA%93/cmu15-445-fall2023project3-query-execution-%E5%B0%8F%E7%BB%93/</link>
       <pubDate>Tue, 11 Mar 2025 00:00:00 +0000</pubDate>
       <guid>https://kerolt.github.io/posts/%E6%95%B0%E6%8D%AE%E5%BA%93/cmu15-445-fall2023project3-query-execution-%E5%B0%8F%E7%BB%93/</guid>
-      <description>该系列博客只是为了记录自己在写Lab时的思路，按照课程要求不会在Github和博客中公开源代码。欢迎与我一起讨论交流！
-这个project和之前就不一样了，开始深入数据库内核的实现了。需要理清楚一条sql语句是如何被执行的，方才能写出代码。
-前置奶酪 一条SQL语句的执行 这里需要去看看一条sql语句传入bustub内部之后的代码：src/common/bustub_instance.cpp:ExecuteSqlTxn：
-auto BustubInstance::ExecuteSqlTxn(const std::string &amp;amp;sql, ResultWriter &amp;amp;writer, Transaction *txn, std::shared_ptr&amp;lt;CheckOptions&amp;gt; check_options) -&amp;gt; bool { if (!sql.empty() &amp;amp;&amp;amp; sql[0] == &amp;#39;\\&amp;#39;) { // 处理元命令 ... } // binder，但是在其中会使用libpg_query来解析sql语句 bustub::Binder binder(*catalog_); binder.ParseAndSave(sql); // 经过上一步后，binder中的statement_nodes_存储着所有的语句解析节点 for (auto *stmt : binder.statement_nodes_) { // 将stmt转换成BoundStatement对象，方便后面处理数据 auto statement = binder.BindStatement(stmt); // 只有不需要构建plan树、不需要进行优化的sql语句才会在switch之后继续执行 switch (statement-&amp;gt;type_) { ... } // 生成初步的执行计划 bustub::Planner planner(*catalog_); planner.PlanQuery(*statement); // 优化刚刚的执行计划 bustub::Optimizer optimizer(*catalog_, IsForceStarterRule()); auto optimized_plan = optimizer.Optimize(planner.plan_); .</description>
+      <description>该系列博客只是为了记录自己在写 Lab 时的思路，按照课程要求不会在 Github 和博客中公开源代码。欢迎与我一起讨论交流！
+这个 project 和之前就不一样了，开始深入数据库内核的实现了。需要理清楚一条 sql 语句是如何被执行的，方才能写出代码。
+前置奶酪 一条 SQL 语句的执行 这里需要去看看一条 sql 语句传入 bustub 内部之后的代码：src/common/bustub_instance.cpp:ExecuteSqlTxn：
+auto BustubInstance::ExecuteSqlTxn(const std::string &amp;amp;sql, ResultWriter &amp;amp;writer, Transaction *txn, std::shared_ptr&amp;lt;CheckOptions&amp;gt; check_options) -&amp;gt; bool { if (!sql.empty() &amp;amp;&amp;amp; sql[0] == &amp;#39;\\&amp;#39;) { // 处理元命令 ... } // binder，但是在其中会使用libpg_query来解析sql语句 bustub::Binder binder(*catalog_); binder.ParseAndSave(sql); // 经过上一步后，binder中的statement_nodes_存储着所有的语句解析节点 for (auto *stmt : binder.statement_nodes_) { // 将stmt转换成BoundStatement对象，方便后面处理数据 auto statement = binder.BindStatement(stmt); // 只有不需要构建plan树、不需要进行优化的sql语句才会在switch之后继续执行 switch (statement-&amp;gt;type_) { ... } // 生成初步的执行计划 bustub::Planner planner(*catalog_); planner.</description>
     </item>
     <item>
       <title>Hugo配置Github Actions</title>
@@ -500,8 +522,8 @@ Global Depth：若global depth为n，那么这个Directory就有2^n个entry（�
       <link>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95/cmakecmake%E4%BD%BF%E7%94%A8%E7%AC%94%E8%AE%B0/</link>
       <pubDate>Thu, 25 Jan 2024 00:00:00 +0000</pubDate>
       <guid>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95/cmakecmake%E4%BD%BF%E7%94%A8%E7%AC%94%E8%AE%B0/</guid>
-      <description>&lt;p&gt;记录学习CMake中碰到的一些问题和笔记&lt;/p&gt;
-&lt;p&gt;ps：CMake相比xmake来说确实太繁琐，但还是得学习🍭&lt;/p&gt;</description>
+      <description>&lt;p&gt;记录学习 CMake 中碰到的一些问题和笔记&lt;/p&gt;
+&lt;p&gt;ps：CMake 相比 xmake 来说确实太繁琐，但还是得学习🍭&lt;/p&gt;</description>
     </item>
     <item>
       <title>muduo网络库的安装</title>
@@ -531,15 +553,6 @@ class Solution { public: bool isPalindrome(ListNode* head) { vector&amp;lt;int&a
 利用后序遍历的思想：
 先保存头结点（left，全局变量），然后递归至最后（最深）的结点（right），然后比较left​和right​的值；如果相等，由递归栈返回上一层（也即right向左走），再操作left向右走，这样就实现了left和right的双向奔赴。
 class Solution { private: ListNode* left_ = nullptr; bool Traverse(ListNode* right) { if (!</description>
-    </item>
-    <item>
-      <title>数据库并发控制</title>
-      <link>https://kerolt.github.io/posts/%E6%95%B0%E6%8D%AE%E5%BA%93/%E6%95%B0%E6%8D%AE%E5%BA%93%E5%B9%B6%E5%8F%91%E6%8E%A7%E5%88%B6/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E6%95%B0%E6%8D%AE%E5%BA%93/%E6%95%B0%E6%8D%AE%E5%BA%93%E5%B9%B6%E5%8F%91%E6%8E%A7%E5%88%B6/</guid>
-      <description>1 两阶段锁协议 阶段#1（Growing）：每个 txn 都要向 DBMS 的锁管理器请求它所需要的锁。锁管理器会授予/拒绝锁的请求 阶段#2（Shrinking）：txn 只允许释放/降级它之前获得的锁，之后它不能获得新的锁。 2 共享锁和排他锁 共享锁（Shared Lock，S 锁） 和 排他锁（Exclusive Lock，X 锁） 是数据库管理系统（DBMS）中用于控制并发事务对资源（如表、行）访问的两种核心锁机制。它们的目标是确保事务的 隔离性 和 一致性 ，避免脏读、不可重复读、幻读等问题。
-2.1 共享锁（S 锁） 作用 ：允许多个事务同时读取同一资源，但禁止任何事务对资源进行修改。 典型场景 ：事务执行 SELECT 查询时（在某些隔离级别下）。 特点 ： 兼容性 ：多个事务可以同时持有共享锁（读-读不冲突）。 冲突 ：如果资源已被共享锁持有，其他事务无法对其加排他锁（X 锁）。 释放时机 ：通常在事务结束（提交或回滚）时释放，但在某些隔离级别下可能提前释放（如读已提交）。 示例： 事务 A 对表 Users 加 S 锁后，事务 B 也可以对 Users 加 S 锁并读取数据，但事务 C 无法修改数据（需 X 锁）。
-2.2 排他锁（X 锁） 作用 ：独占资源，禁止其他事务对资源加任何锁（包括 S 锁和 X 锁）。 典型场景 ：事务执行 UPDATE、DELETE 或 INSERT 操作时。 特点 ： 独占性 ：同一时间只有一个事务可以持有 X 锁。 冲突 ：与其他所有锁（S 锁、X 锁）冲突。 释放时机 ：事务结束时释放。 示例： 事务 A 对表 Users 加 X 锁后，其他事务既不能读取（需 S 锁）也不能修改数据，直到事务 A 释放锁。</description>
     </item>
   </channel>
 </rss>
