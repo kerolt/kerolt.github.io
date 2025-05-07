@@ -11,8 +11,22 @@
     </image>
     <generator>Hugo -- 0.126.2</generator>
     <language>en</language>
-    <lastBuildDate>Mon, 28 Apr 2025 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Tue, 06 May 2025 00:00:00 +0000</lastBuildDate>
     <atom:link href="https://kerolt.github.io/tags/cplusplus/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>C&#43;&#43;折叠表达式</title>
+      <link>https://kerolt.github.io/posts/c&#43;&#43;/c&#43;&#43;%E6%8A%98%E5%8F%A0%E8%A1%A8%E8%BE%BE%E5%BC%8F/</link>
+      <pubDate>Tue, 06 May 2025 00:00:00 +0000</pubDate>
+      <guid>https://kerolt.github.io/posts/c&#43;&#43;/c&#43;&#43;%E6%8A%98%E5%8F%A0%E8%A1%A8%E8%BE%BE%E5%BC%8F/</guid>
+      <description>C++17 为模板元编程带来了一个非常有用的特性：折叠表达式（fold expressions）。它的出现让变参模板函数的编写变得更加简洁、清晰和直观。
+1. 如何处理变长参数包 在 C++11/14 中，如果我们要处理变长参数包（parameter pack），通常需要递归展开，例如：
+template&amp;lt;typename T&amp;gt; void print(const T&amp;amp; t) { std::cout &amp;lt;&amp;lt; t &amp;lt;&amp;lt; &amp;#39;\n&amp;#39;; } template&amp;lt;typename T, typename... Args&amp;gt; void print(const T&amp;amp; t, const Args&amp;amp;... args) { std::cout &amp;lt;&amp;lt; t &amp;lt;&amp;lt; &amp;#34;, &amp;#34;; print(args...); } 虽然这段代码能完成任务，但却略显冗长，并且生成的汇编代码也会很多。C++17 中引入的折叠表达式，就是为了解决这个问题。
+可以在 godbolt 上看看两种方法生成的汇编代码：https://godbolt.org/z/55a7q85oE
+2. 什么是折叠表达式 折叠表达式是一种用运算符对参数包进行折叠的方式。折叠表达式的实例化按以下方式展开成表达式 e：
+（图片来源：https://zh.cppreference.com/w/cpp/language/fold）
+基本语法形式：
+类型 语法形式 示例 一元左折叠 (... op pack) (... + args) 一元右折叠 (pack op ...) (args + ...) 二元左折叠 (init op .</description>
+    </item>
     <item>
       <title>使用 Concept 替代基于虚函数的接口</title>
       <link>https://kerolt.github.io/posts/c&#43;&#43;/%E4%BD%BF%E7%94%A8-concept-%E6%9B%BF%E4%BB%A3%E5%9F%BA%E4%BA%8E%E8%99%9A%E5%87%BD%E6%95%B0%E7%9A%84%E6%8E%A5%E5%8F%A3%E8%AE%BE%E8%AE%A1/</link>
