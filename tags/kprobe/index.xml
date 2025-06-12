@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Kprobe on Kerolt&#39;s Blog</title>
+    <link>https://kerolt.github.io/tags/kprobe/</link>
+    <description>Recent content in Kprobe on Kerolt&#39;s Blog</description>
+    <image>
+      <title>Kerolt&#39;s Blog</title>
+      <url>https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</url>
+      <link>https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</link>
+    </image>
+    <generator>Hugo -- 0.126.2</generator>
+    <language>en</language>
+    <lastBuildDate>Tue, 10 Jun 2025 00:00:00 +0000</lastBuildDate>
+    <atom:link href="https://kerolt.github.io/tags/kprobe/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>【eBPF学习】使用kprobe监测捕获unlink系统调用</title>
+      <link>https://kerolt.github.io/posts/ebpf/ebpf%E5%AD%A6%E4%B9%A0%E4%BD%BF%E7%94%A8kprobe%E7%9B%91%E6%B5%8B%E6%8D%95%E8%8E%B7unlink%E7%B3%BB%E7%BB%9F%E8%B0%83%E7%94%A8/</link>
+      <pubDate>Tue, 10 Jun 2025 00:00:00 +0000</pubDate>
+      <guid>https://kerolt.github.io/posts/ebpf/ebpf%E5%AD%A6%E4%B9%A0%E4%BD%BF%E7%94%A8kprobe%E7%9B%91%E6%B5%8B%E6%8D%95%E8%8E%B7unlink%E7%B3%BB%E7%BB%9F%E8%B0%83%E7%94%A8/</guid>
+      <description>什么是 kprobe Kprobe​​（Kernel Probe）是 Linux 内核提供的一项强大功能，它允许开发者和系统管理员在不​​修改内核源代码​​或重启系统的前提下，在任意内核函数处动态插入 &amp;quot; 探针 &amp;ldquo;：
+​​工作原理​​：通过​​临时替换​​目标函数的前几条指令为一个断点指令（如 int3） ​​执行流程​​：当程序执行到断点时，CPU 控制权会交给 kprobe 系统 ​​事件回调​​：系统执行注册的回调函数，完成数据采集后恢复原函数执行 ​​两种类型​​： ​​Kprobe​​：在函数入口处执行 ​​Kretprobe​​：在函数返回时执行 这种机制为我们提供了​​零侵入式​​的内核行为洞察能力，特别适用于​​实时监控​​、​​性能分析​​和​​故障排查​​等场景。
+do_unlinkat 的作用 do_unlinkat 是 Linux 内核中的一个内部函数，它的作用是执行文件或目录的删除操作。其在内核源码中的定义如下：
+static int do_unlinkat(int dfd, struct filename *name) { ... } do_unlinkat 是内核中实际执行文件删除逻辑的最终汇聚点 用户空间调用 unlink()、unlinkat() 或 rmdir() 等系统调用时，最终都会通过系统调用表路由到这个函数 采用文件描述符 (AT_FDCWD) 和路径名的组合方式，提供了灵活的路径解析能力 vmlinux.h 不同内核版本之间，内核数据结构如结构体字段位置、字段名称等都可能发生变化。传统的 eBPF 程序直接使用内核头文件会导致：
+兼容性问题：程序在​​不同内核版本​​中崩溃 字段偏移错误：读取到​​无效内存数据​​ 维护困难：需要针对​​每个内核版本​​进行适配 vmlinux.h 利用内核的​​BTF（BPF Type Format）​​ 信息生成与当前运行内核完全匹配的类型定义：
+bpftool btf dump file /sys/kernel/btf/vmlinux format c &amp;gt; vmlinux.h 内核态程序 kprobe_unlink.bpf.c 为 do_unlinkat 函数同时设置入口探针和返回探针：</description>
+    </item>
+  </channel>
+</rss>
