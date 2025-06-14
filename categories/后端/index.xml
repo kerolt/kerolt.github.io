@@ -21,7 +21,13 @@
       <description>&lt;h2 id=&#34;前言&#34;&gt;前言&lt;/h2&gt;
 &lt;p&gt;通过一个项目来学习一下如何设计一个多服务的系统。同时也能学习Spring Cloud Gateway、Dubbo、API签名等一些知识。&lt;/p&gt;
 &lt;h2 id=&#34;项目架构&#34;&gt;项目架构&lt;/h2&gt;
-&lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;https://gitee.com/kerolt/picture/raw/main/20241216-143608.png&#34;&gt;&lt;/p&gt;</description>
+&lt;p&gt;
+&lt;div class=&#34;post-img-view&#34;&gt;
+  &lt;a data-fancybox=&#34;gallery&#34; href=&#34;https://gitee.com/kerolt/picture/raw/main/20241216-143608.png&#34;&gt;
+    &lt;img src=&#34;https://gitee.com/kerolt/picture/raw/main/20241216-143608.png&#34; alt=&#34;&#34;  /&gt;
+  &lt;/a&gt;
+&lt;/div&gt;
+&lt;/p&gt;</description>
     </item>
   </channel>
 </rss>
