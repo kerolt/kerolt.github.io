@@ -9,7 +9,7 @@
       <url>https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</url>
       <link>https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</link>
     </image>
-    <generator>Hugo -- 0.126.2</generator>
+    <generator>Hugo -- 0.140.0</generator>
     <language>en</language>
     <lastBuildDate>Tue, 10 Jun 2025 00:00:00 +0000</lastBuildDate>
     <atom:link href="https://kerolt.github.io/categories/ebpf/index.xml" rel="self" type="application/rss+xml" />
@@ -18,13 +18,90 @@
       <link>https://kerolt.github.io/posts/ebpf/ebpf%E5%AD%A6%E4%B9%A0%E4%BD%BF%E7%94%A8kprobe%E7%9B%91%E6%B5%8B%E6%8D%95%E8%8E%B7unlink%E7%B3%BB%E7%BB%9F%E8%B0%83%E7%94%A8/</link>
       <pubDate>Tue, 10 Jun 2025 00:00:00 +0000</pubDate>
       <guid>https://kerolt.github.io/posts/ebpf/ebpf%E5%AD%A6%E4%B9%A0%E4%BD%BF%E7%94%A8kprobe%E7%9B%91%E6%B5%8B%E6%8D%95%E8%8E%B7unlink%E7%B3%BB%E7%BB%9F%E8%B0%83%E7%94%A8/</guid>
-      <description>本文是对于 Eunomia Tutorials 2 的一个学习记录
-什么是 kprobe Kprobe​​（Kernel Probe）是 Linux 内核提供的一项强大功能，它允许开发者和系统管理员在不​​修改内核源代码​​或重启系统的前提下，在任意内核函数处动态插入“探针”：
-​​工作原理​​：通过​​临时替换​​目标函数的前几条指令为一个断点指令（如 int3） ​​执行流程​​：当程序执行到断点时，CPU 控制权会交给 kprobe 系统 ​​事件回调​​：系统执行注册的回调函数，完成数据采集后恢复原函数执行 ​​两种类型​​： ​​Kprobe​​：在函数入口处执行 ​​Kretprobe​​：在函数返回时执行 这种机制为我们提供了​​零侵入式​​的内核行为洞察能力，特别适用于​​实时监控​​、​​性能分析​​和​​故障排查​​等场景。
-do_unlinkat 的作用 do_unlinkat 是 Linux 内核中的一个内部函数，它的作用是执行文件或目录的删除操作。其在内核源码中的定义如下：
-static int do_unlinkat(int dfd, struct filename *name) { ... } do_unlinkat 是内核中实际执行文件删除逻辑的最终汇聚点 用户空间调用 unlink()、unlinkat() 或 rmdir() 等系统调用时，最终都会通过系统调用表路由到这个函数 采用文件描述符 (AT_FDCWD) 和路径名的组合方式，提供了灵活的路径解析能力 vmlinux.h 不同内核版本之间，内核数据结构如结构体字段位置、字段名称等都可能发生变化。传统的 eBPF 程序直接使用内核头文件会导致：
-兼容性问题：程序在​​不同内核版本​​中崩溃 字段偏移错误：读取到​​无效内存数据​​ 维护困难：需要针对​​每个内核版本​​进行适配 vmlinux.h 利用内核的​​BTF（BPF Type Format）​​ 信息生成与当前运行内核完全匹配的类型定义：
-bpftool btf dump file /sys/kernel/btf/vmlinux format c &amp;gt; vmlinux.h 内核态程序 kprobe_unlink.</description>
+      <description>&lt;blockquote&gt;
+&lt;p&gt;本文是对于 &lt;a href=&#34;https://eunomia.dev/zh/tutorials/2-kprobe-unlink/&#34;&gt;Eunomia Tutorials 2&lt;/a&gt; 的一个学习记录&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id=&#34;什么是-kprobe&#34;&gt;什么是 kprobe&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;Kprobe​&lt;/strong&gt;​（Kernel Probe）是 Linux 内核提供的一项强大功能，它允许开发者和系统管理员在不​&lt;strong&gt;​修改内核源代码​&lt;/strong&gt;​或重启系统的前提下，在任意内核函数处动态插入“探针”：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;​&lt;strong&gt;​工作原理​&lt;/strong&gt;​：通过​&lt;strong&gt;​临时替换​&lt;/strong&gt;​目标函数的前几条指令为一个断点指令（如 int3）&lt;/li&gt;
+&lt;li&gt;​&lt;strong&gt;​执行流程​&lt;/strong&gt;​：当程序执行到断点时，CPU 控制权会交给 kprobe 系统&lt;/li&gt;
+&lt;li&gt;​&lt;strong&gt;​事件回调​&lt;/strong&gt;​：系统执行注册的回调函数，完成数据采集后恢复原函数执行&lt;/li&gt;
+&lt;li&gt;​&lt;strong&gt;​两种类型​&lt;/strong&gt;​：
+&lt;ul&gt;
+&lt;li&gt;​&lt;strong&gt;​Kprobe​&lt;/strong&gt;​：在函数入口处执行&lt;/li&gt;
+&lt;li&gt;​&lt;strong&gt;​Kretprobe​&lt;/strong&gt;​：在函数返回时执行&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;这种机制为我们提供了​&lt;strong&gt;​零侵入式​&lt;/strong&gt;​的内核行为洞察能力，特别适用于​&lt;strong&gt;​实时监控​&lt;/strong&gt;​、​&lt;strong&gt;​性能分析​&lt;/strong&gt;​和​&lt;strong&gt;​故障排查​&lt;/strong&gt;​等场景。&lt;/p&gt;
+&lt;h2 id=&#34;do_unlinkat-的作用&#34;&gt;do_unlinkat 的作用&lt;/h2&gt;
+&lt;p&gt;&lt;code&gt;do_unlinkat&lt;/code&gt; 是 Linux 内核中的一个内部函数，它的作用是&lt;strong&gt;执行文件或目录的删除操作&lt;/strong&gt;。其在内核源码中的定义如下：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-c&#34; data-lang=&#34;c&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;k&#34;&gt;static&lt;/span&gt; &lt;span class=&#34;kt&#34;&gt;int&lt;/span&gt; &lt;span class=&#34;nf&#34;&gt;do_unlinkat&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kt&#34;&gt;int&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;dfd&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;struct&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;filename&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;*&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;name&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;	&lt;span class=&#34;p&#34;&gt;...&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;do_unlinkat&lt;/code&gt; 是内核中实际执行文件删除逻辑的最终汇聚点&lt;/li&gt;
+&lt;li&gt;用户空间调用 &lt;code&gt;unlink()&lt;/code&gt;、&lt;code&gt;unlinkat()&lt;/code&gt; 或 &lt;code&gt;rmdir()&lt;/code&gt; 等系统调用时，最终都会通过系统调用表路由到这个函数&lt;/li&gt;
+&lt;li&gt;采用文件描述符 (AT_FDCWD) 和路径名的组合方式，提供了灵活的路径解析能力&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;vmlinuxh&#34;&gt;vmlinux.h&lt;/h2&gt;
+&lt;p&gt;不同内核版本之间，内核数据结构如结构体字段位置、字段名称等都可能发生变化。传统的 eBPF 程序直接使用内核头文件会导致：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;兼容性问题：程序在​&lt;strong&gt;​不同内核版本​&lt;/strong&gt;​中崩溃&lt;/li&gt;
+&lt;li&gt;字段偏移错误：读取到​&lt;strong&gt;​无效内存数据​&lt;/strong&gt;​&lt;/li&gt;
+&lt;li&gt;维护困难：需要针对​&lt;strong&gt;​每个内核版本​&lt;/strong&gt;​进行适配&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;code&gt;vmlinux.h&lt;/code&gt; 利用内核的​&lt;strong&gt;​BTF（BPF Type Format）​&lt;/strong&gt;​ 信息生成与当前运行内核完全匹配的类型定义：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-sh&#34; data-lang=&#34;sh&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;bpftool btf dump file /sys/kernel/btf/vmlinux format c &amp;gt; vmlinux.h
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h2 id=&#34;内核态程序-kprobe_unlinkbpfc&#34;&gt;内核态程序 kprobe_unlink.bpf.c&lt;/h2&gt;
+&lt;p&gt;为 &lt;code&gt;do_unlinkat&lt;/code&gt; 函数同时设置入口探针和返回探针：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;​&lt;strong&gt;​函数入口​&lt;/strong&gt;​：
+&lt;ul&gt;
+&lt;li&gt;捕获调用进程的 PID&lt;/li&gt;
+&lt;li&gt;获取要删除的文件名&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;​&lt;strong&gt;​函数返回​&lt;/strong&gt;​：
+&lt;ul&gt;
+&lt;li&gt;捕获调用进程的 PID&lt;/li&gt;
+&lt;li&gt;获取函数返回值（删除操作的结果）&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-c&#34; data-lang=&#34;c&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;//go:build ignore
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;cp&#34;&gt;#include&lt;/span&gt; &lt;span class=&#34;cpf&#34;&gt;&amp;#34;vmlinux.h&amp;#34;&lt;/span&gt;&lt;span class=&#34;cp&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;cp&#34;&gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;// 下面几个头文件需要安装了libbpf库
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;&lt;/span&gt;&lt;span class=&#34;cp&#34;&gt;#include&lt;/span&gt; &lt;span class=&#34;cpf&#34;&gt;&amp;lt;bpf/bpf_core_read.h&amp;gt;&lt;/span&gt;&lt;span class=&#34;cp&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;cp&#34;&gt;#include&lt;/span&gt; &lt;span class=&#34;cpf&#34;&gt;&amp;lt;bpf/bpf_helpers.h&amp;gt;&lt;/span&gt;&lt;span class=&#34;cp&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;cp&#34;&gt;#include&lt;/span&gt; &lt;span class=&#34;cpf&#34;&gt;&amp;lt;bpf/bpf_tracing.h&amp;gt;&lt;/span&gt;&lt;span class=&#34;cp&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;cp&#34;&gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;kt&#34;&gt;char&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;LICENSE&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[]&lt;/span&gt; &lt;span class=&#34;nf&#34;&gt;SEC&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;#34;license&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;#34;Dual BSD/GPL&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;nf&#34;&gt;SEC&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;#34;kprobe/do_unlinkat&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;kt&#34;&gt;int&lt;/span&gt; &lt;span class=&#34;nf&#34;&gt;BPF_KPROBE&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;do_unlinkat&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;kt&#34;&gt;int&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;dfd&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;struct&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;filename&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;*&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;name&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;kt&#34;&gt;pid_t&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;pid&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;k&#34;&gt;const&lt;/span&gt; &lt;span class=&#34;kt&#34;&gt;char&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;*&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;filename&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;n&#34;&gt;pid&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;nf&#34;&gt;bpf_get_current_pid_tgid&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;()&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;32&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;n&#34;&gt;filename&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;nf&#34;&gt;BPF_CORE_READ&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;name&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;name&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;nf&#34;&gt;bpf_printk&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;#34;KPROBE ENTRY pid = %d, filename = %s&lt;/span&gt;&lt;span class=&#34;se&#34;&gt;\n&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;pid&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;filename&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;k&#34;&gt;return&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;0&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;nf&#34;&gt;SEC&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;#34;kretprobe/do_unlinkat&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;kt&#34;&gt;int&lt;/span&gt; &lt;span class=&#34;nf&#34;&gt;BPF_KRETPROBE&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;do_unlinkat_exit&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;kt&#34;&gt;long&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;ret&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;kt&#34;&gt;pid_t&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;pid&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;n&#34;&gt;pid&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;nf&#34;&gt;bpf_get_current_pid_tgid&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;()&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;32&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;nf&#34;&gt;bpf_printk&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;#34;KPROBE EXIT: pid = %d, ret = %ld&lt;/span&gt;&lt;span class=&#34;se&#34;&gt;\n&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;pid&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;ret&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;k&#34;&gt;return&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;0&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h2 id=&#34;用户态-go-程序&#34;&gt;用户态 Go 程序&lt;/h2&gt;
+&lt;p&gt;用户态程序负责三个主要任务：&lt;/p&gt;</description>
     </item>
   </channel>
 </rss>

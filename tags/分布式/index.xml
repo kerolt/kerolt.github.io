@@ -9,7 +9,7 @@
       <url>https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</url>
       <link>https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</link>
     </image>
-    <generator>Hugo -- 0.126.2</generator>
+    <generator>Hugo -- 0.140.0</generator>
     <language>en</language>
     <lastBuildDate>Sun, 25 May 2025 00:00:00 +0000</lastBuildDate>
     <atom:link href="https://kerolt.github.io/tags/%E5%88%86%E5%B8%83%E5%BC%8F/index.xml" rel="self" type="application/rss+xml" />
@@ -18,11 +18,83 @@
       <link>https://kerolt.github.io/posts/%E9%A1%B9%E7%9B%AE/%E5%88%86%E5%B8%83%E5%BC%8F%E7%BC%93%E5%AD%98/</link>
       <pubDate>Sun, 25 May 2025 00:00:00 +0000</pubDate>
       <guid>https://kerolt.github.io/posts/%E9%A1%B9%E7%9B%AE/%E5%88%86%E5%B8%83%E5%BC%8F%E7%BC%93%E5%AD%98/</guid>
-      <description>项目地址：https://github.com/kerolt/kcache
-KCache 是一个分布式缓存系统，支持一致性哈希和 LRU 缓存淘汰策略。该项目使用 conan 作为包管理工具，使用 CMake 作为项目的构建工具。
-数据流程 当有客户端请求 kcache node 中的数据时：
-kcache node 首先检查本地缓存 如果本地缓存未命中，使用 PeerPicker 选择负责该键的节点 如果键属于远程节点，通过 gRPC 向远程节点请求数据 如果远程节点也没有数据，回退到原始数据源加载（例如数据源是 MySQL、SQLite 等数据库） 将加载的数据添加到本地缓存 示意架构图如下：
-致谢 本项目参考了 geektutu/7days-golang 项目，感谢其作者提供的 教程 和代码示例。 项目第二版参考了 【代码随想录知识星球】项目分享-缓存系统（Go） 项目结构 . |-- .vscode | `-- launch.json |-- example | |-- CMakeLists.txt | `-- example.cpp |-- src | |-- cache | | `-- lru.cpp | |-- consistent_hash | | `-- consistent_hash.cpp | |-- group | | `-- group.</description>
+      <description>&lt;blockquote&gt;
+&lt;p&gt;项目地址：https://github.com/kerolt/kcache&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;KCache 是一个分布式缓存系统，支持一致性哈希和 LRU 缓存淘汰策略。该项目使用 conan 作为包管理工具，使用 CMake 作为项目的构建工具。&lt;/p&gt;
+&lt;h2 id=&#34;数据流程&#34;&gt;数据流程&lt;/h2&gt;
+&lt;p&gt;当有客户端请求 kcache node 中的数据时：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;kcache node 首先检查本地缓存&lt;/li&gt;
+&lt;li&gt;如果本地缓存未命中，使用 PeerPicker 选择负责该键的节点&lt;/li&gt;
+&lt;li&gt;如果键属于远程节点，通过 gRPC 向远程节点请求数据&lt;/li&gt;
+&lt;li&gt;如果远程节点也没有数据，回退到原始数据源加载（例如数据源是 MySQL、SQLite 等数据库）&lt;/li&gt;
+&lt;li&gt;将加载的数据添加到本地缓存&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;示意架构图如下：&lt;/p&gt;
+&lt;p&gt;
+&lt;div class=&#34;post-img-view&#34;&gt;
+  &lt;a data-fancybox=&#34;gallery&#34; href=&#34;https://obsidian-image-oss.oss-cn-shanghai.aliyuncs.com/undefined20250606-144135.png&#34;&gt;
+    &lt;img src=&#34;https://obsidian-image-oss.oss-cn-shanghai.aliyuncs.com/undefined20250606-144135.png&#34; alt=&#34;&#34;  /&gt;
+  &lt;/a&gt;
+&lt;/div&gt;
+&lt;/p&gt;
+&lt;h2 id=&#34;致谢&#34;&gt;致谢&lt;/h2&gt;
+&lt;ol&gt;
+&lt;li&gt;本项目参考了 &lt;a href=&#34;https://github.com/geektutu/7days-golang&#34;&gt;geektutu/7days-golang&lt;/a&gt; 项目，感谢其作者提供的 &lt;a href=&#34;https://geektutu.com/post/geecache.html&#34;&gt;教程&lt;/a&gt; 和代码示例。&lt;/li&gt;
+&lt;li&gt;项目第二版参考了 &lt;a href=&#34;https://github.com/youngyangyang04/KamaCache-Go&#34;&gt;【代码随想录知识星球】项目分享-缓存系统（Go）&lt;/a&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h2 id=&#34;项目结构&#34;&gt;项目结构&lt;/h2&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;.
+|-- .vscode
+|   `-- launch.json
+|-- example
+|   |-- CMakeLists.txt
+|   `-- example.cpp
+|-- src
+|   |-- cache
+|   |   `-- lru.cpp
+|   |-- consistent_hash
+|   |   `-- consistent_hash.cpp
+|   |-- group
+|   |   `-- group.cpp
+|   |-- include
+|   |   `-- kcache
+|   |       |-- cache.h
+|   |       |-- consistent_hash.h
+|   |       |-- group.h
+|   |       |-- grpc_server.h
+|   |       |-- peer.h
+|   |       |-- registry.h
+|   |       `-- singleflight.h
+|   |-- peer
+|   |   |-- peer.cpp
+|   |   `-- peer_picker.cpp
+|   |-- proto
+|   |   |-- kcache.grpc.pb.cc
+|   |   |-- kcache.grpc.pb.h
+|   |   |-- kcache.pb.cc
+|   |   |-- kcache.pb.h
+|   |   `-- kcache.proto
+|   |-- registry
+|   |   `-- registry.cpp
+|   |-- server
+|   |   `-- grpc_server.cpp
+|   `-- CMakeLists.txt
+|-- test
+|   |-- CMakeLists.txt
+|   |-- test_consistent_hash.cpp
+|   |-- test_group.cpp
+|   `-- test_lru.cpp
+|-- .clang-format
+|-- .gitignore
+|-- CMakeLists.txt
+|-- CMakePresets.json
+|-- conanfile.txt
+|-- LICENSE
+`-- README.md
+&lt;/code&gt;&lt;/pre&gt;&lt;h2 id=&#34;依赖&#34;&gt;依赖&lt;/h2&gt;
+&lt;p&gt;项目依赖如下：&lt;/p&gt;</description>
     </item>
   </channel>
 </rss>
