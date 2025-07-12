@@ -11,8 +11,27 @@
     </image>
     <generator>Hugo -- 0.140.0</generator>
     <language>en</language>
-    <lastBuildDate>Sun, 22 Jun 2025 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Mon, 07 Jul 2025 00:00:00 +0000</lastBuildDate>
     <atom:link href="https://kerolt.github.io/categories/ebpf/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>eBPF Map中的数据成员类型的宏定义</title>
+      <link>https://kerolt.github.io/posts/ebpf/ebpf-map%E4%B8%AD%E7%9A%84%E6%95%B0%E6%8D%AE%E6%88%90%E5%91%98%E7%B1%BB%E5%9E%8B%E7%9A%84%E5%AE%8F%E5%AE%9A%E4%B9%89/</link>
+      <pubDate>Mon, 07 Jul 2025 00:00:00 +0000</pubDate>
+      <guid>https://kerolt.github.io/posts/ebpf/ebpf-map%E4%B8%AD%E7%9A%84%E6%95%B0%E6%8D%AE%E6%88%90%E5%91%98%E7%B1%BB%E5%9E%8B%E7%9A%84%E5%AE%8F%E5%AE%9A%E4%B9%89/</guid>
+      <description>&lt;p&gt;&lt;code&gt;__uint&lt;/code&gt;, &lt;code&gt;__type&lt;/code&gt;, &lt;code&gt;__array&lt;/code&gt;, &lt;code&gt;__ulong&lt;/code&gt; 这些宏主要用于 &lt;strong&gt;eBPF Map 的定义&lt;/strong&gt; 中，帮助 LLVM 编译器和 BPF CO-RE (Compile Once – Run Everywhere) 理解和提取 eBPF Map 的元数据信息。它们通常与 &lt;code&gt;BPF_MAP_DEF&lt;/code&gt; 或 &lt;code&gt;struct&lt;/code&gt; 配合使用，在 eBPF 程序中用于告诉内核如何创建 BPF map。&lt;/p&gt;
+&lt;h2 id=&#34;常用的几个宏&#34;&gt;常用的几个宏&lt;/h2&gt;
+&lt;h3 id=&#34;1-__uintname-val&#34;&gt;1. &lt;code&gt;__uint(name, val)&lt;/code&gt;&lt;/h3&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-c&#34; data-lang=&#34;c&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;cp&#34;&gt;#define __uint(name, val) int (*name)[val]
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;strong&gt;用途：定义一个名为 &lt;code&gt;name&lt;/code&gt; 的字段，其值是一个大小为 &lt;code&gt;val&lt;/code&gt; 的整数数组指针。&lt;/strong&gt;&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-c&#34; data-lang=&#34;c&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;nf&#34;&gt;__uint&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;max_entries&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;1024&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;等价于：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-c&#34; data-lang=&#34;c&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;kt&#34;&gt;int&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;*&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;max_entries&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)[&lt;/span&gt;&lt;span class=&#34;mi&#34;&gt;1024&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;];&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;strong&gt;作用：&lt;/strong&gt;&lt;br&gt;
+用于在 eBPF Map 的定义中指定 &lt;code&gt;max_entries&lt;/code&gt; 这一属性（即 map 的最大容量）。这种“类型欺骗”的方式让 clang 编译器能保留这些信息在 ELF 文件的 BTF（BPF Type Format）部分里，从而被 bpftool、libbpf 提取并传给内核。&lt;/p&gt;
+&lt;h3 id=&#34;2-__typename-val&#34;&gt;2. &lt;code&gt;__type(name, val)&lt;/code&gt;&lt;/h3&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-c&#34; data-lang=&#34;c&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;cp&#34;&gt;#define __type(name, val) typeof(val) *name
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;strong&gt;用途：定义一个名为 &lt;code&gt;name&lt;/code&gt; 的字段，其类型是 &lt;code&gt;val&lt;/code&gt; 的指针。&lt;/strong&gt;&lt;/p&gt;</description>
+    </item>
     <item>
       <title>【eBPF学习】使用fentry跟踪tcp连接</title>
       <link>https://kerolt.github.io/posts/ebpf/ebpf%E5%AD%A6%E4%B9%A0%E4%BD%BF%E7%94%A8fentry%E8%B7%9F%E8%B8%AAtcp%E8%BF%9E%E6%8E%A5/</link>

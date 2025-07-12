@@ -11,8 +11,163 @@
     </image>
     <generator>Hugo -- 0.140.0</generator>
     <language>en</language>
-    <lastBuildDate>Sun, 22 Jun 2025 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Mon, 07 Jul 2025 00:00:00 +0000</lastBuildDate>
     <atom:link href="https://kerolt.github.io/posts/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>eBPF Map中的数据成员类型的宏定义</title>
+      <link>https://kerolt.github.io/posts/ebpf/ebpf-map%E4%B8%AD%E7%9A%84%E6%95%B0%E6%8D%AE%E6%88%90%E5%91%98%E7%B1%BB%E5%9E%8B%E7%9A%84%E5%AE%8F%E5%AE%9A%E4%B9%89/</link>
+      <pubDate>Mon, 07 Jul 2025 00:00:00 +0000</pubDate>
+      <guid>https://kerolt.github.io/posts/ebpf/ebpf-map%E4%B8%AD%E7%9A%84%E6%95%B0%E6%8D%AE%E6%88%90%E5%91%98%E7%B1%BB%E5%9E%8B%E7%9A%84%E5%AE%8F%E5%AE%9A%E4%B9%89/</guid>
+      <description>&lt;p&gt;&lt;code&gt;__uint&lt;/code&gt;, &lt;code&gt;__type&lt;/code&gt;, &lt;code&gt;__array&lt;/code&gt;, &lt;code&gt;__ulong&lt;/code&gt; 这些宏主要用于 &lt;strong&gt;eBPF Map 的定义&lt;/strong&gt; 中，帮助 LLVM 编译器和 BPF CO-RE (Compile Once – Run Everywhere) 理解和提取 eBPF Map 的元数据信息。它们通常与 &lt;code&gt;BPF_MAP_DEF&lt;/code&gt; 或 &lt;code&gt;struct&lt;/code&gt; 配合使用，在 eBPF 程序中用于告诉内核如何创建 BPF map。&lt;/p&gt;
+&lt;h2 id=&#34;常用的几个宏&#34;&gt;常用的几个宏&lt;/h2&gt;
+&lt;h3 id=&#34;1-__uintname-val&#34;&gt;1. &lt;code&gt;__uint(name, val)&lt;/code&gt;&lt;/h3&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-c&#34; data-lang=&#34;c&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;cp&#34;&gt;#define __uint(name, val) int (*name)[val]
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;strong&gt;用途：定义一个名为 &lt;code&gt;name&lt;/code&gt; 的字段，其值是一个大小为 &lt;code&gt;val&lt;/code&gt; 的整数数组指针。&lt;/strong&gt;&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-c&#34; data-lang=&#34;c&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;nf&#34;&gt;__uint&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;max_entries&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;1024&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;等价于：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-c&#34; data-lang=&#34;c&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;kt&#34;&gt;int&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;*&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;max_entries&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)[&lt;/span&gt;&lt;span class=&#34;mi&#34;&gt;1024&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;];&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;strong&gt;作用：&lt;/strong&gt;&lt;br&gt;
+用于在 eBPF Map 的定义中指定 &lt;code&gt;max_entries&lt;/code&gt; 这一属性（即 map 的最大容量）。这种“类型欺骗”的方式让 clang 编译器能保留这些信息在 ELF 文件的 BTF（BPF Type Format）部分里，从而被 bpftool、libbpf 提取并传给内核。&lt;/p&gt;
+&lt;h3 id=&#34;2-__typename-val&#34;&gt;2. &lt;code&gt;__type(name, val)&lt;/code&gt;&lt;/h3&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-c&#34; data-lang=&#34;c&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;cp&#34;&gt;#define __type(name, val) typeof(val) *name
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;strong&gt;用途：定义一个名为 &lt;code&gt;name&lt;/code&gt; 的字段，其类型是 &lt;code&gt;val&lt;/code&gt; 的指针。&lt;/strong&gt;&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Curl使用</title>
+      <link>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95/curl%E4%BD%BF%E7%94%A8/</link>
+      <pubDate>Tue, 01 Jul 2025 00:00:00 +0000</pubDate>
+      <guid>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95/curl%E4%BD%BF%E7%94%A8/</guid>
+      <description>&lt;p&gt;curl 是一个强大的命令行工具，用于传输数据，支持多种协议（HTTP、HTTPS、FTP 等）。以下是 curl 的基本使用方法和常见示例。&lt;/p&gt;
+&lt;h2 id=&#34;基本语法&#34;&gt;基本语法&lt;/h2&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;curl [options] [URL...]
+&lt;/code&gt;&lt;/pre&gt;&lt;h2 id=&#34;常用选项&#34;&gt;常用选项&lt;/h2&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;选项&lt;/th&gt;
+          &lt;th&gt;描述&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;code&gt;-X&lt;/code&gt;&lt;/td&gt;
+          &lt;td&gt;指定 HTTP 请求方法 (GET, POST, PUT, DELETE 等)&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;code&gt;-H&lt;/code&gt;&lt;/td&gt;
+          &lt;td&gt;添加请求头&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;code&gt;-d&lt;/code&gt;&lt;/td&gt;
+          &lt;td&gt;发送 POST 请求数据&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;code&gt;-F&lt;/code&gt;&lt;/td&gt;
+          &lt;td&gt;发送表单数据 (multipart/form-data)&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;code&gt;-G&lt;/code&gt;&lt;/td&gt;
+          &lt;td&gt;将 -d 数据作为 GET 请求的查询参数&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;code&gt;-o&lt;/code&gt;&lt;/td&gt;
+          &lt;td&gt;将输出保存到文件&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;code&gt;-O&lt;/code&gt;&lt;/td&gt;
+          &lt;td&gt;将输出保存到文件，使用远程文件名&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;code&gt;-L&lt;/code&gt;&lt;/td&gt;
+          &lt;td&gt;跟随重定向&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;code&gt;-v&lt;/code&gt;&lt;/td&gt;
+          &lt;td&gt;显示详细输出 (verbose)&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;code&gt;-u&lt;/code&gt;&lt;/td&gt;
+          &lt;td&gt;指定用户名和密码&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;code&gt;-A&lt;/code&gt;&lt;/td&gt;
+          &lt;td&gt;设置 User-Agent&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;code&gt;-k&lt;/code&gt;&lt;/td&gt;
+          &lt;td&gt;允许不安全的 SSL 连接&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;code&gt;-I&lt;/code&gt;&lt;/td&gt;
+          &lt;td&gt;只获取响应头&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;code&gt;-s&lt;/code&gt;&lt;/td&gt;
+          &lt;td&gt;静默模式 (不显示进度或错误信息)&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;code&gt;--data-urlencode&lt;/code&gt;&lt;/td&gt;
+          &lt;td&gt;URL 编码 POST 数据&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h2 id=&#34;常见用法示例&#34;&gt;常见用法示例&lt;/h2&gt;
+&lt;h3 id=&#34;1-发送-get-请求&#34;&gt;1. 发送 GET 请求&lt;/h3&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;curl https://example.com
+&lt;/code&gt;&lt;/pre&gt;&lt;h3 id=&#34;2-发送-post-请求&#34;&gt;2. 发送 POST 请求&lt;/h3&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;curl -X POST https://example.com/api -d &amp;#39;name=value&amp;#39;
+&lt;/code&gt;&lt;/pre&gt;&lt;h3 id=&#34;3-发送-json-数据&#34;&gt;3. 发送 JSON 数据&lt;/h3&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;curl -X POST https://example.com/api \
+  -H &amp;#34;Content-Type: application/json&amp;#34; \
+  -d &amp;#39;{&amp;#34;key1&amp;#34;:&amp;#34;value1&amp;#34;, &amp;#34;key2&amp;#34;:&amp;#34;value2&amp;#34;}&amp;#39;
+&lt;/code&gt;&lt;/pre&gt;&lt;h3 id=&#34;4-发送表单数据&#34;&gt;4. 发送表单数据&lt;/h3&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;curl -X POST https://example.com/form \
+  -d &amp;#39;username=admin&amp;#39; \
+  -d &amp;#39;password=123456&amp;#39;
+&lt;/code&gt;&lt;/pre&gt;&lt;h3 id=&#34;5-上传文件&#34;&gt;5. 上传文件&lt;/h3&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;curl -X POST https://example.com/upload \
+  -F &amp;#34;file=@/path/to/file.txt&amp;#34;
+&lt;/code&gt;&lt;/pre&gt;&lt;h3 id=&#34;6-设置请求头&#34;&gt;6. 设置请求头&lt;/h3&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;curl -H &amp;#34;Authorization: Bearer token&amp;#34; \
+  -H &amp;#34;Content-Type: application/json&amp;#34; \
+  https://example.com/api
+&lt;/code&gt;&lt;/pre&gt;&lt;h3 id=&#34;7-下载文件&#34;&gt;7. 下载文件&lt;/h3&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;curl -O https://example.com/file.zip
+&lt;/code&gt;&lt;/pre&gt;&lt;h3 id=&#34;8-跟随重定向&#34;&gt;8. 跟随重定向&lt;/h3&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;curl -L https://example.com/redirect
+&lt;/code&gt;&lt;/pre&gt;&lt;h3 id=&#34;9-使用基本认证&#34;&gt;9. 使用基本认证&lt;/h3&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;curl -u username:password https://example.com
+&lt;/code&gt;&lt;/pre&gt;&lt;h3 id=&#34;10-保存-cookie-并发送&#34;&gt;10. 保存 cookie 并发送&lt;/h3&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;# 保存 cookie
+curl -c cookies.txt https://example.com/login -d &amp;#34;user=name&amp;amp;pass=123&amp;#34;
+
+# 使用 cookie
+curl -b cookies.txt https://example.com/dashboard
+&lt;/code&gt;&lt;/pre&gt;&lt;h3 id=&#34;11-测试-api-响应时间&#34;&gt;11. 测试 API 响应时间&lt;/h3&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;curl -o /dev/null -s -w &amp;#39;Total: %{time_total}s\n&amp;#39; https://example.com
+&lt;/code&gt;&lt;/pre&gt;&lt;h3 id=&#34;12-限制下载速度&#34;&gt;12. 限制下载速度&lt;/h3&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;curl --limit-rate 100K -O https://example.com/largefile.zip
+&lt;/code&gt;&lt;/pre&gt;&lt;h2 id=&#34;高级用法&#34;&gt;高级用法&lt;/h2&gt;
+&lt;h3 id=&#34;发送多部分请求&#34;&gt;发送多部分请求&lt;/h3&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;curl -X POST https://example.com/upload \
+  -F &amp;#34;file=@image.jpg&amp;#34; \
+  -F &amp;#34;description=My image&amp;#34;
+&lt;/code&gt;&lt;/pre&gt;&lt;h3 id=&#34;使用代理&#34;&gt;使用代理&lt;/h3&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;curl -x http://proxy.example.com:8080 https://example.com
+&lt;/code&gt;&lt;/pre&gt;&lt;h3 id=&#34;调试请求&#34;&gt;调试请求&lt;/h3&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;curl -v https://example.com
+&lt;/code&gt;&lt;/pre&gt;&lt;h3 id=&#34;只获取响应头&#34;&gt;只获取响应头&lt;/h3&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;curl -I https://example.com
+&lt;/code&gt;&lt;/pre&gt;&lt;h3 id=&#34;使用自定义-user-agent&#34;&gt;使用自定义 User-Agent&lt;/h3&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;curl -A &amp;#34;Mozilla/5.0 (Windows NT 10.0; Win64; x64)&amp;#34; https://example.com
+&lt;/code&gt;&lt;/pre&gt;&lt;h2 id=&#34;注意事项&#34;&gt;注意事项&lt;/h2&gt;
+&lt;ol&gt;
+&lt;li&gt;在脚本中使用 curl 时，考虑添加 &lt;code&gt;-s&lt;/code&gt; 或 &lt;code&gt;-sS&lt;/code&gt; 选项（-S 显示错误）&lt;/li&gt;
+&lt;li&gt;处理 JSON 数据时，可以使用 &lt;code&gt;jq&lt;/code&gt; 工具进行格式化&lt;/li&gt;
+&lt;li&gt;对于复杂的 API 调用，考虑将请求保存为文件并使用 &lt;code&gt;-K&lt;/code&gt; 选项&lt;/li&gt;
+&lt;li&gt;在 Windows 上，使用双引号 &lt;code&gt;&amp;quot;&lt;/code&gt; 而不是单引号 &lt;code&gt;&#39;&lt;/code&gt;&lt;/li&gt;
+&lt;/ol&gt;</description>
+    </item>
     <item>
       <title>【eBPF学习】使用fentry跟踪tcp连接</title>
       <link>https://kerolt.github.io/posts/ebpf/ebpf%E5%AD%A6%E4%B9%A0%E4%BD%BF%E7%94%A8fentry%E8%B7%9F%E8%B8%AAtcp%E8%BF%9E%E6%8E%A5/</link>
