@@ -11,8 +11,60 @@
     </image>
     <generator>Hugo -- 0.140.0</generator>
     <language>en</language>
-    <lastBuildDate>Fri, 20 Jun 2025 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Tue, 22 Jul 2025 00:00:00 +0000</lastBuildDate>
     <atom:link href="https://kerolt.github.io/tags/cplusplus/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>关于内存对齐、位域的思考</title>
+      <link>https://kerolt.github.io/posts/c&#43;&#43;/%E5%85%B3%E4%BA%8E%E5%86%85%E5%AD%98%E5%AF%B9%E9%BD%90%E4%BD%8D%E5%9F%9F%E7%9A%84%E6%80%9D%E8%80%83/</link>
+      <pubDate>Tue, 22 Jul 2025 00:00:00 +0000</pubDate>
+      <guid>https://kerolt.github.io/posts/c&#43;&#43;/%E5%85%B3%E4%BA%8E%E5%86%85%E5%AD%98%E5%AF%B9%E9%BD%90%E4%BD%8D%E5%9F%9F%E7%9A%84%E6%80%9D%E8%80%83/</guid>
+      <description>&lt;h2 id=&#34;什么是内存对齐为什么需要它&#34;&gt;什么是内存对齐？为什么需要它？&lt;/h2&gt;
+&lt;p&gt;内存对齐（Memory Alignment）是计算机系统中数据在内存中存储的一种规则：​&lt;strong&gt;​数据在内存中的起始地址必须是其自身大小的整数倍​&lt;/strong&gt;​。例如，一个 4 字节的整型变量（&lt;code&gt;int&lt;/code&gt;），其起始地址必须是 4 的倍数（如地址 0x0000、0x0004、0x0008 等）。&lt;/p&gt;
+&lt;p&gt;而需要内存对齐主要基于以下三个原因：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;​&lt;strong&gt;​硬件访问效率​&lt;/strong&gt;​：
+&lt;ul&gt;
+&lt;li&gt;CPU 通过内存总线从内存读取数据时，通常以固定大小的“块”为单位（例如 4 字节或 8 字节）。如果数据对齐，CPU 一次读取操作即可获取完整数据。&lt;/li&gt;
+&lt;li&gt;​&lt;strong&gt;​非对齐示例​&lt;/strong&gt;​：假设一个 &lt;code&gt;int&lt;/code&gt; 变量（4 字节）存储在地址 0x0001（非 4 的倍数），CPU 需要分两次读取：先读取 0x0000-0x0003（包含前 3 字节），再读取 0x0004-0x0007（包含最后 1 字节），最后拼接数据。这会显著降低性能。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;​&lt;strong&gt;​硬件兼容性​&lt;/strong&gt;​：
+&lt;ul&gt;
+&lt;li&gt;部分架构（如 ARM、MIPS）的 CPU 无法直接访问非对齐内存。尝试访问时会导致硬件异常（如“总线错误”）。对齐保证了代码的跨平台兼容性。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;​&lt;strong&gt;​缓存效率优化​&lt;/strong&gt;​：
+&lt;ul&gt;
+&lt;li&gt;现代 CPU 使用缓存行（Cache Line，通常 64 字节）预加载数据。对齐的数据更可能完整地位于单个缓存行中。若数据跨缓存行存储，会引发两次缓存访问，降低效率。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h2 id=&#34;alignas-和-alignof&#34;&gt;alignas 和 alignof&lt;/h2&gt;
+&lt;p&gt;c++11 以后引入两个关键字 &lt;a href=&#34;https://zh.cppreference.com/w/cpp/language/alignas&#34;&gt;alignas&lt;/a&gt; 与 &lt;a href=&#34;https://zh.cppreference.com/w/cpp/language/alignof&#34;&gt;alignof&lt;/a&gt;。&lt;/p&gt;
+&lt;p&gt;alignas 用于显式设置变量、类成员或类型的内存对齐要求；而 alignof 用于获取类型或变量的内存对齐要求。例如：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-cpp&#34; data-lang=&#34;cpp&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;k&#34;&gt;struct&lt;/span&gt; &lt;span class=&#34;nc&#34;&gt;Test1&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{};&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;k&#34;&gt;struct&lt;/span&gt; &lt;span class=&#34;nf&#34;&gt;alignas&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;mi&#34;&gt;4&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;Test2&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{};&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;k&#34;&gt;static_assert&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;sizeof&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;Test1&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;==&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;1&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;k&#34;&gt;static_assert&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;sizeof&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;Test2&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;==&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;4&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;k&#34;&gt;static_assert&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;alignof&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;Test1&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;==&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;1&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;k&#34;&gt;static_assert&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;alignof&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;Test2&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;==&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;4&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;alignas 支持三种语法形式：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;alignas(expression)&lt;/code&gt;：expression 必须是计算结果为零的整数常量表达式，或者是对齐或扩展对齐的有效值（&lt;strong&gt;2 的倍数&lt;/strong&gt;）。&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;alignas(type-id)&lt;/code&gt;：等效于 &lt;code&gt;alignas(alignof(type-id))&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;alignas(pack...)&lt;/code&gt;：等效于应用于同一声明的多个 alignas 说明符，参数包的每个成员对应一个说明符，可以是类型参数包或常量参数包&lt;/li&gt;
+&lt;/ul&gt;
+
+            &lt;link rel=&#34;stylesheet&#34; href=&#34;https://kerolt.github.io/css/vendors/admonitions.5c21d3611305826ca76e50bf22bdda6ed74f2f81d26216e9166f9ae104f2e27a.css&#34; integrity=&#34;sha256-XCHTYRMFgmynblC/Ir3abtdPL4HSYhbpFm&amp;#43;a4QTy4no=&#34; crossorigin=&#34;anonymous&#34;&gt;
+    &lt;div class=&#34;admonition note&#34;&gt;
+      &lt;div class=&#34;admonition-header&#34;&gt;&lt;svg xmlns=&#34;http://www.w3.org/2000/svg&#34; viewBox=&#34;0 0 576 512&#34;&gt;&lt;path d=&#34;M0 64C0 28.7 28.7 0 64 0L224 0l0 128c0 17.7 14.3 32 32 32l128 0 0 125.7-86.8 86.8c-10.3 10.3-17.5 23.1-21 37.2l-18.7 74.9c-2.3 9.2-1.8 18.8 1.3 27.5L64 512c-35.3 0-64-28.7-64-64L0 64zm384 64l-128 0L256 0 384 128zM549.8 235.7l14.4 14.4c15.6 15.6 15.6 40.9 0 56.6l-29.4 29.4-71-71 29.4-29.4c15.6-15.6 40.9-15.6 56.6 0zM311.9 417L441.1 287.8l71 71L382.9 487.9c-4.1 4.1-9.2 7-14.9 8.4l-60.1 15c-5.5 1.4-11.2-.2-15.2-4.2s-5.6-9.7-4.2-15.2l15-60.1c1.4-5.6 4.3-10.8 8.4-14.9z&#34;/&gt;&lt;/svg&gt;
+        &lt;span&gt;Note&lt;/span&gt;
+      &lt;/div&gt;
+      &lt;div class=&#34;admonition-content&#34;&gt;
+        &lt;p&gt;&lt;strong&gt;注意：若指定的对齐值小于编译器默认对齐要求，部分编译器可能忽略该设置。&lt;/strong&gt;&lt;/p&gt;</description>
+    </item>
     <item>
       <title>C&#43;&#43;透明运算符</title>
       <link>https://kerolt.github.io/posts/c&#43;&#43;/c&#43;&#43;%E9%80%8F%E6%98%8E%E8%BF%90%E7%AE%97%E7%AC%A6/</link>
