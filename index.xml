@@ -11,8 +11,47 @@
     </image>
     <generator>Hugo -- 0.140.0</generator>
     <language>en</language>
-    <lastBuildDate>Tue, 22 Jul 2025 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Thu, 21 Aug 2025 00:00:00 +0000</lastBuildDate>
     <atom:link href="https://kerolt.github.io/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>【CMake】CMake使用笔记</title>
+      <link>https://kerolt.github.io/posts/%E6%9D%82%E9%A1%B9/cmakecmake%E4%BD%BF%E7%94%A8%E7%AC%94%E8%AE%B0/</link>
+      <pubDate>Thu, 21 Aug 2025 00:00:00 +0000</pubDate>
+      <guid>https://kerolt.github.io/posts/%E6%9D%82%E9%A1%B9/cmakecmake%E4%BD%BF%E7%94%A8%E7%AC%94%E8%AE%B0/</guid>
+      <description>&lt;p&gt;记录学习 CMake 中碰到的一些问题和笔记&lt;/p&gt;
+&lt;p&gt;ps：CMake 相比 xmake 来说确实太繁琐，但还是得学习🍭&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>CMake中使用find_pakage来使用MySQL</title>
+      <link>https://kerolt.github.io/posts/%E6%9D%82%E9%A1%B9/cmake%E4%B8%AD%E4%BD%BF%E7%94%A8find_pakage%E6%9D%A5%E4%BD%BF%E7%94%A8mysql/</link>
+      <pubDate>Thu, 21 Aug 2025 00:00:00 +0000</pubDate>
+      <guid>https://kerolt.github.io/posts/%E6%9D%82%E9%A1%B9/cmake%E4%B8%AD%E4%BD%BF%E7%94%A8find_pakage%E6%9D%A5%E4%BD%BF%E7%94%A8mysql/</guid>
+      <description>&lt;p&gt;一般来说，如果我们在 C++ 程序中要使用 mysql 的库，最简单的就是&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-sh&#34; data-lang=&#34;sh&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;g++ server.cpp -o server -lmysqlclient
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;但要是在大一点的项目中，在数不清的源文件下使用 g++ 命令来完成，怕是不太现实。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Git中文件换行符都使用LF</title>
+      <link>https://kerolt.github.io/posts/%E6%9D%82%E9%A1%B9/git%E4%B8%AD%E6%96%87%E4%BB%B6%E6%8D%A2%E8%A1%8C%E7%AC%A6%E9%83%BD%E4%BD%BF%E7%94%A8lf/</link>
+      <pubDate>Thu, 21 Aug 2025 00:00:00 +0000</pubDate>
+      <guid>https://kerolt.github.io/posts/%E6%9D%82%E9%A1%B9/git%E4%B8%AD%E6%96%87%E4%BB%B6%E6%8D%A2%E8%A1%8C%E7%AC%A6%E9%83%BD%E4%BD%BF%E7%94%A8lf/</guid>
+      <description>&lt;p&gt;有时候我们会在多个平台上编辑文件、代码，此时我们希望所有文件，包括你在 Windows 上编辑的文件（Windows 采用的是 CRLF），都使用 LF 换行符，那么可以修改 &lt;code&gt;.gitattributes&lt;/code&gt; 文件来强制执行这个规则：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-text&#34; data-lang=&#34;text&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;# 强制所有文件使用 LF 换行符
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;* text eol=lf
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;# 避免对二进制文件进行换行符转换
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;*.png binary
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;*.jpg binary
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;*.pdf binary
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;blockquote&gt;
+&lt;p&gt;在保存提交 &lt;code&gt;.gitattributes&lt;/code&gt; 后，可能因为之前在 Windows 上编辑的文件可能已经变成了 CRLF 换行符，这时需要需要将它们转换回 LF（这里可以使用 VSCode）。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;接着可以执行以下命令，让 Git 重新处理工作目录中的文件并按照新的规则来转换：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-sh&#34; data-lang=&#34;sh&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;git rm --cached -r .
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;git reset --hard
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;code&gt;* text eol=lf&lt;/code&gt;：这条规则告诉 Git，将仓库中的所有文件都视为文本文件，并且强制它们使用 LF 作为行结束符。当你从仓库检出文件时，Git 会将其转换为 CRLF（在 Windows 上），但当你提交时，它会确保所有文件都以 LF 格式存储在仓库中。&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;git rm --cached -r .&lt;/code&gt; 和 &lt;code&gt;git reset --hard&lt;/code&gt;：这些命令会强制 Git 重新将你的工作目录与仓库同步，并在此过程中应用 &lt;code&gt;.gitattributes&lt;/code&gt; 文件中设置的换行符规则，从而确保所有文件都符合 LF 规范。&lt;/p&gt;</description>
+    </item>
     <item>
       <title>关于内存对齐、位域的思考</title>
       <link>https://kerolt.github.io/posts/c&#43;&#43;/%E5%85%B3%E4%BA%8E%E5%86%85%E5%AD%98%E5%AF%B9%E9%BD%90%E4%BD%8D%E5%9F%9F%E7%9A%84%E6%80%9D%E8%80%83/</link>
@@ -86,9 +125,9 @@
     </item>
     <item>
       <title>Curl使用</title>
-      <link>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95/curl%E4%BD%BF%E7%94%A8/</link>
+      <link>https://kerolt.github.io/posts/%E6%9D%82%E9%A1%B9/curl%E4%BD%BF%E7%94%A8/</link>
       <pubDate>Tue, 01 Jul 2025 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95/curl%E4%BD%BF%E7%94%A8/</guid>
+      <guid>https://kerolt.github.io/posts/%E6%9D%82%E9%A1%B9/curl%E4%BD%BF%E7%94%A8/</guid>
       <description>&lt;p&gt;curl 是一个强大的命令行工具，用于传输数据，支持多种协议（HTTP、HTTPS、FTP 等）。以下是 curl 的基本使用方法和常见示例。&lt;/p&gt;
 &lt;h2 id=&#34;基本语法&#34;&gt;基本语法&lt;/h2&gt;
 &lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;curl [options] [URL...]
@@ -496,6 +535,34 @@ curl -b cookies.txt https://example.com/dashboard
 &lt;p&gt;项目依赖如下：&lt;/p&gt;</description>
     </item>
     <item>
+      <title>Git使用</title>
+      <link>https://kerolt.github.io/posts/%E6%9D%82%E9%A1%B9/git%E4%BD%BF%E7%94%A8/</link>
+      <pubDate>Sun, 18 May 2025 00:00:00 +0000</pubDate>
+      <guid>https://kerolt.github.io/posts/%E6%9D%82%E9%A1%B9/git%E4%BD%BF%E7%94%A8/</guid>
+      <description>&lt;h2 id=&#34;如何修改上次的-commit&#34;&gt;如何修改上次的 commit&lt;/h2&gt;
+&lt;p&gt;比如有的时候 commit 漏掉了文件、commit 信息写错了，可以这么做：&lt;/p&gt;
+&lt;p&gt;你要指定一个有效的编辑器作为 Git 的默认编辑器，可以使 Vim 或者 VSCode：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-sh&#34; data-lang=&#34;sh&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;git config --global core.editor &lt;span class=&#34;s2&#34;&gt;&amp;#34;vim&amp;#34;&lt;/span&gt; &lt;span class=&#34;c1&#34;&gt;# 使用 VSCode 的话就用 code&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;然后将上次忘记提交的修改先 &lt;code&gt;git add&lt;/code&gt; （如果有的话），接着：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-sh&#34; data-lang=&#34;sh&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;git commit --amend
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;code&gt;--amend&lt;/code&gt; 会用新的内容替换上一次提交，而不是创建一个新的提交。如果上一次提交已经被推送到远程仓库，使用 &lt;code&gt;--amend&lt;/code&gt; 后需要强制推送：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-sh&#34; data-lang=&#34;sh&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;git push --force
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;blockquote&gt;
+&lt;p&gt;这个方法我有时候用来同步一下两台电脑上的代码，因为有时候一台电脑上写了一部分代码但是还没有到一次提交的地步，这时如果要外出或者要用另一台电脑了，就可以用这个方法来同步一下。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;不过，使用 &lt;code&gt;git push --force&lt;/code&gt; 强制推送后，远程仓库的历史记录会被改写。这种操作可能会导致本地和远程分支的提交历史不一致。我自己通常这么解决：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-sh&#34; data-lang=&#34;sh&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;git fetch origin
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;git reset --hard origin/&amp;lt;branch&amp;gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;这一般是不需要保留本地未推送的更改，可以直接将本地分支强制更新为远程分支的状态。&lt;/p&gt;
+&lt;h2 id=&#34;git-如何移除-submodule&#34;&gt;git 如何移除 submodule&lt;/h2&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-sh&#34; data-lang=&#34;sh&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;git submodule deinit -f path/to/submodule
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;git rm -f path/to/submodule
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;rm -rf path/to/submodule  &lt;span class=&#34;c1&#34;&gt;# 如果要删除物理目录&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;git commit -m &lt;span class=&#34;s2&#34;&gt;&amp;#34;Removed submodule path/to/submodule&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;rm -rf .git/modules/path/to/submodule  &lt;span class=&#34;c1&#34;&gt;# 可选清理&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;</description>
+    </item>
+    <item>
       <title>875. 爱吃香蕉的珂珂</title>
       <link>https://kerolt.github.io/posts/%E7%AE%97%E6%B3%95/%E4%BA%8C%E5%88%86/875.-%E7%88%B1%E5%90%83%E9%A6%99%E8%95%89%E7%9A%84%E7%8F%82%E7%8F%82/</link>
       <pubDate>Wed, 07 May 2025 00:00:00 +0000</pubDate>
@@ -701,9 +768,9 @@ curl -b cookies.txt https://example.com/dashboard
     </item>
     <item>
       <title>【解决】Fedora42升级启动时显示kernel panic</title>
-      <link>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95/%E8%A7%A3%E5%86%B3fedora42%E5%8D%87%E7%BA%A7%E5%90%AF%E5%8A%A8%E6%97%B6%E6%98%BE%E7%A4%BAkernel-panic/</link>
+      <link>https://kerolt.github.io/posts/%E6%9D%82%E9%A1%B9/%E8%A7%A3%E5%86%B3fedora42%E5%8D%87%E7%BA%A7%E5%90%AF%E5%8A%A8%E6%97%B6%E6%98%BE%E7%A4%BAkernel-panic/</link>
       <pubDate>Sun, 27 Apr 2025 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95/%E8%A7%A3%E5%86%B3fedora42%E5%8D%87%E7%BA%A7%E5%90%AF%E5%8A%A8%E6%97%B6%E6%98%BE%E7%A4%BAkernel-panic/</guid>
+      <guid>https://kerolt.github.io/posts/%E6%9D%82%E9%A1%B9/%E8%A7%A3%E5%86%B3fedora42%E5%8D%87%E7%BA%A7%E5%90%AF%E5%8A%A8%E6%97%B6%E6%98%BE%E7%A4%BAkernel-panic/</guid>
       <description>&lt;p&gt;最近 Fedora42 更新了，因此我打算升级一下玩玩。在执行完下面的命令后：&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo dnf upgrade --refresh
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo dnf system-upgrade download --releasever&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;m&#34;&gt;42&lt;/span&gt;
@@ -917,60 +984,17 @@ curl -b cookies.txt https://example.com/dashboard
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;在 binder 之后，我们就有了一条 sql 的语句解析节点，例如执行 &lt;code&gt;select * from (select * from test_2 where colA &amp;gt; 10) where colB &amp;gt; 2;&lt;/code&gt;，其 statement node 如下：&lt;/p&gt;</description>
     </item>
     <item>
-      <title>Hugo配置Github Actions</title>
-      <link>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95/hugo%E9%85%8D%E7%BD%AEgithub-actions/</link>
-      <pubDate>Fri, 07 Feb 2025 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95/hugo%E9%85%8D%E7%BD%AEgithub-actions/</guid>
-      <description>&lt;p&gt;最近把博客的构建工具从Hexo换成了Hugo，感觉Hugo配置和使用起来更简洁方便。&lt;/p&gt;
-&lt;p&gt;由于我的博客总体来说有两个仓库，一个私有仓库是放置建站工具的目录，其中包含博客 Markdown 内容、一些配置还有主题；另一个就是通过 GitHub Pages 来访问公共仓库。为了方便，之前在使用 Hexo 的使用使用了 Github Actions 来一键部署博客，换成 Hugo 后这个 actions 需要修改一下。&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;.github/workflows/hugo.yml&lt;/strong&gt;：&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-yaml&#34; data-lang=&#34;yaml&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;nt&#34;&gt;name&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;l&#34;&gt;GitHub Pages&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;&lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;on&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;  &lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;push&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;    &lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;branches&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;      &lt;/span&gt;- &lt;span class=&#34;l&#34;&gt;master &lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;c&#34;&gt;# 监听 master 分支的推送事件&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;  &lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;pull_request&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;&lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;jobs&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;  &lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;deploy&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;    &lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;runs-on&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;l&#34;&gt;ubuntu-latest&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;    &lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;steps&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;      &lt;/span&gt;- &lt;span class=&#34;nt&#34;&gt;uses&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;l&#34;&gt;actions/checkout@v3&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;        &lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;with&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;          &lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;submodules&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;kc&#34;&gt;true&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;  &lt;/span&gt;&lt;span class=&#34;c&#34;&gt;# 拉取 Hugo 主题子模块&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;          &lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;fetch-depth&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;m&#34;&gt;0&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;    &lt;/span&gt;&lt;span class=&#34;c&#34;&gt;# 获取完整提交历史&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;      &lt;/span&gt;- &lt;span class=&#34;nt&#34;&gt;name&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;l&#34;&gt;Setup Hugo&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;        &lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;uses&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;l&#34;&gt;peaceiris/actions-hugo@v2&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;        &lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;with&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;          &lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;hugo-version&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;s1&#34;&gt;&amp;#39;0.126.2&amp;#39;&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;          &lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;extended&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;kc&#34;&gt;true&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;      &lt;/span&gt;- &lt;span class=&#34;nt&#34;&gt;name&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;l&#34;&gt;Build&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;        &lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;run&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;l&#34;&gt;hugo --minify&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;c&#34;&gt;# 启用压缩优化&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;      &lt;/span&gt;- &lt;span class=&#34;nt&#34;&gt;name&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;l&#34;&gt;Deploy&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;        &lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;uses&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;l&#34;&gt;peaceiris/actions-gh-pages@v3&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;        &lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;with&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;          &lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;personal_token&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;l&#34;&gt;${{ secrets.ACCESS_TOKEN }}&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;c&#34;&gt;# 仓库访问令牌&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;          &lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;external_repository&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;l&#34;&gt;kerolt/kerolt.github.io &lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;c&#34;&gt;# 发布的仓库地址&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;          &lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;PUBLISH_BRANCH&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;l&#34;&gt;master&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;c&#34;&gt;# 部署分支&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;          &lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;PUBLISH_DIR&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;l&#34;&gt;./public&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;c&#34;&gt;# Hugo 输出目录&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;关键点说明：&lt;/p&gt;</description>
-    </item>
-    <item>
       <title>Linux下微信无法使用中文输入法问题解决</title>
-      <link>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95/linux%E4%B8%8B%E5%BE%AE%E4%BF%A1%E6%97%A0%E6%B3%95%E4%BD%BF%E7%94%A8%E4%B8%AD%E6%96%87%E8%BE%93%E5%85%A5%E6%B3%95%E9%97%AE%E9%A2%98%E8%A7%A3%E5%86%B3/</link>
+      <link>https://kerolt.github.io/posts/%E6%9D%82%E9%A1%B9/linux%E4%B8%8B%E5%BE%AE%E4%BF%A1%E6%97%A0%E6%B3%95%E4%BD%BF%E7%94%A8%E4%B8%AD%E6%96%87%E8%BE%93%E5%85%A5%E6%B3%95%E9%97%AE%E9%A2%98%E8%A7%A3%E5%86%B3/</link>
       <pubDate>Tue, 31 Dec 2024 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95/linux%E4%B8%8B%E5%BE%AE%E4%BF%A1%E6%97%A0%E6%B3%95%E4%BD%BF%E7%94%A8%E4%B8%AD%E6%96%87%E8%BE%93%E5%85%A5%E6%B3%95%E9%97%AE%E9%A2%98%E8%A7%A3%E5%86%B3/</guid>
-      <description>&lt;p&gt;微信在不久前终于有了Linux原生版本，我的电脑是Fedora41，之前安装的是flatpak打包的微信，现在在官网下载rpm包后运行发现无法使用fcitx的中文输入法，找了一下是环境遍历的问题。&lt;/p&gt;</description>
+      <guid>https://kerolt.github.io/posts/%E6%9D%82%E9%A1%B9/linux%E4%B8%8B%E5%BE%AE%E4%BF%A1%E6%97%A0%E6%B3%95%E4%BD%BF%E7%94%A8%E4%B8%AD%E6%96%87%E8%BE%93%E5%85%A5%E6%B3%95%E9%97%AE%E9%A2%98%E8%A7%A3%E5%86%B3/</guid>
+      <description>&lt;p&gt;微信在不久前终于有了 Linux 原生版本，我的电脑是 Fedora41，之前安装的是 flatpak 打包的微信，现在在官网下载 rpm 包后运行发现无法使用 fcitx 的中文输入法，找了一下是环境遍历的问题。&lt;/p&gt;</description>
     </item>
     <item>
       <title>在VSCode中配置LLDB</title>
-      <link>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95/%E5%9C%A8vscode%E4%B8%AD%E9%85%8D%E7%BD%AElldb/</link>
+      <link>https://kerolt.github.io/posts/%E6%9D%82%E9%A1%B9/%E5%9C%A8vscode%E4%B8%AD%E9%85%8D%E7%BD%AElldb/</link>
       <pubDate>Tue, 31 Dec 2024 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95/%E5%9C%A8vscode%E4%B8%AD%E9%85%8D%E7%BD%AElldb/</guid>
+      <guid>https://kerolt.github.io/posts/%E6%9D%82%E9%A1%B9/%E5%9C%A8vscode%E4%B8%AD%E9%85%8D%E7%BD%AElldb/</guid>
       <description>&lt;p&gt;为了 &lt;code&gt;CMake Tool&lt;/code&gt; 能调试代码，先装好 &lt;code&gt;codelldb&lt;/code&gt; 插件，然后还需要一个 &lt;code&gt;launch.json&lt;/code&gt; 文件，以下内容可以一键配置好调试：&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-json&#34; data-lang=&#34;json&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;nt&#34;&gt;&amp;#34;version&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt; &lt;span class=&#34;s2&#34;&gt;&amp;#34;0.2.0&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;
@@ -1268,13 +1292,13 @@ curl -b cookies.txt https://example.com/dashboard
     </item>
     <item>
       <title>解决X11下窗口拖动撕裂的一个方法</title>
-      <link>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95/%E8%A7%A3%E5%86%B3x11%E4%B8%8B%E7%AA%97%E5%8F%A3%E6%8B%96%E5%8A%A8%E6%92%95%E8%A3%82%E7%9A%84%E4%B8%80%E4%B8%AA%E6%96%B9%E6%B3%95/</link>
+      <link>https://kerolt.github.io/posts/%E6%9D%82%E9%A1%B9/%E8%A7%A3%E5%86%B3x11%E4%B8%8B%E7%AA%97%E5%8F%A3%E6%8B%96%E5%8A%A8%E6%92%95%E8%A3%82%E7%9A%84%E4%B8%80%E4%B8%AA%E6%96%B9%E6%B3%95/</link>
       <pubDate>Tue, 03 Sep 2024 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95/%E8%A7%A3%E5%86%B3x11%E4%B8%8B%E7%AA%97%E5%8F%A3%E6%8B%96%E5%8A%A8%E6%92%95%E8%A3%82%E7%9A%84%E4%B8%80%E4%B8%AA%E6%96%B9%E6%B3%95/</guid>
+      <guid>https://kerolt.github.io/posts/%E6%9D%82%E9%A1%B9/%E8%A7%A3%E5%86%B3x11%E4%B8%8B%E7%AA%97%E5%8F%A3%E6%8B%96%E5%8A%A8%E6%92%95%E8%A3%82%E7%9A%84%E4%B8%80%E4%B8%AA%E6%96%B9%E6%B3%95/</guid>
       <description>&lt;blockquote&gt;
-&lt;p&gt;Debian系Linux安装N卡驱动参考这篇&lt;a href=&#34;https://www.if-not-true-then-false.com/2021/debian-ubuntu-linux-mint-nvidia-guide/&#34;&gt;博客&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;Debian 系 Linux 安装 N 卡驱动参考这篇 &lt;a href=&#34;https://www.if-not-true-then-false.com/2021/debian-ubuntu-linux-mint-nvidia-guide/&#34;&gt;博客&lt;/a&gt;&lt;/p&gt;
 &lt;/blockquote&gt;
-&lt;p&gt;最近Debian终于是装好nvidia的驱动了，但是只能用在X11上，并且相比于不用n卡驱动时的Wayland，X11下的窗口拖动和视频播放会有比较明显的撕裂感，以下是解决的一个方法。&lt;/p&gt;</description>
+&lt;p&gt;最近 Debian 终于是装好 nvidia 的驱动了，但是只能用在 X11 上，并且相比于不用 n 卡驱动时的 Wayland，X11 下的窗口拖动和视频播放会有比较明显的撕裂感，以下是解决的一个方法。&lt;/p&gt;</description>
     </item>
     <item>
       <title>【协程】C&#43;&#43;是如何通过SFINAE来检查promise_type的</title>
@@ -1371,10 +1395,10 @@ curl -b cookies.txt https://example.com/dashboard
     </item>
     <item>
       <title>VMware17.5.2启动踩坑</title>
-      <link>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95/vmware17.5.2%E5%90%AF%E5%8A%A8%E8%B8%A9%E5%9D%91/</link>
+      <link>https://kerolt.github.io/posts/%E6%9D%82%E9%A1%B9/vmware17.5.2%E5%90%AF%E5%8A%A8%E8%B8%A9%E5%9D%91/</link>
       <pubDate>Mon, 27 May 2024 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95/vmware17.5.2%E5%90%AF%E5%8A%A8%E8%B8%A9%E5%9D%91/</guid>
-      <description>&lt;p&gt;最近听说VMware17.5.2个人版可以免费使用了，故在Linux下安装用用，顺便记录一下踩的坑。&lt;/p&gt;</description>
+      <guid>https://kerolt.github.io/posts/%E6%9D%82%E9%A1%B9/vmware17.5.2%E5%90%AF%E5%8A%A8%E8%B8%A9%E5%9D%91/</guid>
+      <description>&lt;p&gt;最近听说 VMware17.5.2 个人版可以免费使用了，故在 Linux 下安装用用，顺便记录一下踩的坑。&lt;/p&gt;</description>
     </item>
     <item>
       <title>股票问题第二波</title>
@@ -1448,23 +1472,6 @@ curl -b cookies.txt https://example.com/dashboard
 &lt;li&gt;lambda表达式&lt;/li&gt;
 &lt;li&gt;使用&lt;code&gt;std::greater&lt;/code&gt;或&lt;code&gt;std::less&lt;/code&gt;（这里就不介绍这种方法了）&lt;/li&gt;
 &lt;/ol&gt;</description>
-    </item>
-    <item>
-      <title>CMake中使用find_pakage来使用MySQL</title>
-      <link>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95/cmake%E4%B8%AD%E4%BD%BF%E7%94%A8find_pakage%E6%9D%A5%E4%BD%BF%E7%94%A8mysql/</link>
-      <pubDate>Mon, 29 Jan 2024 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95/cmake%E4%B8%AD%E4%BD%BF%E7%94%A8find_pakage%E6%9D%A5%E4%BD%BF%E7%94%A8mysql/</guid>
-      <description>&lt;p&gt;一般来说，如果我们在C++程序中要使用mysql的库，最简单的就是&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-sh&#34; data-lang=&#34;sh&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;g++ server.cpp -o server -lmysqlclient
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;但要是在大一点的项目中，在数不清的源文件下使用g++命令来完成，怕是不太现实。&lt;/p&gt;</description>
-    </item>
-    <item>
-      <title>【CMake】CMake使用笔记</title>
-      <link>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95/cmakecmake%E4%BD%BF%E7%94%A8%E7%AC%94%E8%AE%B0/</link>
-      <pubDate>Thu, 25 Jan 2024 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95/cmakecmake%E4%BD%BF%E7%94%A8%E7%AC%94%E8%AE%B0/</guid>
-      <description>&lt;p&gt;记录学习 CMake 中碰到的一些问题和笔记&lt;/p&gt;
-&lt;p&gt;ps：CMake 相比 xmake 来说确实太繁琐，但还是得学习🍭&lt;/p&gt;</description>
     </item>
     <item>
       <title>muduo网络库的安装</title>
