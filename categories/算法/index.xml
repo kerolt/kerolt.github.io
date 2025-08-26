@@ -9,7 +9,7 @@
       <url>https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</url>
       <link>https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</link>
     </image>
-    <generator>Hugo -- 0.140.0</generator>
+    <generator>Hugo -- 0.148.2</generator>
     <language>en</language>
     <lastBuildDate>Sun, 22 Jun 2025 00:00:00 +0000</lastBuildDate>
     <atom:link href="https://kerolt.github.io/categories/%E7%AE%97%E6%B3%95/index.xml" rel="self" type="application/rss+xml" />
@@ -58,8 +58,7 @@
       <pubDate>Wed, 07 May 2025 00:00:00 +0000</pubDate>
       <guid>https://kerolt.github.io/posts/%E7%AE%97%E6%B3%95/%E4%BA%8C%E5%88%86/875.-%E7%88%B1%E5%90%83%E9%A6%99%E8%95%89%E7%9A%84%E7%8F%82%E7%8F%82/</guid>
       <description>&lt;blockquote&gt;
-&lt;p&gt;&lt;a href=&#34;https://leetcode.cn/problems/koko-eating-bananas/&#34;&gt;https://leetcode.cn/problems/koko-eating-bananas/&lt;/a&gt;&lt;/p&gt;
-&lt;/blockquote&gt;
+&lt;p&gt;&lt;a href=&#34;https://leetcode.cn/problems/koko-eating-bananas/&#34;&gt;https://leetcode.cn/problems/koko-eating-bananas/&lt;/a&gt;&lt;/p&gt;&lt;/blockquote&gt;
 &lt;p&gt;假设每小时吃 &lt;code&gt;max(piles)&lt;/code&gt; 根香蕉，那么按照题意（向上取整）来说就只要 &lt;code&gt;piles.length&lt;/code&gt; 个小时就可以吃完。而注意提示中的：&lt;code&gt;piles.length &amp;lt;= h &amp;lt;= 10^9&lt;/code&gt;，这说明每小时吃 &lt;code&gt;max(piles)&lt;/code&gt; 根香蕉已经是最大的速度了，再快也没用了。因此需要去找比 &lt;code&gt;max(piles)&lt;/code&gt; 小的且满足题意的数。&lt;/p&gt;
 &lt;p&gt;那取 &lt;code&gt;max(piles)&lt;/code&gt; 作为右边界，左边界取 &lt;code&gt;1&lt;/code&gt; （因为总不可能不吃吧~），然去通过二分去找最小的满足条件的速度。&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-cpp&#34; data-lang=&#34;cpp&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;k&#34;&gt;class&lt;/span&gt; &lt;span class=&#34;nc&#34;&gt;Solution&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
@@ -95,8 +94,7 @@
       <pubDate>Wed, 16 Apr 2025 00:00:00 +0000</pubDate>
       <guid>https://kerolt.github.io/posts/%E7%AE%97%E6%B3%95/%E4%BA%8C%E5%88%86/3488.-%E8%B7%9D%E7%A6%BB%E6%9C%80%E5%B0%8F%E7%9B%B8%E7%AD%89%E5%85%83%E7%B4%A0%E6%9F%A5%E8%AF%A2/</guid>
       <description>&lt;blockquote&gt;
-&lt;p&gt;&lt;a href=&#34;https://leetcode.cn/problems/closest-equal-element-queries/&#34;&gt;https://leetcode.cn/problems/closest-equal-element-queries/&lt;/a&gt;&lt;/p&gt;
-&lt;/blockquote&gt;
+&lt;p&gt;&lt;a href=&#34;https://leetcode.cn/problems/closest-equal-element-queries/&#34;&gt;https://leetcode.cn/problems/closest-equal-element-queries/&lt;/a&gt;&lt;/p&gt;&lt;/blockquote&gt;
 &lt;p&gt;通过示例1来分析：&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-text&#34; data-lang=&#34;text&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;输入： nums = [1,3,1,4,1,3,2], queries = [0,3,5]
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;输出： [2,-1,3]
@@ -104,8 +102,7 @@
 &lt;blockquote&gt;
 &lt;p&gt;n 为 nums 的长度，
 在下标列表前面添加 4−n=−3，相当于认为在 −3 下标处也有一个 1。
-在下标列表末尾添加 0+n=7，相当于认为在 7 下标处也有一个 1。&lt;/p&gt;
-&lt;/blockquote&gt;
+在下标列表末尾添加 0+n=7，相当于认为在 7 下标处也有一个 1。&lt;/p&gt;&lt;/blockquote&gt;
 &lt;p&gt;题意是需要我们查询一个 nums 中的下标 &lt;code&gt;x&lt;/code&gt;，与 &lt;strong&gt;任意&lt;/strong&gt; 其他下标 &lt;code&gt;j&lt;/code&gt;（满足 &lt;code&gt;nums[j] == nums[x]&lt;/code&gt;）之间的 &lt;strong&gt;最小&lt;/strong&gt; 距离。我们用哈希表将每个相同值的元素的下标收集起来作为集合 &lt;code&gt;p&lt;/code&gt;，然后在查询时使用二分查询 &lt;code&gt;x&lt;/code&gt; 在其对应集合中的位置 &lt;code&gt;i&lt;/code&gt;，则左边最近的元素下标为 &lt;code&gt;p[i - 1]&lt;/code&gt;，右边最近元素下标为 &lt;code&gt;p[i + 1]&lt;/code&gt;，那么最小距离就是 &lt;code&gt;min(p[i + 1] - x, x - p[i - 1])&lt;/code&gt;。&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-cpp&#34; data-lang=&#34;cpp&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;k&#34;&gt;class&lt;/span&gt; &lt;span class=&#34;nc&#34;&gt;Solution&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;k&#34;&gt;public&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;:&lt;/span&gt;
@@ -148,8 +145,7 @@
       <description>&lt;blockquote&gt;
 &lt;p&gt;难度：Hard&lt;/p&gt;
 &lt;p&gt;标签：位运算；图论；Floyd算法&lt;/p&gt;
-&lt;p&gt;链接： &lt;a href=&#34;https://leetcode.cn/problems/number-of-possible-sets-of-closing-branches/&#34;&gt;https://leetcode.cn/problems/number-of-possible-sets-of-closing-branches/&lt;/a&gt;&lt;/p&gt;
-&lt;/blockquote&gt;</description>
+&lt;p&gt;链接： &lt;a href=&#34;https://leetcode.cn/problems/number-of-possible-sets-of-closing-branches/&#34;&gt;https://leetcode.cn/problems/number-of-possible-sets-of-closing-branches/&lt;/a&gt;&lt;/p&gt;&lt;/blockquote&gt;</description>
     </item>
     <item>
       <title>76. 最小覆盖子串</title>
@@ -159,8 +155,7 @@
       <description>&lt;blockquote&gt;
 &lt;p&gt;难度：Hard&lt;/p&gt;
 &lt;p&gt;标签：哈希表；滑动窗口；字符串&lt;/p&gt;
-&lt;p&gt;链接： &lt;a href=&#34;https://leetcode.cn/problems/minimum-window-substring/description/&#34;&gt;https://leetcode.cn/problems/minimum-window-substring/description/&lt;/a&gt;&lt;/p&gt;
-&lt;/blockquote&gt;</description>
+&lt;p&gt;链接： &lt;a href=&#34;https://leetcode.cn/problems/minimum-window-substring/description/&#34;&gt;https://leetcode.cn/problems/minimum-window-substring/description/&lt;/a&gt;&lt;/p&gt;&lt;/blockquote&gt;</description>
     </item>
     <item>
       <title>30. 串联所有单词的子串</title>
@@ -170,8 +165,7 @@
       <description>&lt;blockquote&gt;
 &lt;p&gt;难度：Hard&lt;/p&gt;
 &lt;p&gt;标签：哈希表、字符串、滑动窗口&lt;/p&gt;
-&lt;p&gt;链接：https://leetcode.cn/problems/substring-with-concatenation-of-all-words/description/&lt;/p&gt;
-&lt;/blockquote&gt;</description>
+&lt;p&gt;链接：https://leetcode.cn/problems/substring-with-concatenation-of-all-words/description/&lt;/p&gt;&lt;/blockquote&gt;</description>
     </item>
     <item>
       <title>股票问题第二波</title>
@@ -192,8 +186,7 @@
       <pubDate>Thu, 11 Apr 2024 00:00:00 +0000</pubDate>
       <guid>https://kerolt.github.io/posts/%E7%AE%97%E6%B3%95/%E8%82%A1%E7%A5%A8%E9%97%AE%E9%A2%98%E4%B8%8E%E7%8A%B6%E6%80%81%E6%9C%BAdp/</guid>
       <description>&lt;blockquote&gt;
-&lt;p&gt;本篇文章思路来源于 @bilibili/&lt;a href=&#34;https://space.bilibili.com/206214&#34;&gt;灵茶山艾府&lt;/a&gt;&lt;/p&gt;
-&lt;/blockquote&gt;
+&lt;p&gt;本篇文章思路来源于 @bilibili/&lt;a href=&#34;https://space.bilibili.com/206214&#34;&gt;灵茶山艾府&lt;/a&gt;&lt;/p&gt;&lt;/blockquote&gt;
 &lt;p&gt;题目描述：&lt;a href=&#34;https://leetcode.cn/problems/best-time-to-buy-and-sell-stock-ii&#34;&gt;https://leetcode.cn/problems/best-time-to-buy-and-sell-stock-ii&lt;/a&gt;&lt;/p&gt;
 &lt;p&gt;相对于买卖股票的最佳时机I，该问题可以多次买入和卖出股票以获取最大利益&lt;/p&gt;</description>
     </item>
@@ -203,8 +196,7 @@
       <pubDate>Fri, 10 Nov 2023 00:00:00 +0000</pubDate>
       <guid>https://kerolt.github.io/posts/%E7%AE%97%E6%B3%95/%E9%93%BE%E8%A1%A8%E5%88%A4%E6%96%AD%E5%9B%9E%E6%96%87%E9%93%BE%E8%A1%A8/</guid>
       <description>&lt;blockquote&gt;
-&lt;p&gt;&lt;a href=&#34;https://leetcode.cn/problems/palindrome-linked-list/&#34;&gt;https://leetcode.cn/problems/palindrome-linked-list/&lt;/a&gt;&lt;/p&gt;
-&lt;/blockquote&gt;
+&lt;p&gt;&lt;a href=&#34;https://leetcode.cn/problems/palindrome-linked-list/&#34;&gt;https://leetcode.cn/problems/palindrome-linked-list/&lt;/a&gt;&lt;/p&gt;&lt;/blockquote&gt;
 &lt;h3 id=&#34;1将链表转化为数组进行比较&#34;&gt;（1）将链表转化为数组进行比较&lt;/h3&gt;
 &lt;p&gt;比较呆板的做法，空间复杂度为&lt;code&gt;O(n)&lt;/code&gt;​。&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-cpp&#34; data-lang=&#34;cpp&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;k&#34;&gt;class&lt;/span&gt; &lt;span class=&#34;nc&#34;&gt;Solution&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;

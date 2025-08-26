@@ -9,32 +9,116 @@
       <url>https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</url>
       <link>https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</link>
     </image>
-    <generator>Hugo -- 0.140.0</generator>
+    <generator>Hugo -- 0.148.2</generator>
     <language>en</language>
-    <lastBuildDate>Thu, 21 Aug 2025 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Mon, 25 Aug 2025 00:00:00 +0000</lastBuildDate>
     <atom:link href="https://kerolt.github.io/index.xml" rel="self" type="application/rss+xml" />
     <item>
-      <title>【CMake】CMake使用笔记</title>
-      <link>https://kerolt.github.io/posts/%E6%9D%82%E9%A1%B9/cmakecmake%E4%BD%BF%E7%94%A8%E7%AC%94%E8%AE%B0/</link>
-      <pubDate>Thu, 21 Aug 2025 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E6%9D%82%E9%A1%B9/cmakecmake%E4%BD%BF%E7%94%A8%E7%AC%94%E8%AE%B0/</guid>
-      <description>&lt;p&gt;记录学习 CMake 中碰到的一些问题和笔记&lt;/p&gt;
-&lt;p&gt;ps：CMake 相比 xmake 来说确实太繁琐，但还是得学习🍭&lt;/p&gt;</description>
+      <title>Rustdesk自建服务器</title>
+      <link>https://kerolt.github.io/posts/%E6%8A%80%E6%9C%AF%E9%9A%8F%E7%AC%94/rustdesk%E8%87%AA%E5%BB%BA%E6%9C%8D%E5%8A%A1%E5%99%A8/</link>
+      <pubDate>Mon, 25 Aug 2025 00:00:00 +0000</pubDate>
+      <guid>https://kerolt.github.io/posts/%E6%8A%80%E6%9C%AF%E9%9A%8F%E7%AC%94/rustdesk%E8%87%AA%E5%BB%BA%E6%9C%8D%E5%8A%A1%E5%99%A8/</guid>
+      <description>&lt;p&gt;对于现在常见的远程控制软件，例如 ToDesk、向日葵，其免费版本总有诸多限制（帧率低、分辨率低、控制时间有限制），而 RustDesk 的公共服务器现在在国内也不可用，因此我就想到了 RustDesk 的自建服务器。现在我们实验室有几台空闲的电脑，并且这些电脑都有 &lt;strong&gt;IPv6&lt;/strong&gt;，这就省去了我购买云服务器的花费，可以实现零成本搭建远程服务😁&lt;/p&gt;
+&lt;h2 id=&#34;安装-rustdesk-server&#34;&gt;安装 RustDesk Server&lt;/h2&gt;
+&lt;p&gt;我使用 &lt;a href=&#34;https://github.com/sshpc/rustdesktool&#34;&gt;https://github.com/sshpc/rustdesktool&lt;/a&gt; 这里的脚本来一键安装，安装完后，RustDesk Server 的默认安装目录为：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-text&#34; data-lang=&#34;text&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;/usr/local/rustdesk-sever
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h2 id=&#34;开放端口&#34;&gt;开放端口&lt;/h2&gt;
+&lt;p&gt;我们需要放行防火墙 TCP &amp;amp; UDP 端口 21115-21119，其中&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;21115 是 hbbs 用作 NAT 类型测试&lt;/li&gt;
+&lt;li&gt;21116/UDP 是 hbbs 用作 ID 注册与心跳服务&lt;/li&gt;
+&lt;li&gt;21116/TCP 是 hbbs 用作 TCP 打洞与连接服务&lt;/li&gt;
+&lt;li&gt;21117 是 hbbr 用作中继服务&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-sh&#34; data-lang=&#34;sh&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;# 允许 TCP 端口 &lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo ufw allow 21115:21119/tcp
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;# 允许 UDP 端口&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo ufw allow 21115:21119/udp
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo ufw &lt;span class=&#34;nb&#34;&gt;enable&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;然后执行&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-sh&#34; data-lang=&#34;sh&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo ufw status
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;如果有如下类似输出，表明端口已经放行并且防火墙正在运行。&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-sh&#34; data-lang=&#34;sh&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;状态：活动
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;至              动作        来自
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;--              --          --
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;21115:21119/tcp ALLOW       Anywhere
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;21115:21119/udp ALLOW       Anywhere
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;21115:21119/tcp &lt;span class=&#34;o&#34;&gt;(&lt;/span&gt;v6&lt;span class=&#34;o&#34;&gt;)&lt;/span&gt; ALLOW  Anywhere &lt;span class=&#34;o&#34;&gt;(&lt;/span&gt;v6&lt;span class=&#34;o&#34;&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;21115:21119/udp &lt;span class=&#34;o&#34;&gt;(&lt;/span&gt;v6&lt;span class=&#34;o&#34;&gt;)&lt;/span&gt; ALLOW  Anywhere &lt;span class=&#34;o&#34;&gt;(&lt;/span&gt;v6&lt;span class=&#34;o&#34;&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h2 id=&#34;启动服务&#34;&gt;启动服务&lt;/h2&gt;
+&lt;p&gt;在我们用脚本一键安装后，服务安装目录为：&lt;/p&gt;</description>
     </item>
     <item>
-      <title>CMake中使用find_pakage来使用MySQL</title>
-      <link>https://kerolt.github.io/posts/%E6%9D%82%E9%A1%B9/cmake%E4%B8%AD%E4%BD%BF%E7%94%A8find_pakage%E6%9D%A5%E4%BD%BF%E7%94%A8mysql/</link>
+      <title>C&amp;C&#43;&#43;类型双关转换</title>
+      <link>https://kerolt.github.io/posts/c&#43;&#43;/cc&#43;&#43;%E7%B1%BB%E5%9E%8B%E5%8F%8C%E5%85%B3%E8%BD%AC%E6%8D%A2/</link>
       <pubDate>Thu, 21 Aug 2025 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E6%9D%82%E9%A1%B9/cmake%E4%B8%AD%E4%BD%BF%E7%94%A8find_pakage%E6%9D%A5%E4%BD%BF%E7%94%A8mysql/</guid>
-      <description>&lt;p&gt;一般来说，如果我们在 C++ 程序中要使用 mysql 的库，最简单的就是&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-sh&#34; data-lang=&#34;sh&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;g++ server.cpp -o server -lmysqlclient
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;但要是在大一点的项目中，在数不清的源文件下使用 g++ 命令来完成，怕是不太现实。&lt;/p&gt;</description>
+      <guid>https://kerolt.github.io/posts/c&#43;&#43;/cc&#43;&#43;%E7%B1%BB%E5%9E%8B%E5%8F%8C%E5%85%B3%E8%BD%AC%E6%8D%A2/</guid>
+      <description>&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-cpp&#34; data-lang=&#34;cpp&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;cp&#34;&gt;#include&lt;/span&gt; &lt;span class=&#34;cpf&#34;&gt;&amp;lt;iostream&amp;gt;&lt;/span&gt;&lt;span class=&#34;cp&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;cp&#34;&gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;k&#34;&gt;auto&lt;/span&gt; &lt;span class=&#34;nf&#34;&gt;ASSERT&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kt&#34;&gt;bool&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;flag&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;const&lt;/span&gt; &lt;span class=&#34;kt&#34;&gt;char&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;*&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;msg&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;k&#34;&gt;if&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;!&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;flag&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;        &lt;span class=&#34;n&#34;&gt;std&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;::&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;cerr&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;&amp;lt;&amp;lt;&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;msg&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;&amp;lt;&amp;lt;&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;std&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;::&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;endl&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;// READ: 枚举类型 &amp;lt;https://zh.cppreference.com/w/cpp/language/enum&amp;gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;// `enum` 是 C 的兼容类型，本质上其对应类型的常量。
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;// 在 `enum` 中定义标识符等价于定义 constexpr 常量，
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;// 这些标识符不需要前缀，可以直接引用。
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;// 因此 `enum` 定义会污染命名空间。
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;enum&lt;/span&gt; &lt;span class=&#34;nc&#34;&gt;ColorEnum&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;:&lt;/span&gt; &lt;span class=&#34;kt&#34;&gt;unsigned&lt;/span&gt; &lt;span class=&#34;kt&#34;&gt;char&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;n&#34;&gt;COLOR_RED&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;31&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;n&#34;&gt;COLOR_GREEN&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;n&#34;&gt;COLOR_YELLOW&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;n&#34;&gt;COLOR_BLUE&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;p&#34;&gt;};&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;// 有作用域枚举型是 C++ 引入的类型安全枚举。
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;// 其内部标识符需要带前缀引用，如 `Color::Red`。
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;// 作用域枚举型可以避免命名空间污染，并提供类型安全保证。
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;enum&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;class&lt;/span&gt; &lt;span class=&#34;nc&#34;&gt;Color&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;:&lt;/span&gt; &lt;span class=&#34;kt&#34;&gt;int&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;n&#34;&gt;Red&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;COLOR_RED&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;n&#34;&gt;Green&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;n&#34;&gt;Yellow&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;n&#34;&gt;Blue&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;p&#34;&gt;};&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;n&#34;&gt;ColorEnum&lt;/span&gt; &lt;span class=&#34;nf&#34;&gt;convert_by_pun&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;Color&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;c&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;c1&#34;&gt;// READ: &amp;lt;https://zh.cppreference.com/w/cpp/language/union&amp;gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;&lt;/span&gt;    &lt;span class=&#34;c1&#34;&gt;// `union` 表示在同一内存位置存储的不同类型的值。
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;&lt;/span&gt;    &lt;span class=&#34;c1&#34;&gt;// 其常见用法是实现类型双关转换，即将一种类型的值转换为另一种无关类型的值。
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;&lt;/span&gt;    &lt;span class=&#34;c1&#34;&gt;// 但这种写法实际上仅在 C 语言良定义，在 C++ 中是未定义行为。
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;&lt;/span&gt;    &lt;span class=&#34;c1&#34;&gt;// 这是比较少见的 C++ 不与 C 保持兼容的特性。
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;&lt;/span&gt;    &lt;span class=&#34;c1&#34;&gt;// READ: 类型双关 &amp;lt;https://tttapa.github.io/Pages/Programming/Cpp/Practices/type-punning.html&amp;gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;&lt;/span&gt;    &lt;span class=&#34;k&#34;&gt;union&lt;/span&gt; &lt;span class=&#34;nc&#34;&gt;TypePun&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;        &lt;span class=&#34;n&#34;&gt;ColorEnum&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;e&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;        &lt;span class=&#34;n&#34;&gt;Color&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;c&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;p&#34;&gt;};&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;n&#34;&gt;TypePun&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;pun&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;n&#34;&gt;pun&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;c&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;c&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;k&#34;&gt;return&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;pun&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;e&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;kt&#34;&gt;int&lt;/span&gt; &lt;span class=&#34;nf&#34;&gt;main&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kt&#34;&gt;int&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;argc&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;kt&#34;&gt;char&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;**&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;argv&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;n&#34;&gt;ASSERT&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;convert_by_pun&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;Color&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;::&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;Red&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;==&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;COLOR_RED&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;#34;Type punning conversion&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;n&#34;&gt;ASSERT&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;convert_by_pun&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;Color&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;::&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;Green&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;==&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;COLOR_GREEN&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;#34;Type punning conversion&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;n&#34;&gt;ASSERT&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;convert_by_pun&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;Color&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;::&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;Yellow&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;==&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;COLOR_YELLOW&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;#34;Type punning conversion&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;n&#34;&gt;ASSERT&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;convert_by_pun&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;Color&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;::&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;Blue&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;==&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;COLOR_BLUE&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;#34;Type punning conversion&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;k&#34;&gt;return&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;0&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;</description>
     </item>
     <item>
       <title>Git中文件换行符都使用LF</title>
-      <link>https://kerolt.github.io/posts/%E6%9D%82%E9%A1%B9/git%E4%B8%AD%E6%96%87%E4%BB%B6%E6%8D%A2%E8%A1%8C%E7%AC%A6%E9%83%BD%E4%BD%BF%E7%94%A8lf/</link>
+      <link>https://kerolt.github.io/posts/%E6%8A%80%E6%9C%AF%E9%9A%8F%E7%AC%94/git%E4%B8%AD%E6%96%87%E4%BB%B6%E6%8D%A2%E8%A1%8C%E7%AC%A6%E9%83%BD%E4%BD%BF%E7%94%A8lf/</link>
       <pubDate>Thu, 21 Aug 2025 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E6%9D%82%E9%A1%B9/git%E4%B8%AD%E6%96%87%E4%BB%B6%E6%8D%A2%E8%A1%8C%E7%AC%A6%E9%83%BD%E4%BD%BF%E7%94%A8lf/</guid>
+      <guid>https://kerolt.github.io/posts/%E6%8A%80%E6%9C%AF%E9%9A%8F%E7%AC%94/git%E4%B8%AD%E6%96%87%E4%BB%B6%E6%8D%A2%E8%A1%8C%E7%AC%A6%E9%83%BD%E4%BD%BF%E7%94%A8lf/</guid>
       <description>&lt;p&gt;有时候我们会在多个平台上编辑文件、代码，此时我们希望所有文件，包括你在 Windows 上编辑的文件（Windows 采用的是 CRLF），都使用 LF 换行符，那么可以修改 &lt;code&gt;.gitattributes&lt;/code&gt; 文件来强制执行这个规则：&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-text&#34; data-lang=&#34;text&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;# 强制所有文件使用 LF 换行符
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;* text eol=lf
@@ -44,8 +128,7 @@
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;*.jpg binary
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;*.pdf binary
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;blockquote&gt;
-&lt;p&gt;在保存提交 &lt;code&gt;.gitattributes&lt;/code&gt; 后，可能因为之前在 Windows 上编辑的文件可能已经变成了 CRLF 换行符，这时需要需要将它们转换回 LF（这里可以使用 VSCode）。&lt;/p&gt;
-&lt;/blockquote&gt;
+&lt;p&gt;在保存提交 &lt;code&gt;.gitattributes&lt;/code&gt; 后，可能因为之前在 Windows 上编辑的文件可能已经变成了 CRLF 换行符，这时需要需要将它们转换回 LF（这里可以使用 VSCode）。&lt;/p&gt;&lt;/blockquote&gt;
 &lt;p&gt;接着可以执行以下命令，让 Git 重新处理工作目录中的文件并按照新的规则来转换：&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-sh&#34; data-lang=&#34;sh&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;git rm --cached -r .
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;git reset --hard
@@ -96,7 +179,6 @@
 &lt;li&gt;&lt;code&gt;alignas(pack...)&lt;/code&gt;：等效于应用于同一声明的多个 alignas 说明符，参数包的每个成员对应一个说明符，可以是类型参数包或常量参数包&lt;/li&gt;
 &lt;/ul&gt;
 
-            &lt;link rel=&#34;stylesheet&#34; href=&#34;https://kerolt.github.io/css/vendors/admonitions.5c21d3611305826ca76e50bf22bdda6ed74f2f81d26216e9166f9ae104f2e27a.css&#34; integrity=&#34;sha256-XCHTYRMFgmynblC/Ir3abtdPL4HSYhbpFm&amp;#43;a4QTy4no=&#34; crossorigin=&#34;anonymous&#34;&gt;
     &lt;div class=&#34;admonition note&#34;&gt;
       &lt;div class=&#34;admonition-header&#34;&gt;&lt;svg xmlns=&#34;http://www.w3.org/2000/svg&#34; viewBox=&#34;0 0 576 512&#34;&gt;&lt;path d=&#34;M0 64C0 28.7 28.7 0 64 0L224 0l0 128c0 17.7 14.3 32 32 32l128 0 0 125.7-86.8 86.8c-10.3 10.3-17.5 23.1-21 37.2l-18.7 74.9c-2.3 9.2-1.8 18.8 1.3 27.5L64 512c-35.3 0-64-28.7-64-64L0 64zm384 64l-128 0L256 0 384 128zM549.8 235.7l14.4 14.4c15.6 15.6 15.6 40.9 0 56.6l-29.4 29.4-71-71 29.4-29.4c15.6-15.6 40.9-15.6 56.6 0zM311.9 417L441.1 287.8l71 71L382.9 487.9c-4.1 4.1-9.2 7-14.9 8.4l-60.1 15c-5.5 1.4-11.2-.2-15.2-4.2s-5.6-9.7-4.2-15.2l15-60.1c1.4-5.6 4.3-10.8 8.4-14.9z&#34;/&gt;&lt;/svg&gt;
         &lt;span&gt;Note&lt;/span&gt;
@@ -125,9 +207,9 @@
     </item>
     <item>
       <title>Curl使用</title>
-      <link>https://kerolt.github.io/posts/%E6%9D%82%E9%A1%B9/curl%E4%BD%BF%E7%94%A8/</link>
+      <link>https://kerolt.github.io/posts/%E6%8A%80%E6%9C%AF%E9%9A%8F%E7%AC%94/curl%E4%BD%BF%E7%94%A8/</link>
       <pubDate>Tue, 01 Jul 2025 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E6%9D%82%E9%A1%B9/curl%E4%BD%BF%E7%94%A8/</guid>
+      <guid>https://kerolt.github.io/posts/%E6%8A%80%E6%9C%AF%E9%9A%8F%E7%AC%94/curl%E4%BD%BF%E7%94%A8/</guid>
       <description>&lt;p&gt;curl 是一个强大的命令行工具，用于传输数据，支持多种协议（HTTP、HTTPS、FTP 等）。以下是 curl 的基本使用方法和常见示例。&lt;/p&gt;
 &lt;h2 id=&#34;基本语法&#34;&gt;基本语法&lt;/h2&gt;
 &lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;curl [options] [URL...]
@@ -265,8 +347,7 @@ curl -b cookies.txt https://example.com/dashboard
       <pubDate>Sun, 22 Jun 2025 00:00:00 +0000</pubDate>
       <guid>https://kerolt.github.io/posts/ebpf/ebpf%E5%AD%A6%E4%B9%A0%E4%BD%BF%E7%94%A8fentry%E8%B7%9F%E8%B8%AAtcp%E8%BF%9E%E6%8E%A5/</guid>
       <description>&lt;blockquote&gt;
-&lt;p&gt;本文是对 &lt;a href=&#34;https://github.com/cilium/ebpf/tree/main/examples/fentry&#34;&gt;cilium/ebpf examples: fentry &lt;/a&gt;的一个学习记录&lt;/p&gt;
-&lt;/blockquote&gt;
+&lt;p&gt;本文是对 &lt;a href=&#34;https://github.com/cilium/ebpf/tree/main/examples/fentry&#34;&gt;cilium/ebpf examples: fentry &lt;/a&gt;的一个学习记录&lt;/p&gt;&lt;/blockquote&gt;
 &lt;p&gt;在这里，我们将会利用 ebpf 监控并记录系统上所有新发起的 IPv4 TCP 连接，其工作流程如下：&lt;/p&gt;
 &lt;ol&gt;
 &lt;li&gt;&lt;strong&gt;挂载点&lt;/strong&gt;：程序使用 &lt;code&gt;fentry&lt;/code&gt; 机制把自己附加到内核函数 &lt;code&gt;tcp_connect&lt;/code&gt; 的入口。每当系统中有任何一个进程尝试发起一个 TCP 连接时，这个内核函数就会被调用，从而触发我们的 eBPF 程序。&lt;/li&gt;
@@ -367,8 +448,7 @@ curl -b cookies.txt https://example.com/dashboard
       <pubDate>Tue, 10 Jun 2025 00:00:00 +0000</pubDate>
       <guid>https://kerolt.github.io/posts/ebpf/ebpf%E5%AD%A6%E4%B9%A0%E4%BD%BF%E7%94%A8kprobe%E7%9B%91%E6%B5%8B%E6%8D%95%E8%8E%B7unlink%E7%B3%BB%E7%BB%9F%E8%B0%83%E7%94%A8/</guid>
       <description>&lt;blockquote&gt;
-&lt;p&gt;本文是对于 &lt;a href=&#34;https://eunomia.dev/zh/tutorials/2-kprobe-unlink/&#34;&gt;Eunomia Tutorials 2&lt;/a&gt; 的一个学习记录&lt;/p&gt;
-&lt;/blockquote&gt;
+&lt;p&gt;本文是对于 &lt;a href=&#34;https://eunomia.dev/zh/tutorials/2-kprobe-unlink/&#34;&gt;Eunomia Tutorials 2&lt;/a&gt; 的一个学习记录&lt;/p&gt;&lt;/blockquote&gt;
 &lt;h2 id=&#34;什么是-kprobe&#34;&gt;什么是 kprobe&lt;/h2&gt;
 &lt;p&gt;&lt;strong&gt;Kprobe​&lt;/strong&gt;​（Kernel Probe）是 Linux 内核提供的一项强大功能，它允许开发者和系统管理员在不​&lt;strong&gt;​修改内核源代码​&lt;/strong&gt;​或重启系统的前提下，在任意内核函数处动态插入“探针”：&lt;/p&gt;
 &lt;ul&gt;
@@ -457,8 +537,7 @@ curl -b cookies.txt https://example.com/dashboard
       <pubDate>Sun, 25 May 2025 00:00:00 +0000</pubDate>
       <guid>https://kerolt.github.io/posts/%E9%A1%B9%E7%9B%AE/%E5%88%86%E5%B8%83%E5%BC%8F%E7%BC%93%E5%AD%98/</guid>
       <description>&lt;blockquote&gt;
-&lt;p&gt;项目地址：https://github.com/kerolt/kcache&lt;/p&gt;
-&lt;/blockquote&gt;
+&lt;p&gt;项目地址：https://github.com/kerolt/kcache&lt;/p&gt;&lt;/blockquote&gt;
 &lt;p&gt;KCache 是一个分布式缓存系统，支持一致性哈希和 LRU 缓存淘汰策略。该项目使用 conan 作为包管理工具，使用 CMake 作为项目的构建工具。&lt;/p&gt;
 &lt;h2 id=&#34;数据流程&#34;&gt;数据流程&lt;/h2&gt;
 &lt;p&gt;当有客户端请求 kcache node 中的数据时：&lt;/p&gt;
@@ -536,9 +615,9 @@ curl -b cookies.txt https://example.com/dashboard
     </item>
     <item>
       <title>Git使用</title>
-      <link>https://kerolt.github.io/posts/%E6%9D%82%E9%A1%B9/git%E4%BD%BF%E7%94%A8/</link>
+      <link>https://kerolt.github.io/posts/%E6%8A%80%E6%9C%AF%E9%9A%8F%E7%AC%94/git%E4%BD%BF%E7%94%A8/</link>
       <pubDate>Sun, 18 May 2025 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E6%9D%82%E9%A1%B9/git%E4%BD%BF%E7%94%A8/</guid>
+      <guid>https://kerolt.github.io/posts/%E6%8A%80%E6%9C%AF%E9%9A%8F%E7%AC%94/git%E4%BD%BF%E7%94%A8/</guid>
       <description>&lt;h2 id=&#34;如何修改上次的-commit&#34;&gt;如何修改上次的 commit&lt;/h2&gt;
 &lt;p&gt;比如有的时候 commit 漏掉了文件、commit 信息写错了，可以这么做：&lt;/p&gt;
 &lt;p&gt;你要指定一个有效的编辑器作为 Git 的默认编辑器，可以使 Vim 或者 VSCode：&lt;/p&gt;
@@ -548,8 +627,7 @@ curl -b cookies.txt https://example.com/dashboard
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;code&gt;--amend&lt;/code&gt; 会用新的内容替换上一次提交，而不是创建一个新的提交。如果上一次提交已经被推送到远程仓库，使用 &lt;code&gt;--amend&lt;/code&gt; 后需要强制推送：&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-sh&#34; data-lang=&#34;sh&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;git push --force
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;blockquote&gt;
-&lt;p&gt;这个方法我有时候用来同步一下两台电脑上的代码，因为有时候一台电脑上写了一部分代码但是还没有到一次提交的地步，这时如果要外出或者要用另一台电脑了，就可以用这个方法来同步一下。&lt;/p&gt;
-&lt;/blockquote&gt;
+&lt;p&gt;这个方法我有时候用来同步一下两台电脑上的代码，因为有时候一台电脑上写了一部分代码但是还没有到一次提交的地步，这时如果要外出或者要用另一台电脑了，就可以用这个方法来同步一下。&lt;/p&gt;&lt;/blockquote&gt;
 &lt;p&gt;不过，使用 &lt;code&gt;git push --force&lt;/code&gt; 强制推送后，远程仓库的历史记录会被改写。这种操作可能会导致本地和远程分支的提交历史不一致。我自己通常这么解决：&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-sh&#34; data-lang=&#34;sh&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;git fetch origin
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;git reset --hard origin/&amp;lt;branch&amp;gt;
@@ -563,13 +641,20 @@ curl -b cookies.txt https://example.com/dashboard
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;</description>
     </item>
     <item>
+      <title>【CMake】CMake使用笔记</title>
+      <link>https://kerolt.github.io/posts/%E6%8A%80%E6%9C%AF%E9%9A%8F%E7%AC%94/cmakecmake%E4%BD%BF%E7%94%A8%E7%AC%94%E8%AE%B0/</link>
+      <pubDate>Wed, 14 May 2025 00:00:00 +0000</pubDate>
+      <guid>https://kerolt.github.io/posts/%E6%8A%80%E6%9C%AF%E9%9A%8F%E7%AC%94/cmakecmake%E4%BD%BF%E7%94%A8%E7%AC%94%E8%AE%B0/</guid>
+      <description>&lt;p&gt;记录学习 CMake 中碰到的一些问题和笔记&lt;/p&gt;
+&lt;p&gt;ps：CMake 相比 xmake 来说确实太繁琐，但还是得学习🍭&lt;/p&gt;</description>
+    </item>
+    <item>
       <title>875. 爱吃香蕉的珂珂</title>
       <link>https://kerolt.github.io/posts/%E7%AE%97%E6%B3%95/%E4%BA%8C%E5%88%86/875.-%E7%88%B1%E5%90%83%E9%A6%99%E8%95%89%E7%9A%84%E7%8F%82%E7%8F%82/</link>
       <pubDate>Wed, 07 May 2025 00:00:00 +0000</pubDate>
       <guid>https://kerolt.github.io/posts/%E7%AE%97%E6%B3%95/%E4%BA%8C%E5%88%86/875.-%E7%88%B1%E5%90%83%E9%A6%99%E8%95%89%E7%9A%84%E7%8F%82%E7%8F%82/</guid>
       <description>&lt;blockquote&gt;
-&lt;p&gt;&lt;a href=&#34;https://leetcode.cn/problems/koko-eating-bananas/&#34;&gt;https://leetcode.cn/problems/koko-eating-bananas/&lt;/a&gt;&lt;/p&gt;
-&lt;/blockquote&gt;
+&lt;p&gt;&lt;a href=&#34;https://leetcode.cn/problems/koko-eating-bananas/&#34;&gt;https://leetcode.cn/problems/koko-eating-bananas/&lt;/a&gt;&lt;/p&gt;&lt;/blockquote&gt;
 &lt;p&gt;假设每小时吃 &lt;code&gt;max(piles)&lt;/code&gt; 根香蕉，那么按照题意（向上取整）来说就只要 &lt;code&gt;piles.length&lt;/code&gt; 个小时就可以吃完。而注意提示中的：&lt;code&gt;piles.length &amp;lt;= h &amp;lt;= 10^9&lt;/code&gt;，这说明每小时吃 &lt;code&gt;max(piles)&lt;/code&gt; 根香蕉已经是最大的速度了，再快也没用了。因此需要去找比 &lt;code&gt;max(piles)&lt;/code&gt; 小的且满足题意的数。&lt;/p&gt;
 &lt;p&gt;那取 &lt;code&gt;max(piles)&lt;/code&gt; 作为右边界，左边界取 &lt;code&gt;1&lt;/code&gt; （因为总不可能不吃吧~），然去通过二分去找最小的满足条件的速度。&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-cpp&#34; data-lang=&#34;cpp&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;k&#34;&gt;class&lt;/span&gt; &lt;span class=&#34;nc&#34;&gt;Solution&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
@@ -612,8 +697,7 @@ curl -b cookies.txt https://example.com/dashboard
 &lt;li&gt;不可见性规则 ：事务不能看到在其读取时间戳之后提交或未提交的数据版本。&lt;/li&gt;
 &lt;/ul&gt;
 &lt;blockquote&gt;
-&lt;p&gt;15445 的 lab 写了太久太久了，自己懒是一方面，实力不够也是一方面，task4 后面的 lab 就不打算写了（无奈.jpg）。在这整个过程中，学到的东西还挺多的，对于代码能力也有提升，以后有时间还是可以多看看配套的课程，然后再好好读读代码，写写注释和博客去深入理解理解，毕竟 bustub 的不论是代码架构还是规范我都觉得非常棒。后面就要像 15445 网页中写到的，去多关注生活中其他感兴趣的地方了，希望能够不断提升自己~&lt;/p&gt;
-&lt;/blockquote&gt;
+&lt;p&gt;15445 的 lab 写了太久太久了，自己懒是一方面，实力不够也是一方面，task4 后面的 lab 就不打算写了（无奈.jpg）。在这整个过程中，学到的东西还挺多的，对于代码能力也有提升，以后有时间还是可以多看看配套的课程，然后再好好读读代码，写写注释和博客去深入理解理解，毕竟 bustub 的不论是代码架构还是规范我都觉得非常棒。后面就要像 15445 网页中写到的，去多关注生活中其他感兴趣的地方了，希望能够不断提升自己~&lt;/p&gt;&lt;/blockquote&gt;
 &lt;h2 id=&#34;0-bustub-中的-undolog&#34;&gt;0. Bustub 中的 undolog&lt;/h2&gt;
 &lt;p&gt;bustub 中在 TransactionManager 中通过一个哈希表来保存所有 tuple 的 undolog 起点：&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-cpp&#34; data-lang=&#34;cpp&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;k&#34;&gt;class&lt;/span&gt; &lt;span class=&#34;nc&#34;&gt;TransactionManager&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
@@ -768,9 +852,9 @@ curl -b cookies.txt https://example.com/dashboard
     </item>
     <item>
       <title>【解决】Fedora42升级启动时显示kernel panic</title>
-      <link>https://kerolt.github.io/posts/%E6%9D%82%E9%A1%B9/%E8%A7%A3%E5%86%B3fedora42%E5%8D%87%E7%BA%A7%E5%90%AF%E5%8A%A8%E6%97%B6%E6%98%BE%E7%A4%BAkernel-panic/</link>
+      <link>https://kerolt.github.io/posts/%E6%8A%80%E6%9C%AF%E9%9A%8F%E7%AC%94/%E8%A7%A3%E5%86%B3fedora42%E5%8D%87%E7%BA%A7%E5%90%AF%E5%8A%A8%E6%97%B6%E6%98%BE%E7%A4%BAkernel-panic/</link>
       <pubDate>Sun, 27 Apr 2025 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E6%9D%82%E9%A1%B9/%E8%A7%A3%E5%86%B3fedora42%E5%8D%87%E7%BA%A7%E5%90%AF%E5%8A%A8%E6%97%B6%E6%98%BE%E7%A4%BAkernel-panic/</guid>
+      <guid>https://kerolt.github.io/posts/%E6%8A%80%E6%9C%AF%E9%9A%8F%E7%AC%94/%E8%A7%A3%E5%86%B3fedora42%E5%8D%87%E7%BA%A7%E5%90%AF%E5%8A%A8%E6%97%B6%E6%98%BE%E7%A4%BAkernel-panic/</guid>
       <description>&lt;p&gt;最近 Fedora42 更新了，因此我打算升级一下玩玩。在执行完下面的命令后：&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo dnf upgrade --refresh
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo dnf system-upgrade download --releasever&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;m&#34;&gt;42&lt;/span&gt;
@@ -788,8 +872,7 @@ curl -b cookies.txt https://example.com/dashboard
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;错误的原因可能是更新内核后没有正确生成新的 initramfs 文件，系统可能会使用旧的、不兼容的 initramfs 文件，从而导致启动失败。&lt;/p&gt;
 &lt;p&gt;而 &lt;code&gt;dracut&lt;/code&gt; 是一个用于生成 Linux 系统 initramfs（初始内存文件系统）的工具。运行 这条命令后，&lt;code&gt;dracut&lt;/code&gt; 会重新生成与当前系统中所有已安装内核对应的 initramfs 文件。&lt;/p&gt;
 &lt;blockquote&gt;
-&lt;p&gt;参考：https://www.reddit.com/r/Fedora/comments/1hfkqnq/boot_error_after_updating_to_6124200&lt;/p&gt;
-&lt;/blockquote&gt;</description>
+&lt;p&gt;参考：https://www.reddit.com/r/Fedora/comments/1hfkqnq/boot_error_after_updating_to_6124200&lt;/p&gt;&lt;/blockquote&gt;</description>
     </item>
     <item>
       <title>3488. 距离最小相等元素查询</title>
@@ -797,8 +880,7 @@ curl -b cookies.txt https://example.com/dashboard
       <pubDate>Wed, 16 Apr 2025 00:00:00 +0000</pubDate>
       <guid>https://kerolt.github.io/posts/%E7%AE%97%E6%B3%95/%E4%BA%8C%E5%88%86/3488.-%E8%B7%9D%E7%A6%BB%E6%9C%80%E5%B0%8F%E7%9B%B8%E7%AD%89%E5%85%83%E7%B4%A0%E6%9F%A5%E8%AF%A2/</guid>
       <description>&lt;blockquote&gt;
-&lt;p&gt;&lt;a href=&#34;https://leetcode.cn/problems/closest-equal-element-queries/&#34;&gt;https://leetcode.cn/problems/closest-equal-element-queries/&lt;/a&gt;&lt;/p&gt;
-&lt;/blockquote&gt;
+&lt;p&gt;&lt;a href=&#34;https://leetcode.cn/problems/closest-equal-element-queries/&#34;&gt;https://leetcode.cn/problems/closest-equal-element-queries/&lt;/a&gt;&lt;/p&gt;&lt;/blockquote&gt;
 &lt;p&gt;通过示例1来分析：&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-text&#34; data-lang=&#34;text&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;输入： nums = [1,3,1,4,1,3,2], queries = [0,3,5]
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;输出： [2,-1,3]
@@ -806,8 +888,7 @@ curl -b cookies.txt https://example.com/dashboard
 &lt;blockquote&gt;
 &lt;p&gt;n 为 nums 的长度，
 在下标列表前面添加 4−n=−3，相当于认为在 −3 下标处也有一个 1。
-在下标列表末尾添加 0+n=7，相当于认为在 7 下标处也有一个 1。&lt;/p&gt;
-&lt;/blockquote&gt;
+在下标列表末尾添加 0+n=7，相当于认为在 7 下标处也有一个 1。&lt;/p&gt;&lt;/blockquote&gt;
 &lt;p&gt;题意是需要我们查询一个 nums 中的下标 &lt;code&gt;x&lt;/code&gt;，与 &lt;strong&gt;任意&lt;/strong&gt; 其他下标 &lt;code&gt;j&lt;/code&gt;（满足 &lt;code&gt;nums[j] == nums[x]&lt;/code&gt;）之间的 &lt;strong&gt;最小&lt;/strong&gt; 距离。我们用哈希表将每个相同值的元素的下标收集起来作为集合 &lt;code&gt;p&lt;/code&gt;，然后在查询时使用二分查询 &lt;code&gt;x&lt;/code&gt; 在其对应集合中的位置 &lt;code&gt;i&lt;/code&gt;，则左边最近的元素下标为 &lt;code&gt;p[i - 1]&lt;/code&gt;，右边最近元素下标为 &lt;code&gt;p[i + 1]&lt;/code&gt;，那么最小距离就是 &lt;code&gt;min(p[i + 1] - x, x - p[i - 1])&lt;/code&gt;。&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-cpp&#34; data-lang=&#34;cpp&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;k&#34;&gt;class&lt;/span&gt; &lt;span class=&#34;nc&#34;&gt;Solution&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;k&#34;&gt;public&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;:&lt;/span&gt;
@@ -929,8 +1010,7 @@ curl -b cookies.txt https://example.com/dashboard
       <pubDate>Tue, 11 Mar 2025 00:00:00 +0000</pubDate>
       <guid>https://kerolt.github.io/posts/%E6%95%B0%E6%8D%AE%E5%BA%93/cmu15-445-fall2023project3-query-execution-%E5%B0%8F%E7%BB%93/</guid>
       <description>&lt;blockquote&gt;
-&lt;p&gt;该系列博客只是为了记录自己在写 Lab 时的思路，按照课程要求不会在 Github 和博客中公开源代码。欢迎与我一起讨论交流！&lt;/p&gt;
-&lt;/blockquote&gt;
+&lt;p&gt;该系列博客只是为了记录自己在写 Lab 时的思路，按照课程要求不会在 Github 和博客中公开源代码。欢迎与我一起讨论交流！&lt;/p&gt;&lt;/blockquote&gt;
 &lt;p&gt;这个 project 和之前就不一样了，开始深入数据库内核的实现了。需要理清楚一条 sql 语句是如何被执行的，方才能写出代码。&lt;/p&gt;
 &lt;h2 id=&#34;前置奶酪&#34;&gt;前置奶酪&lt;/h2&gt;
 &lt;h3 id=&#34;一条-sql-语句的执行&#34;&gt;一条 SQL 语句的执行&lt;/h3&gt;
@@ -985,16 +1065,16 @@ curl -b cookies.txt https://example.com/dashboard
     </item>
     <item>
       <title>Linux下微信无法使用中文输入法问题解决</title>
-      <link>https://kerolt.github.io/posts/%E6%9D%82%E9%A1%B9/linux%E4%B8%8B%E5%BE%AE%E4%BF%A1%E6%97%A0%E6%B3%95%E4%BD%BF%E7%94%A8%E4%B8%AD%E6%96%87%E8%BE%93%E5%85%A5%E6%B3%95%E9%97%AE%E9%A2%98%E8%A7%A3%E5%86%B3/</link>
+      <link>https://kerolt.github.io/posts/%E6%8A%80%E6%9C%AF%E9%9A%8F%E7%AC%94/linux%E4%B8%8B%E5%BE%AE%E4%BF%A1%E6%97%A0%E6%B3%95%E4%BD%BF%E7%94%A8%E4%B8%AD%E6%96%87%E8%BE%93%E5%85%A5%E6%B3%95%E9%97%AE%E9%A2%98%E8%A7%A3%E5%86%B3/</link>
       <pubDate>Tue, 31 Dec 2024 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E6%9D%82%E9%A1%B9/linux%E4%B8%8B%E5%BE%AE%E4%BF%A1%E6%97%A0%E6%B3%95%E4%BD%BF%E7%94%A8%E4%B8%AD%E6%96%87%E8%BE%93%E5%85%A5%E6%B3%95%E9%97%AE%E9%A2%98%E8%A7%A3%E5%86%B3/</guid>
+      <guid>https://kerolt.github.io/posts/%E6%8A%80%E6%9C%AF%E9%9A%8F%E7%AC%94/linux%E4%B8%8B%E5%BE%AE%E4%BF%A1%E6%97%A0%E6%B3%95%E4%BD%BF%E7%94%A8%E4%B8%AD%E6%96%87%E8%BE%93%E5%85%A5%E6%B3%95%E9%97%AE%E9%A2%98%E8%A7%A3%E5%86%B3/</guid>
       <description>&lt;p&gt;微信在不久前终于有了 Linux 原生版本，我的电脑是 Fedora41，之前安装的是 flatpak 打包的微信，现在在官网下载 rpm 包后运行发现无法使用 fcitx 的中文输入法，找了一下是环境遍历的问题。&lt;/p&gt;</description>
     </item>
     <item>
       <title>在VSCode中配置LLDB</title>
-      <link>https://kerolt.github.io/posts/%E6%9D%82%E9%A1%B9/%E5%9C%A8vscode%E4%B8%AD%E9%85%8D%E7%BD%AElldb/</link>
+      <link>https://kerolt.github.io/posts/%E6%8A%80%E6%9C%AF%E9%9A%8F%E7%AC%94/%E5%9C%A8vscode%E4%B8%AD%E9%85%8D%E7%BD%AElldb/</link>
       <pubDate>Tue, 31 Dec 2024 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E6%9D%82%E9%A1%B9/%E5%9C%A8vscode%E4%B8%AD%E9%85%8D%E7%BD%AElldb/</guid>
+      <guid>https://kerolt.github.io/posts/%E6%8A%80%E6%9C%AF%E9%9A%8F%E7%AC%94/%E5%9C%A8vscode%E4%B8%AD%E9%85%8D%E7%BD%AElldb/</guid>
       <description>&lt;p&gt;为了 &lt;code&gt;CMake Tool&lt;/code&gt; 能调试代码，先装好 &lt;code&gt;codelldb&lt;/code&gt; 插件，然后还需要一个 &lt;code&gt;launch.json&lt;/code&gt; 文件，以下内容可以一键配置好调试：&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-json&#34; data-lang=&#34;json&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;nt&#34;&gt;&amp;#34;version&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt; &lt;span class=&#34;s2&#34;&gt;&amp;#34;0.2.0&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;
@@ -1051,13 +1131,21 @@ curl -b cookies.txt https://example.com/dashboard
       <description>&lt;p&gt;本次的实验总体都不是很难，第一个练习让我们在用户态模拟了线程的切换，这里重要的就是进程/线程上下文的保存与恢复；第二三个练习则是让我们跳出了xv6，去熟悉pthread库和线程的同步互斥。&lt;/p&gt;</description>
     </item>
     <item>
+      <title>CMake中使用find_pakage来使用MySQL</title>
+      <link>https://kerolt.github.io/posts/%E6%8A%80%E6%9C%AF%E9%9A%8F%E7%AC%94/cmake%E4%B8%AD%E4%BD%BF%E7%94%A8find_pakage%E6%9D%A5%E4%BD%BF%E7%94%A8mysql/</link>
+      <pubDate>Fri, 15 Nov 2024 00:00:00 +0000</pubDate>
+      <guid>https://kerolt.github.io/posts/%E6%8A%80%E6%9C%AF%E9%9A%8F%E7%AC%94/cmake%E4%B8%AD%E4%BD%BF%E7%94%A8find_pakage%E6%9D%A5%E4%BD%BF%E7%94%A8mysql/</guid>
+      <description>&lt;p&gt;一般来说，如果我们在 C++ 程序中要使用 mysql 的库，最简单的就是&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-sh&#34; data-lang=&#34;sh&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;g++ server.cpp -o server -lmysqlclient
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;但要是在大一点的项目中，在数不清的源文件下使用 g++ 命令来完成，怕是不太现实。&lt;/p&gt;</description>
+    </item>
+    <item>
       <title>【CMU15-445 Fall2023】Project2 Extendible Hash Index 小结</title>
       <link>https://kerolt.github.io/posts/%E6%95%B0%E6%8D%AE%E5%BA%93/cmu15-445-fall2023project2-extendible-hash-index-%E5%B0%8F%E7%BB%93/</link>
       <pubDate>Tue, 12 Nov 2024 00:00:00 +0000</pubDate>
       <guid>https://kerolt.github.io/posts/%E6%95%B0%E6%8D%AE%E5%BA%93/cmu15-445-fall2023project2-extendible-hash-index-%E5%B0%8F%E7%BB%93/</guid>
       <description>&lt;blockquote&gt;
-&lt;p&gt;该系列博客只是为了记录自己在写Lab时的思路，按照课程要求不会在Github和博客中公开源代码。欢迎与我一起讨论交流！&lt;/p&gt;
-&lt;/blockquote&gt;
+&lt;p&gt;该系列博客只是为了记录自己在写Lab时的思路，按照课程要求不会在Github和博客中公开源代码。欢迎与我一起讨论交流！&lt;/p&gt;&lt;/blockquote&gt;
 &lt;p&gt;太菜了，从没打过这么艰难的仗QAQ。由于课程的要求不能公开源代码，所以网上的资源会少很多，平台上的测试案例比较全面，有的还比较刁钻，需要考虑到可拓展哈希的实现细节。在自认为写完了后，提交了近40来次总有几个测试集过不了，还好没有崩溃，在看了几篇博客的方法后，加上自己画图理解，最后终于过了😭。不过回头写博客的时候再去看代码，也没有特别的复杂，还是得明白其中的算法逻辑是如何实现的。&lt;/p&gt;
 &lt;p&gt;
 &lt;div class=&#34;post-img-view&#34;&gt;
@@ -1084,8 +1172,7 @@ curl -b cookies.txt https://example.com/dashboard
 &lt;h2 id=&#34;task2---extendible-hash-table-pages&#34;&gt;Task2 - Extendible Hash Table Pages&lt;/h2&gt;
 &lt;p&gt;为什么我们需要可扩展哈希？&lt;/p&gt;
 &lt;blockquote&gt;
-&lt;p&gt;下图来源：https://www.bilibili.com/video/BV1Qt421w7JT&lt;/p&gt;
-&lt;/blockquote&gt;
+&lt;p&gt;下图来源：https://www.bilibili.com/video/BV1Qt421w7JT&lt;/p&gt;&lt;/blockquote&gt;
 &lt;p&gt;
 &lt;div class=&#34;post-img-view&#34;&gt;
   &lt;a data-fancybox=&#34;gallery&#34; href=&#34;https://obsidian-image-oss.oss-cn-shanghai.aliyuncs.com/Pasted%20image%2020250311201554.png&#34;&gt;
@@ -1113,8 +1200,7 @@ curl -b cookies.txt https://example.com/dashboard
 &lt;p&gt;这就要说到可拓展哈希中的插入和删除操作了。简单来说，在可拓展哈希表中，目录directory的大小是可以变化的（只要不超过最大容量限制）。目录中可能有多个entry映射到同一个bucket。当需要插入时，如果这个bucket还没有满时，可以直接插入；否则，需要将这个bucket分裂成两个bucket（或者说，将这个bucket中的一部分移动到另一个bucket中），并且&lt;strong&gt;这个bucket对应的local depth + 1，这样相比之前就多了一位二进制位去识别bucket&lt;/strong&gt;。具体的用法可以看后面的Task3部分的笔记。&lt;/p&gt;
 &lt;p&gt;下面讲几个稍微难懂的函数：&lt;/p&gt;
 &lt;h4 id=&#34;getglobaldepthmask&#34;&gt;GetGlobalDepthMask&lt;/h4&gt;
-&lt;p&gt;这个函数的作用是获取&lt;code&gt;global_depth_&lt;/code&gt;个二进制1，举个例子，如果global depth是2，那么说明这个目录当前的容量为&lt;code&gt;2^2=4&lt;/code&gt;，索引为0~3，用两位二进制就能表示。&lt;/p&gt;
-&lt;p&gt;主要用于和hash(key)进行&lt;code&gt;&amp;amp;&lt;/code&gt;操作，获取在directory中对应的索引位置。例如，假设key=3，hash(key)=101（二进制），global depth还是2，那么检查hash(key)的最低两位即为01，那么在directory就是第1个entry。&lt;/p&gt;</description>
+&lt;p&gt;这个函数的作用是获取&lt;code&gt;global_depth_&lt;/code&gt;个二进制1，举个例子，如果global depth是2，那么说明这个目录当前的容量为&lt;code&gt;2^2=4&lt;/code&gt;，索引为0~3，用两位二进制就能表示。&lt;/p&gt;</description>
     </item>
     <item>
       <title>【MIT6.S081】Lab5 copy-on-write fork</title>
@@ -1126,8 +1212,7 @@ curl -b cookies.txt https://example.com/dashboard
 &lt;p&gt;xv6中的&lt;code&gt;fork()&lt;/code&gt;系统调用将父进程的所有用户空间内存复制到子进程中。如果父进程所使用的页数很大，复制可能需要很长时间，而这样的复制操作经常是没有用的：&lt;code&gt;fork()&lt;/code&gt;之后通常是子进程中的&lt;code&gt;exec()&lt;/code&gt;，这会丢弃复制的内存而不是使用它们。&lt;/p&gt;
 &lt;p&gt;那么，我们是不是可以在子进程刚创建时将其页表的映射到父进程的物理页，而在其需要对内存进行写操作时再重新分配内存呢？没错，这就是通过copy on write（写时复制）技术来进行优化。&lt;/p&gt;
 &lt;blockquote&gt;
-&lt;p&gt;该实验的代码实现见：&lt;a href=&#34;https://github.com/kerolt/xv6-labs-2023/commit/68fd833dc03a681c04a647ed6aae2108a1e43fbb&#34;&gt;仓库commit&lt;/a&gt;&lt;/p&gt;
-&lt;/blockquote&gt;</description>
+&lt;p&gt;该实验的代码实现见：&lt;a href=&#34;https://github.com/kerolt/xv6-labs-2023/commit/68fd833dc03a681c04a647ed6aae2108a1e43fbb&#34;&gt;仓库commit&lt;/a&gt;&lt;/p&gt;&lt;/blockquote&gt;</description>
     </item>
     <item>
       <title>【MIT6.S081】Lab4 trap backtrace</title>
@@ -1136,8 +1221,7 @@ curl -b cookies.txt https://example.com/dashboard
       <guid>https://kerolt.github.io/posts/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/mit6.s081lab4-trap-backtrace/</guid>
       <description>&lt;p&gt;backtrace这个lab非常有意思，虽然实现的代码量不多，但是能让我们更好地理解栈、栈帧、指针、gdb的一些知识。&lt;/p&gt;
 &lt;blockquote&gt;
-&lt;p&gt;该实验的代码实现见：&lt;a href=&#34;https://github.com/kerolt/xv6-labs-2023/commit/d1dba8ae4a1a71604e8bb6df5238f8cac1771683&#34;&gt;仓库commit&lt;/a&gt;&lt;/p&gt;
-&lt;/blockquote&gt;</description>
+&lt;p&gt;该实验的代码实现见：&lt;a href=&#34;https://github.com/kerolt/xv6-labs-2023/commit/d1dba8ae4a1a71604e8bb6df5238f8cac1771683&#34;&gt;仓库commit&lt;/a&gt;&lt;/p&gt;&lt;/blockquote&gt;</description>
     </item>
     <item>
       <title>【MIT6.S081】Lab4 trap alarm</title>
@@ -1146,8 +1230,7 @@ curl -b cookies.txt https://example.com/dashboard
       <guid>https://kerolt.github.io/posts/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/mit6.s081lab4-trap-alarm/</guid>
       <description>&lt;p&gt;Alarm综合了该lab中前几个练习的知识点：系统调用、中断、寄存器等，我们需要对trap机制有比较好的认识才能理解。Alarm的任务是需要我们完成一个定时器的实现：&lt;code&gt;sigalarm(interval, handler)&lt;/code&gt;，当调用&lt;code&gt;sigalarm(n, fn)&lt;/code&gt;时，内核会每n个时间间隔（tick）执行fn函数。&lt;/p&gt;
 &lt;blockquote&gt;
-&lt;p&gt;该实验的代码实现见：&lt;a href=&#34;https://github.com/kerolt/xv6-labs-2023/commit/0f70ef7d68ab1273262b8d43a2deaf7345a87698&#34;&gt;仓库commit&lt;/a&gt;&lt;/p&gt;
-&lt;/blockquote&gt;</description>
+&lt;p&gt;该实验的代码实现见：&lt;a href=&#34;https://github.com/kerolt/xv6-labs-2023/commit/0f70ef7d68ab1273262b8d43a2deaf7345a87698&#34;&gt;仓库commit&lt;/a&gt;&lt;/p&gt;&lt;/blockquote&gt;</description>
     </item>
     <item>
       <title>【MIT6.S081】Lab3 page tables（上）</title>
@@ -1169,8 +1252,7 @@ curl -b cookies.txt https://example.com/dashboard
 &lt;li&gt;一个存储每一页是否被访问的掩码&lt;/li&gt;
 &lt;/ol&gt;
 &lt;blockquote&gt;
-&lt;p&gt;该lab的所有代码：&lt;a href=&#34;https://github.com/kerolt/xv6-labs-2023/commit/87373230877d27d7f60c39696688863210c41133&#34;&gt;Github&lt;/a&gt;&lt;/p&gt;
-&lt;/blockquote&gt;</description>
+&lt;p&gt;该lab的所有代码：&lt;a href=&#34;https://github.com/kerolt/xv6-labs-2023/commit/87373230877d27d7f60c39696688863210c41133&#34;&gt;Github&lt;/a&gt;&lt;/p&gt;&lt;/blockquote&gt;</description>
     </item>
     <item>
       <title>【MIT6.S081】Lab2 system calls</title>
@@ -1203,8 +1285,7 @@ curl -b cookies.txt https://example.com/dashboard
       <pubDate>Sat, 12 Oct 2024 00:00:00 +0000</pubDate>
       <guid>https://kerolt.github.io/posts/%E6%95%B0%E6%8D%AE%E5%BA%93/cmu15-445-fall2023project1-buffer-pool-%E5%B0%8F%E7%BB%93/</guid>
       <description>&lt;blockquote&gt;
-&lt;p&gt;该系列博客只是为了记录自己在写Lab时的思路，按照课程要求不会在Github和博客中公开源代码。欢迎与我一起讨论交流！&lt;/p&gt;
-&lt;/blockquote&gt;
+&lt;p&gt;该系列博客只是为了记录自己在写Lab时的思路，按照课程要求不会在Github和博客中公开源代码。欢迎与我一起讨论交流！&lt;/p&gt;&lt;/blockquote&gt;
 &lt;p&gt;这个Project需要我们实现一个缓存池，减少对于磁盘的频繁IO。开始慢慢上强度了，细节拉满！&lt;/p&gt;</description>
     </item>
     <item>
@@ -1213,8 +1294,7 @@ curl -b cookies.txt https://example.com/dashboard
       <pubDate>Sun, 06 Oct 2024 00:00:00 +0000</pubDate>
       <guid>https://kerolt.github.io/posts/%E6%95%B0%E6%8D%AE%E5%BA%93/cmu15-445-fall2023project0-c&#43;&#43;-primer-%E5%B0%8F%E7%BB%93/</guid>
       <description>&lt;blockquote&gt;
-&lt;p&gt;该系列博客只是为了记录自己在写Lab时的思路，按照课程要求不会在Github和博客中公开源代码。欢迎与我一起讨论交流！&lt;/p&gt;
-&lt;/blockquote&gt;
+&lt;p&gt;该系列博客只是为了记录自己在写Lab时的思路，按照课程要求不会在Github和博客中公开源代码。欢迎与我一起讨论交流！&lt;/p&gt;&lt;/blockquote&gt;
 &lt;p&gt;project0只在task4中浅浅涉及了一点BusTub的内容，其他都是检测我们对于C++的一个掌握，主要涉及智能指针和C++的常用特性（dynamic_cast、std::move、并发与锁等）。&lt;/p&gt;</description>
     </item>
     <item>
@@ -1224,8 +1304,7 @@ curl -b cookies.txt https://example.com/dashboard
       <guid>https://kerolt.github.io/posts/%E9%A1%B9%E7%9B%AE/%E5%8A%A8%E6%89%8B%E5%86%99%E5%8D%8F%E7%A8%8B%E5%BA%93-5%E5%B8%B8%E7%94%A8io%E5%87%BD%E6%95%B0%E7%9A%84hook%E5%8A%9F%E8%83%BD/</guid>
       <description>&lt;blockquote&gt;
 &lt;p&gt;【动手写协程库】系列笔记是学习sylar的协程库时的记录，参考了&lt;a href=&#34;https://www.midlane.top/wiki/pages/viewpage.action?pageId=10060952&#34;&gt;从零开始重写sylar C++高性能分布式服务器框架&lt;/a&gt;和代码随想录中的&lt;a href=&#34;https://www.programmercarl.com/other/project_coroutine.html#%E4%B8%8B%E8%BD%BD%E6%96%B9%E5%BC%8F&#34;&gt;文档&lt;/a&gt;。文章并不是对所有代码的详细解释，而是为了自己理解一些片段所做的笔记。&lt;/p&gt;
-&lt;p&gt;hook函数的具体定义实现可以在这里查看：&lt;a href=&#34;https://github.com/kerolt/coroutine-lib/blob/master/src/hook.cpp&#34;&gt;Github: src/hook.cpp&lt;/a&gt;&lt;/p&gt;
-&lt;/blockquote&gt;
+&lt;p&gt;hook函数的具体定义实现可以在这里查看：&lt;a href=&#34;https://github.com/kerolt/coroutine-lib/blob/master/src/hook.cpp&#34;&gt;Github: src/hook.cpp&lt;/a&gt;&lt;/p&gt;&lt;/blockquote&gt;
 &lt;p&gt;该协程库框架的目标并不是做成类似goroutine那样，而是希望能够通过协程来提高IO处理的效率。因此，对于每个文件描述符fd，我们都希望它有一个读写IO的超时时间。&lt;/p&gt;
 &lt;p&gt;hook的目的是在不重新编写代码的情况下，把老代码中的socket IO相关的API都&lt;strong&gt;转成异步&lt;/strong&gt;，以提高性能。&lt;/p&gt;</description>
     </item>
@@ -1236,8 +1315,7 @@ curl -b cookies.txt https://example.com/dashboard
       <guid>https://kerolt.github.io/posts/%E9%A1%B9%E7%9B%AE/%E5%8A%A8%E6%89%8B%E5%86%99%E5%8D%8F%E7%A8%8B%E5%BA%93-4io%E5%8D%8F%E7%A8%8B%E8%B0%83%E5%BA%A6%E5%99%A8/</guid>
       <description>&lt;blockquote&gt;
 &lt;p&gt;【动手写协程库】系列笔记是学习sylar的协程库时的记录，参考了&lt;a href=&#34;https://www.midlane.top/wiki/pages/viewpage.action?pageId=10060952&#34;&gt;从零开始重写sylar C++高性能分布式服务器框架&lt;/a&gt;和代码随想录中的&lt;a href=&#34;https://www.programmercarl.com/other/project_coroutine.html#%E4%B8%8B%E8%BD%BD%E6%96%B9%E5%BC%8F&#34;&gt;文档&lt;/a&gt;。文章并不是对所有代码的详细解释，而是为了自己理解一些片段所做的笔记。&lt;/p&gt;
-&lt;p&gt;&lt;code&gt;IOManager&lt;/code&gt;类中具体定义实现可以在这里查看：&lt;a href=&#34;https://github.com/kerolt/coroutine-lib/blob/master/src/iomanager.cpp&#34;&gt;Github: src/iomanager.cpp&lt;/a&gt;&lt;/p&gt;
-&lt;/blockquote&gt;
+&lt;p&gt;&lt;code&gt;IOManager&lt;/code&gt;类中具体定义实现可以在这里查看：&lt;a href=&#34;https://github.com/kerolt/coroutine-lib/blob/master/src/iomanager.cpp&#34;&gt;Github: src/iomanager.cpp&lt;/a&gt;&lt;/p&gt;&lt;/blockquote&gt;
 &lt;p&gt;之前实现的协程调度器的功能其实非常简单，当添加任务后调度器只是单纯的从任务队列中取出任务交给协程去执行。sylar的协程库的关注对象是网络IO，如果采用这么简单的调度就根本没有用到协程的精髓。&lt;/p&gt;
 &lt;p&gt;sylar的IO协程调度解决了之前调度器在idle状态下忙等待导致CPU占用率高的问题。IO协程调度器使用一对管道fd来tickle调度协程，当调度器空闲时，idle协程通过epoll_wait阻塞在管道的读描述符上，等管道的可读事件。添加新任务时，tickle方法写管道，idle协程检测到管道可读后退出，调度器执行调度。&lt;/p&gt;</description>
     </item>
@@ -1248,8 +1326,7 @@ curl -b cookies.txt https://example.com/dashboard
       <guid>https://kerolt.github.io/posts/%E9%A1%B9%E7%9B%AE/%E5%8A%A8%E6%89%8B%E5%86%99%E5%8D%8F%E7%A8%8B%E5%BA%93-3%E5%AE%9A%E6%97%B6%E5%99%A8/</guid>
       <description>&lt;blockquote&gt;
 &lt;p&gt;【动手写协程库】系列笔记是学习sylar的协程库时的记录，参考了&lt;a href=&#34;https://www.midlane.top/wiki/pages/viewpage.action?pageId=10060952&#34;&gt;从零开始重写sylar C++高性能分布式服务器框架&lt;/a&gt;和代码随想录中的&lt;a href=&#34;https://www.programmercarl.com/other/project_coroutine.html#%E4%B8%8B%E8%BD%BD%E6%96%B9%E5%BC%8F&#34;&gt;文档&lt;/a&gt;。文章并不是对所有代码的详细解释，而是为了自己理解一些片段所做的笔记。&lt;/p&gt;
-&lt;p&gt;&lt;code&gt;TimerManager&lt;/code&gt;类中具体定义实现可以在这里查看：&lt;a href=&#34;https://github.com/kerolt/coroutine-lib/blob/master/src/timer.cpp&#34;&gt;Github: src/timer.cpp&lt;/a&gt;&lt;/p&gt;
-&lt;/blockquote&gt;
+&lt;p&gt;&lt;code&gt;TimerManager&lt;/code&gt;类中具体定义实现可以在这里查看：&lt;a href=&#34;https://github.com/kerolt/coroutine-lib/blob/master/src/timer.cpp&#34;&gt;Github: src/timer.cpp&lt;/a&gt;&lt;/p&gt;&lt;/blockquote&gt;
 &lt;p&gt;通过定时器，我们可以实现给服务器注册定时事件。sylar的定时器采用最小堆设计，所有定时器根据绝对的超时时间点（也就是超时到期的具体时间戳）进行排序，每次取出离当前时间&lt;strong&gt;最近的一个超时时间点&lt;/strong&gt;，计算出超时需要等待的时间，然后等待超时。超时时间到后，获取当前的绝对时间点，然后&lt;strong&gt;把最小堆里超时时间点小于这个时间点的定时器都收集起来&lt;/strong&gt;，执行它们的回调函数。&lt;/p&gt;</description>
     </item>
     <item>
@@ -1273,8 +1350,7 @@ curl -b cookies.txt https://example.com/dashboard
       <guid>https://kerolt.github.io/posts/%E9%A1%B9%E7%9B%AE/%E5%8A%A8%E6%89%8B%E5%86%99%E5%8D%8F%E7%A8%8B%E5%BA%93-2%E5%8D%8F%E7%A8%8B%E8%B0%83%E5%BA%A6%E5%99%A8/</guid>
       <description>&lt;blockquote&gt;
 &lt;p&gt;【动手写协程库】系列笔记是学习sylar的协程库时的记录，参考了&lt;a href=&#34;https://www.midlane.top/wiki/pages/viewpage.action?pageId=10060952&#34;&gt;从零开始重写sylar C++高性能分布式服务器框架&lt;/a&gt;和代码随想录中的&lt;a href=&#34;https://www.programmercarl.com/other/project_coroutine.html#%E4%B8%8B%E8%BD%BD%E6%96%B9%E5%BC%8F&#34;&gt;文档&lt;/a&gt;。文章并不是对所有代码的详细解释，而是为了自己理解一些片段所做的笔记。&lt;/p&gt;
-&lt;p&gt;&lt;code&gt;Scheduler&lt;/code&gt;类中其他函数的定义可以在这里查看：&lt;a href=&#34;https://github.com/kerolt/coroutine-lib/blob/master/src/scheduler.cpp&#34;&gt;Github: src/scheduler.cpp&lt;/a&gt;&lt;/p&gt;
-&lt;/blockquote&gt;
+&lt;p&gt;&lt;code&gt;Scheduler&lt;/code&gt;类中其他函数的定义可以在这里查看：&lt;a href=&#34;https://github.com/kerolt/coroutine-lib/blob/master/src/scheduler.cpp&#34;&gt;Github: src/scheduler.cpp&lt;/a&gt;&lt;/p&gt;&lt;/blockquote&gt;
 &lt;p&gt;Sylar的协程调度器是一个N-M模型，意味着N个线程可以运行M个协程，协程能够在线程之间进行切换，也可以被绑定到特定的线程上执行。&lt;/p&gt;
 &lt;p&gt;调度器可以由应用程序中的任何线程创建，但创建它的线程（称为caller线程）可以选择是否参与协程的调度。如果caller线程参与调度，那么调度器的线程数会相应减少一个，因为caller线程本身也会作为一个调度线程。&lt;/p&gt;</description>
     </item>
@@ -1285,19 +1361,17 @@ curl -b cookies.txt https://example.com/dashboard
       <guid>https://kerolt.github.io/posts/%E9%A1%B9%E7%9B%AE/%E5%8A%A8%E6%89%8B%E5%86%99%E5%8D%8F%E7%A8%8B%E5%BA%93-1%E5%8D%8F%E7%A8%8B%E5%AE%9A%E4%B9%89/</guid>
       <description>&lt;blockquote&gt;
 &lt;p&gt;【动手写协程库】系列笔记是学习sylar的协程库时的记录，参考了&lt;a href=&#34;https://www.midlane.top/wiki/pages/viewpage.action?pageId=10060952&#34;&gt;从零开始重写sylar C++高性能分布式服务器框架&lt;/a&gt;和代码随想录中的&lt;a href=&#34;https://www.programmercarl.com/other/project_coroutine.html#%E4%B8%8B%E8%BD%BD%E6%96%B9%E5%BC%8F&#34;&gt;文档&lt;/a&gt;。文章并不是对所有代码的详细解释，而是为了自己理解一些片段所做的笔记。&lt;/p&gt;
-&lt;p&gt;&lt;code&gt;Coroutine&lt;/code&gt;类中其他函数的定义可以在这里查看：&lt;a href=&#34;https://github.com/kerolt/coroutine-lib/blob/master/src/coroutine.cpp&#34;&gt;Github: src/coroutine.cpp&lt;/a&gt;&lt;/p&gt;
-&lt;/blockquote&gt;
+&lt;p&gt;&lt;code&gt;Coroutine&lt;/code&gt;类中其他函数的定义可以在这里查看：&lt;a href=&#34;https://github.com/kerolt/coroutine-lib/blob/master/src/coroutine.cpp&#34;&gt;Github: src/coroutine.cpp&lt;/a&gt;&lt;/p&gt;&lt;/blockquote&gt;
 &lt;p&gt;对于什么是协程，为什么要使用协程，可以看看之前的笔记：&lt;a href=&#34;https://kerolt.github.io/posts/f663291a/&#34;&gt;【协程】C++20协程初体验&lt;/a&gt;。&lt;/p&gt;
 &lt;p&gt;对于我们自己来实现协程，其实在之前Xv6的Lab中就有做过：&lt;a href=&#34;https://kerolt.github.io/posts/cb4e63bc/#Uthread-switching-between-threads&#34;&gt;【MIT6.S081】Lab6 multithreading&lt;/a&gt;，当初做这个lab的时候没有意识到这就是协程。协程的切换最重要的就是要保存和恢复上下文，在这个lab中，我们通过保存每个协程在切换之前的寄存器的值，以此可用来恢复原来的执行流。&lt;/p&gt;</description>
     </item>
     <item>
       <title>解决X11下窗口拖动撕裂的一个方法</title>
-      <link>https://kerolt.github.io/posts/%E6%9D%82%E9%A1%B9/%E8%A7%A3%E5%86%B3x11%E4%B8%8B%E7%AA%97%E5%8F%A3%E6%8B%96%E5%8A%A8%E6%92%95%E8%A3%82%E7%9A%84%E4%B8%80%E4%B8%AA%E6%96%B9%E6%B3%95/</link>
+      <link>https://kerolt.github.io/posts/%E6%8A%80%E6%9C%AF%E9%9A%8F%E7%AC%94/%E8%A7%A3%E5%86%B3x11%E4%B8%8B%E7%AA%97%E5%8F%A3%E6%8B%96%E5%8A%A8%E6%92%95%E8%A3%82%E7%9A%84%E4%B8%80%E4%B8%AA%E6%96%B9%E6%B3%95/</link>
       <pubDate>Tue, 03 Sep 2024 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E6%9D%82%E9%A1%B9/%E8%A7%A3%E5%86%B3x11%E4%B8%8B%E7%AA%97%E5%8F%A3%E6%8B%96%E5%8A%A8%E6%92%95%E8%A3%82%E7%9A%84%E4%B8%80%E4%B8%AA%E6%96%B9%E6%B3%95/</guid>
+      <guid>https://kerolt.github.io/posts/%E6%8A%80%E6%9C%AF%E9%9A%8F%E7%AC%94/%E8%A7%A3%E5%86%B3x11%E4%B8%8B%E7%AA%97%E5%8F%A3%E6%8B%96%E5%8A%A8%E6%92%95%E8%A3%82%E7%9A%84%E4%B8%80%E4%B8%AA%E6%96%B9%E6%B3%95/</guid>
       <description>&lt;blockquote&gt;
-&lt;p&gt;Debian 系 Linux 安装 N 卡驱动参考这篇 &lt;a href=&#34;https://www.if-not-true-then-false.com/2021/debian-ubuntu-linux-mint-nvidia-guide/&#34;&gt;博客&lt;/a&gt;&lt;/p&gt;
-&lt;/blockquote&gt;
+&lt;p&gt;Debian 系 Linux 安装 N 卡驱动参考这篇 &lt;a href=&#34;https://www.if-not-true-then-false.com/2021/debian-ubuntu-linux-mint-nvidia-guide/&#34;&gt;博客&lt;/a&gt;&lt;/p&gt;&lt;/blockquote&gt;
 &lt;p&gt;最近 Debian 终于是装好 nvidia 的驱动了，但是只能用在 X11 上，并且相比于不用 n 卡驱动时的 Wayland，X11 下的窗口拖动和视频播放会有比较明显的撕裂感，以下是解决的一个方法。&lt;/p&gt;</description>
     </item>
     <item>
@@ -1354,8 +1428,7 @@ curl -b cookies.txt https://example.com/dashboard
       <description>&lt;blockquote&gt;
 &lt;p&gt;难度：Hard&lt;/p&gt;
 &lt;p&gt;标签：位运算；图论；Floyd算法&lt;/p&gt;
-&lt;p&gt;链接： &lt;a href=&#34;https://leetcode.cn/problems/number-of-possible-sets-of-closing-branches/&#34;&gt;https://leetcode.cn/problems/number-of-possible-sets-of-closing-branches/&lt;/a&gt;&lt;/p&gt;
-&lt;/blockquote&gt;</description>
+&lt;p&gt;链接： &lt;a href=&#34;https://leetcode.cn/problems/number-of-possible-sets-of-closing-branches/&#34;&gt;https://leetcode.cn/problems/number-of-possible-sets-of-closing-branches/&lt;/a&gt;&lt;/p&gt;&lt;/blockquote&gt;</description>
     </item>
     <item>
       <title>Linux开放端口号</title>
@@ -1372,8 +1445,7 @@ curl -b cookies.txt https://example.com/dashboard
       <description>&lt;blockquote&gt;
 &lt;p&gt;难度：Hard&lt;/p&gt;
 &lt;p&gt;标签：哈希表；滑动窗口；字符串&lt;/p&gt;
-&lt;p&gt;链接： &lt;a href=&#34;https://leetcode.cn/problems/minimum-window-substring/description/&#34;&gt;https://leetcode.cn/problems/minimum-window-substring/description/&lt;/a&gt;&lt;/p&gt;
-&lt;/blockquote&gt;</description>
+&lt;p&gt;链接： &lt;a href=&#34;https://leetcode.cn/problems/minimum-window-substring/description/&#34;&gt;https://leetcode.cn/problems/minimum-window-substring/description/&lt;/a&gt;&lt;/p&gt;&lt;/blockquote&gt;</description>
     </item>
     <item>
       <title>用uni-cli创建项目后使用eslint</title>
@@ -1390,14 +1462,13 @@ curl -b cookies.txt https://example.com/dashboard
       <description>&lt;blockquote&gt;
 &lt;p&gt;难度：Hard&lt;/p&gt;
 &lt;p&gt;标签：哈希表、字符串、滑动窗口&lt;/p&gt;
-&lt;p&gt;链接：https://leetcode.cn/problems/substring-with-concatenation-of-all-words/description/&lt;/p&gt;
-&lt;/blockquote&gt;</description>
+&lt;p&gt;链接：https://leetcode.cn/problems/substring-with-concatenation-of-all-words/description/&lt;/p&gt;&lt;/blockquote&gt;</description>
     </item>
     <item>
       <title>VMware17.5.2启动踩坑</title>
-      <link>https://kerolt.github.io/posts/%E6%9D%82%E9%A1%B9/vmware17.5.2%E5%90%AF%E5%8A%A8%E8%B8%A9%E5%9D%91/</link>
+      <link>https://kerolt.github.io/posts/%E6%8A%80%E6%9C%AF%E9%9A%8F%E7%AC%94/vmware17.5.2%E5%90%AF%E5%8A%A8%E8%B8%A9%E5%9D%91/</link>
       <pubDate>Mon, 27 May 2024 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E6%9D%82%E9%A1%B9/vmware17.5.2%E5%90%AF%E5%8A%A8%E8%B8%A9%E5%9D%91/</guid>
+      <guid>https://kerolt.github.io/posts/%E6%8A%80%E6%9C%AF%E9%9A%8F%E7%AC%94/vmware17.5.2%E5%90%AF%E5%8A%A8%E8%B8%A9%E5%9D%91/</guid>
       <description>&lt;p&gt;最近听说 VMware17.5.2 个人版可以免费使用了，故在 Linux 下安装用用，顺便记录一下踩的坑。&lt;/p&gt;</description>
     </item>
     <item>
@@ -1419,8 +1490,7 @@ curl -b cookies.txt https://example.com/dashboard
       <pubDate>Thu, 11 Apr 2024 00:00:00 +0000</pubDate>
       <guid>https://kerolt.github.io/posts/%E7%AE%97%E6%B3%95/%E8%82%A1%E7%A5%A8%E9%97%AE%E9%A2%98%E4%B8%8E%E7%8A%B6%E6%80%81%E6%9C%BAdp/</guid>
       <description>&lt;blockquote&gt;
-&lt;p&gt;本篇文章思路来源于 @bilibili/&lt;a href=&#34;https://space.bilibili.com/206214&#34;&gt;灵茶山艾府&lt;/a&gt;&lt;/p&gt;
-&lt;/blockquote&gt;
+&lt;p&gt;本篇文章思路来源于 @bilibili/&lt;a href=&#34;https://space.bilibili.com/206214&#34;&gt;灵茶山艾府&lt;/a&gt;&lt;/p&gt;&lt;/blockquote&gt;
 &lt;p&gt;题目描述：&lt;a href=&#34;https://leetcode.cn/problems/best-time-to-buy-and-sell-stock-ii&#34;&gt;https://leetcode.cn/problems/best-time-to-buy-and-sell-stock-ii&lt;/a&gt;&lt;/p&gt;
 &lt;p&gt;相对于买卖股票的最佳时机I，该问题可以多次买入和卖出股票以获取最大利益&lt;/p&gt;</description>
     </item>
@@ -1496,8 +1566,7 @@ curl -b cookies.txt https://example.com/dashboard
       <pubDate>Fri, 10 Nov 2023 00:00:00 +0000</pubDate>
       <guid>https://kerolt.github.io/posts/%E7%AE%97%E6%B3%95/%E9%93%BE%E8%A1%A8%E5%88%A4%E6%96%AD%E5%9B%9E%E6%96%87%E9%93%BE%E8%A1%A8/</guid>
       <description>&lt;blockquote&gt;
-&lt;p&gt;&lt;a href=&#34;https://leetcode.cn/problems/palindrome-linked-list/&#34;&gt;https://leetcode.cn/problems/palindrome-linked-list/&lt;/a&gt;&lt;/p&gt;
-&lt;/blockquote&gt;
+&lt;p&gt;&lt;a href=&#34;https://leetcode.cn/problems/palindrome-linked-list/&#34;&gt;https://leetcode.cn/problems/palindrome-linked-list/&lt;/a&gt;&lt;/p&gt;&lt;/blockquote&gt;
 &lt;h3 id=&#34;1将链表转化为数组进行比较&#34;&gt;（1）将链表转化为数组进行比较&lt;/h3&gt;
 &lt;p&gt;比较呆板的做法，空间复杂度为&lt;code&gt;O(n)&lt;/code&gt;​。&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-cpp&#34; data-lang=&#34;cpp&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;k&#34;&gt;class&lt;/span&gt; &lt;span class=&#34;nc&#34;&gt;Solution&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
