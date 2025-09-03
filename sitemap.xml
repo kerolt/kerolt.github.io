@@ -2,6 +2,12 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
+    <loc>https://kerolt.github.io/</loc>
+    <lastmod>2025-09-02T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://kerolt.github.io/posts/</loc>
+    <lastmod>2025-09-02T00:00:00+00:00</lastmod>
+  </url><url>
     <loc>https://kerolt.github.io/posts/%E6%8A%80%E6%9C%AF%E9%9A%8F%E7%AC%94/%E9%97%AE%E9%A2%98%E8%AE%B0%E5%BD%95ddns-go%E4%B8%8Eipv6%E7%BD%91%E7%BB%9C%E9%85%8D%E7%BD%AE/</loc>
     <lastmod>2025-08-29T00:00:00+00:00</lastmod>
   </url><url>
@@ -14,16 +20,10 @@
     <loc>https://kerolt.github.io/tags/ipv6/</loc>
     <lastmod>2025-08-29T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://kerolt.github.io/</loc>
-    <lastmod>2025-08-29T00:00:00+00:00</lastmod>
-  </url><url>
     <loc>https://kerolt.github.io/tags/linux/</loc>
     <lastmod>2025-08-29T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://kerolt.github.io/tags/network/</loc>
-    <lastmod>2025-08-29T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>https://kerolt.github.io/posts/</loc>
     <lastmod>2025-08-29T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://kerolt.github.io/tags/ssh/</loc>
