@@ -341,6 +341,77 @@
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;strong&gt;用途：定义一个名为 &lt;code&gt;name&lt;/code&gt; 的字段，其类型是 &lt;code&gt;val&lt;/code&gt; 的指针。&lt;/strong&gt;&lt;/p&gt;</description>
     </item>
     <item>
+      <title>CO-RE机制与vmlinux.h</title>
+      <link>https://kerolt.github.io/posts/ebpf/co-re%E6%9C%BA%E5%88%B6%E4%B8%8Evmlinux.h/</link>
+      <pubDate>Tue, 01 Jul 2025 00:00:00 +0000</pubDate>
+      <guid>https://kerolt.github.io/posts/ebpf/co-re%E6%9C%BA%E5%88%B6%E4%B8%8Evmlinux.h/</guid>
+      <description>&lt;p&gt;通过解耦编译时依赖和运行时重定位，实现 BPF 程序对内核版本与配置差异的自动适配。vmlinux.h 之所以无需严格匹配你的内核配置或版本，关键在于以下机制：&lt;/p&gt;
+&lt;h2 id=&#34;btfbpf-type-format提供统一类型描述&#34;&gt;BTF（BPF Type Format）提供统一类型描述&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;vmlinux.h 本质是内核 BTF 的 C 语言翻译&lt;/strong&gt;：它由 &lt;code&gt;bpftool btf dump file /sys/kernel/btf/vmlinux format c &amp;gt; vmlinux.h&lt;/code&gt; 命令生成，完整包含内核所有数据结构的类型定义（如结构体、枚举）。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;独立于具体配置&lt;/strong&gt;：BTF 记录了内核的&lt;strong&gt;最终内存布局&lt;/strong&gt;（包括因配置选项如 &lt;code&gt;CONFIG_COMPAT&lt;/code&gt; 导致的字段偏移变化）。因此，编译时使用的 &lt;code&gt;vmlinux.h&lt;/code&gt; 只需是&lt;strong&gt;某一有效内核的 BTF 快照&lt;/strong&gt;，无需与目标内核完全一致。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;生成-vmlinuxh&#34;&gt;生成 vmlinux.h&lt;/h2&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;bpftool btf dump file /sys/kernel/btf/vmlinux format c &amp;gt; vmlinux.h
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h2 id=&#34;clang-编译时记录重定位元信息&#34;&gt;Clang 编译时记录“重定位元信息”&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;当使用 Clang（≥10）编译 BPF 程序时，对内核结构的访问（如 &lt;code&gt;task_struct-&amp;gt;pid&lt;/code&gt;）会被转换为 &lt;strong&gt;CO-RE 重定位项&lt;/strong&gt;。这些项记录：
+&lt;ul&gt;
+&lt;li&gt;访问的&lt;strong&gt;字段名&lt;/strong&gt;（如 &lt;code&gt;pid&lt;/code&gt;）&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;类型路径&lt;/strong&gt;（如 &lt;code&gt;struct task_struct&lt;/code&gt;）&lt;/li&gt;
+&lt;li&gt;预期偏移/大小等。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;此过程依赖 &lt;code&gt;vmlinux.h&lt;/code&gt; 提供类型合法性检查，但&lt;strong&gt;不绑定具体偏移&lt;/strong&gt;。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;libbpf-运行时动态重定位&#34;&gt;libbpf 运行时动态重定位&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;加载 BPF 程序时，libbpf 执行关键两步：
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;查询目标内核的 BTF&lt;/strong&gt;（&lt;code&gt;/sys/kernel/btf/vmlinux&lt;/code&gt;），获取实际结构布局；&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;比对编译时的重定位项&lt;/strong&gt;，修正字段偏移、处理字段增减（如通过 &lt;code&gt;bpf_core_field_exists()&lt;/code&gt; 判断成员是否存在）。&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/li&gt;
+&lt;li&gt;例如：若目标内核的 &lt;code&gt;struct user_arg_ptr&lt;/code&gt; 因 &lt;code&gt;CONFIG_COMPAT=y&lt;/code&gt; 新增 &lt;code&gt;is_compat&lt;/code&gt; 字段，libbpf 会自动调整 &lt;code&gt;native&lt;/code&gt; 字段的访问偏移。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;co-re-辅助函数实现条件兼容&#34;&gt;CO-RE 辅助函数实现条件兼容&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;BPF 代码可通过以下函数动态适应内核差异：
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;&lt;code&gt;bpf_core_read(dst, src)&lt;/code&gt;&lt;/strong&gt;：替代直接指针访问，按运行时偏移安全读取字段；&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;&lt;code&gt;BPF_CORE_READ(src, field)&lt;/code&gt;&lt;/strong&gt;：处理嵌套结构；&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;&lt;code&gt;bpf_core_field_exists(field)&lt;/code&gt;&lt;/strong&gt;：条件执行兼容逻辑（如选择参数索引）。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;这些函数在编译时生成重定位项，在运行时由 libbpf 解析为正确操作。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;实际限制与注意事项&#34;&gt;实际限制与注意事项&lt;/h2&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;限制&lt;/th&gt;
+          &lt;th&gt;说明&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;目标内核需开启 BTF&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;必须配置 &lt;code&gt;CONFIG_DEBUG_INFO_BTF=y&lt;/code&gt;（多数发行版已默认开启）。&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;旧内核无 BTF 支持&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;若无 BTF，需手动提供等效的 BTF 文件（如通过 &lt;a href=&#34;https://github.com/aquasecurity/btfhub&#34;&gt;BTFHub&lt;/a&gt;）。&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;宏与函数签名变化&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;BTF 不记录宏或函数参数列表变化，需通过 &lt;code&gt;#ifdef&lt;/code&gt; 或运行时检测处理。&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;hr&gt;
+&lt;p&gt;BPF CO-RE 将&lt;strong&gt;类型描述&lt;/strong&gt;（&lt;code&gt;vmlinux.h&lt;/code&gt;）、&lt;strong&gt;编译时元信息&lt;/strong&gt;（Clang 重定位项）、&lt;strong&gt;运行时适配器&lt;/strong&gt;（libbpf）三者分离，使 &lt;code&gt;vmlinux.h&lt;/code&gt; 仅需作为“合法类型模板”，而&lt;strong&gt;非精确内存布局参考&lt;/strong&gt;。最终由 libbpf 借助目标内核的 BTF 完成字段偏移、存在性的动态修正，实现跨版本/配置的运行兼容。这一机制大幅降低了 eBPF 程序的移植成本，使其真正成为“一次编译，到处运行”的内核可编程工具。&lt;/p&gt;</description>
+    </item>
+    <item>
       <title>Curl使用</title>
       <link>https://kerolt.github.io/posts/%E6%8A%80%E6%9C%AF%E9%9A%8F%E7%AC%94/curl%E4%BD%BF%E7%94%A8/</link>
       <pubDate>Tue, 01 Jul 2025 00:00:00 +0000</pubDate>
