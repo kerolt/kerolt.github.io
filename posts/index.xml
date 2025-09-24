@@ -11,8 +11,190 @@
     </image>
     <generator>Hugo -- 0.150.0</generator>
     <language>en</language>
-    <lastBuildDate>Sun, 07 Sep 2025 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Thu, 18 Sep 2025 00:00:00 +0000</lastBuildDate>
     <atom:link href="https://kerolt.github.io/posts/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Windows Terminal分屏快捷键</title>
+      <link>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/windows-terminal%E5%88%86%E5%B1%8F%E5%BF%AB%E6%8D%B7%E9%94%AE/</link>
+      <pubDate>Thu, 18 Sep 2025 00:00:00 +0000</pubDate>
+      <guid>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/windows-terminal%E5%88%86%E5%B1%8F%E5%BF%AB%E6%8D%B7%E9%94%AE/</guid>
+      <description>&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;左右分屏&lt;/strong&gt;: 使用 &lt;code&gt;Alt+Shift+=&lt;/code&gt; 或 &lt;code&gt;Alt+Shift+-&lt;/code&gt; 快捷键。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;上下分屏&lt;/strong&gt;: 使用 &lt;code&gt;Alt+Shift+=&lt;/code&gt; 或 &lt;code&gt;Alt+Shift+-&lt;/code&gt; 快捷键。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;取消分屏&lt;/strong&gt;: 使用 &lt;code&gt;Ctrl+Shift+w&lt;/code&gt; 快捷键。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;关闭当前标签&lt;/strong&gt;: 使用 &lt;code&gt;Ctrl+Shift+w&lt;/code&gt; 快捷键。&lt;/li&gt;
+&lt;/ul&gt;</description>
+    </item>
+    <item>
+      <title>Linux NAPI机制知识点总结</title>
+      <link>https://kerolt.github.io/posts/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/linux-napi%E6%9C%BA%E5%88%B6%E7%9F%A5%E8%AF%86%E7%82%B9%E6%80%BB%E7%BB%93/</link>
+      <pubDate>Wed, 17 Sep 2025 00:00:00 +0000</pubDate>
+      <guid>https://kerolt.github.io/posts/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/linux-napi%E6%9C%BA%E5%88%B6%E7%9F%A5%E8%AF%86%E7%82%B9%E6%80%BB%E7%BB%93/</guid>
+      <description>&lt;blockquote&gt;
+&lt;p&gt;对 &lt;a href=&#34;https://docs.kernel.org/networking/napi.html&#34;&gt;https://docs.kernel.org/networking/napi.html&lt;/a&gt; 的总结&lt;/p&gt;&lt;/blockquote&gt;
+&lt;p&gt;NAPI (New API，但现已无特定含义) 是 Linux 内核中用于高效处理网络数据包的一种机制，旨在减少高负载下的中断开销。&lt;/p&gt;
+&lt;p&gt;其​目的​​是为了解决传统基于中断的包处理在高流量下的性能问题（“中断活锁”）。通过混合​&lt;strong&gt;​中断​&lt;/strong&gt;​和​&lt;strong&gt;​轮询​&lt;/strong&gt;​模式，在低负载时使用中断保证低延迟，在高负载时切换到轮询保证高吞吐量。&lt;/p&gt;
+&lt;p&gt;设备通过中断通知有新数据包 -&amp;gt; 内核调度对应的 NAPI 实例 -&amp;gt; 在软中断上下文（或内核线程）中轮询处理多个数据包 -&amp;gt; 处理完毕后再打开中断。&lt;/p&gt;
+&lt;h2 id=&#34;核心数据结构与-api&#34;&gt;核心数据结构与 API&lt;/h2&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;​&lt;strong&gt;​&lt;code&gt;struct napi_struct&lt;/code&gt;​&lt;/strong&gt;​：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;核心数据结构，代表一个 NAPI 实例，保存其状态信息。&lt;/li&gt;
+&lt;li&gt;通常与一个中断或一个队列（RX/TX）相关联。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;​&lt;strong&gt;​控制 API (初始化和状态管理)​&lt;/strong&gt;​：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;netif_napi_add()&lt;/code&gt; / &lt;code&gt;netif_napi_del()&lt;/code&gt;: 向系统添加/删除一个 NAPI 实例（通常附加到网络设备上）。&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;napi_enable()&lt;/code&gt; / &lt;code&gt;napi_disable()&lt;/code&gt;: 启用/禁用 NAPI 实例。禁用状态下实例不会被调度，&lt;code&gt;poll&lt;/code&gt; 方法不会被调用。​&lt;strong&gt;​注意​&lt;/strong&gt;​：API 非幂等，错误调用顺序可能导致死锁或竞态。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;​&lt;strong&gt;​数据路径 API (调度与处理)​&lt;/strong&gt;​：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;napi_schedule()&lt;/code&gt;: ​&lt;strong&gt;​核心调度函数​&lt;/strong&gt;​。通常在设备的中断处理程序中调用，通知内核有数据需要处理，并获取 NAPI 实例的所有权。&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;napi_schedule_irqoff()&lt;/code&gt;: &lt;code&gt;napi_schedule()&lt;/code&gt; 的变体，用于已知在中断上下文中调用的情况，可优化中断屏蔽操作。&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;napi_complete_done()&lt;/code&gt;: ​&lt;strong&gt;​完成处理函数​&lt;/strong&gt;​。当驱动程序的 &lt;code&gt;poll&lt;/code&gt; 方法处理完所有事件后调用此函数，释放实例的所有权。​&lt;strong&gt;​警告​&lt;/strong&gt;​：&lt;code&gt;budget&lt;/code&gt; 为 0 时绝不能调用；若处理恰好用完 &lt;code&gt;budget&lt;/code&gt; 且工作已完成，需谨慎返回 &lt;code&gt;budget - 1&lt;/code&gt; 或等待下次调用。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h2 id=&#34;驱动程序实现要点&#34;&gt;驱动程序实现要点&lt;/h2&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;​&lt;strong&gt;​&lt;code&gt;poll&lt;/code&gt; 方法​&lt;/strong&gt;​：&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>什么是云原生（自我解惑）</title>
+      <link>https://kerolt.github.io/posts/k8s/%E4%BB%80%E4%B9%88%E6%98%AF%E4%BA%91%E5%8E%9F%E7%94%9F%E8%87%AA%E6%88%91%E8%A7%A3%E6%83%91/</link>
+      <pubDate>Wed, 17 Sep 2025 00:00:00 +0000</pubDate>
+      <guid>https://kerolt.github.io/posts/k8s/%E4%BB%80%E4%B9%88%E6%98%AF%E4%BA%91%E5%8E%9F%E7%94%9F%E8%87%AA%E6%88%91%E8%A7%A3%E6%83%91/</guid>
+      <description>&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;云原生​&lt;/strong&gt;​是一套以​&lt;strong&gt;​微服务、容器、动态编排（如 Kubernetes）、DevOps​&lt;/strong&gt;​为核心，旨在构建和运行​&lt;strong&gt;​弹性、可靠、敏捷​&lt;/strong&gt;​的云化应用的最佳实践集合。&lt;/p&gt;
+&lt;p&gt;理解它的关键在于思维的转变：​&lt;strong&gt;​从把云当作一台更便宜的虚拟主机，转变为把云当作一个可无限扩展、按需取用的计算能力平台，并以此为前提来设计和构建应用。​&lt;/strong&gt;&lt;/p&gt;&lt;/blockquote&gt;
+&lt;h2 id=&#34;什么是云原生&#34;&gt;什么是云原生？&lt;/h2&gt;
+&lt;p&gt;​&lt;strong&gt;​云原生​&lt;/strong&gt;​ 是一种构建和运行应用程序的全新方法论，它充分利用了云计算的优势。&lt;/p&gt;
+&lt;p&gt;简单来说，​&lt;strong&gt;​云原生 = 云 + 原生​&lt;/strong&gt;​。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;​&lt;strong&gt;​云​&lt;/strong&gt;​：指的是应用程序运行在云环境中，而不仅仅是托管在云服务器上。&lt;/li&gt;
+&lt;li&gt;​&lt;strong&gt;​原生​&lt;/strong&gt;​：意味着应用程序从设计、开发、部署到运维的整个生命周期，都是​&lt;strong&gt;​专门为云环境而设计和构建的​&lt;/strong&gt;​，是“云上的原住民”。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;它不是某一种具体的技术，而是一套​&lt;strong&gt;​技术体系、方法论和最佳实践的集合​&lt;/strong&gt;​，其核心目标是构建和运行​&lt;strong&gt;​弹性扩展、韧性可靠、易于管理、可观测、松耦合的现代化应用​&lt;/strong&gt;​。&lt;/p&gt;
+&lt;h2 id=&#34;如何通俗地理解云原生&#34;&gt;如何通俗地理解云原生&lt;/h2&gt;
+&lt;p&gt;我们可以用一个生动的比喻来理解：&lt;/p&gt;
+&lt;p&gt;​&lt;strong&gt;​传统应用 vs. 云原生应用​&lt;/strong&gt;​&lt;/p&gt;
+&lt;p&gt;想象一下，你要运送货物。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;​&lt;strong&gt;​传统应用（像“巨石应用”）​&lt;/strong&gt;​：就像把所有的货物都塞进一个巨大的、不可分割的木箱里。这个木箱非常沉重，需要一辆巨大的卡车（一台强大的服务器）来运输。如果想扩大运力，你必须换一辆更大的卡车（升级服务器，​&lt;strong&gt;​纵向扩展​&lt;/strong&gt;​），这个过程很慢，而且一旦卡车抛锚，所有货物都会受损。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;​&lt;strong&gt;​对应现实​&lt;/strong&gt;​：一个庞大的、所有功能都紧密耦合在一起的传统软件（如一个庞大的 ERP 系统），部署和维护都非常笨重。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;​&lt;strong&gt;​云原生应用（像“乐高应用”）​&lt;/strong&gt;​：就像把货物分装在许多标准化的小集装箱（​&lt;strong&gt;​微服务​&lt;/strong&gt;​）里。每个集装箱都可以被单独搬运、检查、替换。你可以根据需要轻松地增加或减少集装箱的数量（​&lt;strong&gt;​弹性伸缩​&lt;/strong&gt;​），并且用许多辆小卡车（廉价的普通服务器）组成车队来运输。即使有几辆小卡车坏掉，也只会影响部分货物，整个运输系统不会瘫痪。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;​&lt;strong&gt;​对应现实​&lt;/strong&gt;​：一个应用被拆分成许多小的、独立的服务（如用户服务、订单服务、支付服务），它们可以独立开发、部署和扩展。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;云原生的四大核心要素&#34;&gt;云原生的四大核心要素&lt;/h2&gt;
+&lt;p&gt;要支撑上述的“乐高式”应用，需要一套强大的技术框架。云原生主要由以下四大核心技术要素构成：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;​&lt;strong&gt;​微服务​&lt;/strong&gt;​&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;​&lt;strong&gt;​是什么​&lt;/strong&gt;​：将大型单体应用拆分为一组小的、松耦合的、可独立部署和升级的服务。&lt;/li&gt;
+&lt;li&gt;​&lt;strong&gt;​好处​&lt;/strong&gt;​：每个服务可以由不同的团队用不同的技术栈开发，更新速度快，容错性高。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;​&lt;strong&gt;​容器化​&lt;/strong&gt;​&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;​&lt;strong&gt;​是什么​&lt;/strong&gt;​：最代表性的技术是 ​&lt;strong&gt;​Docker​&lt;/strong&gt;​。它将应用程序及其所有依赖项（库、环境配置等）打包成一个标准化的、轻量级的、可移植的“容器镜像”。这个容器在任何地方（开发、测试、生产环境）的运行效果都是一致的。&lt;/li&gt;
+&lt;li&gt;​&lt;strong&gt;​好处​&lt;/strong&gt;​：解决了“在我这运行得好好的，到你那就出问题”的环境一致性问题，是应用的标准交付件。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;​&lt;strong&gt;​动态编排​&lt;/strong&gt;​&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;​&lt;strong&gt;​是什么​&lt;/strong&gt;​：最代表性的技术是 ​&lt;strong&gt;​Kubernetes​&lt;/strong&gt;​。当你有成千上万个容器需要管理时，Kubernetes 就像一位​&lt;strong&gt;​超级调度员和管家​&lt;/strong&gt;​。它负责自动部署容器、故障恢复（容器挂了自动重启）、弹性伸缩（流量大了自动增加容器数量）、负载均衡等。&lt;/li&gt;
+&lt;li&gt;​&lt;strong&gt;​好处​&lt;/strong&gt;​：实现了应用的自动化和智能化运维，是云原生的操作系统。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;​&lt;strong&gt;​DevOps 和持续交付​&lt;/strong&gt;​&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;​&lt;strong&gt;​是什么​&lt;/strong&gt;​：​&lt;strong&gt;​DevOps​&lt;/strong&gt;​ 是一种文化理念和实践，它打通了开发（Development）和运维（Operations）团队，通过高度自动化工具链（如 CI/CD），实现软件的频繁、可靠、快速的交付。&lt;/li&gt;
+&lt;li&gt;​&lt;strong&gt;​好处​&lt;/strong&gt;​：使得从代码提交到应用上线的过程可以完全自动化，极大地加快了迭代速度。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;​&lt;strong&gt;​简单总结一下四者的关系​&lt;/strong&gt;​：&lt;/p&gt;
+&lt;p&gt;我们用 ​&lt;strong&gt;​DevOps​&lt;/strong&gt;​ 的文化和 ​&lt;strong&gt;​CI/CD​&lt;/strong&gt;​ 的工具，来自动化地开发、构建和测试​&lt;strong&gt;​微服务​&lt;/strong&gt;​，并将其打包成​&lt;strong&gt;​容器​&lt;/strong&gt;​，最后交给 ​&lt;strong&gt;​Kubernetes​&lt;/strong&gt;​ 这个编排系统去动态地管理和运行。&lt;/p&gt;
+&lt;h2 id=&#34;为什么需要云原生它的优势是什么&#34;&gt;为什么需要云原生？它的优势是什么？&lt;/h2&gt;
+&lt;p&gt;采用云原生架构能带来巨大的商业和技术价值：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;​&lt;strong&gt;​弹性与可扩展性​&lt;/strong&gt;​：应用可以根据流量压力自动缩扩容，轻松应对“双十一”等高峰场景，同时节省空闲时的资源成本。&lt;/li&gt;
+&lt;li&gt;​&lt;strong&gt;​高韧性与故障隔离​&lt;/strong&gt;​：单个服务的故障不会导致整个系统崩溃，系统具备自愈能力。&lt;/li&gt;
+&lt;li&gt;​&lt;strong&gt;​快速迭代与交付​&lt;/strong&gt;​：微服务和 DevOps 使得新功能可以独立、频繁、安全地发布，大大加快了市场响应速度。&lt;/li&gt;
+&lt;li&gt;​&lt;strong&gt;​资源利用率高​&lt;/strong&gt;​：容器非常轻量，可以在同一台机器上密集部署，节省硬件成本。&lt;/li&gt;
+&lt;li&gt;​&lt;strong&gt;​可移植性​&lt;/strong&gt;​：容器化的应用可以运行在任何云平台（公有云、私有云、混合云）上，避免被单一云厂商锁定。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;云环境和托管在云服务器上有什么区别&#34;&gt;云环境和托管在云服务器上有什么区别&lt;/h2&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;特性&lt;/th&gt;
+          &lt;th&gt;托管在云服务器上（租用办公室）&lt;/th&gt;
+          &lt;th&gt;构建在云环境上（打造智能企业）&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;​​核心思想​​&lt;/td&gt;
+          &lt;td&gt;​&lt;strong&gt;​“换地方”​&lt;/strong&gt;​&lt;/td&gt;
+          &lt;td&gt;​&lt;strong&gt;​“换活法”​&lt;/strong&gt;​&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;​​比喻​​&lt;/td&gt;
+          &lt;td&gt;你租用了一间云厂商的​&lt;strong&gt;​办公室（云服务器）​&lt;/strong&gt;​，然后把自家机房里的​&lt;strong&gt;​旧家具、旧电脑（传统应用）​&lt;/strong&gt;​ 原封不动地搬了进去。运维方式完全没变。&lt;/td&gt;
+          &lt;td&gt;你利用云厂商提供的​&lt;strong&gt;​全套智能办公解决方案（云服务）​&lt;/strong&gt;​：按需使用的会议室（计算资源）、自动化的物流系统（CI/CD）、可随意拼拆的工位（容器）、智能调度系统（Kubernetes）来​&lt;strong&gt;​重新组建一个高效、灵活的现代化公司（云原生应用）​&lt;/strong&gt;​。&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;​​弹性伸缩​​&lt;/td&gt;
+          &lt;td&gt;​&lt;strong&gt;​手动、缓慢​&lt;/strong&gt;​。需要更多资源时，需要人工干预去升级服务器配置（​&lt;strong&gt;​纵向扩展​&lt;/strong&gt;​），这通常需要停机。&lt;/td&gt;
+          &lt;td&gt;​&lt;strong&gt;​自动、即时​&lt;/strong&gt;​。应用可根据流量压力，自动增加或减少计算资源（​&lt;strong&gt;​横向扩展​&lt;/strong&gt;​），过程无缝，按实际使用量计费。&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;​​韧性/可靠性​​&lt;/td&gt;
+          &lt;td&gt;​&lt;strong&gt;​依赖单机​&lt;/strong&gt;​。如果托管你应用的这台云服务器宕机，你的服务就中断了，直到你手动将其恢复或迁移到另一台服务器。&lt;/td&gt;
+          &lt;td&gt;​&lt;strong&gt;​内置高可用​&lt;/strong&gt;​。应用被设计为分布式、多实例运行。即使底层一台或多台服务器宕机，编排系统会自动在健康的服务器上重启应用实例，用户无感知。&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;​​资源管理​​&lt;/td&gt;
+          &lt;td&gt;​&lt;strong&gt;​以服务器为中心​&lt;/strong&gt;​。你需要关心每台服务器的 CPU、内存、磁盘使用率，并进行运维。&lt;/td&gt;
+          &lt;td&gt;​&lt;strong&gt;​以应用为中心​&lt;/strong&gt;​。你只需声明“我的应用需要 2 核 4G”，云平台会自动调度和分配资源，你不再需要关心应用具体跑在哪台物理机上。&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;​​成本模式​​&lt;/td&gt;
+          &lt;td&gt;​&lt;strong&gt;​为资源预留付费​&lt;/strong&gt;​。你租了一台云服务器，无论你是否满负荷使用它，你都需要为它整个月的配置付费。&lt;/td&gt;
+          &lt;td&gt;​&lt;strong&gt;​为资源消耗付费​&lt;/strong&gt;​。你只为应用程序实际消耗的 CPU 秒、内存 MB、网络流量付费。利用率极高，成本显著优化。&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;​​技术栈​​&lt;/td&gt;
+          &lt;td&gt;传统架构，如：​&lt;strong&gt;​单体应用​&lt;/strong&gt;​ + ​&lt;strong&gt;​服务器​&lt;/strong&gt;​ + ​&lt;strong&gt;​SSH 运维​&lt;/strong&gt;​。&lt;/td&gt;
+          &lt;td&gt;云原生架构，如：​&lt;strong&gt;​微服务​&lt;/strong&gt;​ + ​&lt;strong&gt;​容器​&lt;/strong&gt;​ + ​&lt;strong&gt;​Kubernetes​&lt;/strong&gt;​ + ​&lt;strong&gt;​DevOps​&lt;/strong&gt;​。&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;​​与云的关系​​&lt;/td&gt;
+          &lt;td&gt;​&lt;strong&gt;​租赁关系​&lt;/strong&gt;​。你只是租用它的基础空间和硬件。&lt;/td&gt;
+          &lt;td&gt;​&lt;strong&gt;​共生关系​&lt;/strong&gt;​。你的应用深度使用了云提供的数据库、消息队列、AI、大数据等​&lt;strong&gt;​托管服务​&lt;/strong&gt;​，与应用紧密集成。&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;</description>
+    </item>
     <item>
       <title>【k8s】什么是Service</title>
       <link>https://kerolt.github.io/posts/k8s/k8s%E4%BB%80%E4%B9%88%E6%98%AFservice/</link>
@@ -110,9 +292,9 @@
     </item>
     <item>
       <title>Windows11右键菜单关闭扩展</title>
-      <link>https://kerolt.github.io/posts/%E6%8A%80%E6%9C%AF%E9%9A%8F%E7%AC%94/windows11%E5%8F%B3%E9%94%AE%E8%8F%9C%E5%8D%95%E5%85%B3%E9%97%AD%E6%89%A9%E5%B1%95/</link>
+      <link>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/windows11%E5%8F%B3%E9%94%AE%E8%8F%9C%E5%8D%95%E5%85%B3%E9%97%AD%E6%89%A9%E5%B1%95/</link>
       <pubDate>Wed, 03 Sep 2025 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E6%8A%80%E6%9C%AF%E9%9A%8F%E7%AC%94/windows11%E5%8F%B3%E9%94%AE%E8%8F%9C%E5%8D%95%E5%85%B3%E9%97%AD%E6%89%A9%E5%B1%95/</guid>
+      <guid>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/windows11%E5%8F%B3%E9%94%AE%E8%8F%9C%E5%8D%95%E5%85%B3%E9%97%AD%E6%89%A9%E5%B1%95/</guid>
       <description>&lt;p&gt;关闭右键扩展：&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-powershell&#34; data-lang=&#34;powershell&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;n&#34;&gt;reg&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;add&lt;/span&gt; &lt;span class=&#34;s2&#34;&gt;&amp;#34;HKCU\Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32&amp;#34;&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;/&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;f&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;/&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;ve&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;n&#34;&gt;taskkill&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;/&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;f&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;/&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;im&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;explorer&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;py&#34;&gt;exe&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;&amp;amp;&lt;/span&gt; &lt;span class=&#34;nb&#34;&gt;start &lt;/span&gt;&lt;span class=&#34;n&#34;&gt;explorer&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;py&#34;&gt;exe&lt;/span&gt;
@@ -123,11 +305,11 @@
     </item>
     <item>
       <title>【问题记录】ddns-go与IPv6网络配置</title>
-      <link>https://kerolt.github.io/posts/%E6%8A%80%E6%9C%AF%E9%9A%8F%E7%AC%94/%E9%97%AE%E9%A2%98%E8%AE%B0%E5%BD%95ddns-go%E4%B8%8Eipv6%E7%BD%91%E7%BB%9C%E9%85%8D%E7%BD%AE/</link>
+      <link>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/%E9%97%AE%E9%A2%98%E8%AE%B0%E5%BD%95ddns-go%E4%B8%8Eipv6%E7%BD%91%E7%BB%9C%E9%85%8D%E7%BD%AE/</link>
       <pubDate>Fri, 29 Aug 2025 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E6%8A%80%E6%9C%AF%E9%9A%8F%E7%AC%94/%E9%97%AE%E9%A2%98%E8%AE%B0%E5%BD%95ddns-go%E4%B8%8Eipv6%E7%BD%91%E7%BB%9C%E9%85%8D%E7%BD%AE/</guid>
+      <guid>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/%E9%97%AE%E9%A2%98%E8%AE%B0%E5%BD%95ddns-go%E4%B8%8Eipv6%E7%BD%91%E7%BB%9C%E9%85%8D%E7%BD%AE/</guid>
       <description>&lt;p&gt;在完成 &lt;a href=&#34;https://zhuanlan.zhihu.com/p/1943305270387275457&#34;&gt;Rustdesk 自建服务器&lt;/a&gt; 的搭建后，我又想到：由于实验室服务器的公网 &lt;strong&gt;IPv6 地址&lt;/strong&gt; 并非永久不变，直接使用 IP 进行远程连接（如 SSH 或 Rustdesk）并不现实，如何确保远程访问的稳定性和便利性呢。为了解决这一痛点，我决定利用 &lt;strong&gt;动态域名解析（DDNS）&lt;/strong&gt; 技术，配合 &lt;strong&gt;ddns-go&lt;/strong&gt; 和 &lt;strong&gt;阿里云 DNS&lt;/strong&gt; 服务，将服务器的动态 IP 地址实时绑定到一个易于记忆的域名上。&lt;/p&gt;
-&lt;p&gt;本文将记录我在配置过程中遇到的三个主要问题及其解决方案。&lt;/p&gt;
+&lt;p&gt;本文将记录我在配置过程中遇到的四个主要问题及其解决方案。&lt;/p&gt;
 &lt;hr&gt;
 &lt;h2 id=&#34;问题-1ipv6-临时地址导致域名解析不稳定&#34;&gt;问题 1：IPv6 临时地址导致域名解析不稳定&lt;/h2&gt;
 &lt;p&gt;在启用 &lt;strong&gt;ddns-go&lt;/strong&gt; 服务后，我发现尽管程序运行正常，但我的域名解析记录却频繁失效。经过排查，我意识到罪魁祸首是 &lt;strong&gt;IPv6 临时地址（Temporary Address）&lt;/strong&gt;。这是一种为了增强用户隐私而设计的特性，系统会定期生成新的、临时的 IPv6 地址用于出站连接。当服务器的地址发生变化时，DDNS 服务来不及同步更新，就会导致域名无法解析到正确的 IP 地址。&lt;/p&gt;
@@ -150,9 +332,9 @@
     </item>
     <item>
       <title>Rustdesk自建服务器</title>
-      <link>https://kerolt.github.io/posts/%E6%8A%80%E6%9C%AF%E9%9A%8F%E7%AC%94/rustdesk%E8%87%AA%E5%BB%BA%E6%9C%8D%E5%8A%A1%E5%99%A8/</link>
+      <link>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/rustdesk%E8%87%AA%E5%BB%BA%E6%9C%8D%E5%8A%A1%E5%99%A8/</link>
       <pubDate>Mon, 25 Aug 2025 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E6%8A%80%E6%9C%AF%E9%9A%8F%E7%AC%94/rustdesk%E8%87%AA%E5%BB%BA%E6%9C%8D%E5%8A%A1%E5%99%A8/</guid>
+      <guid>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/rustdesk%E8%87%AA%E5%BB%BA%E6%9C%8D%E5%8A%A1%E5%99%A8/</guid>
       <description>&lt;p&gt;对于现在常见的远程控制软件，例如 ToDesk、向日葵，其免费版本总有诸多限制（帧率低、分辨率低、控制时间有限制），而 RustDesk 的公共服务器现在在国内也不可用，因此我就想到了 RustDesk 的自建服务器。现在我们实验室有几台空闲的电脑，并且这些电脑都有 &lt;strong&gt;IPv6&lt;/strong&gt;，这就省去了我购买云服务器的花费，可以实现零成本搭建远程服务😁&lt;/p&gt;
 &lt;h2 id=&#34;安装-rustdesk-server&#34;&gt;安装 RustDesk Server&lt;/h2&gt;
 &lt;p&gt;我使用 &lt;a href=&#34;https://github.com/sshpc/rustdesktool&#34;&gt;https://github.com/sshpc/rustdesktool&lt;/a&gt; 这里的脚本来一键安装，安装完后，RustDesk Server 的默认安装目录为：&lt;/p&gt;
@@ -251,9 +433,9 @@
     </item>
     <item>
       <title>Git中文件换行符都使用LF</title>
-      <link>https://kerolt.github.io/posts/%E6%8A%80%E6%9C%AF%E9%9A%8F%E7%AC%94/git%E4%B8%AD%E6%96%87%E4%BB%B6%E6%8D%A2%E8%A1%8C%E7%AC%A6%E9%83%BD%E4%BD%BF%E7%94%A8lf/</link>
+      <link>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/git%E4%B8%AD%E6%96%87%E4%BB%B6%E6%8D%A2%E8%A1%8C%E7%AC%A6%E9%83%BD%E4%BD%BF%E7%94%A8lf/</link>
       <pubDate>Thu, 21 Aug 2025 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E6%8A%80%E6%9C%AF%E9%9A%8F%E7%AC%94/git%E4%B8%AD%E6%96%87%E4%BB%B6%E6%8D%A2%E8%A1%8C%E7%AC%A6%E9%83%BD%E4%BD%BF%E7%94%A8lf/</guid>
+      <guid>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/git%E4%B8%AD%E6%96%87%E4%BB%B6%E6%8D%A2%E8%A1%8C%E7%AC%A6%E9%83%BD%E4%BD%BF%E7%94%A8lf/</guid>
       <description>&lt;p&gt;有时候我们会在多个平台上编辑文件、代码，此时我们希望所有文件，包括你在 Windows 上编辑的文件（Windows 采用的是 CRLF），都使用 LF 换行符，那么可以修改 &lt;code&gt;.gitattributes&lt;/code&gt; 文件来强制执行这个规则：&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-text&#34; data-lang=&#34;text&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;# 强制所有文件使用 LF 换行符
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;* text eol=lf
@@ -413,9 +595,9 @@
     </item>
     <item>
       <title>Curl使用</title>
-      <link>https://kerolt.github.io/posts/%E6%8A%80%E6%9C%AF%E9%9A%8F%E7%AC%94/curl%E4%BD%BF%E7%94%A8/</link>
+      <link>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/curl%E4%BD%BF%E7%94%A8/</link>
       <pubDate>Tue, 01 Jul 2025 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E6%8A%80%E6%9C%AF%E9%9A%8F%E7%AC%94/curl%E4%BD%BF%E7%94%A8/</guid>
+      <guid>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/curl%E4%BD%BF%E7%94%A8/</guid>
       <description>&lt;p&gt;curl 是一个强大的命令行工具，用于传输数据，支持多种协议（HTTP、HTTPS、FTP 等）。以下是 curl 的基本使用方法和常见示例。&lt;/p&gt;
 &lt;h2 id=&#34;基本语法&#34;&gt;基本语法&lt;/h2&gt;
 &lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;curl [options] [URL...]
@@ -821,9 +1003,9 @@ curl -b cookies.txt https://example.com/dashboard
     </item>
     <item>
       <title>Git使用</title>
-      <link>https://kerolt.github.io/posts/%E6%8A%80%E6%9C%AF%E9%9A%8F%E7%AC%94/git%E4%BD%BF%E7%94%A8/</link>
+      <link>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/git%E4%BD%BF%E7%94%A8/</link>
       <pubDate>Sun, 18 May 2025 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E6%8A%80%E6%9C%AF%E9%9A%8F%E7%AC%94/git%E4%BD%BF%E7%94%A8/</guid>
+      <guid>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/git%E4%BD%BF%E7%94%A8/</guid>
       <description>&lt;h2 id=&#34;如何修改上次的-commit&#34;&gt;如何修改上次的 commit&lt;/h2&gt;
 &lt;p&gt;比如有的时候 commit 漏掉了文件、commit 信息写错了，可以这么做：&lt;/p&gt;
 &lt;p&gt;你要指定一个有效的编辑器作为 Git 的默认编辑器，可以使 Vim 或者 VSCode：&lt;/p&gt;
@@ -848,9 +1030,9 @@ curl -b cookies.txt https://example.com/dashboard
     </item>
     <item>
       <title>【CMake】CMake使用笔记</title>
-      <link>https://kerolt.github.io/posts/%E6%8A%80%E6%9C%AF%E9%9A%8F%E7%AC%94/cmakecmake%E4%BD%BF%E7%94%A8%E7%AC%94%E8%AE%B0/</link>
+      <link>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/cmakecmake%E4%BD%BF%E7%94%A8%E7%AC%94%E8%AE%B0/</link>
       <pubDate>Wed, 14 May 2025 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E6%8A%80%E6%9C%AF%E9%9A%8F%E7%AC%94/cmakecmake%E4%BD%BF%E7%94%A8%E7%AC%94%E8%AE%B0/</guid>
+      <guid>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/cmakecmake%E4%BD%BF%E7%94%A8%E7%AC%94%E8%AE%B0/</guid>
       <description>&lt;p&gt;记录学习 CMake 中碰到的一些问题和笔记&lt;/p&gt;
 &lt;p&gt;ps：CMake 相比 xmake 来说确实太繁琐，但还是得学习🍭&lt;/p&gt;</description>
     </item>
@@ -1058,9 +1240,9 @@ curl -b cookies.txt https://example.com/dashboard
     </item>
     <item>
       <title>【解决】Fedora42升级启动时显示kernel panic</title>
-      <link>https://kerolt.github.io/posts/%E6%8A%80%E6%9C%AF%E9%9A%8F%E7%AC%94/%E8%A7%A3%E5%86%B3fedora42%E5%8D%87%E7%BA%A7%E5%90%AF%E5%8A%A8%E6%97%B6%E6%98%BE%E7%A4%BAkernel-panic/</link>
+      <link>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/%E8%A7%A3%E5%86%B3fedora42%E5%8D%87%E7%BA%A7%E5%90%AF%E5%8A%A8%E6%97%B6%E6%98%BE%E7%A4%BAkernel-panic/</link>
       <pubDate>Sun, 27 Apr 2025 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E6%8A%80%E6%9C%AF%E9%9A%8F%E7%AC%94/%E8%A7%A3%E5%86%B3fedora42%E5%8D%87%E7%BA%A7%E5%90%AF%E5%8A%A8%E6%97%B6%E6%98%BE%E7%A4%BAkernel-panic/</guid>
+      <guid>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/%E8%A7%A3%E5%86%B3fedora42%E5%8D%87%E7%BA%A7%E5%90%AF%E5%8A%A8%E6%97%B6%E6%98%BE%E7%A4%BAkernel-panic/</guid>
       <description>&lt;p&gt;最近 Fedora42 更新了，因此我打算升级一下玩玩。在执行完下面的命令后：&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo dnf upgrade --refresh
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo dnf system-upgrade download --releasever&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;m&#34;&gt;42&lt;/span&gt;
@@ -1271,16 +1453,16 @@ curl -b cookies.txt https://example.com/dashboard
     </item>
     <item>
       <title>Linux下微信无法使用中文输入法问题解决</title>
-      <link>https://kerolt.github.io/posts/%E6%8A%80%E6%9C%AF%E9%9A%8F%E7%AC%94/linux%E4%B8%8B%E5%BE%AE%E4%BF%A1%E6%97%A0%E6%B3%95%E4%BD%BF%E7%94%A8%E4%B8%AD%E6%96%87%E8%BE%93%E5%85%A5%E6%B3%95%E9%97%AE%E9%A2%98%E8%A7%A3%E5%86%B3/</link>
+      <link>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/linux%E4%B8%8B%E5%BE%AE%E4%BF%A1%E6%97%A0%E6%B3%95%E4%BD%BF%E7%94%A8%E4%B8%AD%E6%96%87%E8%BE%93%E5%85%A5%E6%B3%95%E9%97%AE%E9%A2%98%E8%A7%A3%E5%86%B3/</link>
       <pubDate>Tue, 31 Dec 2024 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E6%8A%80%E6%9C%AF%E9%9A%8F%E7%AC%94/linux%E4%B8%8B%E5%BE%AE%E4%BF%A1%E6%97%A0%E6%B3%95%E4%BD%BF%E7%94%A8%E4%B8%AD%E6%96%87%E8%BE%93%E5%85%A5%E6%B3%95%E9%97%AE%E9%A2%98%E8%A7%A3%E5%86%B3/</guid>
+      <guid>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/linux%E4%B8%8B%E5%BE%AE%E4%BF%A1%E6%97%A0%E6%B3%95%E4%BD%BF%E7%94%A8%E4%B8%AD%E6%96%87%E8%BE%93%E5%85%A5%E6%B3%95%E9%97%AE%E9%A2%98%E8%A7%A3%E5%86%B3/</guid>
       <description>&lt;p&gt;微信在不久前终于有了 Linux 原生版本，我的电脑是 Fedora41，之前安装的是 flatpak 打包的微信，现在在官网下载 rpm 包后运行发现无法使用 fcitx 的中文输入法，找了一下是环境遍历的问题。&lt;/p&gt;</description>
     </item>
     <item>
       <title>在VSCode中配置LLDB</title>
-      <link>https://kerolt.github.io/posts/%E6%8A%80%E6%9C%AF%E9%9A%8F%E7%AC%94/%E5%9C%A8vscode%E4%B8%AD%E9%85%8D%E7%BD%AElldb/</link>
+      <link>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/%E5%9C%A8vscode%E4%B8%AD%E9%85%8D%E7%BD%AElldb/</link>
       <pubDate>Tue, 31 Dec 2024 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E6%8A%80%E6%9C%AF%E9%9A%8F%E7%AC%94/%E5%9C%A8vscode%E4%B8%AD%E9%85%8D%E7%BD%AElldb/</guid>
+      <guid>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/%E5%9C%A8vscode%E4%B8%AD%E9%85%8D%E7%BD%AElldb/</guid>
       <description>&lt;p&gt;为了 &lt;code&gt;CMake Tool&lt;/code&gt; 能调试代码，先装好 &lt;code&gt;codelldb&lt;/code&gt; 插件，然后还需要一个 &lt;code&gt;launch.json&lt;/code&gt; 文件，以下内容可以一键配置好调试：&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-json&#34; data-lang=&#34;json&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;nt&#34;&gt;&amp;#34;version&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt; &lt;span class=&#34;s2&#34;&gt;&amp;#34;0.2.0&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;
@@ -1338,9 +1520,9 @@ curl -b cookies.txt https://example.com/dashboard
     </item>
     <item>
       <title>CMake中使用find_pakage来使用MySQL</title>
-      <link>https://kerolt.github.io/posts/%E6%8A%80%E6%9C%AF%E9%9A%8F%E7%AC%94/cmake%E4%B8%AD%E4%BD%BF%E7%94%A8find_pakage%E6%9D%A5%E4%BD%BF%E7%94%A8mysql/</link>
+      <link>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/cmake%E4%B8%AD%E4%BD%BF%E7%94%A8find_pakage%E6%9D%A5%E4%BD%BF%E7%94%A8mysql/</link>
       <pubDate>Fri, 15 Nov 2024 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E6%8A%80%E6%9C%AF%E9%9A%8F%E7%AC%94/cmake%E4%B8%AD%E4%BD%BF%E7%94%A8find_pakage%E6%9D%A5%E4%BD%BF%E7%94%A8mysql/</guid>
+      <guid>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/cmake%E4%B8%AD%E4%BD%BF%E7%94%A8find_pakage%E6%9D%A5%E4%BD%BF%E7%94%A8mysql/</guid>
       <description>&lt;p&gt;一般来说，如果我们在 C++ 程序中要使用 mysql 的库，最简单的就是&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-sh&#34; data-lang=&#34;sh&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;g++ server.cpp -o server -lmysqlclient
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;但要是在大一点的项目中，在数不清的源文件下使用 g++ 命令来完成，怕是不太现实。&lt;/p&gt;</description>
@@ -1501,7 +1683,7 @@ curl -b cookies.txt https://example.com/dashboard
       <guid>https://kerolt.github.io/posts/%E6%95%B0%E6%8D%AE%E5%BA%93/cmu15-445-fall2023project0-c&#43;&#43;-primer-%E5%B0%8F%E7%BB%93/</guid>
       <description>&lt;blockquote&gt;
 &lt;p&gt;该系列博客只是为了记录自己在写Lab时的思路，按照课程要求不会在Github和博客中公开源代码。欢迎与我一起讨论交流！&lt;/p&gt;&lt;/blockquote&gt;
-&lt;p&gt;project0只在task4中浅浅涉及了一点BusTub的内容，其他都是检测我们对于C++的一个掌握，主要涉及智能指针和C++的常用特性（dynamic_cast、std::move、并发与锁等）。&lt;/p&gt;</description>
+&lt;p&gt;project0只在task4中浅浅涉及了一点BusTub的内容，其他都是检测我们对于C&lt;ins&gt;的一个掌握，主要涉及智能指针和C&lt;/ins&gt;的常用特性（dynamic_cast、std::move、并发与锁等）。&lt;/p&gt;</description>
     </item>
     <item>
       <title>【动手写协程库 5】常用IO函数的HOOK功能</title>
@@ -1573,9 +1755,9 @@ curl -b cookies.txt https://example.com/dashboard
     </item>
     <item>
       <title>解决X11下窗口拖动撕裂的一个方法</title>
-      <link>https://kerolt.github.io/posts/%E6%8A%80%E6%9C%AF%E9%9A%8F%E7%AC%94/%E8%A7%A3%E5%86%B3x11%E4%B8%8B%E7%AA%97%E5%8F%A3%E6%8B%96%E5%8A%A8%E6%92%95%E8%A3%82%E7%9A%84%E4%B8%80%E4%B8%AA%E6%96%B9%E6%B3%95/</link>
+      <link>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/%E8%A7%A3%E5%86%B3x11%E4%B8%8B%E7%AA%97%E5%8F%A3%E6%8B%96%E5%8A%A8%E6%92%95%E8%A3%82%E7%9A%84%E4%B8%80%E4%B8%AA%E6%96%B9%E6%B3%95/</link>
       <pubDate>Tue, 03 Sep 2024 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E6%8A%80%E6%9C%AF%E9%9A%8F%E7%AC%94/%E8%A7%A3%E5%86%B3x11%E4%B8%8B%E7%AA%97%E5%8F%A3%E6%8B%96%E5%8A%A8%E6%92%95%E8%A3%82%E7%9A%84%E4%B8%80%E4%B8%AA%E6%96%B9%E6%B3%95/</guid>
+      <guid>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/%E8%A7%A3%E5%86%B3x11%E4%B8%8B%E7%AA%97%E5%8F%A3%E6%8B%96%E5%8A%A8%E6%92%95%E8%A3%82%E7%9A%84%E4%B8%80%E4%B8%AA%E6%96%B9%E6%B3%95/</guid>
       <description>&lt;blockquote&gt;
 &lt;p&gt;Debian 系 Linux 安装 N 卡驱动参考这篇 &lt;a href=&#34;https://www.if-not-true-then-false.com/2021/debian-ubuntu-linux-mint-nvidia-guide/&#34;&gt;博客&lt;/a&gt;&lt;/p&gt;&lt;/blockquote&gt;
 &lt;p&gt;最近 Debian 终于是装好 nvidia 的驱动了，但是只能用在 X11 上，并且相比于不用 n 卡驱动时的 Wayland，X11 下的窗口拖动和视频播放会有比较明显的撕裂感，以下是解决的一个方法。&lt;/p&gt;</description>
@@ -1672,9 +1854,9 @@ curl -b cookies.txt https://example.com/dashboard
     </item>
     <item>
       <title>VMware17.5.2启动踩坑</title>
-      <link>https://kerolt.github.io/posts/%E6%8A%80%E6%9C%AF%E9%9A%8F%E7%AC%94/vmware17.5.2%E5%90%AF%E5%8A%A8%E8%B8%A9%E5%9D%91/</link>
+      <link>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/vmware17.5.2%E5%90%AF%E5%8A%A8%E8%B8%A9%E5%9D%91/</link>
       <pubDate>Mon, 27 May 2024 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E6%8A%80%E6%9C%AF%E9%9A%8F%E7%AC%94/vmware17.5.2%E5%90%AF%E5%8A%A8%E8%B8%A9%E5%9D%91/</guid>
+      <guid>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/vmware17.5.2%E5%90%AF%E5%8A%A8%E8%B8%A9%E5%9D%91/</guid>
       <description>&lt;p&gt;最近听说 VMware17.5.2 个人版可以免费使用了，故在 Linux 下安装用用，顺便记录一下踩的坑。&lt;/p&gt;</description>
     </item>
     <item>

@@ -1,0 +1,272 @@
+<!doctype html><html lang=en dir=auto><head><meta charset=utf-8><meta http-equiv=X-UA-Compatible content="IE=edge"><meta name=viewport content="width=device-width,initial-scale=1,shrink-to-fit=no"><meta name=robots content="index, follow"><title>什么是云原生（自我解惑） | Kerolt's Blog</title><meta name=keywords content="云原生"><meta name=description content="
+云原生​​是一套以​​微服务、容器、动态编排（如 Kubernetes）、DevOps​​为核心，旨在构建和运行​​弹性、可靠、敏捷​​的云化应用的最佳实践集合。
+理解它的关键在于思维的转变：​​从把云当作一台更便宜的虚拟主机，转变为把云当作一个可无限扩展、按需取用的计算能力平台，并以此为前提来设计和构建应用。​
+什么是云原生？
+​​云原生​​ 是一种构建和运行应用程序的全新方法论，它充分利用了云计算的优势。
+简单来说，​​云原生 = 云 + 原生​​。
+
+​​云​​：指的是应用程序运行在云环境中，而不仅仅是托管在云服务器上。
+​​原生​​：意味着应用程序从设计、开发、部署到运维的整个生命周期，都是​​专门为云环境而设计和构建的​​，是“云上的原住民”。
+
+它不是某一种具体的技术，而是一套​​技术体系、方法论和最佳实践的集合​​，其核心目标是构建和运行​​弹性扩展、韧性可靠、易于管理、可观测、松耦合的现代化应用​​。
+如何通俗地理解云原生
+我们可以用一个生动的比喻来理解：
+​​传统应用 vs. 云原生应用​​
+想象一下，你要运送货物。
+
+
+​​传统应用（像“巨石应用”）​​：就像把所有的货物都塞进一个巨大的、不可分割的木箱里。这个木箱非常沉重，需要一辆巨大的卡车（一台强大的服务器）来运输。如果想扩大运力，你必须换一辆更大的卡车（升级服务器，​​纵向扩展​​），这个过程很慢，而且一旦卡车抛锚，所有货物都会受损。
+
+​​对应现实​​：一个庞大的、所有功能都紧密耦合在一起的传统软件（如一个庞大的 ERP 系统），部署和维护都非常笨重。
+
+
+
+​​云原生应用（像“乐高应用”）​​：就像把货物分装在许多标准化的小集装箱（​​微服务​​）里。每个集装箱都可以被单独搬运、检查、替换。你可以根据需要轻松地增加或减少集装箱的数量（​​弹性伸缩​​），并且用许多辆小卡车（廉价的普通服务器）组成车队来运输。即使有几辆小卡车坏掉，也只会影响部分货物，整个运输系统不会瘫痪。
+
+​​对应现实​​：一个应用被拆分成许多小的、独立的服务（如用户服务、订单服务、支付服务），它们可以独立开发、部署和扩展。
+
+
+
+云原生的四大核心要素
+要支撑上述的“乐高式”应用，需要一套强大的技术框架。云原生主要由以下四大核心技术要素构成：
+
+
+​​微服务​​
+
+​​是什么​​：将大型单体应用拆分为一组小的、松耦合的、可独立部署和升级的服务。
+​​好处​​：每个服务可以由不同的团队用不同的技术栈开发，更新速度快，容错性高。
+
+
+
+​​容器化​​
+
+​​是什么​​：最代表性的技术是 ​​Docker​​。它将应用程序及其所有依赖项（库、环境配置等）打包成一个标准化的、轻量级的、可移植的“容器镜像”。这个容器在任何地方（开发、测试、生产环境）的运行效果都是一致的。
+​​好处​​：解决了“在我这运行得好好的，到你那就出问题”的环境一致性问题，是应用的标准交付件。
+
+
+
+​​动态编排​​
+
+​​是什么​​：最代表性的技术是 ​​Kubernetes​​。当你有成千上万个容器需要管理时，Kubernetes 就像一位​​超级调度员和管家​​。它负责自动部署容器、故障恢复（容器挂了自动重启）、弹性伸缩（流量大了自动增加容器数量）、负载均衡等。
+​​好处​​：实现了应用的自动化和智能化运维，是云原生的操作系统。
+
+
+
+​​DevOps 和持续交付​​
+
+​​是什么​​：​​DevOps​​ 是一种文化理念和实践，它打通了开发（Development）和运维（Operations）团队，通过高度自动化工具链（如 CI/CD），实现软件的频繁、可靠、快速的交付。
+​​好处​​：使得从代码提交到应用上线的过程可以完全自动化，极大地加快了迭代速度。
+
+
+
+​​简单总结一下四者的关系​​：
+我们用 ​​DevOps​​ 的文化和 ​​CI/CD​​ 的工具，来自动化地开发、构建和测试​​微服务​​，并将其打包成​​容器​​，最后交给 ​​Kubernetes​​ 这个编排系统去动态地管理和运行。
+为什么需要云原生？它的优势是什么？
+采用云原生架构能带来巨大的商业和技术价值：
+
+​​弹性与可扩展性​​：应用可以根据流量压力自动缩扩容，轻松应对“双十一”等高峰场景，同时节省空闲时的资源成本。
+​​高韧性与故障隔离​​：单个服务的故障不会导致整个系统崩溃，系统具备自愈能力。
+​​快速迭代与交付​​：微服务和 DevOps 使得新功能可以独立、频繁、安全地发布，大大加快了市场响应速度。
+​​资源利用率高​​：容器非常轻量，可以在同一台机器上密集部署，节省硬件成本。
+​​可移植性​​：容器化的应用可以运行在任何云平台（公有云、私有云、混合云）上，避免被单一云厂商锁定。
+
+云环境和托管在云服务器上有什么区别
+
+  
+      
+          特性
+          托管在云服务器上（租用办公室）
+          构建在云环境上（打造智能企业）
+      
+  
+  
+      
+          ​​核心思想​​
+          ​​“换地方”​​
+          ​​“换活法”​​
+      
+      
+          ​​比喻​​
+          你租用了一间云厂商的​​办公室（云服务器）​​，然后把自家机房里的​​旧家具、旧电脑（传统应用）​​ 原封不动地搬了进去。运维方式完全没变。
+          你利用云厂商提供的​​全套智能办公解决方案（云服务）​​：按需使用的会议室（计算资源）、自动化的物流系统（CI/CD）、可随意拼拆的工位（容器）、智能调度系统（Kubernetes）来​​重新组建一个高效、灵活的现代化公司（云原生应用）​​。
+      
+      
+          ​​弹性伸缩​​
+          ​​手动、缓慢​​。需要更多资源时，需要人工干预去升级服务器配置（​​纵向扩展​​），这通常需要停机。
+          ​​自动、即时​​。应用可根据流量压力，自动增加或减少计算资源（​​横向扩展​​），过程无缝，按实际使用量计费。
+      
+      
+          ​​韧性/可靠性​​
+          ​​依赖单机​​。如果托管你应用的这台云服务器宕机，你的服务就中断了，直到你手动将其恢复或迁移到另一台服务器。
+          ​​内置高可用​​。应用被设计为分布式、多实例运行。即使底层一台或多台服务器宕机，编排系统会自动在健康的服务器上重启应用实例，用户无感知。
+      
+      
+          ​​资源管理​​
+          ​​以服务器为中心​​。你需要关心每台服务器的 CPU、内存、磁盘使用率，并进行运维。
+          ​​以应用为中心​​。你只需声明“我的应用需要 2 核 4G”，云平台会自动调度和分配资源，你不再需要关心应用具体跑在哪台物理机上。
+      
+      
+          ​​成本模式​​
+          ​​为资源预留付费​​。你租了一台云服务器，无论你是否满负荷使用它，你都需要为它整个月的配置付费。
+          ​​为资源消耗付费​​。你只为应用程序实际消耗的 CPU 秒、内存 MB、网络流量付费。利用率极高，成本显著优化。
+      
+      
+          ​​技术栈​​
+          传统架构，如：​​单体应用​​ + ​​服务器​​ + ​​SSH 运维​​。
+          云原生架构，如：​​微服务​​ + ​​容器​​ + ​​Kubernetes​​ + ​​DevOps​​。
+      
+      
+          ​​与云的关系​​
+          ​​租赁关系​​。你只是租用它的基础空间和硬件。
+          ​​共生关系​​。你的应用深度使用了云提供的数据库、消息队列、AI、大数据等​​托管服务​​，与应用紧密集成。
+      
+  
+"><meta name=author content="Kerolt"><link rel=canonical href=https://kerolt.github.io/posts/k8s/%E4%BB%80%E4%B9%88%E6%98%AF%E4%BA%91%E5%8E%9F%E7%94%9F%E8%87%AA%E6%88%91%E8%A7%A3%E6%83%91/><meta name=google-site-verification content="NpIO0KEIJS0CPRzTzQCbYQdSRIyb0Lspx"><meta name=yandex-verification content="XYZabc"><meta name=msvalidate.01 content="2300A23B82DB579A2DEA6261191AD771"><link crossorigin=anonymous href=/assets/css/stylesheet.5b90ca56d432f576bba1f6ce202271509c48bea7e64b7db7b3018ea0ce698db2.css integrity="sha256-W5DKVtQy9Xa7ofbOICJxUJxIvqfmS323swGOoM5pjbI=" rel="preload stylesheet" as=style><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/lxgw-wenkai-screen-web/style.css><link rel=icon href=https://kerolt.github.io/images/avatar/favicon.png><link rel=icon type=image/png sizes=16x16 href=https://kerolt.github.io/%3Clink%20/%20abs%20url%3E><link rel=icon type=image/png sizes=32x32 href=https://kerolt.github.io/%3Clink%20/%20abs%20url%3E><link rel=apple-touch-icon href=https://kerolt.github.io/%3Clink%20/%20abs%20url%3E><link rel=mask-icon href=https://kerolt.github.io/%3Clink%20/%20abs%20url%3E><meta name=theme-color content="#2e2e33"><meta name=msapplication-TileColor content="#2e2e33"><link rel=alternate hreflang=en href=https://kerolt.github.io/posts/k8s/%E4%BB%80%E4%B9%88%E6%98%AF%E4%BA%91%E5%8E%9F%E7%94%9F%E8%87%AA%E6%88%91%E8%A7%A3%E6%83%91/><script src=https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js></script><link rel=stylesheet href=https://cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css><script src=https://cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js></script><noscript><style>#theme-toggle,.top-link{display:none}</style><style>@media(prefers-color-scheme:dark){:root{--theme:rgb(29, 30, 32);--entry:rgb(46, 46, 51);--primary:rgb(218, 218, 219);--secondary:rgb(155, 156, 157);--tertiary:rgb(65, 66, 68);--content:rgb(196, 196, 197);--code-block-bg:rgb(46, 46, 51);--code-bg:rgb(55, 56, 62);--border:rgb(51, 51, 51)}.list{background:var(--theme)}.list:not(.dark)::-webkit-scrollbar-track{background:0 0}.list:not(.dark)::-webkit-scrollbar-thumb{border-color:var(--theme)}}</style></noscript><meta property="og:url" content="https://kerolt.github.io/posts/k8s/%E4%BB%80%E4%B9%88%E6%98%AF%E4%BA%91%E5%8E%9F%E7%94%9F%E8%87%AA%E6%88%91%E8%A7%A3%E6%83%91/"><meta property="og:site_name" content="Kerolt's Blog"><meta property="og:title" content="什么是云原生（自我解惑）"><meta property="og:description" content=" 云原生​​是一套以​​微服务、容器、动态编排（如 Kubernetes）、DevOps​​为核心，旨在构建和运行​​弹性、可靠、敏捷​​的云化应用的最佳实践集合。
+理解它的关键在于思维的转变：​​从把云当作一台更便宜的虚拟主机，转变为把云当作一个可无限扩展、按需取用的计算能力平台，并以此为前提来设计和构建应用。​
+什么是云原生？ ​​云原生​​ 是一种构建和运行应用程序的全新方法论，它充分利用了云计算的优势。
+简单来说，​​云原生 = 云 + 原生​​。
+​​云​​：指的是应用程序运行在云环境中，而不仅仅是托管在云服务器上。 ​​原生​​：意味着应用程序从设计、开发、部署到运维的整个生命周期，都是​​专门为云环境而设计和构建的​​，是“云上的原住民”。 它不是某一种具体的技术，而是一套​​技术体系、方法论和最佳实践的集合​​，其核心目标是构建和运行​​弹性扩展、韧性可靠、易于管理、可观测、松耦合的现代化应用​​。
+如何通俗地理解云原生 我们可以用一个生动的比喻来理解：
+​​传统应用 vs. 云原生应用​​
+想象一下，你要运送货物。
+​​传统应用（像“巨石应用”）​​：就像把所有的货物都塞进一个巨大的、不可分割的木箱里。这个木箱非常沉重，需要一辆巨大的卡车（一台强大的服务器）来运输。如果想扩大运力，你必须换一辆更大的卡车（升级服务器，​​纵向扩展​​），这个过程很慢，而且一旦卡车抛锚，所有货物都会受损。
+​​对应现实​​：一个庞大的、所有功能都紧密耦合在一起的传统软件（如一个庞大的 ERP 系统），部署和维护都非常笨重。 ​​云原生应用（像“乐高应用”）​​：就像把货物分装在许多标准化的小集装箱（​​微服务​​）里。每个集装箱都可以被单独搬运、检查、替换。你可以根据需要轻松地增加或减少集装箱的数量（​​弹性伸缩​​），并且用许多辆小卡车（廉价的普通服务器）组成车队来运输。即使有几辆小卡车坏掉，也只会影响部分货物，整个运输系统不会瘫痪。
+​​对应现实​​：一个应用被拆分成许多小的、独立的服务（如用户服务、订单服务、支付服务），它们可以独立开发、部署和扩展。 云原生的四大核心要素 要支撑上述的“乐高式”应用，需要一套强大的技术框架。云原生主要由以下四大核心技术要素构成：
+​​微服务​​
+​​是什么​​：将大型单体应用拆分为一组小的、松耦合的、可独立部署和升级的服务。 ​​好处​​：每个服务可以由不同的团队用不同的技术栈开发，更新速度快，容错性高。 ​​容器化​​
+​​是什么​​：最代表性的技术是 ​​Docker​​。它将应用程序及其所有依赖项（库、环境配置等）打包成一个标准化的、轻量级的、可移植的“容器镜像”。这个容器在任何地方（开发、测试、生产环境）的运行效果都是一致的。 ​​好处​​：解决了“在我这运行得好好的，到你那就出问题”的环境一致性问题，是应用的标准交付件。 ​​动态编排​​
+​​是什么​​：最代表性的技术是 ​​Kubernetes​​。当你有成千上万个容器需要管理时，Kubernetes 就像一位​​超级调度员和管家​​。它负责自动部署容器、故障恢复（容器挂了自动重启）、弹性伸缩（流量大了自动增加容器数量）、负载均衡等。 ​​好处​​：实现了应用的自动化和智能化运维，是云原生的操作系统。 ​​DevOps 和持续交付​​
+​​是什么​​：​​DevOps​​ 是一种文化理念和实践，它打通了开发（Development）和运维（Operations）团队，通过高度自动化工具链（如 CI/CD），实现软件的频繁、可靠、快速的交付。 ​​好处​​：使得从代码提交到应用上线的过程可以完全自动化，极大地加快了迭代速度。 ​​简单总结一下四者的关系​​：
+我们用 ​​DevOps​​ 的文化和 ​​CI/CD​​ 的工具，来自动化地开发、构建和测试​​微服务​​，并将其打包成​​容器​​，最后交给 ​​Kubernetes​​ 这个编排系统去动态地管理和运行。
+为什么需要云原生？它的优势是什么？ 采用云原生架构能带来巨大的商业和技术价值：
+​​弹性与可扩展性​​：应用可以根据流量压力自动缩扩容，轻松应对“双十一”等高峰场景，同时节省空闲时的资源成本。 ​​高韧性与故障隔离​​：单个服务的故障不会导致整个系统崩溃，系统具备自愈能力。 ​​快速迭代与交付​​：微服务和 DevOps 使得新功能可以独立、频繁、安全地发布，大大加快了市场响应速度。 ​​资源利用率高​​：容器非常轻量，可以在同一台机器上密集部署，节省硬件成本。 ​​可移植性​​：容器化的应用可以运行在任何云平台（公有云、私有云、混合云）上，避免被单一云厂商锁定。 云环境和托管在云服务器上有什么区别 特性 托管在云服务器上（租用办公室） 构建在云环境上（打造智能企业） ​​核心思想​​ ​​“换地方”​​ ​​“换活法”​​ ​​比喻​​ 你租用了一间云厂商的​​办公室（云服务器）​​，然后把自家机房里的​​旧家具、旧电脑（传统应用）​​ 原封不动地搬了进去。运维方式完全没变。 你利用云厂商提供的​​全套智能办公解决方案（云服务）​​：按需使用的会议室（计算资源）、自动化的物流系统（CI/CD）、可随意拼拆的工位（容器）、智能调度系统（Kubernetes）来​​重新组建一个高效、灵活的现代化公司（云原生应用）​​。 ​​弹性伸缩​​ ​​手动、缓慢​​。需要更多资源时，需要人工干预去升级服务器配置（​​纵向扩展​​），这通常需要停机。 ​​自动、即时​​。应用可根据流量压力，自动增加或减少计算资源（​​横向扩展​​），过程无缝，按实际使用量计费。 ​​韧性/可靠性​​ ​​依赖单机​​。如果托管你应用的这台云服务器宕机，你的服务就中断了，直到你手动将其恢复或迁移到另一台服务器。 ​​内置高可用​​。应用被设计为分布式、多实例运行。即使底层一台或多台服务器宕机，编排系统会自动在健康的服务器上重启应用实例，用户无感知。 ​​资源管理​​ ​​以服务器为中心​​。你需要关心每台服务器的 CPU、内存、磁盘使用率，并进行运维。 ​​以应用为中心​​。你只需声明“我的应用需要 2 核 4G”，云平台会自动调度和分配资源，你不再需要关心应用具体跑在哪台物理机上。 ​​成本模式​​ ​​为资源预留付费​​。你租了一台云服务器，无论你是否满负荷使用它，你都需要为它整个月的配置付费。 ​​为资源消耗付费​​。你只为应用程序实际消耗的 CPU 秒、内存 MB、网络流量付费。利用率极高，成本显著优化。 ​​技术栈​​ 传统架构，如：​​单体应用​​ + ​​服务器​​ + ​​SSH 运维​​。 云原生架构，如：​​微服务​​ + ​​容器​​ + ​​Kubernetes​​ + ​​DevOps​​。 ​​与云的关系​​ ​​租赁关系​​。你只是租用它的基础空间和硬件。 ​​共生关系​​。你的应用深度使用了云提供的数据库、消息队列、AI、大数据等​​托管服务​​，与应用紧密集成。 "><meta property="og:locale" content="en"><meta property="og:type" content="article"><meta property="article:section" content="posts"><meta property="article:published_time" content="2025-09-17T00:00:00+00:00"><meta property="article:modified_time" content="2025-09-17T00:00:00+00:00"><meta property="article:tag" content="云原生"><meta property="og:image" content="https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E"><meta name=twitter:card content="summary_large_image"><meta name=twitter:image content="https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E"><meta name=twitter:title content="什么是云原生（自我解惑）"><meta name=twitter:description content="
+云原生​​是一套以​​微服务、容器、动态编排（如 Kubernetes）、DevOps​​为核心，旨在构建和运行​​弹性、可靠、敏捷​​的云化应用的最佳实践集合。
+理解它的关键在于思维的转变：​​从把云当作一台更便宜的虚拟主机，转变为把云当作一个可无限扩展、按需取用的计算能力平台，并以此为前提来设计和构建应用。​
+什么是云原生？
+​​云原生​​ 是一种构建和运行应用程序的全新方法论，它充分利用了云计算的优势。
+简单来说，​​云原生 = 云 + 原生​​。
+
+​​云​​：指的是应用程序运行在云环境中，而不仅仅是托管在云服务器上。
+​​原生​​：意味着应用程序从设计、开发、部署到运维的整个生命周期，都是​​专门为云环境而设计和构建的​​，是“云上的原住民”。
+
+它不是某一种具体的技术，而是一套​​技术体系、方法论和最佳实践的集合​​，其核心目标是构建和运行​​弹性扩展、韧性可靠、易于管理、可观测、松耦合的现代化应用​​。
+如何通俗地理解云原生
+我们可以用一个生动的比喻来理解：
+​​传统应用 vs. 云原生应用​​
+想象一下，你要运送货物。
+
+
+​​传统应用（像“巨石应用”）​​：就像把所有的货物都塞进一个巨大的、不可分割的木箱里。这个木箱非常沉重，需要一辆巨大的卡车（一台强大的服务器）来运输。如果想扩大运力，你必须换一辆更大的卡车（升级服务器，​​纵向扩展​​），这个过程很慢，而且一旦卡车抛锚，所有货物都会受损。
+
+​​对应现实​​：一个庞大的、所有功能都紧密耦合在一起的传统软件（如一个庞大的 ERP 系统），部署和维护都非常笨重。
+
+
+
+​​云原生应用（像“乐高应用”）​​：就像把货物分装在许多标准化的小集装箱（​​微服务​​）里。每个集装箱都可以被单独搬运、检查、替换。你可以根据需要轻松地增加或减少集装箱的数量（​​弹性伸缩​​），并且用许多辆小卡车（廉价的普通服务器）组成车队来运输。即使有几辆小卡车坏掉，也只会影响部分货物，整个运输系统不会瘫痪。
+
+​​对应现实​​：一个应用被拆分成许多小的、独立的服务（如用户服务、订单服务、支付服务），它们可以独立开发、部署和扩展。
+
+
+
+云原生的四大核心要素
+要支撑上述的“乐高式”应用，需要一套强大的技术框架。云原生主要由以下四大核心技术要素构成：
+
+
+​​微服务​​
+
+​​是什么​​：将大型单体应用拆分为一组小的、松耦合的、可独立部署和升级的服务。
+​​好处​​：每个服务可以由不同的团队用不同的技术栈开发，更新速度快，容错性高。
+
+
+
+​​容器化​​
+
+​​是什么​​：最代表性的技术是 ​​Docker​​。它将应用程序及其所有依赖项（库、环境配置等）打包成一个标准化的、轻量级的、可移植的“容器镜像”。这个容器在任何地方（开发、测试、生产环境）的运行效果都是一致的。
+​​好处​​：解决了“在我这运行得好好的，到你那就出问题”的环境一致性问题，是应用的标准交付件。
+
+
+
+​​动态编排​​
+
+​​是什么​​：最代表性的技术是 ​​Kubernetes​​。当你有成千上万个容器需要管理时，Kubernetes 就像一位​​超级调度员和管家​​。它负责自动部署容器、故障恢复（容器挂了自动重启）、弹性伸缩（流量大了自动增加容器数量）、负载均衡等。
+​​好处​​：实现了应用的自动化和智能化运维，是云原生的操作系统。
+
+
+
+​​DevOps 和持续交付​​
+
+​​是什么​​：​​DevOps​​ 是一种文化理念和实践，它打通了开发（Development）和运维（Operations）团队，通过高度自动化工具链（如 CI/CD），实现软件的频繁、可靠、快速的交付。
+​​好处​​：使得从代码提交到应用上线的过程可以完全自动化，极大地加快了迭代速度。
+
+
+
+​​简单总结一下四者的关系​​：
+我们用 ​​DevOps​​ 的文化和 ​​CI/CD​​ 的工具，来自动化地开发、构建和测试​​微服务​​，并将其打包成​​容器​​，最后交给 ​​Kubernetes​​ 这个编排系统去动态地管理和运行。
+为什么需要云原生？它的优势是什么？
+采用云原生架构能带来巨大的商业和技术价值：
+
+​​弹性与可扩展性​​：应用可以根据流量压力自动缩扩容，轻松应对“双十一”等高峰场景，同时节省空闲时的资源成本。
+​​高韧性与故障隔离​​：单个服务的故障不会导致整个系统崩溃，系统具备自愈能力。
+​​快速迭代与交付​​：微服务和 DevOps 使得新功能可以独立、频繁、安全地发布，大大加快了市场响应速度。
+​​资源利用率高​​：容器非常轻量，可以在同一台机器上密集部署，节省硬件成本。
+​​可移植性​​：容器化的应用可以运行在任何云平台（公有云、私有云、混合云）上，避免被单一云厂商锁定。
+
+云环境和托管在云服务器上有什么区别
+
+  
+      
+          特性
+          托管在云服务器上（租用办公室）
+          构建在云环境上（打造智能企业）
+      
+  
+  
+      
+          ​​核心思想​​
+          ​​“换地方”​​
+          ​​“换活法”​​
+      
+      
+          ​​比喻​​
+          你租用了一间云厂商的​​办公室（云服务器）​​，然后把自家机房里的​​旧家具、旧电脑（传统应用）​​ 原封不动地搬了进去。运维方式完全没变。
+          你利用云厂商提供的​​全套智能办公解决方案（云服务）​​：按需使用的会议室（计算资源）、自动化的物流系统（CI/CD）、可随意拼拆的工位（容器）、智能调度系统（Kubernetes）来​​重新组建一个高效、灵活的现代化公司（云原生应用）​​。
+      
+      
+          ​​弹性伸缩​​
+          ​​手动、缓慢​​。需要更多资源时，需要人工干预去升级服务器配置（​​纵向扩展​​），这通常需要停机。
+          ​​自动、即时​​。应用可根据流量压力，自动增加或减少计算资源（​​横向扩展​​），过程无缝，按实际使用量计费。
+      
+      
+          ​​韧性/可靠性​​
+          ​​依赖单机​​。如果托管你应用的这台云服务器宕机，你的服务就中断了，直到你手动将其恢复或迁移到另一台服务器。
+          ​​内置高可用​​。应用被设计为分布式、多实例运行。即使底层一台或多台服务器宕机，编排系统会自动在健康的服务器上重启应用实例，用户无感知。
+      
+      
+          ​​资源管理​​
+          ​​以服务器为中心​​。你需要关心每台服务器的 CPU、内存、磁盘使用率，并进行运维。
+          ​​以应用为中心​​。你只需声明“我的应用需要 2 核 4G”，云平台会自动调度和分配资源，你不再需要关心应用具体跑在哪台物理机上。
+      
+      
+          ​​成本模式​​
+          ​​为资源预留付费​​。你租了一台云服务器，无论你是否满负荷使用它，你都需要为它整个月的配置付费。
+          ​​为资源消耗付费​​。你只为应用程序实际消耗的 CPU 秒、内存 MB、网络流量付费。利用率极高，成本显著优化。
+      
+      
+          ​​技术栈​​
+          传统架构，如：​​单体应用​​ + ​​服务器​​ + ​​SSH 运维​​。
+          云原生架构，如：​​微服务​​ + ​​容器​​ + ​​Kubernetes​​ + ​​DevOps​​。
+      
+      
+          ​​与云的关系​​
+          ​​租赁关系​​。你只是租用它的基础空间和硬件。
+          ​​共生关系​​。你的应用深度使用了云提供的数据库、消息队列、AI、大数据等​​托管服务​​，与应用紧密集成。
+      
+  
+"><script type=application/ld+json>{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Posts","item":"https://kerolt.github.io/posts/"},{"@type":"ListItem","position":2,"name":"什么是云原生（自我解惑）","item":"https://kerolt.github.io/posts/k8s/%E4%BB%80%E4%B9%88%E6%98%AF%E4%BA%91%E5%8E%9F%E7%94%9F%E8%87%AA%E6%88%91%E8%A7%A3%E6%83%91/"}]}</script><script type=application/ld+json>{"@context":"https://schema.org","@type":"BlogPosting","headline":"什么是云原生（自我解惑）","name":"什么是云原生（自我解惑）","description":" 云原生​​是一套以​​微服务、容器、动态编排（如 Kubernetes）、DevOps​​为核心，旨在构建和运行​​弹性、可靠、敏捷​​的云化应用的最佳实践集合。\n理解它的关键在于思维的转变：​​从把云当作一台更便宜的虚拟主机，转变为把云当作一个可无限扩展、按需取用的计算能力平台，并以此为前提来设计和构建应用。​\n什么是云原生？ ​​云原生​​ 是一种构建和运行应用程序的全新方法论，它充分利用了云计算的优势。\n简单来说，​​云原生 = 云 + 原生​​。\n​​云​​：指的是应用程序运行在云环境中，而不仅仅是托管在云服务器上。 ​​原生​​：意味着应用程序从设计、开发、部署到运维的整个生命周期，都是​​专门为云环境而设计和构建的​​，是“云上的原住民”。 它不是某一种具体的技术，而是一套​​技术体系、方法论和最佳实践的集合​​，其核心目标是构建和运行​​弹性扩展、韧性可靠、易于管理、可观测、松耦合的现代化应用​​。\n如何通俗地理解云原生 我们可以用一个生动的比喻来理解：\n​​传统应用 vs. 云原生应用​​\n想象一下，你要运送货物。\n​​传统应用（像“巨石应用”）​​：就像把所有的货物都塞进一个巨大的、不可分割的木箱里。这个木箱非常沉重，需要一辆巨大的卡车（一台强大的服务器）来运输。如果想扩大运力，你必须换一辆更大的卡车（升级服务器，​​纵向扩展​​），这个过程很慢，而且一旦卡车抛锚，所有货物都会受损。\n​​对应现实​​：一个庞大的、所有功能都紧密耦合在一起的传统软件（如一个庞大的 ERP 系统），部署和维护都非常笨重。 ​​云原生应用（像“乐高应用”）​​：就像把货物分装在许多标准化的小集装箱（​​微服务​​）里。每个集装箱都可以被单独搬运、检查、替换。你可以根据需要轻松地增加或减少集装箱的数量（​​弹性伸缩​​），并且用许多辆小卡车（廉价的普通服务器）组成车队来运输。即使有几辆小卡车坏掉，也只会影响部分货物，整个运输系统不会瘫痪。\n​​对应现实​​：一个应用被拆分成许多小的、独立的服务（如用户服务、订单服务、支付服务），它们可以独立开发、部署和扩展。 云原生的四大核心要素 要支撑上述的“乐高式”应用，需要一套强大的技术框架。云原生主要由以下四大核心技术要素构成：\n​​微服务​​\n​​是什么​​：将大型单体应用拆分为一组小的、松耦合的、可独立部署和升级的服务。 ​​好处​​：每个服务可以由不同的团队用不同的技术栈开发，更新速度快，容错性高。 ​​容器化​​\n​​是什么​​：最代表性的技术是 ​​Docker​​。它将应用程序及其所有依赖项（库、环境配置等）打包成一个标准化的、轻量级的、可移植的“容器镜像”。这个容器在任何地方（开发、测试、生产环境）的运行效果都是一致的。 ​​好处​​：解决了“在我这运行得好好的，到你那就出问题”的环境一致性问题，是应用的标准交付件。 ​​动态编排​​\n​​是什么​​：最代表性的技术是 ​​Kubernetes​​。当你有成千上万个容器需要管理时，Kubernetes 就像一位​​超级调度员和管家​​。它负责自动部署容器、故障恢复（容器挂了自动重启）、弹性伸缩（流量大了自动增加容器数量）、负载均衡等。 ​​好处​​：实现了应用的自动化和智能化运维，是云原生的操作系统。 ​​DevOps 和持续交付​​\n​​是什么​​：​​DevOps​​ 是一种文化理念和实践，它打通了开发（Development）和运维（Operations）团队，通过高度自动化工具链（如 CI/CD），实现软件的频繁、可靠、快速的交付。 ​​好处​​：使得从代码提交到应用上线的过程可以完全自动化，极大地加快了迭代速度。 ​​简单总结一下四者的关系​​：\n我们用 ​​DevOps​​ 的文化和 ​​CI/CD​​ 的工具，来自动化地开发、构建和测试​​微服务​​，并将其打包成​​容器​​，最后交给 ​​Kubernetes​​ 这个编排系统去动态地管理和运行。\n为什么需要云原生？它的优势是什么？ 采用云原生架构能带来巨大的商业和技术价值：\n​​弹性与可扩展性​​：应用可以根据流量压力自动缩扩容，轻松应对“双十一”等高峰场景，同时节省空闲时的资源成本。 ​​高韧性与故障隔离​​：单个服务的故障不会导致整个系统崩溃，系统具备自愈能力。 ​​快速迭代与交付​​：微服务和 DevOps 使得新功能可以独立、频繁、安全地发布，大大加快了市场响应速度。 ​​资源利用率高​​：容器非常轻量，可以在同一台机器上密集部署，节省硬件成本。 ​​可移植性​​：容器化的应用可以运行在任何云平台（公有云、私有云、混合云）上，避免被单一云厂商锁定。 云环境和托管在云服务器上有什么区别 特性 托管在云服务器上（租用办公室） 构建在云环境上（打造智能企业） ​​核心思想​​ ​​“换地方”​​ ​​“换活法”​​ ​​比喻​​ 你租用了一间云厂商的​​办公室（云服务器）​​，然后把自家机房里的​​旧家具、旧电脑（传统应用）​​ 原封不动地搬了进去。运维方式完全没变。 你利用云厂商提供的​​全套智能办公解决方案（云服务）​​：按需使用的会议室（计算资源）、自动化的物流系统（CI/CD）、可随意拼拆的工位（容器）、智能调度系统（Kubernetes）来​​重新组建一个高效、灵活的现代化公司（云原生应用）​​。 ​​弹性伸缩​​ ​​手动、缓慢​​。需要更多资源时，需要人工干预去升级服务器配置（​​纵向扩展​​），这通常需要停机。 ​​自动、即时​​。应用可根据流量压力，自动增加或减少计算资源（​​横向扩展​​），过程无缝，按实际使用量计费。 ​​韧性/可靠性​​ ​​依赖单机​​。如果托管你应用的这台云服务器宕机，你的服务就中断了，直到你手动将其恢复或迁移到另一台服务器。 ​​内置高可用​​。应用被设计为分布式、多实例运行。即使底层一台或多台服务器宕机，编排系统会自动在健康的服务器上重启应用实例，用户无感知。 ​​资源管理​​ ​​以服务器为中心​​。你需要关心每台服务器的 CPU、内存、磁盘使用率，并进行运维。 ​​以应用为中心​​。你只需声明“我的应用需要 2 核 4G”，云平台会自动调度和分配资源，你不再需要关心应用具体跑在哪台物理机上。 ​​成本模式​​ ​​为资源预留付费​​。你租了一台云服务器，无论你是否满负荷使用它，你都需要为它整个月的配置付费。 ​​为资源消耗付费​​。你只为应用程序实际消耗的 CPU 秒、内存 MB、网络流量付费。利用率极高，成本显著优化。 ​​技术栈​​ 传统架构，如：​​单体应用​​ + ​​服务器​​ + ​​SSH 运维​​。 云原生架构，如：​​微服务​​ + ​​容器​​ + ​​Kubernetes​​ + ​​DevOps​​。 ​​与云的关系​​ ​​租赁关系​​。你只是租用它的基础空间和硬件。 ​​共生关系​​。你的应用深度使用了云提供的数据库、消息队列、AI、大数据等​​托管服务​​，与应用紧密集成。 ","keywords":["云原生"],"articleBody":" 云原生​​是一套以​​微服务、容器、动态编排（如 Kubernetes）、DevOps​​为核心，旨在构建和运行​​弹性、可靠、敏捷​​的云化应用的最佳实践集合。\n理解它的关键在于思维的转变：​​从把云当作一台更便宜的虚拟主机，转变为把云当作一个可无限扩展、按需取用的计算能力平台，并以此为前提来设计和构建应用。​\n什么是云原生？ ​​云原生​​ 是一种构建和运行应用程序的全新方法论，它充分利用了云计算的优势。\n简单来说，​​云原生 = 云 + 原生​​。\n​​云​​：指的是应用程序运行在云环境中，而不仅仅是托管在云服务器上。 ​​原生​​：意味着应用程序从设计、开发、部署到运维的整个生命周期，都是​​专门为云环境而设计和构建的​​，是“云上的原住民”。 它不是某一种具体的技术，而是一套​​技术体系、方法论和最佳实践的集合​​，其核心目标是构建和运行​​弹性扩展、韧性可靠、易于管理、可观测、松耦合的现代化应用​​。\n如何通俗地理解云原生 我们可以用一个生动的比喻来理解：\n​​传统应用 vs. 云原生应用​​\n想象一下，你要运送货物。\n​​传统应用（像“巨石应用”）​​：就像把所有的货物都塞进一个巨大的、不可分割的木箱里。这个木箱非常沉重，需要一辆巨大的卡车（一台强大的服务器）来运输。如果想扩大运力，你必须换一辆更大的卡车（升级服务器，​​纵向扩展​​），这个过程很慢，而且一旦卡车抛锚，所有货物都会受损。\n​​对应现实​​：一个庞大的、所有功能都紧密耦合在一起的传统软件（如一个庞大的 ERP 系统），部署和维护都非常笨重。 ​​云原生应用（像“乐高应用”）​​：就像把货物分装在许多标准化的小集装箱（​​微服务​​）里。每个集装箱都可以被单独搬运、检查、替换。你可以根据需要轻松地增加或减少集装箱的数量（​​弹性伸缩​​），并且用许多辆小卡车（廉价的普通服务器）组成车队来运输。即使有几辆小卡车坏掉，也只会影响部分货物，整个运输系统不会瘫痪。\n​​对应现实​​：一个应用被拆分成许多小的、独立的服务（如用户服务、订单服务、支付服务），它们可以独立开发、部署和扩展。 云原生的四大核心要素 要支撑上述的“乐高式”应用，需要一套强大的技术框架。云原生主要由以下四大核心技术要素构成：\n​​微服务​​\n​​是什么​​：将大型单体应用拆分为一组小的、松耦合的、可独立部署和升级的服务。 ​​好处​​：每个服务可以由不同的团队用不同的技术栈开发，更新速度快，容错性高。 ​​容器化​​\n​​是什么​​：最代表性的技术是 ​​Docker​​。它将应用程序及其所有依赖项（库、环境配置等）打包成一个标准化的、轻量级的、可移植的“容器镜像”。这个容器在任何地方（开发、测试、生产环境）的运行效果都是一致的。 ​​好处​​：解决了“在我这运行得好好的，到你那就出问题”的环境一致性问题，是应用的标准交付件。 ​​动态编排​​\n​​是什么​​：最代表性的技术是 ​​Kubernetes​​。当你有成千上万个容器需要管理时，Kubernetes 就像一位​​超级调度员和管家​​。它负责自动部署容器、故障恢复（容器挂了自动重启）、弹性伸缩（流量大了自动增加容器数量）、负载均衡等。 ​​好处​​：实现了应用的自动化和智能化运维，是云原生的操作系统。 ​​DevOps 和持续交付​​\n​​是什么​​：​​DevOps​​ 是一种文化理念和实践，它打通了开发（Development）和运维（Operations）团队，通过高度自动化工具链（如 CI/CD），实现软件的频繁、可靠、快速的交付。 ​​好处​​：使得从代码提交到应用上线的过程可以完全自动化，极大地加快了迭代速度。 ​​简单总结一下四者的关系​​：\n我们用 ​​DevOps​​ 的文化和 ​​CI/CD​​ 的工具，来自动化地开发、构建和测试​​微服务​​，并将其打包成​​容器​​，最后交给 ​​Kubernetes​​ 这个编排系统去动态地管理和运行。\n为什么需要云原生？它的优势是什么？ 采用云原生架构能带来巨大的商业和技术价值：\n​​弹性与可扩展性​​：应用可以根据流量压力自动缩扩容，轻松应对“双十一”等高峰场景，同时节省空闲时的资源成本。 ​​高韧性与故障隔离​​：单个服务的故障不会导致整个系统崩溃，系统具备自愈能力。 ​​快速迭代与交付​​：微服务和 DevOps 使得新功能可以独立、频繁、安全地发布，大大加快了市场响应速度。 ​​资源利用率高​​：容器非常轻量，可以在同一台机器上密集部署，节省硬件成本。 ​​可移植性​​：容器化的应用可以运行在任何云平台（公有云、私有云、混合云）上，避免被单一云厂商锁定。 云环境和托管在云服务器上有什么区别 特性 托管在云服务器上（租用办公室） 构建在云环境上（打造智能企业） ​​核心思想​​ ​​“换地方”​​ ​​“换活法”​​ ​​比喻​​ 你租用了一间云厂商的​​办公室（云服务器）​​，然后把自家机房里的​​旧家具、旧电脑（传统应用）​​ 原封不动地搬了进去。运维方式完全没变。 你利用云厂商提供的​​全套智能办公解决方案（云服务）​​：按需使用的会议室（计算资源）、自动化的物流系统（CI/CD）、可随意拼拆的工位（容器）、智能调度系统（Kubernetes）来​​重新组建一个高效、灵活的现代化公司（云原生应用）​​。 ​​弹性伸缩​​ ​​手动、缓慢​​。需要更多资源时，需要人工干预去升级服务器配置（​​纵向扩展​​），这通常需要停机。 ​​自动、即时​​。应用可根据流量压力，自动增加或减少计算资源（​​横向扩展​​），过程无缝，按实际使用量计费。 ​​韧性/可靠性​​ ​​依赖单机​​。如果托管你应用的这台云服务器宕机，你的服务就中断了，直到你手动将其恢复或迁移到另一台服务器。 ​​内置高可用​​。应用被设计为分布式、多实例运行。即使底层一台或多台服务器宕机，编排系统会自动在健康的服务器上重启应用实例，用户无感知。 ​​资源管理​​ ​​以服务器为中心​​。你需要关心每台服务器的 CPU、内存、磁盘使用率，并进行运维。 ​​以应用为中心​​。你只需声明“我的应用需要 2 核 4G”，云平台会自动调度和分配资源，你不再需要关心应用具体跑在哪台物理机上。 ​​成本模式​​ ​​为资源预留付费​​。你租了一台云服务器，无论你是否满负荷使用它，你都需要为它整个月的配置付费。 ​​为资源消耗付费​​。你只为应用程序实际消耗的 CPU 秒、内存 MB、网络流量付费。利用率极高，成本显著优化。 ​​技术栈​​ 传统架构，如：​​单体应用​​ + ​​服务器​​ + ​​SSH 运维​​。 云原生架构，如：​​微服务​​ + ​​容器​​ + ​​Kubernetes​​ + ​​DevOps​​。 ​​与云的关系​​ ​​租赁关系​​。你只是租用它的基础空间和硬件。 ​​共生关系​​。你的应用深度使用了云提供的数据库、消息队列、AI、大数据等​​托管服务​​，与应用紧密集成。 ","wordCount":"110","inLanguage":"en","image":"https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E","datePublished":"2025-09-17T00:00:00Z","dateModified":"2025-09-17T00:00:00Z","author":{"@type":"Person","name":"Kerolt"},"mainEntityOfPage":{"@type":"WebPage","@id":"https://kerolt.github.io/posts/k8s/%E4%BB%80%E4%B9%88%E6%98%AF%E4%BA%91%E5%8E%9F%E7%94%9F%E8%87%AA%E6%88%91%E8%A7%A3%E6%83%91/"},"publisher":{"@type":"Organization","name":"Kerolt's Blog","logo":{"@type":"ImageObject","url":"https://kerolt.github.io/images/avatar/favicon.png"}}}</script></head><body id=top><script>localStorage.getItem("pref-theme")==="dark"?document.body.classList.add("dark"):localStorage.getItem("pref-theme")==="light"?document.body.classList.remove("dark"):window.matchMedia("(prefers-color-scheme: dark)").matches&&document.body.classList.add("dark")</script><header class=header><nav class=nav><div class=logo><a href=https://kerolt.github.io/ accesskey=h title="Kerolt's Blog (Alt + H)">Kerolt's Blog</a><div class=logo-switches><button id=theme-toggle accesskey=t title="(Alt + T)" aria-label="Toggle theme">
+<svg id="moon" width="24" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+<svg id="sun" width="24" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></button></div></div><ul id=menu><li><a href=https://kerolt.github.io/posts/ title=文章><span>文章</span></a></li><li><a href=https://kerolt.github.io/categories/ title=分类><span>分类</span></a></li><li><a href=https://kerolt.github.io/tags/ title=标签><span>标签</span></a></li><li><a href=https://kerolt.github.io/archives/ title=归档><span>归档</span></a></li><li><a href=https://kerolt.github.io/about/ title=关于我><span>关于我</span></a></li><li><a href=https://kerolt.github.io/search/ title="🔍 (Alt + /)" accesskey=/><span>🔍</span></a></li></ul></nav></header><main class=main><article class=post-single><header class=post-header><div class=breadcrumbs><a href=https://kerolt.github.io/>Home</a>&nbsp;»&nbsp;<a href=https://kerolt.github.io/posts/>Posts</a></div><h1 class="post-title entry-hint-parent">什么是云原生（自我解惑）</h1><div class=post-meta><span title='2025-09-17 00:00:00 +0000 UTC'>2025-09-17</span>&nbsp;·&nbsp;1 min&nbsp;·&nbsp;110 words&nbsp;·&nbsp;Kerolt</div><ul class=post-tags><li><a href=https://kerolt.github.io/tags/%E4%BA%91%E5%8E%9F%E7%94%9F/>云原生</a></li></ul></header><aside id=toc-container class="toc-container wide"><div class=toc><details open><summary accesskey=c title="(Alt + C)"><span class=details>Table of Contents</span></summary><div class=inner><ul><li><a href=#%e4%bb%80%e4%b9%88%e6%98%af%e4%ba%91%e5%8e%9f%e7%94%9f aria-label=什么是云原生？>什么是云原生？</a></li><li><a href=#%e5%a6%82%e4%bd%95%e9%80%9a%e4%bf%97%e5%9c%b0%e7%90%86%e8%a7%a3%e4%ba%91%e5%8e%9f%e7%94%9f aria-label=如何通俗地理解云原生>如何通俗地理解云原生</a></li><li><a href=#%e4%ba%91%e5%8e%9f%e7%94%9f%e7%9a%84%e5%9b%9b%e5%a4%a7%e6%a0%b8%e5%bf%83%e8%a6%81%e7%b4%a0 aria-label=云原生的四大核心要素>云原生的四大核心要素</a></li><li><a href=#%e4%b8%ba%e4%bb%80%e4%b9%88%e9%9c%80%e8%a6%81%e4%ba%91%e5%8e%9f%e7%94%9f%e5%ae%83%e7%9a%84%e4%bc%98%e5%8a%bf%e6%98%af%e4%bb%80%e4%b9%88 aria-label=为什么需要云原生？它的优势是什么？>为什么需要云原生？它的优势是什么？</a></li><li><a href=#%e4%ba%91%e7%8e%af%e5%a2%83%e5%92%8c%e6%89%98%e7%ae%a1%e5%9c%a8%e4%ba%91%e6%9c%8d%e5%8a%a1%e5%99%a8%e4%b8%8a%e6%9c%89%e4%bb%80%e4%b9%88%e5%8c%ba%e5%88%ab aria-label=云环境和托管在云服务器上有什么区别>云环境和托管在云服务器上有什么区别</a></li></ul></div></details></div></aside><script>let activeElement,elements;window.addEventListener("DOMContentLoaded",function(){checkTocPosition(),elements=document.querySelectorAll("h1[id],h2[id],h3[id],h4[id],h5[id],h6[id]"),activeElement=elements[0];const t=encodeURI(activeElement.getAttribute("id")).toLowerCase();document.querySelector(`.inner ul li a[href="#${t}"]`).classList.add("active")},!1),window.addEventListener("resize",function(){checkTocPosition()},!1),window.addEventListener("scroll",()=>{activeElement=Array.from(elements).find(e=>{if(getOffsetTop(e)-window.pageYOffset>0&&getOffsetTop(e)-window.pageYOffset<window.innerHeight/2)return e})||activeElement,elements.forEach(e=>{const t=encodeURI(e.getAttribute("id")).toLowerCase();e===activeElement?document.querySelector(`.inner ul li a[href="#${t}"]`).classList.add("active"):document.querySelector(`.inner ul li a[href="#${t}"]`).classList.remove("active")})},!1);const main=parseInt(getComputedStyle(document.body).getPropertyValue("--article-width"),10),toc=parseInt(getComputedStyle(document.body).getPropertyValue("--toc-width"),10),gap=parseInt(getComputedStyle(document.body).getPropertyValue("--gap"),10);function checkTocPosition(){const e=document.body.scrollWidth;e-main-toc*2-gap*4>0?document.getElementById("toc-container").classList.add("wide"):document.getElementById("toc-container").classList.remove("wide")}function getOffsetTop(e){if(!e.getClientRects().length)return 0;let t=e.getBoundingClientRect(),n=e.ownerDocument.defaultView;return t.top+n.pageYOffset}</script><div class=post-content><blockquote><p><strong>云原生​</strong>​是一套以​<strong>​微服务、容器、动态编排（如 Kubernetes）、DevOps​</strong>​为核心，旨在构建和运行​<strong>​弹性、可靠、敏捷​</strong>​的云化应用的最佳实践集合。</p><p>理解它的关键在于思维的转变：​<strong>​从把云当作一台更便宜的虚拟主机，转变为把云当作一个可无限扩展、按需取用的计算能力平台，并以此为前提来设计和构建应用。​</strong></p></blockquote><h2 id=什么是云原生>什么是云原生？<a hidden class=anchor aria-hidden=true href=#什么是云原生>#</a></h2><p>​<strong>​云原生​</strong>​ 是一种构建和运行应用程序的全新方法论，它充分利用了云计算的优势。</p><p>简单来说，​<strong>​云原生 = 云 + 原生​</strong>​。</p><ul><li>​<strong>​云​</strong>​：指的是应用程序运行在云环境中，而不仅仅是托管在云服务器上。</li><li>​<strong>​原生​</strong>​：意味着应用程序从设计、开发、部署到运维的整个生命周期，都是​<strong>​专门为云环境而设计和构建的​</strong>​，是“云上的原住民”。</li></ul><p>它不是某一种具体的技术，而是一套​<strong>​技术体系、方法论和最佳实践的集合​</strong>​，其核心目标是构建和运行​<strong>​弹性扩展、韧性可靠、易于管理、可观测、松耦合的现代化应用​</strong>​。</p><h2 id=如何通俗地理解云原生>如何通俗地理解云原生<a hidden class=anchor aria-hidden=true href=#如何通俗地理解云原生>#</a></h2><p>我们可以用一个生动的比喻来理解：</p><p>​<strong>​传统应用 vs. 云原生应用​</strong>​</p><p>想象一下，你要运送货物。</p><ul><li><p>​<strong>​传统应用（像“巨石应用”）​</strong>​：就像把所有的货物都塞进一个巨大的、不可分割的木箱里。这个木箱非常沉重，需要一辆巨大的卡车（一台强大的服务器）来运输。如果想扩大运力，你必须换一辆更大的卡车（升级服务器，​<strong>​纵向扩展​</strong>​），这个过程很慢，而且一旦卡车抛锚，所有货物都会受损。</p><ul><li>​<strong>​对应现实​</strong>​：一个庞大的、所有功能都紧密耦合在一起的传统软件（如一个庞大的 ERP 系统），部署和维护都非常笨重。</li></ul></li><li><p>​<strong>​云原生应用（像“乐高应用”）​</strong>​：就像把货物分装在许多标准化的小集装箱（​<strong>​微服务​</strong>​）里。每个集装箱都可以被单独搬运、检查、替换。你可以根据需要轻松地增加或减少集装箱的数量（​<strong>​弹性伸缩​</strong>​），并且用许多辆小卡车（廉价的普通服务器）组成车队来运输。即使有几辆小卡车坏掉，也只会影响部分货物，整个运输系统不会瘫痪。</p><ul><li>​<strong>​对应现实​</strong>​：一个应用被拆分成许多小的、独立的服务（如用户服务、订单服务、支付服务），它们可以独立开发、部署和扩展。</li></ul></li></ul><h2 id=云原生的四大核心要素>云原生的四大核心要素<a hidden class=anchor aria-hidden=true href=#云原生的四大核心要素>#</a></h2><p>要支撑上述的“乐高式”应用，需要一套强大的技术框架。云原生主要由以下四大核心技术要素构成：</p><ol><li><p>​<strong>​微服务​</strong>​</p><ul><li>​<strong>​是什么​</strong>​：将大型单体应用拆分为一组小的、松耦合的、可独立部署和升级的服务。</li><li>​<strong>​好处​</strong>​：每个服务可以由不同的团队用不同的技术栈开发，更新速度快，容错性高。</li></ul></li><li><p>​<strong>​容器化​</strong>​</p><ul><li>​<strong>​是什么​</strong>​：最代表性的技术是 ​<strong>​Docker​</strong>​。它将应用程序及其所有依赖项（库、环境配置等）打包成一个标准化的、轻量级的、可移植的“容器镜像”。这个容器在任何地方（开发、测试、生产环境）的运行效果都是一致的。</li><li>​<strong>​好处​</strong>​：解决了“在我这运行得好好的，到你那就出问题”的环境一致性问题，是应用的标准交付件。</li></ul></li><li><p>​<strong>​动态编排​</strong>​</p><ul><li>​<strong>​是什么​</strong>​：最代表性的技术是 ​<strong>​Kubernetes​</strong>​。当你有成千上万个容器需要管理时，Kubernetes 就像一位​<strong>​超级调度员和管家​</strong>​。它负责自动部署容器、故障恢复（容器挂了自动重启）、弹性伸缩（流量大了自动增加容器数量）、负载均衡等。</li><li>​<strong>​好处​</strong>​：实现了应用的自动化和智能化运维，是云原生的操作系统。</li></ul></li><li><p>​<strong>​DevOps 和持续交付​</strong>​</p><ul><li>​<strong>​是什么​</strong>​：​<strong>​DevOps​</strong>​ 是一种文化理念和实践，它打通了开发（Development）和运维（Operations）团队，通过高度自动化工具链（如 CI/CD），实现软件的频繁、可靠、快速的交付。</li><li>​<strong>​好处​</strong>​：使得从代码提交到应用上线的过程可以完全自动化，极大地加快了迭代速度。</li></ul></li></ol><p>​<strong>​简单总结一下四者的关系​</strong>​：</p><p>我们用 ​<strong>​DevOps​</strong>​ 的文化和 ​<strong>​CI/CD​</strong>​ 的工具，来自动化地开发、构建和测试​<strong>​微服务​</strong>​，并将其打包成​<strong>​容器​</strong>​，最后交给 ​<strong>​Kubernetes​</strong>​ 这个编排系统去动态地管理和运行。</p><h2 id=为什么需要云原生它的优势是什么>为什么需要云原生？它的优势是什么？<a hidden class=anchor aria-hidden=true href=#为什么需要云原生它的优势是什么>#</a></h2><p>采用云原生架构能带来巨大的商业和技术价值：</p><ul><li>​<strong>​弹性与可扩展性​</strong>​：应用可以根据流量压力自动缩扩容，轻松应对“双十一”等高峰场景，同时节省空闲时的资源成本。</li><li>​<strong>​高韧性与故障隔离​</strong>​：单个服务的故障不会导致整个系统崩溃，系统具备自愈能力。</li><li>​<strong>​快速迭代与交付​</strong>​：微服务和 DevOps 使得新功能可以独立、频繁、安全地发布，大大加快了市场响应速度。</li><li>​<strong>​资源利用率高​</strong>​：容器非常轻量，可以在同一台机器上密集部署，节省硬件成本。</li><li>​<strong>​可移植性​</strong>​：容器化的应用可以运行在任何云平台（公有云、私有云、混合云）上，避免被单一云厂商锁定。</li></ul><h2 id=云环境和托管在云服务器上有什么区别>云环境和托管在云服务器上有什么区别<a hidden class=anchor aria-hidden=true href=#云环境和托管在云服务器上有什么区别>#</a></h2><table><thead><tr><th>特性</th><th>托管在云服务器上（租用办公室）</th><th>构建在云环境上（打造智能企业）</th></tr></thead><tbody><tr><td>​​核心思想​​</td><td>​<strong>​“换地方”​</strong>​</td><td>​<strong>​“换活法”​</strong>​</td></tr><tr><td>​​比喻​​</td><td>你租用了一间云厂商的​<strong>​办公室（云服务器）​</strong>​，然后把自家机房里的​<strong>​旧家具、旧电脑（传统应用）​</strong>​ 原封不动地搬了进去。运维方式完全没变。</td><td>你利用云厂商提供的​<strong>​全套智能办公解决方案（云服务）​</strong>​：按需使用的会议室（计算资源）、自动化的物流系统（CI/CD）、可随意拼拆的工位（容器）、智能调度系统（Kubernetes）来​<strong>​重新组建一个高效、灵活的现代化公司（云原生应用）​</strong>​。</td></tr><tr><td>​​弹性伸缩​​</td><td>​<strong>​手动、缓慢​</strong>​。需要更多资源时，需要人工干预去升级服务器配置（​<strong>​纵向扩展​</strong>​），这通常需要停机。</td><td>​<strong>​自动、即时​</strong>​。应用可根据流量压力，自动增加或减少计算资源（​<strong>​横向扩展​</strong>​），过程无缝，按实际使用量计费。</td></tr><tr><td>​​韧性/可靠性​​</td><td>​<strong>​依赖单机​</strong>​。如果托管你应用的这台云服务器宕机，你的服务就中断了，直到你手动将其恢复或迁移到另一台服务器。</td><td>​<strong>​内置高可用​</strong>​。应用被设计为分布式、多实例运行。即使底层一台或多台服务器宕机，编排系统会自动在健康的服务器上重启应用实例，用户无感知。</td></tr><tr><td>​​资源管理​​</td><td>​<strong>​以服务器为中心​</strong>​。你需要关心每台服务器的 CPU、内存、磁盘使用率，并进行运维。</td><td>​<strong>​以应用为中心​</strong>​。你只需声明“我的应用需要 2 核 4G”，云平台会自动调度和分配资源，你不再需要关心应用具体跑在哪台物理机上。</td></tr><tr><td>​​成本模式​​</td><td>​<strong>​为资源预留付费​</strong>​。你租了一台云服务器，无论你是否满负荷使用它，你都需要为它整个月的配置付费。</td><td>​<strong>​为资源消耗付费​</strong>​。你只为应用程序实际消耗的 CPU 秒、内存 MB、网络流量付费。利用率极高，成本显著优化。</td></tr><tr><td>​​技术栈​​</td><td>传统架构，如：​<strong>​单体应用​</strong>​ + ​<strong>​服务器​</strong>​ + ​<strong>​SSH 运维​</strong>​。</td><td>云原生架构，如：​<strong>​微服务​</strong>​ + ​<strong>​容器​</strong>​ + ​<strong>​Kubernetes​</strong>​ + ​<strong>​DevOps​</strong>​。</td></tr><tr><td>​​与云的关系​​</td><td>​<strong>​租赁关系​</strong>​。你只是租用它的基础空间和硬件。</td><td>​<strong>​共生关系​</strong>​。你的应用深度使用了云提供的数据库、消息队列、AI、大数据等​<strong>​托管服务​</strong>​，与应用紧密集成。</td></tr></tbody></table></div><footer class=post-footer><nav class=paginav><a class=prev href=https://kerolt.github.io/posts/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/linux-napi%E6%9C%BA%E5%88%B6%E7%9F%A5%E8%AF%86%E7%82%B9%E6%80%BB%E7%BB%93/><span class=title>« Prev</span><br><span>Linux NAPI机制知识点总结</span>
+</a><a class=next href=https://kerolt.github.io/posts/k8s/k8s%E4%BB%80%E4%B9%88%E6%98%AFservice/><span class=title>Next »</span><br><span>【k8s】什么是Service</span></a></nav></footer></article></main><footer class=footer><span>&copy; 2025 <a href=https://kerolt.github.io/>Kerolt's Blog</a></span> ·
+<span>Powered by
+<a href=https://gohugo.io/ rel="noopener noreferrer" target=_blank>Hugo</a> &
+<a href=https://github.com/adityatelange/hugo-PaperMod/ rel=noopener target=_blank>PaperMod</a></span></footer><a href=#top aria-label="go to top" title="Go to Top (Alt + G)" class=top-link id=top-link accesskey=g><svg viewBox="0 0 12 6" fill="currentColor"><path d="M12 6H0l6-6z"/></svg>
+</a><script>let menu=document.getElementById("menu");menu&&(menu.scrollLeft=localStorage.getItem("menu-scroll-position"),menu.onscroll=function(){localStorage.setItem("menu-scroll-position",menu.scrollLeft)}),document.querySelectorAll('a[href^="#"]').forEach(e=>{e.addEventListener("click",function(e){e.preventDefault();var t=this.getAttribute("href").substr(1);window.matchMedia("(prefers-reduced-motion: reduce)").matches?document.querySelector(`[id='${decodeURIComponent(t)}']`).scrollIntoView():document.querySelector(`[id='${decodeURIComponent(t)}']`).scrollIntoView({behavior:"smooth"}),t==="top"?history.replaceState(null,null," "):history.pushState(null,null,`#${t}`)})})</script><script>var mybutton=document.getElementById("top-link");window.onscroll=function(){document.body.scrollTop>800||document.documentElement.scrollTop>800?(mybutton.style.visibility="visible",mybutton.style.opacity="1"):(mybutton.style.visibility="hidden",mybutton.style.opacity="0")}</script><script>document.getElementById("theme-toggle").addEventListener("click",()=>{document.body.className.includes("dark")?(document.body.classList.remove("dark"),localStorage.setItem("pref-theme","light")):(document.body.classList.add("dark"),localStorage.setItem("pref-theme","dark"))})</script><script>document.querySelectorAll("pre > code").forEach(e=>{const n=e.parentNode.parentNode,t=document.createElement("button");t.classList.add("copy-code"),t.innerHTML="copy";function s(){t.innerHTML="copied!",setTimeout(()=>{t.innerHTML="copy"},2e3)}t.addEventListener("click",t=>{if("clipboard"in navigator){navigator.clipboard.writeText(e.textContent),s();return}const n=document.createRange();n.selectNodeContents(e);const o=window.getSelection();o.removeAllRanges(),o.addRange(n);try{document.execCommand("copy"),s()}catch{}o.removeRange(n)}),n.classList.contains("highlight")?n.appendChild(t):n.parentNode.firstChild==n||(e.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName=="TABLE"?e.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(t):e.parentNode.appendChild(t))})</script></body></html>

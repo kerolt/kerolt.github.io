@@ -11,8 +11,48 @@
     </image>
     <generator>Hugo -- 0.150.0</generator>
     <language>en</language>
-    <lastBuildDate>Fri, 22 Nov 2024 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Wed, 17 Sep 2025 00:00:00 +0000</lastBuildDate>
     <atom:link href="https://kerolt.github.io/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Linux NAPI机制知识点总结</title>
+      <link>https://kerolt.github.io/posts/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/linux-napi%E6%9C%BA%E5%88%B6%E7%9F%A5%E8%AF%86%E7%82%B9%E6%80%BB%E7%BB%93/</link>
+      <pubDate>Wed, 17 Sep 2025 00:00:00 +0000</pubDate>
+      <guid>https://kerolt.github.io/posts/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/linux-napi%E6%9C%BA%E5%88%B6%E7%9F%A5%E8%AF%86%E7%82%B9%E6%80%BB%E7%BB%93/</guid>
+      <description>&lt;blockquote&gt;
+&lt;p&gt;对 &lt;a href=&#34;https://docs.kernel.org/networking/napi.html&#34;&gt;https://docs.kernel.org/networking/napi.html&lt;/a&gt; 的总结&lt;/p&gt;&lt;/blockquote&gt;
+&lt;p&gt;NAPI (New API，但现已无特定含义) 是 Linux 内核中用于高效处理网络数据包的一种机制，旨在减少高负载下的中断开销。&lt;/p&gt;
+&lt;p&gt;其​目的​​是为了解决传统基于中断的包处理在高流量下的性能问题（“中断活锁”）。通过混合​&lt;strong&gt;​中断​&lt;/strong&gt;​和​&lt;strong&gt;​轮询​&lt;/strong&gt;​模式，在低负载时使用中断保证低延迟，在高负载时切换到轮询保证高吞吐量。&lt;/p&gt;
+&lt;p&gt;设备通过中断通知有新数据包 -&amp;gt; 内核调度对应的 NAPI 实例 -&amp;gt; 在软中断上下文（或内核线程）中轮询处理多个数据包 -&amp;gt; 处理完毕后再打开中断。&lt;/p&gt;
+&lt;h2 id=&#34;核心数据结构与-api&#34;&gt;核心数据结构与 API&lt;/h2&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;​&lt;strong&gt;​&lt;code&gt;struct napi_struct&lt;/code&gt;​&lt;/strong&gt;​：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;核心数据结构，代表一个 NAPI 实例，保存其状态信息。&lt;/li&gt;
+&lt;li&gt;通常与一个中断或一个队列（RX/TX）相关联。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;​&lt;strong&gt;​控制 API (初始化和状态管理)​&lt;/strong&gt;​：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;netif_napi_add()&lt;/code&gt; / &lt;code&gt;netif_napi_del()&lt;/code&gt;: 向系统添加/删除一个 NAPI 实例（通常附加到网络设备上）。&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;napi_enable()&lt;/code&gt; / &lt;code&gt;napi_disable()&lt;/code&gt;: 启用/禁用 NAPI 实例。禁用状态下实例不会被调度，&lt;code&gt;poll&lt;/code&gt; 方法不会被调用。​&lt;strong&gt;​注意​&lt;/strong&gt;​：API 非幂等，错误调用顺序可能导致死锁或竞态。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;​&lt;strong&gt;​数据路径 API (调度与处理)​&lt;/strong&gt;​：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;napi_schedule()&lt;/code&gt;: ​&lt;strong&gt;​核心调度函数​&lt;/strong&gt;​。通常在设备的中断处理程序中调用，通知内核有数据需要处理，并获取 NAPI 实例的所有权。&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;napi_schedule_irqoff()&lt;/code&gt;: &lt;code&gt;napi_schedule()&lt;/code&gt; 的变体，用于已知在中断上下文中调用的情况，可优化中断屏蔽操作。&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;napi_complete_done()&lt;/code&gt;: ​&lt;strong&gt;​完成处理函数​&lt;/strong&gt;​。当驱动程序的 &lt;code&gt;poll&lt;/code&gt; 方法处理完所有事件后调用此函数，释放实例的所有权。​&lt;strong&gt;​警告​&lt;/strong&gt;​：&lt;code&gt;budget&lt;/code&gt; 为 0 时绝不能调用；若处理恰好用完 &lt;code&gt;budget&lt;/code&gt; 且工作已完成，需谨慎返回 &lt;code&gt;budget - 1&lt;/code&gt; 或等待下次调用。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h2 id=&#34;驱动程序实现要点&#34;&gt;驱动程序实现要点&lt;/h2&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;​&lt;strong&gt;​&lt;code&gt;poll&lt;/code&gt; 方法​&lt;/strong&gt;​：&lt;/p&gt;</description>
+    </item>
     <item>
       <title>【MIT6.S081】Lab10 mmap</title>
       <link>https://kerolt.github.io/posts/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/mit6.s081lab10-mmap/</link>
