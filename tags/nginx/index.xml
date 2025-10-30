@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Nginx on Kerolt&#39;s Blog</title>
+    <link>https://kerolt.github.io/tags/nginx/</link>
+    <description>Recent content in Nginx on Kerolt&#39;s Blog</description>
+    <image>
+      <title>Kerolt&#39;s Blog</title>
+      <url>https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</url>
+      <link>https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</link>
+    </image>
+    <generator>Hugo -- 0.152.2</generator>
+    <language>en</language>
+    <lastBuildDate>Tue, 21 Oct 2025 00:00:00 +0000</lastBuildDate>
+    <atom:link href="https://kerolt.github.io/tags/nginx/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>eBPF增强Nginx负载均衡</title>
+      <link>https://kerolt.github.io/posts/ebpf/ebpf%E5%A2%9E%E5%BC%BAnginx%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1/</link>
+      <pubDate>Tue, 21 Oct 2025 00:00:00 +0000</pubDate>
+      <guid>https://kerolt.github.io/posts/ebpf/ebpf%E5%A2%9E%E5%BC%BAnginx%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1/</guid>
+      <description>&lt;h2 id=&#34;nginx-负载均衡基准测试&#34;&gt;Nginx 负载均衡基准测试&lt;/h2&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-sh&#34; data-lang=&#34;sh&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;/ &lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;# wrk -c100 &amp;#34;http://172.17.0.5&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Running 10s &lt;span style=&#34;color:#366&#34;&gt;test&lt;/span&gt; @ http://172.17.0.5
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#f60&#34;&gt;2&lt;/span&gt; threads and &lt;span style=&#34;color:#f60&#34;&gt;100&lt;/span&gt; connections
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  Thread Stats   Avg      Stdev     Max   +/- Stdev
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    Latency    12.31ms   12.66ms  84.49ms   82.31%
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    Req/Sec     5.71k     4.96k   12.98k    63.00%
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#f60&#34;&gt;113583&lt;/span&gt; requests in 10.04s, 17.87MB &lt;span style=&#34;color:#366&#34;&gt;read&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Requests/sec:  11313.86
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Transfer/sec:      1.78MB
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;Latency（延迟）&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Avg 12.31ms&lt;/strong&gt;：平均每个请求的响应时间为 &lt;strong&gt;12.31 毫秒&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Stdev 12.66ms&lt;/strong&gt;：标准差说明响应时间波动较大&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Max 84.49ms&lt;/strong&gt;：最长请求花了 84.49 毫秒&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;82.31% +/- Stdev&lt;/strong&gt;：82% 的请求延迟在 ±1 标准差范围内（说明大部分请求分布较广）&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;Req/Sec（每秒请求数）&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Avg 5.71k&lt;/strong&gt;：平均每个线程每秒发出约 &lt;strong&gt;5710 个请求&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Stdev 4.96k&lt;/strong&gt;：标准差说明不同时间点吞吐波动较大&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Max 12.98k&lt;/strong&gt;：单个线程的最高瞬时请求速率为 12.98k/s&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;63.00% +/- Stdev&lt;/strong&gt;：约 63% 的样本在这个范围内&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;接下来我们利用套接字 eBPF 程序优化&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>
