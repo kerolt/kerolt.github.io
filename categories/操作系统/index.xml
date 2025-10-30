@@ -9,7 +9,7 @@
       <url>https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</url>
       <link>https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</link>
     </image>
-    <generator>Hugo -- 0.151.0</generator>
+    <generator>Hugo -- 0.152.2</generator>
     <language>en</language>
     <lastBuildDate>Wed, 17 Sep 2025 00:00:00 +0000</lastBuildDate>
     <atom:link href="https://kerolt.github.io/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/index.xml" rel="self" type="application/rss+xml" />
@@ -19,7 +19,8 @@
       <pubDate>Wed, 17 Sep 2025 00:00:00 +0000</pubDate>
       <guid>https://kerolt.github.io/posts/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/linux-napi%E6%9C%BA%E5%88%B6%E7%9F%A5%E8%AF%86%E7%82%B9%E6%80%BB%E7%BB%93/</guid>
       <description>&lt;blockquote&gt;
-&lt;p&gt;对 &lt;a href=&#34;https://docs.kernel.org/networking/napi.html&#34;&gt;https://docs.kernel.org/networking/napi.html&lt;/a&gt; 的总结&lt;/p&gt;&lt;/blockquote&gt;
+&lt;p&gt;对 &lt;a href=&#34;https://docs.kernel.org/networking/napi.html&#34;&gt;https://docs.kernel.org/networking/napi.html&lt;/a&gt; 的总结&lt;/p&gt;
+&lt;/blockquote&gt;
 &lt;p&gt;NAPI (New API，但现已无特定含义) 是 Linux 内核中用于高效处理网络数据包的一种机制，旨在减少高负载下的中断开销。&lt;/p&gt;
 &lt;p&gt;其​目的​​是为了解决传统基于中断的包处理在高流量下的性能问题（“中断活锁”）。通过混合​&lt;strong&gt;​中断​&lt;/strong&gt;​和​&lt;strong&gt;​轮询​&lt;/strong&gt;​模式，在低负载时使用中断保证低延迟，在高负载时切换到轮询保证高吞吐量。&lt;/p&gt;
 &lt;p&gt;设备通过中断通知有新数据包 -&amp;gt; 内核调度对应的 NAPI 实例 -&amp;gt; 在软中断上下文（或内核线程）中轮询处理多个数据包 -&amp;gt; 处理完毕后再打开中断。&lt;/p&gt;
@@ -51,7 +52,14 @@
 &lt;h2 id=&#34;驱动程序实现要点&#34;&gt;驱动程序实现要点&lt;/h2&gt;
 &lt;ol&gt;
 &lt;li&gt;
-&lt;p&gt;​&lt;strong&gt;​&lt;code&gt;poll&lt;/code&gt; 方法​&lt;/strong&gt;​：&lt;/p&gt;</description>
+&lt;p&gt;​&lt;strong&gt;​&lt;code&gt;poll&lt;/code&gt; 方法​&lt;/strong&gt;​：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;驱动必须实现的回调函数，由内核调度执行实际的数据包处理工作。&lt;/li&gt;
+&lt;li&gt;​&lt;strong&gt;​参数 &lt;code&gt;budget&lt;/code&gt;​&lt;/strong&gt;​：限制一次 &lt;code&gt;poll&lt;/code&gt; 调用最多可处理的​&lt;strong&gt;​接收​&lt;/strong&gt;​（RX）数据包数量（发送 TX 处理无此限制）。若返回值为 &lt;code&gt;budget&lt;/code&gt;，表示还有工作未完成，内核会再次调度；若小于 &lt;code&gt;budget&lt;/code&gt;，表示本轮处理已完成。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;​&lt;strong&gt;​中断屏蔽策略​&lt;/strong&gt;​：&lt;/p&gt;</description>
     </item>
     <item>
       <title>【MIT6.S081】Lab10 mmap</title>
@@ -102,7 +110,8 @@
 &lt;p&gt;xv6中的&lt;code&gt;fork()&lt;/code&gt;系统调用将父进程的所有用户空间内存复制到子进程中。如果父进程所使用的页数很大，复制可能需要很长时间，而这样的复制操作经常是没有用的：&lt;code&gt;fork()&lt;/code&gt;之后通常是子进程中的&lt;code&gt;exec()&lt;/code&gt;，这会丢弃复制的内存而不是使用它们。&lt;/p&gt;
 &lt;p&gt;那么，我们是不是可以在子进程刚创建时将其页表的映射到父进程的物理页，而在其需要对内存进行写操作时再重新分配内存呢？没错，这就是通过copy on write（写时复制）技术来进行优化。&lt;/p&gt;
 &lt;blockquote&gt;
-&lt;p&gt;该实验的代码实现见：&lt;a href=&#34;https://github.com/kerolt/xv6-labs-2023/commit/68fd833dc03a681c04a647ed6aae2108a1e43fbb&#34;&gt;仓库commit&lt;/a&gt;&lt;/p&gt;&lt;/blockquote&gt;</description>
+&lt;p&gt;该实验的代码实现见：&lt;a href=&#34;https://github.com/kerolt/xv6-labs-2023/commit/68fd833dc03a681c04a647ed6aae2108a1e43fbb&#34;&gt;仓库commit&lt;/a&gt;&lt;/p&gt;
+&lt;/blockquote&gt;</description>
     </item>
     <item>
       <title>【MIT6.S081】Lab4 trap backtrace</title>
@@ -111,7 +120,8 @@
       <guid>https://kerolt.github.io/posts/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/mit6.s081lab4-trap-backtrace/</guid>
       <description>&lt;p&gt;backtrace这个lab非常有意思，虽然实现的代码量不多，但是能让我们更好地理解栈、栈帧、指针、gdb的一些知识。&lt;/p&gt;
 &lt;blockquote&gt;
-&lt;p&gt;该实验的代码实现见：&lt;a href=&#34;https://github.com/kerolt/xv6-labs-2023/commit/d1dba8ae4a1a71604e8bb6df5238f8cac1771683&#34;&gt;仓库commit&lt;/a&gt;&lt;/p&gt;&lt;/blockquote&gt;</description>
+&lt;p&gt;该实验的代码实现见：&lt;a href=&#34;https://github.com/kerolt/xv6-labs-2023/commit/d1dba8ae4a1a71604e8bb6df5238f8cac1771683&#34;&gt;仓库commit&lt;/a&gt;&lt;/p&gt;
+&lt;/blockquote&gt;</description>
     </item>
     <item>
       <title>【MIT6.S081】Lab4 trap alarm</title>
@@ -120,7 +130,8 @@
       <guid>https://kerolt.github.io/posts/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/mit6.s081lab4-trap-alarm/</guid>
       <description>&lt;p&gt;Alarm综合了该lab中前几个练习的知识点：系统调用、中断、寄存器等，我们需要对trap机制有比较好的认识才能理解。Alarm的任务是需要我们完成一个定时器的实现：&lt;code&gt;sigalarm(interval, handler)&lt;/code&gt;，当调用&lt;code&gt;sigalarm(n, fn)&lt;/code&gt;时，内核会每n个时间间隔（tick）执行fn函数。&lt;/p&gt;
 &lt;blockquote&gt;
-&lt;p&gt;该实验的代码实现见：&lt;a href=&#34;https://github.com/kerolt/xv6-labs-2023/commit/0f70ef7d68ab1273262b8d43a2deaf7345a87698&#34;&gt;仓库commit&lt;/a&gt;&lt;/p&gt;&lt;/blockquote&gt;</description>
+&lt;p&gt;该实验的代码实现见：&lt;a href=&#34;https://github.com/kerolt/xv6-labs-2023/commit/0f70ef7d68ab1273262b8d43a2deaf7345a87698&#34;&gt;仓库commit&lt;/a&gt;&lt;/p&gt;
+&lt;/blockquote&gt;</description>
     </item>
     <item>
       <title>【MIT6.S081】Lab3 page tables（上）</title>
@@ -142,7 +153,8 @@
 &lt;li&gt;一个存储每一页是否被访问的掩码&lt;/li&gt;
 &lt;/ol&gt;
 &lt;blockquote&gt;
-&lt;p&gt;该lab的所有代码：&lt;a href=&#34;https://github.com/kerolt/xv6-labs-2023/commit/87373230877d27d7f60c39696688863210c41133&#34;&gt;Github&lt;/a&gt;&lt;/p&gt;&lt;/blockquote&gt;</description>
+&lt;p&gt;该lab的所有代码：&lt;a href=&#34;https://github.com/kerolt/xv6-labs-2023/commit/87373230877d27d7f60c39696688863210c41133&#34;&gt;Github&lt;/a&gt;&lt;/p&gt;
+&lt;/blockquote&gt;</description>
     </item>
     <item>
       <title>【MIT6.S081】Lab2 system calls</title>

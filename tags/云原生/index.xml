@@ -9,7 +9,7 @@
       <url>https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</url>
       <link>https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</link>
     </image>
-    <generator>Hugo -- 0.151.0</generator>
+    <generator>Hugo -- 0.152.2</generator>
     <language>en</language>
     <lastBuildDate>Wed, 17 Sep 2025 00:00:00 +0000</lastBuildDate>
     <atom:link href="https://kerolt.github.io/tags/%E4%BA%91%E5%8E%9F%E7%94%9F/index.xml" rel="self" type="application/rss+xml" />
@@ -20,7 +20,8 @@
       <guid>https://kerolt.github.io/posts/k8s/%E4%BB%80%E4%B9%88%E6%98%AF%E4%BA%91%E5%8E%9F%E7%94%9F%E8%87%AA%E6%88%91%E8%A7%A3%E6%83%91/</guid>
       <description>&lt;blockquote&gt;
 &lt;p&gt;&lt;strong&gt;云原生​&lt;/strong&gt;​是一套以​&lt;strong&gt;​微服务、容器、动态编排（如 Kubernetes）、DevOps​&lt;/strong&gt;​为核心，旨在构建和运行​&lt;strong&gt;​弹性、可靠、敏捷​&lt;/strong&gt;​的云化应用的最佳实践集合。&lt;/p&gt;
-&lt;p&gt;理解它的关键在于思维的转变：​&lt;strong&gt;​从把云当作一台更便宜的虚拟主机，转变为把云当作一个可无限扩展、按需取用的计算能力平台，并以此为前提来设计和构建应用。​&lt;/strong&gt;&lt;/p&gt;&lt;/blockquote&gt;
+&lt;p&gt;理解它的关键在于思维的转变：​&lt;strong&gt;​从把云当作一台更便宜的虚拟主机，转变为把云当作一个可无限扩展、按需取用的计算能力平台，并以此为前提来设计和构建应用。​&lt;/strong&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
 &lt;h2 id=&#34;什么是云原生&#34;&gt;什么是云原生？&lt;/h2&gt;
 &lt;p&gt;​&lt;strong&gt;​云原生​&lt;/strong&gt;​ 是一种构建和运行应用程序的全新方法论，它充分利用了云计算的优势。&lt;/p&gt;
 &lt;p&gt;简单来说，​&lt;strong&gt;​云原生 = 云 + 原生​&lt;/strong&gt;​。&lt;/p&gt;
