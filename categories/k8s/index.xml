@@ -11,8 +11,130 @@
     </image>
     <generator>Hugo -- 0.152.2</generator>
     <language>en</language>
-    <lastBuildDate>Fri, 31 Oct 2025 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Tue, 04 Nov 2025 00:00:00 +0000</lastBuildDate>
     <atom:link href="https://kerolt.github.io/categories/k8s/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>在开发一个CNI插件时需要定义的几个配置文件</title>
+      <link>https://kerolt.github.io/posts/k8s/%E5%9C%A8%E5%BC%80%E5%8F%91%E4%B8%80%E4%B8%AAcni%E6%8F%92%E4%BB%B6%E6%97%B6%E9%9C%80%E8%A6%81%E5%AE%9A%E4%B9%89%E7%9A%84%E5%87%A0%E4%B8%AA%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6/</link>
+      <pubDate>Tue, 04 Nov 2025 00:00:00 +0000</pubDate>
+      <guid>https://kerolt.github.io/posts/k8s/%E5%9C%A8%E5%BC%80%E5%8F%91%E4%B8%80%E4%B8%AAcni%E6%8F%92%E4%BB%B6%E6%97%B6%E9%9C%80%E8%A6%81%E5%AE%9A%E4%B9%89%E7%9A%84%E5%87%A0%E4%B8%AA%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6/</guid>
+      <description>&lt;p&gt;在开发一个 &lt;strong&gt;CNI（Container Network Interface）插件&lt;/strong&gt; 时，一般需要定义几个&lt;strong&gt;关键配置文件&lt;/strong&gt;，它们共同决定插件的行为、网络配置方式、以及与 Kubernetes 的集成。&lt;/p&gt;
+&lt;h2 id=&#34;一cni-网络配置文件&#34;&gt;一、CNI 网络配置文件&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;位置：&lt;/strong&gt;&lt;br&gt;
+通常位于 &lt;code&gt;/etc/cni/net.d/&lt;/code&gt; 目录下（可以通过 kubelet 参数 &lt;code&gt;--cni-conf-dir&lt;/code&gt; 修改）。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;文件名：&lt;/strong&gt;&lt;br&gt;
+一般以 &lt;code&gt;.conf&lt;/code&gt;、&lt;code&gt;.conflist&lt;/code&gt; 结尾，例如：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;/etc/cni/net.d/10-myplugin.conf
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;/etc/cni/net.d/10-myplugin.conflist
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;内容：&lt;/strong&gt;&lt;br&gt;
+JSON 格式，描述网络的类型、IPAM 配置、路由等。&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;示例：&lt;code&gt;10-simplecni.conf&lt;/code&gt;&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-json&#34; data-lang=&#34;json&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;{
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;&amp;#34;cniVersion&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;0.4.0&amp;#34;&lt;/span&gt;,
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;&amp;#34;name&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;simple-network&amp;#34;&lt;/span&gt;,
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;&amp;#34;type&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;simple-cni&amp;#34;&lt;/span&gt;,
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;&amp;#34;ipam&amp;#34;&lt;/span&gt;: {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;&amp;#34;type&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;host-local&amp;#34;&lt;/span&gt;,
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;&amp;#34;subnet&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;10.10.0.0/16&amp;#34;&lt;/span&gt;,
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;&amp;#34;rangeStart&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;10.10.0.10&amp;#34;&lt;/span&gt;,
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;&amp;#34;rangeEnd&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;10.10.255.254&amp;#34;&lt;/span&gt;,
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;&amp;#34;routes&amp;#34;&lt;/span&gt;: [
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;      { &lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;&amp;#34;dst&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;0.0.0.0/0&amp;#34;&lt;/span&gt; }
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    ],
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;&amp;#34;gateway&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;10.10.0.1&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  }
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;其中：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;type&lt;/code&gt;：对应你编译出的插件二进制名，比如 &lt;code&gt;/opt/cni/bin/simple-cni&lt;/code&gt;。&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;ipam&lt;/code&gt;：IP 地址分配方式。可以是 &lt;code&gt;host-local&lt;/code&gt;、&lt;code&gt;dhcp&lt;/code&gt; 或你自己实现的插件。&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;.conflist&lt;/code&gt; 文件可以包含多个 CNI 插件链，用于组合执行（比如 Flannel + Portmap）。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;二cni-插件的内部配置文件插件自定义&#34;&gt;二、CNI 插件的内部配置文件（插件自定义）&lt;/h2&gt;
+&lt;p&gt;除了标准 CNI 配置外，大多数插件都会定义自己独立的配置文件目录，用来&lt;strong&gt;保存运行时信息或持久化状态&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;常见位置：&lt;/strong&gt;&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>K8s中的单一职责和对象组合</title>
+      <link>https://kerolt.github.io/posts/k8s/k8s%E4%B8%AD%E7%9A%84%E5%8D%95%E4%B8%80%E8%81%8C%E8%B4%A3%E5%92%8C%E5%AF%B9%E8%B1%A1%E7%BB%84%E5%90%88/</link>
+      <pubDate>Sat, 01 Nov 2025 00:00:00 +0000</pubDate>
+      <guid>https://kerolt.github.io/posts/k8s/k8s%E4%B8%AD%E7%9A%84%E5%8D%95%E4%B8%80%E8%81%8C%E8%B4%A3%E5%92%8C%E5%AF%B9%E8%B1%A1%E7%BB%84%E5%90%88/</guid>
+      <description>&lt;blockquote&gt;
+&lt;p&gt;Kubernetes 的设计理念是：&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;用单一职责的组件，通过对象组合的方式，构建出复杂且可扩展的分布式系统。&lt;/strong&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id=&#34;什么是单一职责和对象组合&#34;&gt;什么是“单一职责”和“对象组合”？&lt;/h2&gt;
+&lt;p&gt;这两个概念来自软件设计原则（尤其是微服务与面向对象设计），Kubernetes 只是将它们贯彻得非常彻底：&lt;/p&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;概念&lt;/th&gt;
+          &lt;th&gt;含义&lt;/th&gt;
+          &lt;th&gt;在 K8s 中的体现&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;单一职责（Single Responsibility）&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;每个组件、对象、控制器只做一件事情，并把它做到极致&lt;/td&gt;
+          &lt;td&gt;API Server 只提供 API；Scheduler 只负责调度；Controller 只负责某个资源的控制循环&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;对象组合（Object Composition）&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;复杂功能通过多个简单对象的组合实现，而不是通过单个复杂对象&lt;/td&gt;
+          &lt;td&gt;Pod 由多个 Container 组成；Deployment 由多个 ReplicaSet 组成；Service 与 Pod 组合形成负载均衡能力&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h2 id=&#34;kubernetes-的单一职责原则&#34;&gt;Kubernetes 的单一职责原则&lt;/h2&gt;
+&lt;p&gt;K8s 的每个核心组件都有明确且边界清晰的职责：&lt;/p&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;组件&lt;/th&gt;
+          &lt;th&gt;职责&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;kube-apiserver&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;提供 REST API，是所有操作的入口，不做任何业务逻辑，只负责一致性与认证授权&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;kube-scheduler&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;只负责选择 Pod 要运行在哪个 Node 上&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;kube-controller-manager&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;负责运行各种控制循环（ReplicaSetController、NodeController、ServiceController 等），每个控制器专注一种资源类型&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;kubelet&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;只负责本节点 Pod 的生命周期管理&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;etcd&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;只负责存储状态，不参与逻辑&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;blockquote&gt;
+&lt;p&gt;👉 这就像一个分布式的微内核系统——每个模块专注于自己的“单一职责”，彼此通过 API 协作。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id=&#34;对象组合的体现k8s-的积木哲学&#34;&gt;对象组合的体现（K8s 的“积木哲学”）&lt;/h2&gt;
+&lt;p&gt;Kubernetes 的对象设计体现出非常强的&lt;strong&gt;组合思想&lt;/strong&gt;（composition over inheritance）：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;Pod 是容器的组合&lt;/p&gt;</description>
+    </item>
     <item>
       <title>利用kubeadm搭建集群</title>
       <link>https://kerolt.github.io/posts/k8s/%E5%88%A9%E7%94%A8kubeadm%E6%90%AD%E5%BB%BA%E9%9B%86%E7%BE%A4/</link>

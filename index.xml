@@ -11,8 +11,225 @@
     </image>
     <generator>Hugo -- 0.152.2</generator>
     <language>en</language>
-    <lastBuildDate>Fri, 31 Oct 2025 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Fri, 07 Nov 2025 00:00:00 +0000</lastBuildDate>
     <atom:link href="https://kerolt.github.io/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Linux校准时间</title>
+      <link>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/linux%E6%A0%A1%E5%87%86%E6%97%B6%E9%97%B4/</link>
+      <pubDate>Fri, 07 Nov 2025 00:00:00 +0000</pubDate>
+      <guid>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/linux%E6%A0%A1%E5%87%86%E6%97%B6%E9%97%B4/</guid>
+      <description>&lt;p&gt;服务器是用旧笔记本装的 Debian13，然后用 ddns-go 做动态域名解析，但是装好之后貌似由于时钟没有校准因此 ddns-go 无法更新域名解析（使用的 aliyun），以下是解决方法。&lt;/p&gt;
+&lt;hr&gt;
+&lt;p&gt;首先我使用 &lt;code&gt;timedatectl&lt;/code&gt; 的结果如下：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;~ $ timedatectl 
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Local time: 六 2025-11-08 00:20:49 CST 
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Universal time: 五 2025-11-07 16:20:49 UTC 
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;RTC time: 五 2025-11-07 16:20:49 
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Time zone: Asia/Shanghai &lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;CST, +0800&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt; 
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;System clock synchronized: no 
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;NTP service: n/a 
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;RTC in &lt;span style=&#34;color:#366&#34;&gt;local&lt;/span&gt; TZ: no
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;使用 &lt;code&gt;systemd-timesyncd&lt;/code&gt; 可以让系统自动校时：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;sudo timedatectl set-ntp &lt;span style=&#34;color:#366&#34;&gt;true&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;如果显示：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Failed to &lt;span style=&#34;color:#366&#34;&gt;set&lt;/span&gt; ntp: NTP not supported
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;说明当前系统里没有可用的 NTP 同步服务（比如 &lt;code&gt;systemd-timesyncd&lt;/code&gt;、&lt;code&gt;chronyd&lt;/code&gt; 或 &lt;code&gt;ntpd&lt;/code&gt;）被启用或支持，可以执行：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;sudo apt install systemd-timesyncd
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;sudo systemctl &lt;span style=&#34;color:#366&#34;&gt;enable&lt;/span&gt; --now systemd-timesyncd.service
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;之后再执行 &lt;code&gt;timedatectl&lt;/code&gt; 可以看到：&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>如何理解内核态与用户态切换的上下文开销</title>
+      <link>https://kerolt.github.io/posts/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E5%A6%82%E4%BD%95%E7%90%86%E8%A7%A3%E5%86%85%E6%A0%B8%E6%80%81%E4%B8%8E%E7%94%A8%E6%88%B7%E6%80%81%E5%88%87%E6%8D%A2%E7%9A%84%E4%B8%8A%E4%B8%8B%E6%96%87%E5%BC%80%E9%94%80/</link>
+      <pubDate>Thu, 06 Nov 2025 00:00:00 +0000</pubDate>
+      <guid>https://kerolt.github.io/posts/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E5%A6%82%E4%BD%95%E7%90%86%E8%A7%A3%E5%86%85%E6%A0%B8%E6%80%81%E4%B8%8E%E7%94%A8%E6%88%B7%E6%80%81%E5%88%87%E6%8D%A2%E7%9A%84%E4%B8%8A%E4%B8%8B%E6%96%87%E5%BC%80%E9%94%80/</guid>
+      <description>&lt;h2 id=&#34;一什么是用户态和内核态&#34;&gt;一、什么是“用户态”和“内核态”&lt;/h2&gt;
+&lt;p&gt;CPU 有不同的 &lt;strong&gt;特权级（Privilege Level）&lt;/strong&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;用户态（User Mode）&lt;/strong&gt;：&lt;br&gt;
+应用程序在这里运行，权限受限，比如不能直接访问硬件、不能修改页表等。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;内核态（Kernel Mode）&lt;/strong&gt;：&lt;br&gt;
+操作系统内核运行在这里，拥有完全的访问权限，可以管理内存、设备、中断等。&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;二什么是上下文切换context-switch&#34;&gt;二、什么是“上下文切换（Context Switch）”&lt;/h2&gt;
+&lt;p&gt;“上下文”就是 CPU 当前正在执行的任务的所有状态，包括：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;寄存器内容（RIP、RSP、RAX 等）&lt;/li&gt;
+&lt;li&gt;程序计数器（Program Counter）&lt;/li&gt;
+&lt;li&gt;栈指针&lt;/li&gt;
+&lt;li&gt;内存映射（页表）&lt;/li&gt;
+&lt;li&gt;调度信息（优先级、时间片等）&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;上下文切换&lt;/strong&gt;指的是 CPU 从一个执行上下文切换到另一个（比如进程 A → 进程 B）。&lt;/p&gt;
+&lt;h2 id=&#34;三内核态与用户态切换--进程切换但都属于上下文切换&#34;&gt;三、内核态与用户态切换 ≠ 进程切换，但都属于“上下文切换”&lt;/h2&gt;
+&lt;p&gt;这两种是不同层次的“切换”：&lt;/p&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;类型&lt;/th&gt;
+          &lt;th&gt;示例&lt;/th&gt;
+          &lt;th&gt;是否涉及调度&lt;/th&gt;
+          &lt;th&gt;开销大小&lt;/th&gt;
+          &lt;th&gt;备注&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;用户态 → 内核态&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;系统调用、I/O、中断&lt;/td&gt;
+          &lt;td&gt;否&lt;/td&gt;
+          &lt;td&gt;小（几十到几百纳秒）&lt;/td&gt;
+          &lt;td&gt;同一线程，只是 CPU 特权级变化&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;进程上下文切换&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;从进程 A → 进程 B&lt;/td&gt;
+          &lt;td&gt;是&lt;/td&gt;
+          &lt;td&gt;大（微秒级）&lt;/td&gt;
+          &lt;td&gt;不仅换栈，还要换虚拟内存上下文&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h2 id=&#34;四为什么内核用户态切换有开销&#34;&gt;四、为什么内核/用户态切换有“开销”&lt;/h2&gt;
+&lt;p&gt;内核态切换的代价来自几个部分：&lt;/p&gt;
+&lt;h3 id=&#34;1-cpu-特权级变化&#34;&gt;1. CPU 特权级变化&lt;/h3&gt;
+&lt;p&gt;切换时 CPU 会：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;保存当前寄存器状态；&lt;/li&gt;
+&lt;li&gt;改变特权级（从 ring3 → ring0）；&lt;/li&gt;
+&lt;li&gt;切换到内核栈（每个线程有独立内核栈）；&lt;/li&gt;
+&lt;li&gt;执行系统调用入口代码（&lt;code&gt;syscall&lt;/code&gt;、&lt;code&gt;sysenter&lt;/code&gt; 指令）；&lt;/li&gt;
+&lt;li&gt;执行完后再反向恢复回用户态。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;这些过程虽然不是“线程切换”，但都需要 CPU 做额外操作。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>在开发一个CNI插件时需要定义的几个配置文件</title>
+      <link>https://kerolt.github.io/posts/k8s/%E5%9C%A8%E5%BC%80%E5%8F%91%E4%B8%80%E4%B8%AAcni%E6%8F%92%E4%BB%B6%E6%97%B6%E9%9C%80%E8%A6%81%E5%AE%9A%E4%B9%89%E7%9A%84%E5%87%A0%E4%B8%AA%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6/</link>
+      <pubDate>Tue, 04 Nov 2025 00:00:00 +0000</pubDate>
+      <guid>https://kerolt.github.io/posts/k8s/%E5%9C%A8%E5%BC%80%E5%8F%91%E4%B8%80%E4%B8%AAcni%E6%8F%92%E4%BB%B6%E6%97%B6%E9%9C%80%E8%A6%81%E5%AE%9A%E4%B9%89%E7%9A%84%E5%87%A0%E4%B8%AA%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6/</guid>
+      <description>&lt;p&gt;在开发一个 &lt;strong&gt;CNI（Container Network Interface）插件&lt;/strong&gt; 时，一般需要定义几个&lt;strong&gt;关键配置文件&lt;/strong&gt;，它们共同决定插件的行为、网络配置方式、以及与 Kubernetes 的集成。&lt;/p&gt;
+&lt;h2 id=&#34;一cni-网络配置文件&#34;&gt;一、CNI 网络配置文件&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;位置：&lt;/strong&gt;&lt;br&gt;
+通常位于 &lt;code&gt;/etc/cni/net.d/&lt;/code&gt; 目录下（可以通过 kubelet 参数 &lt;code&gt;--cni-conf-dir&lt;/code&gt; 修改）。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;文件名：&lt;/strong&gt;&lt;br&gt;
+一般以 &lt;code&gt;.conf&lt;/code&gt;、&lt;code&gt;.conflist&lt;/code&gt; 结尾，例如：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;/etc/cni/net.d/10-myplugin.conf
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;/etc/cni/net.d/10-myplugin.conflist
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;内容：&lt;/strong&gt;&lt;br&gt;
+JSON 格式，描述网络的类型、IPAM 配置、路由等。&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;示例：&lt;code&gt;10-simplecni.conf&lt;/code&gt;&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-json&#34; data-lang=&#34;json&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;{
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;&amp;#34;cniVersion&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;0.4.0&amp;#34;&lt;/span&gt;,
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;&amp;#34;name&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;simple-network&amp;#34;&lt;/span&gt;,
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;&amp;#34;type&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;simple-cni&amp;#34;&lt;/span&gt;,
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;&amp;#34;ipam&amp;#34;&lt;/span&gt;: {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;&amp;#34;type&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;host-local&amp;#34;&lt;/span&gt;,
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;&amp;#34;subnet&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;10.10.0.0/16&amp;#34;&lt;/span&gt;,
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;&amp;#34;rangeStart&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;10.10.0.10&amp;#34;&lt;/span&gt;,
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;&amp;#34;rangeEnd&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;10.10.255.254&amp;#34;&lt;/span&gt;,
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;&amp;#34;routes&amp;#34;&lt;/span&gt;: [
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;      { &lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;&amp;#34;dst&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;0.0.0.0/0&amp;#34;&lt;/span&gt; }
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    ],
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;&amp;#34;gateway&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;10.10.0.1&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  }
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;其中：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;type&lt;/code&gt;：对应你编译出的插件二进制名，比如 &lt;code&gt;/opt/cni/bin/simple-cni&lt;/code&gt;。&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;ipam&lt;/code&gt;：IP 地址分配方式。可以是 &lt;code&gt;host-local&lt;/code&gt;、&lt;code&gt;dhcp&lt;/code&gt; 或你自己实现的插件。&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;.conflist&lt;/code&gt; 文件可以包含多个 CNI 插件链，用于组合执行（比如 Flannel + Portmap）。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;二cni-插件的内部配置文件插件自定义&#34;&gt;二、CNI 插件的内部配置文件（插件自定义）&lt;/h2&gt;
+&lt;p&gt;除了标准 CNI 配置外，大多数插件都会定义自己独立的配置文件目录，用来&lt;strong&gt;保存运行时信息或持久化状态&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;常见位置：&lt;/strong&gt;&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>K8s中的单一职责和对象组合</title>
+      <link>https://kerolt.github.io/posts/k8s/k8s%E4%B8%AD%E7%9A%84%E5%8D%95%E4%B8%80%E8%81%8C%E8%B4%A3%E5%92%8C%E5%AF%B9%E8%B1%A1%E7%BB%84%E5%90%88/</link>
+      <pubDate>Sat, 01 Nov 2025 00:00:00 +0000</pubDate>
+      <guid>https://kerolt.github.io/posts/k8s/k8s%E4%B8%AD%E7%9A%84%E5%8D%95%E4%B8%80%E8%81%8C%E8%B4%A3%E5%92%8C%E5%AF%B9%E8%B1%A1%E7%BB%84%E5%90%88/</guid>
+      <description>&lt;blockquote&gt;
+&lt;p&gt;Kubernetes 的设计理念是：&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;用单一职责的组件，通过对象组合的方式，构建出复杂且可扩展的分布式系统。&lt;/strong&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id=&#34;什么是单一职责和对象组合&#34;&gt;什么是“单一职责”和“对象组合”？&lt;/h2&gt;
+&lt;p&gt;这两个概念来自软件设计原则（尤其是微服务与面向对象设计），Kubernetes 只是将它们贯彻得非常彻底：&lt;/p&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;概念&lt;/th&gt;
+          &lt;th&gt;含义&lt;/th&gt;
+          &lt;th&gt;在 K8s 中的体现&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;单一职责（Single Responsibility）&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;每个组件、对象、控制器只做一件事情，并把它做到极致&lt;/td&gt;
+          &lt;td&gt;API Server 只提供 API；Scheduler 只负责调度；Controller 只负责某个资源的控制循环&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;对象组合（Object Composition）&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;复杂功能通过多个简单对象的组合实现，而不是通过单个复杂对象&lt;/td&gt;
+          &lt;td&gt;Pod 由多个 Container 组成；Deployment 由多个 ReplicaSet 组成；Service 与 Pod 组合形成负载均衡能力&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h2 id=&#34;kubernetes-的单一职责原则&#34;&gt;Kubernetes 的单一职责原则&lt;/h2&gt;
+&lt;p&gt;K8s 的每个核心组件都有明确且边界清晰的职责：&lt;/p&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;组件&lt;/th&gt;
+          &lt;th&gt;职责&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;kube-apiserver&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;提供 REST API，是所有操作的入口，不做任何业务逻辑，只负责一致性与认证授权&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;kube-scheduler&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;只负责选择 Pod 要运行在哪个 Node 上&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;kube-controller-manager&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;负责运行各种控制循环（ReplicaSetController、NodeController、ServiceController 等），每个控制器专注一种资源类型&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;kubelet&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;只负责本节点 Pod 的生命周期管理&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;etcd&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;只负责存储状态，不参与逻辑&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;blockquote&gt;
+&lt;p&gt;👉 这就像一个分布式的微内核系统——每个模块专注于自己的“单一职责”，彼此通过 API 协作。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id=&#34;对象组合的体现k8s-的积木哲学&#34;&gt;对象组合的体现（K8s 的“积木哲学”）&lt;/h2&gt;
+&lt;p&gt;Kubernetes 的对象设计体现出非常强的&lt;strong&gt;组合思想&lt;/strong&gt;（composition over inheritance）：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;Pod 是容器的组合&lt;/p&gt;</description>
+    </item>
     <item>
       <title>利用kubeadm搭建集群</title>
       <link>https://kerolt.github.io/posts/k8s/%E5%88%A9%E7%94%A8kubeadm%E6%90%AD%E5%BB%BA%E9%9B%86%E7%BE%A4/</link>
@@ -48,133 +265,6 @@
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;sudo sysctl --system
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;修改“/etc/fstab”，关闭 Linux 的 swap 分区，提升 Kubernetes 的性能：&lt;/p&gt;</description>
-    </item>
-    <item>
-      <title>TC和XDP</title>
-      <link>https://kerolt.github.io/posts/ebpf/tc%E5%92%8Cxdp/</link>
-      <pubDate>Wed, 29 Oct 2025 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/ebpf/tc%E5%92%8Cxdp/</guid>
-      <description>&lt;p&gt;&lt;strong&gt;&lt;code&gt;tc&lt;/code&gt;&lt;/strong&gt; 和 &lt;strong&gt;&lt;code&gt;XDP&lt;/code&gt;&lt;/strong&gt; 都能对网络数据包进行处理，但它们位于 &lt;strong&gt;不同的网络协议栈层次&lt;/strong&gt;，因此性能、能力和适用场景差别都很大：&lt;/p&gt;
-&lt;table&gt;
-  &lt;thead&gt;
-      &lt;tr&gt;
-          &lt;th&gt;项目&lt;/th&gt;
-          &lt;th&gt;作用层级&lt;/th&gt;
-          &lt;th&gt;处理方向&lt;/th&gt;
-          &lt;th&gt;特点&lt;/th&gt;
-      &lt;/tr&gt;
-  &lt;/thead&gt;
-  &lt;tbody&gt;
-      &lt;tr&gt;
-          &lt;td&gt;&lt;strong&gt;XDP (eXpress Data Path)&lt;/strong&gt;&lt;/td&gt;
-          &lt;td&gt;&lt;strong&gt;驱动层（最早）&lt;/strong&gt;：网络设备驱动入口处（L2 之前）&lt;/td&gt;
-          &lt;td&gt;入站（Ingress）&lt;/td&gt;
-          &lt;td&gt;极快，绕过内核协议栈，可直接丢包/转发&lt;/td&gt;
-      &lt;/tr&gt;
-      &lt;tr&gt;
-          &lt;td&gt;&lt;strong&gt;tc (Traffic Control)&lt;/strong&gt;&lt;/td&gt;
-          &lt;td&gt;&lt;strong&gt;内核网络栈层（L3/L4 之后）&lt;/strong&gt;&lt;/td&gt;
-          &lt;td&gt;入站 + 出站&lt;/td&gt;
-          &lt;td&gt;通常用于带宽控制、QoS、流量整形等&lt;/td&gt;
-      &lt;/tr&gt;
-  &lt;/tbody&gt;
-&lt;/table&gt;
-&lt;h2 id=&#34;linux-网络包处理路径&#34;&gt;Linux 网络包处理路径&lt;/h2&gt;
-&lt;p&gt;下面这张图能清晰地看到 &lt;code&gt;XDP&lt;/code&gt; 和 &lt;code&gt;tc&lt;/code&gt; 各自处在什么位置：&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;                +----------------------------------------+
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;                |              用户空间                  |
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;                |  (应用层: Nginx, curl, ping, etc.)     |
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;                +----------------------------------------+
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;                                ▲
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;                                │ send()/recv()
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;                                │
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;                +----------------------------------------+
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;                |            内核网络协议栈               |
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;                |----------------------------------------|
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;                |   L4 (TCP/UDP)                         |
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;                |   L3 (IP 路由转发)                     |
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;                |   L2 (Ethernet frame 处理)             |
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;                +----------------------------------------+
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;                     ▲                     ▲
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;                     │                     │
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        tc ingress/qdisc           tc egress/qdisc
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;             │                           │
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;             │                           ▼
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        +----------------------------------------+
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        |        XDP (eXpress Data Path)         |
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        | (位于网卡驱动中，最靠近硬件的钩子点)     |
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        +----------------------------------------+
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;                     ▲
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;                     │
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;              NIC 驱动 / DMA 收包
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;hr&gt;
-&lt;h2 id=&#34;处理路径细节对比&#34;&gt;处理路径细节对比&lt;/h2&gt;
-&lt;table&gt;
-  &lt;thead&gt;
-      &lt;tr&gt;
-          &lt;th&gt;对比项&lt;/th&gt;
-          &lt;th&gt;&lt;strong&gt;XDP&lt;/strong&gt;&lt;/th&gt;
-          &lt;th&gt;&lt;strong&gt;tc (ingress/egress)&lt;/strong&gt;&lt;/th&gt;
-      &lt;/tr&gt;
-  &lt;/thead&gt;
-  &lt;tbody&gt;
-      &lt;tr&gt;
-          &lt;td&gt;&lt;strong&gt;所在层级&lt;/strong&gt;&lt;/td&gt;
-          &lt;td&gt;NIC 驱动层（比内核协议栈还早）&lt;/td&gt;
-          &lt;td&gt;内核网络栈（L3/L4 层之间）&lt;/td&gt;
-      &lt;/tr&gt;
-      &lt;tr&gt;
-          &lt;td&gt;&lt;strong&gt;钩子位置&lt;/strong&gt;&lt;/td&gt;
-          &lt;td&gt;驱动接收包 → DMA → XDP&lt;/td&gt;
-          &lt;td&gt;skb（socket buffer）进入或离开协议栈时&lt;/td&gt;
-      &lt;/tr&gt;
-      &lt;tr&gt;
-          &lt;td&gt;&lt;strong&gt;作用方向&lt;/strong&gt;&lt;/td&gt;
-          &lt;td&gt;仅支持 ingress（入站）&lt;/td&gt;
-          &lt;td&gt;支持 ingress + egress&lt;/td&gt;
-      &lt;/tr&gt;
-      &lt;tr&gt;
-          &lt;td&gt;&lt;strong&gt;处理对象&lt;/strong&gt;&lt;/td&gt;
-          &lt;td&gt;原始数据包（frame）&lt;/td&gt;
-          &lt;td&gt;封装后的 skb&lt;/td&gt;
-      &lt;/tr&gt;
-      &lt;tr&gt;
-          &lt;td&gt;&lt;strong&gt;性能&lt;/strong&gt;&lt;/td&gt;
-          &lt;td&gt;极高（可在百万 pps 级别）&lt;/td&gt;
-          &lt;td&gt;中等（受内核调度和 qdisc 影响）&lt;/td&gt;
-      &lt;/tr&gt;
-      &lt;tr&gt;
-          &lt;td&gt;&lt;strong&gt;典型用途&lt;/strong&gt;&lt;/td&gt;
-          &lt;td&gt;DDoS 防护、早期丢包、快速转发、内核旁路&lt;/td&gt;
-          &lt;td&gt;QoS、流量整形、限速、包分类&lt;/td&gt;
-      &lt;/tr&gt;
-      &lt;tr&gt;
-          &lt;td&gt;&lt;strong&gt;可编程性&lt;/strong&gt;&lt;/td&gt;
-          &lt;td&gt;eBPF 程序（xdp 程序）&lt;/td&gt;
-          &lt;td&gt;eBPF 程序（cls_bpf）&lt;/td&gt;
-      &lt;/tr&gt;
-      &lt;tr&gt;
-          &lt;td&gt;&lt;strong&gt;返回动作&lt;/strong&gt;&lt;/td&gt;
-          &lt;td&gt;XDP_PASS、XDP_DROP、XDP_TX、XDP_REDIRECT&lt;/td&gt;
-          &lt;td&gt;TC_ACT_OK、TC_ACT_SHOT、TC_ACT_REDIRECT&lt;/td&gt;
-      &lt;/tr&gt;
-      &lt;tr&gt;
-          &lt;td&gt;&lt;strong&gt;使用接口&lt;/strong&gt;&lt;/td&gt;
-          &lt;td&gt;&lt;code&gt;ip link set dev eth0 xdp obj prog.o&lt;/code&gt;&lt;/td&gt;
-          &lt;td&gt;&lt;code&gt;tc filter add dev eth0 ... bpf obj prog.o&lt;/code&gt;&lt;/td&gt;
-      &lt;/tr&gt;
-  &lt;/tbody&gt;
-&lt;/table&gt;
-&lt;h2 id=&#34;数据处理流程举例&#34;&gt;数据处理流程举例&lt;/h2&gt;
-&lt;h3 id=&#34;xdp-流程最早阶段&#34;&gt;XDP 流程（最早阶段）&lt;/h3&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-text&#34; data-lang=&#34;text&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;[网卡接收包]
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;   ↓
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;[XDP 程序执行]
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;   ├── XDP_DROP：直接丢包（不进入内核）
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;   ├── XDP_PASS：让包进入内核协议栈
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;   ├── XDP_TX：直接从驱动回发
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;   └── XDP_REDIRECT：转发到其他网卡或 AF_XDP socket
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;strong&gt;典型用途：&lt;/strong&gt;&lt;/p&gt;</description>
     </item>
     <item>
       <title>eBPF中何时使用字节序转换函数</title>
@@ -288,7 +378,7 @@
       <description>&lt;blockquote&gt;
 &lt;p&gt;以下操作基于 Debian12&lt;/p&gt;
 &lt;/blockquote&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;# 1. 添加阿里的 Docker 镜像仓库证书&lt;/span&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;# 1. 添加阿里的 Docker 镜像仓库证书；这里具体的url根据自身修改&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;curl -fsSL https://mirrors.aliyun.com/docker-ce/debian/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/aliyun-docker.gpg
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;# 2. 添加仓库&lt;/span&gt;
@@ -1754,41 +1844,41 @@
     </item>
     <item>
       <title>【MIT6.S081】Lab10 mmap</title>
-      <link>https://kerolt.github.io/posts/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/mit6.s081lab10-mmap/</link>
+      <link>https://kerolt.github.io/posts/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/mit6.s081/mit6.s081lab10-mmap/</link>
       <pubDate>Fri, 22 Nov 2024 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/mit6.s081lab10-mmap/</guid>
+      <guid>https://kerolt.github.io/posts/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/mit6.s081/mit6.s081lab10-mmap/</guid>
       <description>&lt;h2 id=&#34;什么是mmap&#34;&gt;什么是mmap？&lt;/h2&gt;
 &lt;p&gt;&lt;code&gt;mmap&lt;/code&gt; 是一种用于将文件或设备与进程的地址空间关联起来的内存映射技术。通过 &lt;code&gt;mmap&lt;/code&gt;，可以将文件的内容直接映射到进程的虚拟内存地址空间，使得文件的内容可以像操作普通内存一样进行读取和写入。&lt;/p&gt;</description>
     </item>
     <item>
       <title>【MIT6.S081】Lab9 file system</title>
-      <link>https://kerolt.github.io/posts/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/mit6.s081lab9-file-system/</link>
+      <link>https://kerolt.github.io/posts/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/mit6.s081/mit6.s081lab9-file-system/</link>
       <pubDate>Tue, 19 Nov 2024 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/mit6.s081lab9-file-system/</guid>
+      <guid>https://kerolt.github.io/posts/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/mit6.s081/mit6.s081lab9-file-system/</guid>
       <description>&lt;h2 id=&#34;intro&#34;&gt;Intro&lt;/h2&gt;
 &lt;p&gt;在这个实验中，我们需要让xv6支持更大的文件和软链接。实验总体不是特别难，不过需要我们理解好文件系统是如何工作的。&lt;code&gt;Lab8 lock&lt;/code&gt;中的Buffer Cache也是文件系统的一部分，不过它位于文件系统的下层，这里我们需要处理的更多在上层，偏应用层。&lt;/p&gt;</description>
     </item>
     <item>
       <title>【MIT6.S081】Lab8 lock</title>
-      <link>https://kerolt.github.io/posts/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/mit6.s081lab8-lock/</link>
+      <link>https://kerolt.github.io/posts/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/mit6.s081/mit6.s081lab8-lock/</link>
       <pubDate>Sun, 17 Nov 2024 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/mit6.s081lab8-lock/</guid>
+      <guid>https://kerolt.github.io/posts/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/mit6.s081/mit6.s081lab8-lock/</guid>
       <description>&lt;h2 id=&#34;intro&#34;&gt;Intro&lt;/h2&gt;
 &lt;p&gt;这个实验个人感觉挺难的，需要我们重新设计数据结构，还要考虑在并发（并行）情况下对于锁的操作，以减少多核情况下对于锁的竞争。其中主要涉及内存分配和IO缓冲块分配，在这个lab之前，xv6对于这两个分配都是使用的全局对象，并只有一把全局锁进行操作，这样的话在并行情况下锁的竞争是很激烈的，我们的任务就是重新设计这两个分配器，它们的重构思路并不完全一致，需要具体问题具体分析。&lt;/p&gt;</description>
     </item>
     <item>
       <title>【MIT6.S081】xv6进程调度分析</title>
-      <link>https://kerolt.github.io/posts/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/mit6.s081xv6%E8%BF%9B%E7%A8%8B%E8%B0%83%E5%BA%A6%E5%88%86%E6%9E%90/</link>
+      <link>https://kerolt.github.io/posts/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/mit6.s081/mit6.s081xv6%E8%BF%9B%E7%A8%8B%E8%B0%83%E5%BA%A6%E5%88%86%E6%9E%90/</link>
       <pubDate>Sat, 16 Nov 2024 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/mit6.s081xv6%E8%BF%9B%E7%A8%8B%E8%B0%83%E5%BA%A6%E5%88%86%E6%9E%90/</guid>
+      <guid>https://kerolt.github.io/posts/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/mit6.s081/mit6.s081xv6%E8%BF%9B%E7%A8%8B%E8%B0%83%E5%BA%A6%E5%88%86%E6%9E%90/</guid>
       <description>&lt;p&gt;在做thread lab的时候，阅读xv6的源码后对于进程调度的实现有了大致的了解，但是其中锁的获取与释放顺序让我困惑了好久：在yield函数中，不是先获取了进程p的锁吗，那么之后在调度器中又获取p的锁，那不是会死锁吗？在调度器内使用swtch发生进程切换后，又会跳转到哪里？&lt;/p&gt;
 &lt;p&gt;而在我观摩大佬的一些博客和视频后，发现我之前的想法有很大的问题，归根结底是没有弄明白xv6何时发生了切换，切换后应该从哪里开始运行。这篇笔记就是对于分析xv6进程调度的总结。&lt;/p&gt;</description>
     </item>
     <item>
       <title>【MIT6.S081】Lab6 multithreading</title>
-      <link>https://kerolt.github.io/posts/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/mit6.s081lab6-multithreading/</link>
+      <link>https://kerolt.github.io/posts/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/mit6.s081/mit6.s081lab6-multithreading/</link>
       <pubDate>Fri, 15 Nov 2024 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/mit6.s081lab6-multithreading/</guid>
+      <guid>https://kerolt.github.io/posts/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/mit6.s081/mit6.s081lab6-multithreading/</guid>
       <description>&lt;p&gt;本次的实验总体都不是很难，第一个练习让我们在用户态模拟了线程的切换，这里重要的就是进程/线程上下文的保存与恢复；第二三个练习则是让我们跳出了xv6，去熟悉pthread库和线程的同步互斥。&lt;/p&gt;</description>
     </item>
     <item>
@@ -1864,9 +1954,9 @@
     </item>
     <item>
       <title>【MIT6.S081】Lab5 copy-on-write fork</title>
-      <link>https://kerolt.github.io/posts/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/mit6.s081lab5-copy-on-write-fork/</link>
+      <link>https://kerolt.github.io/posts/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/mit6.s081/mit6.s081lab5-copy-on-write-fork/</link>
       <pubDate>Tue, 12 Nov 2024 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/mit6.s081lab5-copy-on-write-fork/</guid>
+      <guid>https://kerolt.github.io/posts/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/mit6.s081/mit6.s081lab5-copy-on-write-fork/</guid>
       <description>&lt;h2 id=&#34;为什么我们需要copy-on-write&#34;&gt;为什么我们需要copy on write&lt;/h2&gt;
 &lt;p&gt;通过xv6的实验指导书，我们可以知道：&lt;/p&gt;
 &lt;p&gt;xv6中的&lt;code&gt;fork()&lt;/code&gt;系统调用将父进程的所有用户空间内存复制到子进程中。如果父进程所使用的页数很大，复制可能需要很长时间，而这样的复制操作经常是没有用的：&lt;code&gt;fork()&lt;/code&gt;之后通常是子进程中的&lt;code&gt;exec()&lt;/code&gt;，这会丢弃复制的内存而不是使用它们。&lt;/p&gt;
@@ -1877,9 +1967,9 @@
     </item>
     <item>
       <title>【MIT6.S081】Lab4 trap backtrace</title>
-      <link>https://kerolt.github.io/posts/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/mit6.s081lab4-trap-backtrace/</link>
+      <link>https://kerolt.github.io/posts/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/mit6.s081/mit6.s081lab4-trap-backtrace/</link>
       <pubDate>Sun, 10 Nov 2024 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/mit6.s081lab4-trap-backtrace/</guid>
+      <guid>https://kerolt.github.io/posts/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/mit6.s081/mit6.s081lab4-trap-backtrace/</guid>
       <description>&lt;p&gt;backtrace这个lab非常有意思，虽然实现的代码量不多，但是能让我们更好地理解栈、栈帧、指针、gdb的一些知识。&lt;/p&gt;
 &lt;blockquote&gt;
 &lt;p&gt;该实验的代码实现见：&lt;a href=&#34;https://github.com/kerolt/xv6-labs-2023/commit/d1dba8ae4a1a71604e8bb6df5238f8cac1771683&#34;&gt;仓库commit&lt;/a&gt;&lt;/p&gt;
@@ -1887,9 +1977,9 @@
     </item>
     <item>
       <title>【MIT6.S081】Lab4 trap alarm</title>
-      <link>https://kerolt.github.io/posts/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/mit6.s081lab4-trap-alarm/</link>
+      <link>https://kerolt.github.io/posts/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/mit6.s081/mit6.s081lab4-trap-alarm/</link>
       <pubDate>Thu, 07 Nov 2024 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/mit6.s081lab4-trap-alarm/</guid>
+      <guid>https://kerolt.github.io/posts/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/mit6.s081/mit6.s081lab4-trap-alarm/</guid>
       <description>&lt;p&gt;Alarm综合了该lab中前几个练习的知识点：系统调用、中断、寄存器等，我们需要对trap机制有比较好的认识才能理解。Alarm的任务是需要我们完成一个定时器的实现：&lt;code&gt;sigalarm(interval, handler)&lt;/code&gt;，当调用&lt;code&gt;sigalarm(n, fn)&lt;/code&gt;时，内核会每n个时间间隔（tick）执行fn函数。&lt;/p&gt;
 &lt;blockquote&gt;
 &lt;p&gt;该实验的代码实现见：&lt;a href=&#34;https://github.com/kerolt/xv6-labs-2023/commit/0f70ef7d68ab1273262b8d43a2deaf7345a87698&#34;&gt;仓库commit&lt;/a&gt;&lt;/p&gt;
@@ -1897,17 +1987,17 @@
     </item>
     <item>
       <title>【MIT6.S081】Lab3 page tables（上）</title>
-      <link>https://kerolt.github.io/posts/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/mit6.s081lab3-page-tables%E4%B8%8A/</link>
+      <link>https://kerolt.github.io/posts/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/mit6.s081/mit6.s081lab3-page-tables%E4%B8%8A/</link>
       <pubDate>Tue, 05 Nov 2024 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/mit6.s081lab3-page-tables%E4%B8%8A/</guid>
+      <guid>https://kerolt.github.io/posts/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/mit6.s081/mit6.s081lab3-page-tables%E4%B8%8A/</guid>
       <description>&lt;h2 id=&#34;前言&#34;&gt;前言&lt;/h2&gt;
 &lt;p&gt;页表是最常用的机制，操作系统通过它为每个进程提供自己的私有地址空间和内存。页表决定了内存地址的含义，以及可以访问物理内存的哪些部分。在本文中，记录了&lt;code&gt;Lab: page tables&lt;/code&gt;的前两个实验：加速系统调用和打印页表。&lt;/p&gt;</description>
     </item>
     <item>
       <title>【MIT6.S081】Lab3 page tables（下）</title>
-      <link>https://kerolt.github.io/posts/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/mit6.s081lab3-page-tables%E4%B8%8B/</link>
+      <link>https://kerolt.github.io/posts/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/mit6.s081/mit6.s081lab3-page-tables%E4%B8%8B/</link>
       <pubDate>Tue, 05 Nov 2024 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/mit6.s081lab3-page-tables%E4%B8%8B/</guid>
+      <guid>https://kerolt.github.io/posts/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/mit6.s081/mit6.s081lab3-page-tables%E4%B8%8B/</guid>
       <description>&lt;p&gt;本关的任务为“Detect which pages have been accessed”，需要实现一个新的系统调用&lt;code&gt;pgaccess&lt;/code&gt;，它指出访问了哪些页面被访问了（读、写等）。系统调用需要三个参数：&lt;/p&gt;
 &lt;ol&gt;
 &lt;li&gt;第一个用户页面的起始虚拟地址&lt;/li&gt;
@@ -1920,17 +2010,17 @@
     </item>
     <item>
       <title>【MIT6.S081】Lab2 system calls</title>
-      <link>https://kerolt.github.io/posts/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/mit6.s081lab2-system-calls/</link>
+      <link>https://kerolt.github.io/posts/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/mit6.s081/mit6.s081lab2-system-calls/</link>
       <pubDate>Mon, 28 Oct 2024 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/mit6.s081lab2-system-calls/</guid>
+      <guid>https://kerolt.github.io/posts/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/mit6.s081/mit6.s081lab2-system-calls/</guid>
       <description>&lt;h2 id=&#34;前言&#34;&gt;前言&lt;/h2&gt;
 &lt;p&gt;这个lab开始我们就正式进入了xv6的世界了，这一次我们可以了解到内核中系统调用的注册和运行原理，这可以说是之后lab的一个基石。&lt;/p&gt;</description>
     </item>
     <item>
       <title>【MIT6.S081】Lab1 utilities</title>
-      <link>https://kerolt.github.io/posts/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/mit6.s081lab1-utilities/</link>
+      <link>https://kerolt.github.io/posts/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/mit6.s081/mit6.s081lab1-utilities/</link>
       <pubDate>Sun, 27 Oct 2024 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/mit6.s081lab1-utilities/</guid>
+      <guid>https://kerolt.github.io/posts/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/mit6.s081/mit6.s081lab1-utilities/</guid>
       <description>&lt;h2 id=&#34;前言&#34;&gt;前言&lt;/h2&gt;
 &lt;p&gt;该Lab通过实现几个命令来熟悉 xv6 及其系统调用&lt;/p&gt;
 &lt;ul&gt;
