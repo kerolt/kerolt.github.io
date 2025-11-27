@@ -15,9 +15,9 @@
     <atom:link href="https://kerolt.github.io/tags/bridge/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Linux中的veth与bridge</title>
-      <link>https://kerolt.github.io/posts/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/linux%E4%B8%AD%E7%9A%84veth%E4%B8%8Ebridge/</link>
+      <link>https://kerolt.github.io/posts/os/network/linux%E4%B8%AD%E7%9A%84veth%E4%B8%8Ebridge/</link>
       <pubDate>Sat, 08 Nov 2025 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/linux%E4%B8%AD%E7%9A%84veth%E4%B8%8Ebridge/</guid>
+      <guid>https://kerolt.github.io/posts/os/network/linux%E4%B8%AD%E7%9A%84veth%E4%B8%8Ebridge/</guid>
       <description>&lt;p&gt;容器网络最典型的基础模型 —— &lt;strong&gt;两个不同的命名空间通过 bridge 通信&lt;/strong&gt; 。&lt;/p&gt;
 &lt;p&gt;Docker 默认的 bridge 模式就是基于此原理,创建 &lt;code&gt;docker0&lt;/code&gt; bridge，容器 veth 对一端连接容器，一端连接 docker0，提供 NAT 功能让容器可以访问外网。&lt;/p&gt;
 &lt;p&gt;一个简单的结构如下👇：&lt;/p&gt;

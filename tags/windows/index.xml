@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Windows on Kerolt&#39;s Blog</title>
+    <link>https://kerolt.github.io/tags/windows/</link>
+    <description>Recent content in Windows on Kerolt&#39;s Blog</description>
+    <image>
+      <title>Kerolt&#39;s Blog</title>
+      <url>https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</url>
+      <link>https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</link>
+    </image>
+    <generator>Hugo -- 0.152.2</generator>
+    <language>en</language>
+    <lastBuildDate>Thu, 27 Nov 2025 00:00:00 +0000</lastBuildDate>
+    <atom:link href="https://kerolt.github.io/tags/windows/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Windows修改默认文件夹名为英文</title>
+      <link>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/windows%E4%BF%AE%E6%94%B9%E9%BB%98%E8%AE%A4%E6%96%87%E4%BB%B6%E5%A4%B9%E5%90%8D%E4%B8%BA%E8%8B%B1%E6%96%87/</link>
+      <pubDate>Thu, 27 Nov 2025 00:00:00 +0000</pubDate>
+      <guid>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/windows%E4%BF%AE%E6%94%B9%E9%BB%98%E8%AE%A4%E6%96%87%E4%BB%B6%E5%A4%B9%E5%90%8D%E4%B8%BA%E8%8B%B1%E6%96%87/</guid>
+      <description>&lt;p&gt;系统路径 内的&lt;strong&gt;文件夹不仅有图标还显示中文名称&lt;/strong&gt;，&lt;strong&gt;但是打开路径的时候显示的却是英文&lt;/strong&gt;，如何修改呢？&lt;/p&gt;
+&lt;p&gt;
+&lt;div class=&#34;post-img-view&#34;&gt;
+  &lt;a data-fancybox=&#34;gallery&#34; href=&#34;https://img2020.cnblogs.com/blog/1528674/202009/1528674-20200902195936468-2033057250.png&#34;&gt;
+    &lt;img src=&#34;https://img2020.cnblogs.com/blog/1528674/202009/1528674-20200902195936468-2033057250.png&#34; alt=&#34;&#34;  /&gt;
+  &lt;/a&gt;
+&lt;/div&gt;
+&lt;/p&gt;
+&lt;h2 id=&#34;修改文件夹图标的步骤&#34;&gt;修改文件夹图标的步骤 &lt;/h2&gt;
+&lt;blockquote&gt;
+&lt;p&gt;选中文件夹点击鼠标右键&amp;gt;选择属性&amp;gt;选择自定义&amp;gt;选择更改图标&amp;gt;选择应用&amp;gt;选择确定&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;
+&lt;div class=&#34;post-img-view&#34;&gt;
+  &lt;a data-fancybox=&#34;gallery&#34; href=&#34;https://img2020.cnblogs.com/blog/1528674/202009/1528674-20200902200522495-1480817730.png&#34;&gt;
+    &lt;img src=&#34;https://img2020.cnblogs.com/blog/1528674/202009/1528674-20200902200522495-1480817730.png&#34; alt=&#34;&#34;  /&gt;
+  &lt;/a&gt;
+&lt;/div&gt;
+&lt;/p&gt;
+&lt;h2 id=&#34;设置文件夹别名&#34;&gt;设置文件夹别名&lt;/h2&gt;
+&lt;ol&gt;
+&lt;li&gt;先要显示受保护的操作系统文件，设置完成之后将会看到 desktop.ini 文件（ desktop.ini 在每个文件夹内都有一个）&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;
+&lt;div class=&#34;post-img-view&#34;&gt;
+  &lt;a data-fancybox=&#34;gallery&#34; href=&#34;https://img2020.cnblogs.com/blog/1528674/202009/1528674-20200902200843706-1405130835.png&#34;&gt;
+    &lt;img src=&#34;https://img2020.cnblogs.com/blog/1528674/202009/1528674-20200902200843706-1405130835.png&#34; alt=&#34;&#34;  /&gt;
+  &lt;/a&gt;
+&lt;/div&gt;
+&lt;/p&gt;
+&lt;p&gt;
+&lt;div class=&#34;post-img-view&#34;&gt;
+  &lt;a data-fancybox=&#34;gallery&#34; href=&#34;https://img2020.cnblogs.com/blog/1528674/202009/1528674-20200902200848982-785622283.png&#34;&gt;
+    &lt;img src=&#34;https://img2020.cnblogs.com/blog/1528674/202009/1528674-20200902200848982-785622283.png&#34; alt=&#34;&#34;  /&gt;
+  &lt;/a&gt;
+&lt;/div&gt;
+&lt;/p&gt;
+&lt;p&gt;
+&lt;div class=&#34;post-img-view&#34;&gt;
+  &lt;a data-fancybox=&#34;gallery&#34; href=&#34;https://img2020.cnblogs.com/blog/1528674/202009/1528674-20200902200852966-830505444.png&#34;&gt;
+    &lt;img src=&#34;https://img2020.cnblogs.com/blog/1528674/202009/1528674-20200902200852966-830505444.png&#34; alt=&#34;&#34;  /&gt;
+  &lt;/a&gt;
+&lt;/div&gt;
+&lt;/p&gt;
+&lt;ol start=&#34;2&#34;&gt;
+&lt;li&gt;如果要设置哪个文件夹的别名就找到哪个文件夹内的 desktop.ini 文件，并编辑其内容如下：&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;
+&lt;div class=&#34;post-img-view&#34;&gt;
+  &lt;a data-fancybox=&#34;gallery&#34; href=&#34;https://img2020.cnblogs.com/blog/1528674/202009/1528674-20200903082525017-972445781.png&#34;&gt;
+    &lt;img src=&#34;https://img2020.cnblogs.com/blog/1528674/202009/1528674-20200903082525017-972445781.png&#34; alt=&#34;&#34;  /&gt;
+  &lt;/a&gt;
+&lt;/div&gt;
+&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#555&#34;&gt;[&lt;/span&gt;.ShellClassInfo&lt;span style=&#34;color:#555&#34;&gt;]&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#033&#34;&gt;LocalizedResourceName&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;@%SystemRoot%&lt;span style=&#34;color:#c30;font-weight:bold&#34;&gt;\s&lt;/span&gt;ystem32&lt;span style=&#34;color:#c30;font-weight:bold&#34;&gt;\s&lt;/span&gt;hell32.dll,-9227
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#033&#34;&gt;IconResource&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;C:&lt;span style=&#34;color:#c30;font-weight:bold&#34;&gt;\W&lt;/span&gt;indows&lt;span style=&#34;color:#c30;font-weight:bold&#34;&gt;\\&lt;/span&gt;System32&lt;span style=&#34;color:#c30;font-weight:bold&#34;&gt;\S&lt;/span&gt;HELL32.dll,1
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;设置完成之后保存 刷新就 OK 了，设置完成注意要  隐藏受保护的操作系统文件。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;好像不同版本后面的数字不同，在修改前记得保存。&lt;/strong&gt;&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

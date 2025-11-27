@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>OS on Kerolt&#39;s Blog</title>
+    <link>https://kerolt.github.io/categories/os/</link>
+    <description>Recent content in OS on Kerolt&#39;s Blog</description>
+    <image>
+      <title>Kerolt&#39;s Blog</title>
+      <url>https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</url>
+      <link>https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</link>
+    </image>
+    <generator>Hugo -- 0.152.2</generator>
+    <language>en</language>
+    <lastBuildDate>Sun, 09 Nov 2025 00:00:00 +0000</lastBuildDate>
+    <atom:link href="https://kerolt.github.io/categories/os/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Linux修改IP</title>
+      <link>https://kerolt.github.io/posts/os/network/linux%E4%BF%AE%E6%94%B9ip/</link>
+      <pubDate>Sun, 09 Nov 2025 00:00:00 +0000</pubDate>
+      <guid>https://kerolt.github.io/posts/os/network/linux%E4%BF%AE%E6%94%B9ip/</guid>
+      <description>&lt;p&gt;首先确定网络是用什么工具管理：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-sh&#34; data-lang=&#34;sh&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;$ systemctl is-active NetworkManager
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;active
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;说明 &lt;strong&gt;网络由 NetworkManager 管理&lt;/strong&gt;，这种情况修改 IP 通常使用 &lt;code&gt;nmcli&lt;/code&gt;：&lt;/p&gt;
+&lt;h2 id=&#34;修改静态-ip&#34;&gt;修改静态 IP&lt;/h2&gt;
+&lt;h3 id=&#34;看当前连接名&#34;&gt;看当前连接名&lt;/h3&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;nmcli connection show
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;输出类似：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;NAME                UUID                                  TYPE      DEVICE
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Wired connection 1  2d3e1f6a-4e87-4a76-8f23-2f459c8c112b  ethernet  enp60s0
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;这里的 &lt;code&gt;NAME&lt;/code&gt;（如 &lt;code&gt;Wired connection 1&lt;/code&gt;）就是连接名，后面命令要用到。&lt;/p&gt;
+&lt;h3 id=&#34;修改为静态-ip&#34;&gt;修改为静态 IP&lt;/h3&gt;
+&lt;p&gt;假设你想把 IP 设置为：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;IP：&lt;code&gt;192.168.1.100/24&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;网关：&lt;code&gt;192.168.1.1&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;DNS：&lt;code&gt;8.8.8.8, 1.1.1.1&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;执行：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;sudo nmcli con mod &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;Wired connection 1&amp;#34;&lt;/span&gt; ipv4.addresses 192.168.1.100/24
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;sudo nmcli con mod &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;Wired connection 1&amp;#34;&lt;/span&gt; ipv4.gateway 192.168.1.1
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;sudo nmcli con mod &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;Wired connection 1&amp;#34;&lt;/span&gt; ipv4.dns &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;8.8.8.8,1.1.1.1&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;sudo nmcli con mod &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;Wired connection 1&amp;#34;&lt;/span&gt; ipv4.method manual
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;blockquote&gt;
+&lt;p&gt;注意 &lt;code&gt;&amp;quot;Wired connection 1&amp;quot;&lt;/code&gt; 需要替换为你自己的连接名。&lt;br&gt;
+如果名字里有空格，必须加引号。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Linux中的veth与bridge</title>
+      <link>https://kerolt.github.io/posts/os/network/linux%E4%B8%AD%E7%9A%84veth%E4%B8%8Ebridge/</link>
+      <pubDate>Sat, 08 Nov 2025 00:00:00 +0000</pubDate>
+      <guid>https://kerolt.github.io/posts/os/network/linux%E4%B8%AD%E7%9A%84veth%E4%B8%8Ebridge/</guid>
+      <description>&lt;p&gt;容器网络最典型的基础模型 —— &lt;strong&gt;两个不同的命名空间通过 bridge 通信&lt;/strong&gt; 。&lt;/p&gt;
+&lt;p&gt;Docker 默认的 bridge 模式就是基于此原理,创建 &lt;code&gt;docker0&lt;/code&gt; bridge，容器 veth 对一端连接容器，一端连接 docker0，提供 NAT 功能让容器可以访问外网。&lt;/p&gt;
+&lt;p&gt;一个简单的结构如下👇：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;                      +---------------------+
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;                      |      root NS        |   (宿主机 / default netns)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;                      |  bridge: br0(10.0.0.254/24)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;                      |                     |
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;                      |   veth0 ─────────┐  |   &amp;lt;- veth0 在 root，master=br0
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;                      |                  │  |
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;                      |   veth2 ─────────┴──┘  &amp;lt;- veth2 在 root，master=br0
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;                      +---------------------+
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;                               │
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;             ┌─────────────────┴─────────────────┐
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;             │                                   │
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;       veth0 &amp;lt;-&amp;gt; veth1                       veth2 &amp;lt;-&amp;gt; veth3
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  (root, peer)   (in ns1)                 (root, peer)   (in ns2)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;                ns1 namespace                          ns2 namespace
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;                ┌───────────────┐                     ┌───────────────┐
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;                │ veth1         │                     │ veth3         │
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;                │ 10.0.0.1/24   │                     │ 10.0.0.2/24   │
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;                └───────────────┘                     └───────────────┘
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+    &lt;div class=&#34;admonition note&#34;&gt;
+      &lt;div class=&#34;admonition-header&#34;&gt;&lt;svg xmlns=&#34;http://www.w3.org/2000/svg&#34; viewBox=&#34;0 0 576 512&#34;&gt;&lt;path d=&#34;M0 64C0 28.7 28.7 0 64 0L224 0l0 128c0 17.7 14.3 32 32 32l128 0 0 125.7-86.8 86.8c-10.3 10.3-17.5 23.1-21 37.2l-18.7 74.9c-2.3 9.2-1.8 18.8 1.3 27.5L64 512c-35.3 0-64-28.7-64-64L0 64zm384 64l-128 0L256 0 384 128zM549.8 235.7l14.4 14.4c15.6 15.6 15.6 40.9 0 56.6l-29.4 29.4-71-71 29.4-29.4c15.6-15.6 40.9-15.6 56.6 0zM311.9 417L441.1 287.8l71 71L382.9 487.9c-4.1 4.1-9.2 7-14.9 8.4l-60.1 15c-5.5 1.4-11.2-.2-15.2-4.2s-5.6-9.7-4.2-15.2l15-60.1c1.4-5.6 4.3-10.8 8.4-14.9z&#34;/&gt;&lt;/svg&gt;
+        &lt;span&gt;veth (Virtual Ethernet Device)&lt;/span&gt;
+      &lt;/div&gt;
+      &lt;div class=&#34;admonition-content&#34;&gt;
+        &lt;p&gt;虚拟以太网设备，总是成对出现，类似管道两端&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>如何理解内核态与用户态切换的上下文开销</title>
+      <link>https://kerolt.github.io/posts/os/%E5%A6%82%E4%BD%95%E7%90%86%E8%A7%A3%E5%86%85%E6%A0%B8%E6%80%81%E4%B8%8E%E7%94%A8%E6%88%B7%E6%80%81%E5%88%87%E6%8D%A2%E7%9A%84%E4%B8%8A%E4%B8%8B%E6%96%87%E5%BC%80%E9%94%80/</link>
+      <pubDate>Thu, 06 Nov 2025 00:00:00 +0000</pubDate>
+      <guid>https://kerolt.github.io/posts/os/%E5%A6%82%E4%BD%95%E7%90%86%E8%A7%A3%E5%86%85%E6%A0%B8%E6%80%81%E4%B8%8E%E7%94%A8%E6%88%B7%E6%80%81%E5%88%87%E6%8D%A2%E7%9A%84%E4%B8%8A%E4%B8%8B%E6%96%87%E5%BC%80%E9%94%80/</guid>
+      <description>&lt;h2 id=&#34;一什么是用户态和内核态&#34;&gt;一、什么是“用户态”和“内核态”&lt;/h2&gt;
+&lt;p&gt;CPU 有不同的 &lt;strong&gt;特权级（Privilege Level）&lt;/strong&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;用户态（User Mode）&lt;/strong&gt;：&lt;br&gt;
+应用程序在这里运行，权限受限，比如不能直接访问硬件、不能修改页表等。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;内核态（Kernel Mode）&lt;/strong&gt;：&lt;br&gt;
+操作系统内核运行在这里，拥有完全的访问权限，可以管理内存、设备、中断等。&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;二什么是上下文切换context-switch&#34;&gt;二、什么是“上下文切换（Context Switch）”&lt;/h2&gt;
+&lt;p&gt;“上下文”就是 CPU 当前正在执行的任务的所有状态，包括：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;寄存器内容（RIP、RSP、RAX 等）&lt;/li&gt;
+&lt;li&gt;程序计数器（Program Counter）&lt;/li&gt;
+&lt;li&gt;栈指针&lt;/li&gt;
+&lt;li&gt;内存映射（页表）&lt;/li&gt;
+&lt;li&gt;调度信息（优先级、时间片等）&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;上下文切换&lt;/strong&gt;指的是 CPU 从一个执行上下文切换到另一个（比如进程 A → 进程 B）。&lt;/p&gt;
+&lt;h2 id=&#34;三内核态与用户态切换--进程切换但都属于上下文切换&#34;&gt;三、内核态与用户态切换 ≠ 进程切换，但都属于“上下文切换”&lt;/h2&gt;
+&lt;p&gt;这两种是不同层次的“切换”：&lt;/p&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;类型&lt;/th&gt;
+          &lt;th&gt;示例&lt;/th&gt;
+          &lt;th&gt;是否涉及调度&lt;/th&gt;
+          &lt;th&gt;开销大小&lt;/th&gt;
+          &lt;th&gt;备注&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;用户态 → 内核态&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;系统调用、I/O、中断&lt;/td&gt;
+          &lt;td&gt;否&lt;/td&gt;
+          &lt;td&gt;小（几十到几百纳秒）&lt;/td&gt;
+          &lt;td&gt;同一线程，只是 CPU 特权级变化&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;进程上下文切换&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;从进程 A → 进程 B&lt;/td&gt;
+          &lt;td&gt;是&lt;/td&gt;
+          &lt;td&gt;大（微秒级）&lt;/td&gt;
+          &lt;td&gt;不仅换栈，还要换虚拟内存上下文&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h2 id=&#34;四为什么内核用户态切换有开销&#34;&gt;四、为什么内核/用户态切换有“开销”&lt;/h2&gt;
+&lt;p&gt;内核态切换的代价来自几个部分：&lt;/p&gt;
+&lt;h3 id=&#34;1-cpu-特权级变化&#34;&gt;1. CPU 特权级变化&lt;/h3&gt;
+&lt;p&gt;切换时 CPU 会：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;保存当前寄存器状态；&lt;/li&gt;
+&lt;li&gt;改变特权级（从 ring3 → ring0）；&lt;/li&gt;
+&lt;li&gt;切换到内核栈（每个线程有独立内核栈）；&lt;/li&gt;
+&lt;li&gt;执行系统调用入口代码（&lt;code&gt;syscall&lt;/code&gt;、&lt;code&gt;sysenter&lt;/code&gt; 指令）；&lt;/li&gt;
+&lt;li&gt;执行完后再反向恢复回用户态。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;这些过程虽然不是“线程切换”，但都需要 CPU 做额外操作。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Linux NAPI机制知识点总结</title>
+      <link>https://kerolt.github.io/posts/os/linux-napi%E6%9C%BA%E5%88%B6%E7%9F%A5%E8%AF%86%E7%82%B9%E6%80%BB%E7%BB%93/</link>
+      <pubDate>Wed, 17 Sep 2025 00:00:00 +0000</pubDate>
+      <guid>https://kerolt.github.io/posts/os/linux-napi%E6%9C%BA%E5%88%B6%E7%9F%A5%E8%AF%86%E7%82%B9%E6%80%BB%E7%BB%93/</guid>
+      <description>&lt;blockquote&gt;
+&lt;p&gt;对 &lt;a href=&#34;https://docs.kernel.org/networking/napi.html&#34;&gt;https://docs.kernel.org/networking/napi.html&lt;/a&gt; 的总结&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;NAPI (New API，但现已无特定含义) 是 Linux 内核中用于高效处理网络数据包的一种机制，旨在减少高负载下的中断开销。&lt;/p&gt;
+&lt;p&gt;其​目的​​是为了解决传统基于中断的包处理在高流量下的性能问题（“中断活锁”）。通过混合​&lt;strong&gt;​中断​&lt;/strong&gt;​和​&lt;strong&gt;​轮询​&lt;/strong&gt;​模式，在低负载时使用中断保证低延迟，在高负载时切换到轮询保证高吞吐量。&lt;/p&gt;
+&lt;p&gt;设备通过中断通知有新数据包 -&amp;gt; 内核调度对应的 NAPI 实例 -&amp;gt; 在软中断上下文（或内核线程）中轮询处理多个数据包 -&amp;gt; 处理完毕后再打开中断。&lt;/p&gt;
+&lt;h2 id=&#34;核心数据结构与-api&#34;&gt;核心数据结构与 API&lt;/h2&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;​&lt;strong&gt;​&lt;code&gt;struct napi_struct&lt;/code&gt;​&lt;/strong&gt;​：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;核心数据结构，代表一个 NAPI 实例，保存其状态信息。&lt;/li&gt;
+&lt;li&gt;通常与一个中断或一个队列（RX/TX）相关联。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;​&lt;strong&gt;​控制 API (初始化和状态管理)​&lt;/strong&gt;​：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;netif_napi_add()&lt;/code&gt; / &lt;code&gt;netif_napi_del()&lt;/code&gt;: 向系统添加/删除一个 NAPI 实例（通常附加到网络设备上）。&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;napi_enable()&lt;/code&gt; / &lt;code&gt;napi_disable()&lt;/code&gt;: 启用/禁用 NAPI 实例。禁用状态下实例不会被调度，&lt;code&gt;poll&lt;/code&gt; 方法不会被调用。​&lt;strong&gt;​注意​&lt;/strong&gt;​：API 非幂等，错误调用顺序可能导致死锁或竞态。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;​&lt;strong&gt;​数据路径 API (调度与处理)​&lt;/strong&gt;​：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;napi_schedule()&lt;/code&gt;: ​&lt;strong&gt;​核心调度函数​&lt;/strong&gt;​。通常在设备的中断处理程序中调用，通知内核有数据需要处理，并获取 NAPI 实例的所有权。&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;napi_schedule_irqoff()&lt;/code&gt;: &lt;code&gt;napi_schedule()&lt;/code&gt; 的变体，用于已知在中断上下文中调用的情况，可优化中断屏蔽操作。&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;napi_complete_done()&lt;/code&gt;: ​&lt;strong&gt;​完成处理函数​&lt;/strong&gt;​。当驱动程序的 &lt;code&gt;poll&lt;/code&gt; 方法处理完所有事件后调用此函数，释放实例的所有权。​&lt;strong&gt;​警告​&lt;/strong&gt;​：&lt;code&gt;budget&lt;/code&gt; 为 0 时绝不能调用；若处理恰好用完 &lt;code&gt;budget&lt;/code&gt; 且工作已完成，需谨慎返回 &lt;code&gt;budget - 1&lt;/code&gt; 或等待下次调用。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h2 id=&#34;驱动程序实现要点&#34;&gt;驱动程序实现要点&lt;/h2&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;​&lt;strong&gt;​&lt;code&gt;poll&lt;/code&gt; 方法​&lt;/strong&gt;​：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;驱动必须实现的回调函数，由内核调度执行实际的数据包处理工作。&lt;/li&gt;
+&lt;li&gt;​&lt;strong&gt;​参数 &lt;code&gt;budget&lt;/code&gt;​&lt;/strong&gt;​：限制一次 &lt;code&gt;poll&lt;/code&gt; 调用最多可处理的​&lt;strong&gt;​接收​&lt;/strong&gt;​（RX）数据包数量（发送 TX 处理无此限制）。若返回值为 &lt;code&gt;budget&lt;/code&gt;，表示还有工作未完成，内核会再次调度；若小于 &lt;code&gt;budget&lt;/code&gt;，表示本轮处理已完成。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;​&lt;strong&gt;​中断屏蔽策略​&lt;/strong&gt;​：&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

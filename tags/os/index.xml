@@ -15,48 +15,48 @@
     <atom:link href="https://kerolt.github.io/tags/os/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>【MIT6.S081】Lab10 mmap</title>
-      <link>https://kerolt.github.io/posts/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/mit6.s081/mit6.s081lab10-mmap/</link>
+      <link>https://kerolt.github.io/posts/os/mit6.s081/mit6.s081lab10-mmap/</link>
       <pubDate>Fri, 22 Nov 2024 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/mit6.s081/mit6.s081lab10-mmap/</guid>
+      <guid>https://kerolt.github.io/posts/os/mit6.s081/mit6.s081lab10-mmap/</guid>
       <description>&lt;h2 id=&#34;什么是mmap&#34;&gt;什么是mmap？&lt;/h2&gt;
 &lt;p&gt;&lt;code&gt;mmap&lt;/code&gt; 是一种用于将文件或设备与进程的地址空间关联起来的内存映射技术。通过 &lt;code&gt;mmap&lt;/code&gt;，可以将文件的内容直接映射到进程的虚拟内存地址空间，使得文件的内容可以像操作普通内存一样进行读取和写入。&lt;/p&gt;</description>
     </item>
     <item>
       <title>【MIT6.S081】Lab9 file system</title>
-      <link>https://kerolt.github.io/posts/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/mit6.s081/mit6.s081lab9-file-system/</link>
+      <link>https://kerolt.github.io/posts/os/mit6.s081/mit6.s081lab9-file-system/</link>
       <pubDate>Tue, 19 Nov 2024 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/mit6.s081/mit6.s081lab9-file-system/</guid>
+      <guid>https://kerolt.github.io/posts/os/mit6.s081/mit6.s081lab9-file-system/</guid>
       <description>&lt;h2 id=&#34;intro&#34;&gt;Intro&lt;/h2&gt;
 &lt;p&gt;在这个实验中，我们需要让xv6支持更大的文件和软链接。实验总体不是特别难，不过需要我们理解好文件系统是如何工作的。&lt;code&gt;Lab8 lock&lt;/code&gt;中的Buffer Cache也是文件系统的一部分，不过它位于文件系统的下层，这里我们需要处理的更多在上层，偏应用层。&lt;/p&gt;</description>
     </item>
     <item>
       <title>【MIT6.S081】Lab8 lock</title>
-      <link>https://kerolt.github.io/posts/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/mit6.s081/mit6.s081lab8-lock/</link>
+      <link>https://kerolt.github.io/posts/os/mit6.s081/mit6.s081lab8-lock/</link>
       <pubDate>Sun, 17 Nov 2024 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/mit6.s081/mit6.s081lab8-lock/</guid>
+      <guid>https://kerolt.github.io/posts/os/mit6.s081/mit6.s081lab8-lock/</guid>
       <description>&lt;h2 id=&#34;intro&#34;&gt;Intro&lt;/h2&gt;
 &lt;p&gt;这个实验个人感觉挺难的，需要我们重新设计数据结构，还要考虑在并发（并行）情况下对于锁的操作，以减少多核情况下对于锁的竞争。其中主要涉及内存分配和IO缓冲块分配，在这个lab之前，xv6对于这两个分配都是使用的全局对象，并只有一把全局锁进行操作，这样的话在并行情况下锁的竞争是很激烈的，我们的任务就是重新设计这两个分配器，它们的重构思路并不完全一致，需要具体问题具体分析。&lt;/p&gt;</description>
     </item>
     <item>
       <title>【MIT6.S081】xv6进程调度分析</title>
-      <link>https://kerolt.github.io/posts/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/mit6.s081/mit6.s081xv6%E8%BF%9B%E7%A8%8B%E8%B0%83%E5%BA%A6%E5%88%86%E6%9E%90/</link>
+      <link>https://kerolt.github.io/posts/os/mit6.s081/mit6.s081xv6%E8%BF%9B%E7%A8%8B%E8%B0%83%E5%BA%A6%E5%88%86%E6%9E%90/</link>
       <pubDate>Sat, 16 Nov 2024 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/mit6.s081/mit6.s081xv6%E8%BF%9B%E7%A8%8B%E8%B0%83%E5%BA%A6%E5%88%86%E6%9E%90/</guid>
+      <guid>https://kerolt.github.io/posts/os/mit6.s081/mit6.s081xv6%E8%BF%9B%E7%A8%8B%E8%B0%83%E5%BA%A6%E5%88%86%E6%9E%90/</guid>
       <description>&lt;p&gt;在做thread lab的时候，阅读xv6的源码后对于进程调度的实现有了大致的了解，但是其中锁的获取与释放顺序让我困惑了好久：在yield函数中，不是先获取了进程p的锁吗，那么之后在调度器中又获取p的锁，那不是会死锁吗？在调度器内使用swtch发生进程切换后，又会跳转到哪里？&lt;/p&gt;
 &lt;p&gt;而在我观摩大佬的一些博客和视频后，发现我之前的想法有很大的问题，归根结底是没有弄明白xv6何时发生了切换，切换后应该从哪里开始运行。这篇笔记就是对于分析xv6进程调度的总结。&lt;/p&gt;</description>
     </item>
     <item>
       <title>【MIT6.S081】Lab6 multithreading</title>
-      <link>https://kerolt.github.io/posts/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/mit6.s081/mit6.s081lab6-multithreading/</link>
+      <link>https://kerolt.github.io/posts/os/mit6.s081/mit6.s081lab6-multithreading/</link>
       <pubDate>Fri, 15 Nov 2024 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/mit6.s081/mit6.s081lab6-multithreading/</guid>
+      <guid>https://kerolt.github.io/posts/os/mit6.s081/mit6.s081lab6-multithreading/</guid>
       <description>&lt;p&gt;本次的实验总体都不是很难，第一个练习让我们在用户态模拟了线程的切换，这里重要的就是进程/线程上下文的保存与恢复；第二三个练习则是让我们跳出了xv6，去熟悉pthread库和线程的同步互斥。&lt;/p&gt;</description>
     </item>
     <item>
       <title>【MIT6.S081】Lab5 copy-on-write fork</title>
-      <link>https://kerolt.github.io/posts/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/mit6.s081/mit6.s081lab5-copy-on-write-fork/</link>
+      <link>https://kerolt.github.io/posts/os/mit6.s081/mit6.s081lab5-copy-on-write-fork/</link>
       <pubDate>Tue, 12 Nov 2024 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/mit6.s081/mit6.s081lab5-copy-on-write-fork/</guid>
+      <guid>https://kerolt.github.io/posts/os/mit6.s081/mit6.s081lab5-copy-on-write-fork/</guid>
       <description>&lt;h2 id=&#34;为什么我们需要copy-on-write&#34;&gt;为什么我们需要copy on write&lt;/h2&gt;
 &lt;p&gt;通过xv6的实验指导书，我们可以知道：&lt;/p&gt;
 &lt;p&gt;xv6中的&lt;code&gt;fork()&lt;/code&gt;系统调用将父进程的所有用户空间内存复制到子进程中。如果父进程所使用的页数很大，复制可能需要很长时间，而这样的复制操作经常是没有用的：&lt;code&gt;fork()&lt;/code&gt;之后通常是子进程中的&lt;code&gt;exec()&lt;/code&gt;，这会丢弃复制的内存而不是使用它们。&lt;/p&gt;
@@ -67,9 +67,9 @@
     </item>
     <item>
       <title>【MIT6.S081】Lab4 trap backtrace</title>
-      <link>https://kerolt.github.io/posts/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/mit6.s081/mit6.s081lab4-trap-backtrace/</link>
+      <link>https://kerolt.github.io/posts/os/mit6.s081/mit6.s081lab4-trap-backtrace/</link>
       <pubDate>Sun, 10 Nov 2024 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/mit6.s081/mit6.s081lab4-trap-backtrace/</guid>
+      <guid>https://kerolt.github.io/posts/os/mit6.s081/mit6.s081lab4-trap-backtrace/</guid>
       <description>&lt;p&gt;backtrace这个lab非常有意思，虽然实现的代码量不多，但是能让我们更好地理解栈、栈帧、指针、gdb的一些知识。&lt;/p&gt;
 &lt;blockquote&gt;
 &lt;p&gt;该实验的代码实现见：&lt;a href=&#34;https://github.com/kerolt/xv6-labs-2023/commit/d1dba8ae4a1a71604e8bb6df5238f8cac1771683&#34;&gt;仓库commit&lt;/a&gt;&lt;/p&gt;
@@ -77,9 +77,9 @@
     </item>
     <item>
       <title>【MIT6.S081】Lab4 trap alarm</title>
-      <link>https://kerolt.github.io/posts/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/mit6.s081/mit6.s081lab4-trap-alarm/</link>
+      <link>https://kerolt.github.io/posts/os/mit6.s081/mit6.s081lab4-trap-alarm/</link>
       <pubDate>Thu, 07 Nov 2024 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/mit6.s081/mit6.s081lab4-trap-alarm/</guid>
+      <guid>https://kerolt.github.io/posts/os/mit6.s081/mit6.s081lab4-trap-alarm/</guid>
       <description>&lt;p&gt;Alarm综合了该lab中前几个练习的知识点：系统调用、中断、寄存器等，我们需要对trap机制有比较好的认识才能理解。Alarm的任务是需要我们完成一个定时器的实现：&lt;code&gt;sigalarm(interval, handler)&lt;/code&gt;，当调用&lt;code&gt;sigalarm(n, fn)&lt;/code&gt;时，内核会每n个时间间隔（tick）执行fn函数。&lt;/p&gt;
 &lt;blockquote&gt;
 &lt;p&gt;该实验的代码实现见：&lt;a href=&#34;https://github.com/kerolt/xv6-labs-2023/commit/0f70ef7d68ab1273262b8d43a2deaf7345a87698&#34;&gt;仓库commit&lt;/a&gt;&lt;/p&gt;
@@ -87,17 +87,17 @@
     </item>
     <item>
       <title>【MIT6.S081】Lab3 page tables（上）</title>
-      <link>https://kerolt.github.io/posts/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/mit6.s081/mit6.s081lab3-page-tables%E4%B8%8A/</link>
+      <link>https://kerolt.github.io/posts/os/mit6.s081/mit6.s081lab3-page-tables%E4%B8%8A/</link>
       <pubDate>Tue, 05 Nov 2024 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/mit6.s081/mit6.s081lab3-page-tables%E4%B8%8A/</guid>
+      <guid>https://kerolt.github.io/posts/os/mit6.s081/mit6.s081lab3-page-tables%E4%B8%8A/</guid>
       <description>&lt;h2 id=&#34;前言&#34;&gt;前言&lt;/h2&gt;
 &lt;p&gt;页表是最常用的机制，操作系统通过它为每个进程提供自己的私有地址空间和内存。页表决定了内存地址的含义，以及可以访问物理内存的哪些部分。在本文中，记录了&lt;code&gt;Lab: page tables&lt;/code&gt;的前两个实验：加速系统调用和打印页表。&lt;/p&gt;</description>
     </item>
     <item>
       <title>【MIT6.S081】Lab3 page tables（下）</title>
-      <link>https://kerolt.github.io/posts/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/mit6.s081/mit6.s081lab3-page-tables%E4%B8%8B/</link>
+      <link>https://kerolt.github.io/posts/os/mit6.s081/mit6.s081lab3-page-tables%E4%B8%8B/</link>
       <pubDate>Tue, 05 Nov 2024 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/mit6.s081/mit6.s081lab3-page-tables%E4%B8%8B/</guid>
+      <guid>https://kerolt.github.io/posts/os/mit6.s081/mit6.s081lab3-page-tables%E4%B8%8B/</guid>
       <description>&lt;p&gt;本关的任务为“Detect which pages have been accessed”，需要实现一个新的系统调用&lt;code&gt;pgaccess&lt;/code&gt;，它指出访问了哪些页面被访问了（读、写等）。系统调用需要三个参数：&lt;/p&gt;
 &lt;ol&gt;
 &lt;li&gt;第一个用户页面的起始虚拟地址&lt;/li&gt;
@@ -110,17 +110,17 @@
     </item>
     <item>
       <title>【MIT6.S081】Lab2 system calls</title>
-      <link>https://kerolt.github.io/posts/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/mit6.s081/mit6.s081lab2-system-calls/</link>
+      <link>https://kerolt.github.io/posts/os/mit6.s081/mit6.s081lab2-system-calls/</link>
       <pubDate>Mon, 28 Oct 2024 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/mit6.s081/mit6.s081lab2-system-calls/</guid>
+      <guid>https://kerolt.github.io/posts/os/mit6.s081/mit6.s081lab2-system-calls/</guid>
       <description>&lt;h2 id=&#34;前言&#34;&gt;前言&lt;/h2&gt;
 &lt;p&gt;这个lab开始我们就正式进入了xv6的世界了，这一次我们可以了解到内核中系统调用的注册和运行原理，这可以说是之后lab的一个基石。&lt;/p&gt;</description>
     </item>
     <item>
       <title>【MIT6.S081】Lab1 utilities</title>
-      <link>https://kerolt.github.io/posts/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/mit6.s081/mit6.s081lab1-utilities/</link>
+      <link>https://kerolt.github.io/posts/os/mit6.s081/mit6.s081lab1-utilities/</link>
       <pubDate>Sun, 27 Oct 2024 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/mit6.s081/mit6.s081lab1-utilities/</guid>
+      <guid>https://kerolt.github.io/posts/os/mit6.s081/mit6.s081lab1-utilities/</guid>
       <description>&lt;h2 id=&#34;前言&#34;&gt;前言&lt;/h2&gt;
 &lt;p&gt;该Lab通过实现几个命令来熟悉 xv6 及其系统调用&lt;/p&gt;
 &lt;ul&gt;

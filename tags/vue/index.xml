@@ -15,9 +15,9 @@
     <atom:link href="https://kerolt.github.io/tags/vue/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Vue3路由与Vite的base</title>
-      <link>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/vue3%E8%B7%AF%E7%94%B1%E4%B8%8Evite%E7%9A%84base/</link>
+      <link>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/%E5%89%8D%E7%AB%AF/vue3%E8%B7%AF%E7%94%B1%E4%B8%8Evite%E7%9A%84base/</link>
       <pubDate>Thu, 16 Oct 2025 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/vue3%E8%B7%AF%E7%94%B1%E4%B8%8Evite%E7%9A%84base/</guid>
+      <guid>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/%E5%89%8D%E7%AB%AF/vue3%E8%B7%AF%E7%94%B1%E4%B8%8Evite%E7%9A%84base/</guid>
       <description>&lt;p&gt;虽然我不是一个专门搞前端的，但也会写点点 Vue。最近实验室项目写完后需要部署一下，这里我就使用了 Docker Compose 来部署。由于前端项目有前台用户端访问和后台管理端两个，而老师申请的服务器只开了 80 端口，因此我就打算使用 nginx 来反向代理：&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;code&gt;http://example.com&lt;/code&gt; 为前台&lt;/li&gt;
@@ -66,16 +66,16 @@
     </item>
     <item>
       <title>用uni-cli创建项目后使用eslint</title>
-      <link>https://kerolt.github.io/posts/%E5%89%8D%E7%AB%AF/%E7%94%A8uni-cli%E5%88%9B%E5%BB%BA%E9%A1%B9%E7%9B%AE%E5%90%8E%E4%BD%BF%E7%94%A8eslint/</link>
+      <link>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/%E5%89%8D%E7%AB%AF/%E7%94%A8uni-cli%E5%88%9B%E5%BB%BA%E9%A1%B9%E7%9B%AE%E5%90%8E%E4%BD%BF%E7%94%A8eslint/</link>
       <pubDate>Sat, 08 Jun 2024 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E5%89%8D%E7%AB%AF/%E7%94%A8uni-cli%E5%88%9B%E5%BB%BA%E9%A1%B9%E7%9B%AE%E5%90%8E%E4%BD%BF%E7%94%A8eslint/</guid>
+      <guid>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/%E5%89%8D%E7%AB%AF/%E7%94%A8uni-cli%E5%88%9B%E5%BB%BA%E9%A1%B9%E7%9B%AE%E5%90%8E%E4%BD%BF%E7%94%A8eslint/</guid>
       <description>&lt;p&gt;记录一下如何配置eslint（其实是怕下一次又被折磨）。&lt;/p&gt;</description>
     </item>
     <item>
       <title>Vue3封装el-upload</title>
-      <link>https://kerolt.github.io/posts/%E5%89%8D%E7%AB%AF/vue3%E5%B0%81%E8%A3%85el-upload/</link>
+      <link>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/%E5%89%8D%E7%AB%AF/vue3%E5%B0%81%E8%A3%85el-upload/</link>
       <pubDate>Sun, 10 Dec 2023 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E5%89%8D%E7%AB%AF/vue3%E5%B0%81%E8%A3%85el-upload/</guid>
+      <guid>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/%E5%89%8D%E7%AB%AF/vue3%E5%B0%81%E8%A3%85el-upload/</guid>
       <description>&lt;h2 id=&#34;前言&#34;&gt;前言&lt;/h2&gt;
 &lt;p&gt;在Vue3项目中，如果我们想上传图片一般可以利用element-ui中的&lt;code&gt;el-upload&lt;/code&gt;，为了避免代码的重复，我们可以自己封装一个图片上传组件。&lt;/p&gt;
 &lt;p&gt;其中，主要实现思想为前端利用el-upload组件选择上传的图片，并利用其&lt;code&gt;http-request&lt;/code&gt;属性来自定义函数来实现文件上传请求：该请求函数使用七牛云的对象存储，在通过后端得到的上传凭证token后来实现文件上传。&lt;/p&gt;</description>

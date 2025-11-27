@@ -1,0 +1,146 @@
+<!doctype html><html lang=en dir=auto><head><meta charset=utf-8><meta http-equiv=X-UA-Compatible content="IE=edge"><meta name=viewport content="width=device-width,initial-scale=1,shrink-to-fit=no"><meta name=robots content="index, follow"><title>Vue3路由与Vite的base | Kerolt's Blog</title><meta name=keywords content="Vue,Vite"><meta name=description content="虽然我不是一个专门搞前端的，但也会写点点 Vue。最近实验室项目写完后需要部署一下，这里我就使用了 Docker Compose 来部署。由于前端项目有前台用户端访问和后台管理端两个，而老师申请的服务器只开了 80 端口，因此我就打算使用 nginx 来反向代理：
+
+http://example.com 为前台
+http://example.com/admin 为后台
+
+ok，那我就用了一个 nginx 容器做网关，其 nginx.conf 如下：
+server {
+	listen 80;
+	listen [::]:80;
+	
+	server_name _;
+	
+	# 后台管理
+	location /admin/ {
+		proxy_pass http://frontend-admin;
+		proxy_set_header Host $host;
+		proxy_set_header X-Real-IP $remote_addr;
+	} 
+	
+	# 后端接口
+	location /api {
+		proxy_pass http://backend:8080/;
+		proxy_set_header Host $host;
+		proxy_set_header X-Real-IP $remote_addr;
+	}
+	
+	# minio
+	location /images/ {
+		proxy_pass http://minio:9000/;
+		proxy_set_header Host $host;
+		proxy_set_header X-Real-IP $remote_addr;
+	}
+	
+	# 前台用户
+	location / {
+		proxy_pass http://frontend-user/;
+		proxy_set_header Host $host;
+		proxy_set_header X-Real-IP $remote_addr;
+	}
+	
+	location = /admin {
+		return 301 /admin/;
+	}
+}
+docker compose up -d 后，用户端能访问并且接口没问题，但是一到管理端 http://xx.xx.xx.xx/admin，就会是白屏，我检查了一下，管理端页面的标签栏标题是正确的，也就是 nginx 反向代理没问题，获取的 index-xxx.js 和 index-yyy.css 也没问题，那就奇了个怪了。"><meta name=author content="Kerolt"><link rel=canonical href=https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/%E5%89%8D%E7%AB%AF/vue3%E8%B7%AF%E7%94%B1%E4%B8%8Evite%E7%9A%84base/><meta name=google-site-verification content="NpIO0KEIJS0CPRzTzQCbYQdSRIyb0Lspx"><meta name=yandex-verification content="XYZabc"><meta name=msvalidate.01 content="2300A23B82DB579A2DEA6261191AD771"><link crossorigin=anonymous href=/assets/css/stylesheet.bac160dbfb451d3b958c7b16ede7310831652f1c7b9abec95d519b00de4cd6a5.css integrity="sha256-usFg2/tFHTuVjHsW7ecxCDFlLxx7mr7JXVGbAN5M1qU=" rel="preload stylesheet" as=style><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/lxgw-wenkai-screen-web/style.css><link rel=icon href=https://kerolt.github.io/images/avatar/favicon.png><link rel=icon type=image/png sizes=16x16 href=https://kerolt.github.io/%3Clink%20/%20abs%20url%3E><link rel=icon type=image/png sizes=32x32 href=https://kerolt.github.io/%3Clink%20/%20abs%20url%3E><link rel=apple-touch-icon href=https://kerolt.github.io/%3Clink%20/%20abs%20url%3E><link rel=mask-icon href=https://kerolt.github.io/%3Clink%20/%20abs%20url%3E><meta name=theme-color content="#2e2e33"><meta name=msapplication-TileColor content="#2e2e33"><link rel=alternate hreflang=en href=https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/%E5%89%8D%E7%AB%AF/vue3%E8%B7%AF%E7%94%B1%E4%B8%8Evite%E7%9A%84base/><script src=https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js></script><link rel=stylesheet href=https://cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css><script src=https://cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js></script><noscript><style>#theme-toggle,.top-link{display:none}</style><style>@media(prefers-color-scheme:dark){:root{--theme:rgb(29, 30, 32);--entry:rgb(46, 46, 51);--primary:rgb(218, 218, 219);--secondary:rgb(155, 156, 157);--tertiary:rgb(65, 66, 68);--content:rgb(196, 196, 197);--code-block-bg:rgb(46, 46, 51);--code-bg:rgb(55, 56, 62);--border:rgb(51, 51, 51)}.list{background:var(--theme)}.list:not(.dark)::-webkit-scrollbar-track{background:0 0}.list:not(.dark)::-webkit-scrollbar-thumb{border-color:var(--theme)}}</style></noscript><meta property="og:url" content="https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/%E5%89%8D%E7%AB%AF/vue3%E8%B7%AF%E7%94%B1%E4%B8%8Evite%E7%9A%84base/"><meta property="og:site_name" content="Kerolt's Blog"><meta property="og:title" content="Vue3路由与Vite的base"><meta property="og:description" content="虽然我不是一个专门搞前端的，但也会写点点 Vue。最近实验室项目写完后需要部署一下，这里我就使用了 Docker Compose 来部署。由于前端项目有前台用户端访问和后台管理端两个，而老师申请的服务器只开了 80 端口，因此我就打算使用 nginx 来反向代理：
+http://example.com 为前台 http://example.com/admin 为后台 ok，那我就用了一个 nginx 容器做网关，其 nginx.conf 如下：
+server { listen 80; listen [::]:80; server_name _; # 后台管理 location /admin/ { proxy_pass http://frontend-admin; proxy_set_header Host $host; proxy_set_header X-Real-IP $remote_addr; } # 后端接口 location /api { proxy_pass http://backend:8080/; proxy_set_header Host $host; proxy_set_header X-Real-IP $remote_addr; } # minio location /images/ { proxy_pass http://minio:9000/; proxy_set_header Host $host; proxy_set_header X-Real-IP $remote_addr; } # 前台用户 location / { proxy_pass http://frontend-user/; proxy_set_header Host $host; proxy_set_header X-Real-IP $remote_addr; } location = /admin { return 301 /admin/; } } docker compose up -d 后，用户端能访问并且接口没问题，但是一到管理端 http://xx.xx.xx.xx/admin，就会是白屏，我检查了一下，管理端页面的标签栏标题是正确的，也就是 nginx 反向代理没问题，获取的 index-xxx.js 和 index-yyy.css 也没问题，那就奇了个怪了。"><meta property="og:locale" content="en"><meta property="og:type" content="article"><meta property="article:section" content="posts"><meta property="article:published_time" content="2025-10-16T00:00:00+00:00"><meta property="article:modified_time" content="2025-10-16T00:00:00+00:00"><meta property="article:tag" content="Vue"><meta property="article:tag" content="Vite"><meta property="og:image" content="https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E"><meta name=twitter:card content="summary_large_image"><meta name=twitter:image content="https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E"><meta name=twitter:title content="Vue3路由与Vite的base"><meta name=twitter:description content="虽然我不是一个专门搞前端的，但也会写点点 Vue。最近实验室项目写完后需要部署一下，这里我就使用了 Docker Compose 来部署。由于前端项目有前台用户端访问和后台管理端两个，而老师申请的服务器只开了 80 端口，因此我就打算使用 nginx 来反向代理：
+
+http://example.com 为前台
+http://example.com/admin 为后台
+
+ok，那我就用了一个 nginx 容器做网关，其 nginx.conf 如下：
+server {
+	listen 80;
+	listen [::]:80;
+	
+	server_name _;
+	
+	# 后台管理
+	location /admin/ {
+		proxy_pass http://frontend-admin;
+		proxy_set_header Host $host;
+		proxy_set_header X-Real-IP $remote_addr;
+	} 
+	
+	# 后端接口
+	location /api {
+		proxy_pass http://backend:8080/;
+		proxy_set_header Host $host;
+		proxy_set_header X-Real-IP $remote_addr;
+	}
+	
+	# minio
+	location /images/ {
+		proxy_pass http://minio:9000/;
+		proxy_set_header Host $host;
+		proxy_set_header X-Real-IP $remote_addr;
+	}
+	
+	# 前台用户
+	location / {
+		proxy_pass http://frontend-user/;
+		proxy_set_header Host $host;
+		proxy_set_header X-Real-IP $remote_addr;
+	}
+	
+	location = /admin {
+		return 301 /admin/;
+	}
+}
+docker compose up -d 后，用户端能访问并且接口没问题，但是一到管理端 http://xx.xx.xx.xx/admin，就会是白屏，我检查了一下，管理端页面的标签栏标题是正确的，也就是 nginx 反向代理没问题，获取的 index-xxx.js 和 index-yyy.css 也没问题，那就奇了个怪了。"><script type=application/ld+json>{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Posts","item":"https://kerolt.github.io/posts/"},{"@type":"ListItem","position":2,"name":"Vue3路由与Vite的base","item":"https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/%E5%89%8D%E7%AB%AF/vue3%E8%B7%AF%E7%94%B1%E4%B8%8Evite%E7%9A%84base/"}]}</script><script type=application/ld+json>{"@context":"https://schema.org","@type":"BlogPosting","headline":"Vue3路由与Vite的base","name":"Vue3路由与Vite的base","description":"虽然我不是一个专门搞前端的，但也会写点点 Vue。最近实验室项目写完后需要部署一下，这里我就使用了 Docker Compose 来部署。由于前端项目有前台用户端访问和后台管理端两个，而老师申请的服务器只开了 80 端口，因此我就打算使用 nginx 来反向代理：\nhttp://example.com 为前台 http://example.com/admin 为后台 ok，那我就用了一个 nginx 容器做网关，其 nginx.conf 如下：\nserver { listen 80; listen [::]:80; server_name _; # 后台管理 location /admin/ { proxy_pass http://frontend-admin; proxy_set_header Host $host; proxy_set_header X-Real-IP $remote_addr; } # 后端接口 location /api { proxy_pass http://backend:8080/; proxy_set_header Host $host; proxy_set_header X-Real-IP $remote_addr; } # minio location /images/ { proxy_pass http://minio:9000/; proxy_set_header Host $host; proxy_set_header X-Real-IP $remote_addr; } # 前台用户 location / { proxy_pass http://frontend-user/; proxy_set_header Host $host; proxy_set_header X-Real-IP $remote_addr; } location = /admin { return 301 /admin/; } } docker compose up -d 后，用户端能访问并且接口没问题，但是一到管理端 http://xx.xx.xx.xx/admin，就会是白屏，我检查了一下，管理端页面的标签栏标题是正确的，也就是 nginx 反向代理没问题，获取的 index-xxx.js 和 index-yyy.css 也没问题，那就奇了个怪了。\n","keywords":["Vue","Vite"],"articleBody":"虽然我不是一个专门搞前端的，但也会写点点 Vue。最近实验室项目写完后需要部署一下，这里我就使用了 Docker Compose 来部署。由于前端项目有前台用户端访问和后台管理端两个，而老师申请的服务器只开了 80 端口，因此我就打算使用 nginx 来反向代理：\nhttp://example.com 为前台 http://example.com/admin 为后台 ok，那我就用了一个 nginx 容器做网关，其 nginx.conf 如下：\nserver { listen 80; listen [::]:80; server_name _; # 后台管理 location /admin/ { proxy_pass http://frontend-admin; proxy_set_header Host $host; proxy_set_header X-Real-IP $remote_addr; } # 后端接口 location /api { proxy_pass http://backend:8080/; proxy_set_header Host $host; proxy_set_header X-Real-IP $remote_addr; } # minio location /images/ { proxy_pass http://minio:9000/; proxy_set_header Host $host; proxy_set_header X-Real-IP $remote_addr; } # 前台用户 location / { proxy_pass http://frontend-user/; proxy_set_header Host $host; proxy_set_header X-Real-IP $remote_addr; } location = /admin { return 301 /admin/; } } docker compose up -d 后，用户端能访问并且接口没问题，但是一到管理端 http://xx.xx.xx.xx/admin，就会是白屏，我检查了一下，管理端页面的标签栏标题是正确的，也就是 nginx 反向代理没问题，获取的 index-xxx.js 和 index-yyy.css 也没问题，那就奇了个怪了。\n研究了一番才发现，修改了 base 配置后，创建路由时也需要使用 BASE_URL（或等效值）的原因是为了保证前端路由与部署路径的一致性。而我在 vite.config.js 中的 base 如下：\nexport default defineConfig({ base: '/admin/', }) 在 vite.config.js 中设置的 base 选项，表示：\n所有静态资源（JS、CSS、图片等）的公共基础路径； 构建后的 HTML 文件中引用资源时会自动加上这个前缀； 构建后，所有资源路径会变成 /admin/assets/xxx.js。\nVue Router 默认假设应用部署在域名根路径（即 /）。如果你把应用部署在子路径下（如 https://example.com/admin/），而路由仍以 / 为基准，就会出现：\n页面刷新后 404； 路由跳转错误或无法匹配。 因此，Vue Router 需要知道“应用实际挂载的路径前缀”，这就是 history 配置中的 base 参数。\n在 Vite 项目中，import.meta.env.BASE_URL 是一个由 Vite 自动注入的变量，它的值就是 vite.config.js 中配置的 base。\n所以，在创建路由时这样写：\n// router/index.js import { createRouter, createWebHistory } from 'vue-router' const router = createRouter({ history: createWebHistory(import.meta.env.BASE_URL), routes: [...] }) 这样就能确保：\n开发环境（base: '/'）和生产环境（base: '/admin/'）使用相同的代码； 路由前缀与静态资源前缀保持一致； 避免部署到子目录时出现空白页或路由错乱。 ","wordCount":"179","inLanguage":"en","image":"https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E","datePublished":"2025-10-16T00:00:00Z","dateModified":"2025-10-16T00:00:00Z","author":{"@type":"Person","name":"Kerolt"},"mainEntityOfPage":{"@type":"WebPage","@id":"https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/%E5%89%8D%E7%AB%AF/vue3%E8%B7%AF%E7%94%B1%E4%B8%8Evite%E7%9A%84base/"},"publisher":{"@type":"Organization","name":"Kerolt's Blog","logo":{"@type":"ImageObject","url":"https://kerolt.github.io/images/avatar/favicon.png"}}}</script></head><body id=top><script>localStorage.getItem("pref-theme")==="dark"?document.body.classList.add("dark"):localStorage.getItem("pref-theme")==="light"?document.body.classList.remove("dark"):window.matchMedia("(prefers-color-scheme: dark)").matches&&document.body.classList.add("dark")</script><header class=header><nav class=nav><div class=logo><a href=https://kerolt.github.io/ accesskey=h title="Kerolt's Blog (Alt + H)">Kerolt's Blog</a><div class=logo-switches><button id=theme-toggle accesskey=t title="(Alt + T)" aria-label="Toggle theme">
+<svg id="moon" width="24" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+<svg id="sun" width="24" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></button></div></div><ul id=menu><li><a href=https://kerolt.github.io/posts/ title=文章><span>文章</span></a></li><li><a href=https://kerolt.github.io/categories/ title=分类><span>分类</span></a></li><li><a href=https://kerolt.github.io/tags/ title=标签><span>标签</span></a></li><li><a href=https://kerolt.github.io/archives/ title=归档><span>归档</span></a></li><li><a href=https://kerolt.github.io/about/ title=关于我><span>关于我</span></a></li><li><a href=https://kerolt.github.io/search/ title="🔍 (Alt + /)" accesskey=/><span>🔍</span></a></li></ul></nav></header><main class=main><article class=post-single><header class=post-header><div class=breadcrumbs><a href=https://kerolt.github.io/>Home</a>&nbsp;»&nbsp;<a href=https://kerolt.github.io/posts/>Posts</a></div><h1 class="post-title entry-hint-parent">Vue3路由与Vite的base</h1><div class=post-meta><span title='2025-10-16 00:00:00 +0000 UTC'>2025-10-16</span>&nbsp;·&nbsp;1 min&nbsp;·&nbsp;179 words&nbsp;·&nbsp;Kerolt</div><ul class=post-tags><li><a href=https://kerolt.github.io/tags/vue/>Vue</a></li><li><a href=https://kerolt.github.io/tags/vite/>Vite</a></li></ul></header><div class=post-content><p>虽然我不是一个专门搞前端的，但也会写点点 Vue。最近实验室项目写完后需要部署一下，这里我就使用了 Docker Compose 来部署。由于前端项目有前台用户端访问和后台管理端两个，而老师申请的服务器只开了 80 端口，因此我就打算使用 nginx 来反向代理：</p><ul><li><code>http://example.com</code> 为前台</li><li><code>http://example.com/admin</code> 为后台</li></ul><p>ok，那我就用了一个 nginx 容器做网关，其 <code>nginx.conf</code> 如下：</p><div class=highlight><pre tabindex=0 style=background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-nginx data-lang=nginx><span style=display:flex><span><span style=color:#069;font-weight:700>server</span> {
+</span></span><span style=display:flex><span>	<span style=color:#069;font-weight:700>listen</span> <span style=color:#f60>80</span>;
+</span></span><span style=display:flex><span>	<span style=color:#069;font-weight:700>listen</span> <span style=color:#c30>[::]:80</span>;
+</span></span><span style=display:flex><span>	
+</span></span><span style=display:flex><span>	<span style=color:#069;font-weight:700>server_name</span> <span style=color:#c30>_</span>;
+</span></span><span style=display:flex><span>	
+</span></span><span style=display:flex><span>	<span style=color:#09f;font-style:italic># 后台管理
+</span></span></span><span style=display:flex><span><span style=color:#09f;font-style:italic></span>	<span style=color:#069;font-weight:700>location</span> <span style=color:#c30>/admin/</span> {
+</span></span><span style=display:flex><span>		<span style=color:#069;font-weight:700>proxy_pass</span> <span style=color:#c30>http://frontend-admin</span>;
+</span></span><span style=display:flex><span>		<span style=color:#069;font-weight:700>proxy_set_header</span> <span style=color:#c30>Host</span> <span style=color:#033>$host</span>;
+</span></span><span style=display:flex><span>		<span style=color:#069;font-weight:700>proxy_set_header</span> <span style=color:#c30>X-Real-IP</span> <span style=color:#033>$remote_addr</span>;
+</span></span><span style=display:flex><span>	} 
+</span></span><span style=display:flex><span>	
+</span></span><span style=display:flex><span>	<span style=color:#09f;font-style:italic># 后端接口
+</span></span></span><span style=display:flex><span><span style=color:#09f;font-style:italic></span>	<span style=color:#069;font-weight:700>location</span> <span style=color:#c30>/api</span> {
+</span></span><span style=display:flex><span>		<span style=color:#069;font-weight:700>proxy_pass</span> <span style=color:#c30>http://backend:8080/</span>;
+</span></span><span style=display:flex><span>		<span style=color:#069;font-weight:700>proxy_set_header</span> <span style=color:#c30>Host</span> <span style=color:#033>$host</span>;
+</span></span><span style=display:flex><span>		<span style=color:#069;font-weight:700>proxy_set_header</span> <span style=color:#c30>X-Real-IP</span> <span style=color:#033>$remote_addr</span>;
+</span></span><span style=display:flex><span>	}
+</span></span><span style=display:flex><span>	
+</span></span><span style=display:flex><span>	<span style=color:#09f;font-style:italic># minio
+</span></span></span><span style=display:flex><span><span style=color:#09f;font-style:italic></span>	<span style=color:#069;font-weight:700>location</span> <span style=color:#c30>/images/</span> {
+</span></span><span style=display:flex><span>		<span style=color:#069;font-weight:700>proxy_pass</span> <span style=color:#c30>http://minio:9000/</span>;
+</span></span><span style=display:flex><span>		<span style=color:#069;font-weight:700>proxy_set_header</span> <span style=color:#c30>Host</span> <span style=color:#033>$host</span>;
+</span></span><span style=display:flex><span>		<span style=color:#069;font-weight:700>proxy_set_header</span> <span style=color:#c30>X-Real-IP</span> <span style=color:#033>$remote_addr</span>;
+</span></span><span style=display:flex><span>	}
+</span></span><span style=display:flex><span>	
+</span></span><span style=display:flex><span>	<span style=color:#09f;font-style:italic># 前台用户
+</span></span></span><span style=display:flex><span><span style=color:#09f;font-style:italic></span>	<span style=color:#069;font-weight:700>location</span> <span style=color:#c30>/</span> {
+</span></span><span style=display:flex><span>		<span style=color:#069;font-weight:700>proxy_pass</span> <span style=color:#c30>http://frontend-user/</span>;
+</span></span><span style=display:flex><span>		<span style=color:#069;font-weight:700>proxy_set_header</span> <span style=color:#c30>Host</span> <span style=color:#033>$host</span>;
+</span></span><span style=display:flex><span>		<span style=color:#069;font-weight:700>proxy_set_header</span> <span style=color:#c30>X-Real-IP</span> <span style=color:#033>$remote_addr</span>;
+</span></span><span style=display:flex><span>	}
+</span></span><span style=display:flex><span>	
+</span></span><span style=display:flex><span>	<span style=color:#069;font-weight:700>location</span> = <span style=color:#c30>/admin</span> {
+</span></span><span style=display:flex><span>		<span style=color:#069;font-weight:700>return</span> <span style=color:#f60>301</span> <span style=color:#c30>/admin/</span>;
+</span></span><span style=display:flex><span>	}
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p><code>docker compose up -d</code> 后，用户端能访问并且接口没问题，但是一到管理端 <code>http://xx.xx.xx.xx/admin</code>，就会是白屏，我检查了一下，管理端页面的标签栏标题是正确的，也就是 nginx 反向代理没问题，获取的 index-xxx.js 和 index-yyy.css 也没问题，那就奇了个怪了。</p><p>研究了一番才发现，<strong>修改了 <code>base</code> 配置后，创建路由时也需要使用 <code>BASE_URL</code>（或等效值）的原因是为了保证前端路由与部署路径的一致性</strong>。而我在 <code>vite.config.js</code> 中的 base 如下：</p><div class=highlight><pre tabindex=0 style=background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-js data-lang=js><span style=display:flex><span><span style=color:#069;font-weight:700>export</span> <span style=color:#069;font-weight:700>default</span> defineConfig({
+</span></span><span style=display:flex><span>  base<span style=color:#555>:</span> <span style=color:#c30>&#39;/admin/&#39;</span>,
+</span></span><span style=display:flex><span>})
+</span></span></code></pre></div><hr><p>在 <code>vite.config.js</code> 中设置的 <code>base</code> 选项，表示：</p><ul><li>所有静态资源（JS、CSS、图片等）的公共基础路径；</li><li>构建后的 HTML 文件中引用资源时会自动加上这个前缀；</li></ul><p>构建后，所有资源路径会变成 <code>/admin/assets/xxx.js</code>。</p><p>Vue Router 默认假设应用部署在域名根路径（即 <code>/</code>）。如果你把应用部署在子路径下（如 <code>https://example.com/admin/</code>），而路由仍以 <code>/</code> 为基准，就会出现：</p><ul><li>页面刷新后 404；</li><li>路由跳转错误或无法匹配。</li></ul><p>因此，<strong>Vue Router 需要知道“应用实际挂载的路径前缀”</strong>，这就是 <code>history</code> 配置中的 <code>base</code> 参数。</p><hr><p>在 Vite 项目中，<code>import.meta.env.BASE_URL</code> 是一个<strong>由 Vite 自动注入的变量</strong>，它的值就是 <code>vite.config.js</code> 中配置的 <code>base</code>。</p><p>所以，在创建路由时这样写：</p><div class=highlight><pre tabindex=0 style=background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-js data-lang=js><span style=display:flex><span><span style=color:#09f;font-style:italic>// router/index.js
+</span></span></span><span style=display:flex><span><span style=color:#09f;font-style:italic></span><span style=color:#069;font-weight:700>import</span> { createRouter, createWebHistory } from <span style=color:#c30>&#39;vue-router&#39;</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#069;font-weight:700>const</span> router <span style=color:#555>=</span> createRouter({
+</span></span><span style=display:flex><span>  history<span style=color:#555>:</span> createWebHistory(<span style=color:#069;font-weight:700>import</span>.meta.env.BASE_URL),
+</span></span><span style=display:flex><span>  routes<span style=color:#555>:</span> [...]
+</span></span><span style=display:flex><span>})
+</span></span></code></pre></div><p>这样就能确保：</p><ul><li>开发环境（<code>base: '/'</code>）和生产环境（<code>base: '/admin/'</code>）使用相同的代码；</li><li>路由前缀与静态资源前缀保持一致；</li><li>避免部署到子目录时出现空白页或路由错乱。</li></ul></div><footer class=post-footer><nav class=paginav><a class=prev href=https://kerolt.github.io/posts/ebpf/ebpf%E5%A2%9E%E5%BC%BAnginx%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1/><span class=title>« Prev</span><br><span>eBPF增强Nginx负载均衡</span>
+</a><a class=next href=https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/%E5%9B%BD%E5%86%85%E5%AE%89%E8%A3%85docker-ce/><span class=title>Next »</span><br><span>国内安装Docker CE</span></a></nav></footer></article></main><footer class=footer><span>&copy; 2025 <a href=https://kerolt.github.io/>Kerolt's Blog</a></span> ·
+<span>Powered by
+<a href=https://gohugo.io/ rel="noopener noreferrer" target=_blank>Hugo</a> &
+<a href=https://github.com/adityatelange/hugo-PaperMod/ rel=noopener target=_blank>PaperMod</a></span></footer><a href=#top aria-label="go to top" title="Go to Top (Alt + G)" class=top-link id=top-link accesskey=g><svg viewBox="0 0 12 6" fill="currentColor"><path d="M12 6H0l6-6z"/></svg>
+</a><script>let menu=document.getElementById("menu");menu&&(menu.scrollLeft=localStorage.getItem("menu-scroll-position"),menu.onscroll=function(){localStorage.setItem("menu-scroll-position",menu.scrollLeft)}),document.querySelectorAll('a[href^="#"]').forEach(e=>{e.addEventListener("click",function(e){e.preventDefault();var t=this.getAttribute("href").substr(1);window.matchMedia("(prefers-reduced-motion: reduce)").matches?document.querySelector(`[id='${decodeURIComponent(t)}']`).scrollIntoView():document.querySelector(`[id='${decodeURIComponent(t)}']`).scrollIntoView({behavior:"smooth"}),t==="top"?history.replaceState(null,null," "):history.pushState(null,null,`#${t}`)})})</script><script>var mybutton=document.getElementById("top-link");window.onscroll=function(){document.body.scrollTop>800||document.documentElement.scrollTop>800?(mybutton.style.visibility="visible",mybutton.style.opacity="1"):(mybutton.style.visibility="hidden",mybutton.style.opacity="0")}</script><script>document.getElementById("theme-toggle").addEventListener("click",()=>{document.body.className.includes("dark")?(document.body.classList.remove("dark"),localStorage.setItem("pref-theme","light")):(document.body.classList.add("dark"),localStorage.setItem("pref-theme","dark"))})</script><script>document.querySelectorAll("pre > code").forEach(e=>{const n=e.parentNode.parentNode,t=document.createElement("button");t.classList.add("copy-code"),t.innerHTML="copy";function s(){t.innerHTML="copied!",setTimeout(()=>{t.innerHTML="copy"},2e3)}t.addEventListener("click",t=>{if("clipboard"in navigator){navigator.clipboard.writeText(e.textContent),s();return}const n=document.createRange();n.selectNodeContents(e);const o=window.getSelection();o.removeAllRanges(),o.addRange(n);try{document.execCommand("copy"),s()}catch{}o.removeRange(n)}),n.classList.contains("highlight")?n.appendChild(t):n.parentNode.firstChild==n||(e.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName=="TABLE"?e.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(t):e.parentNode.appendChild(t))})</script></body></html>

@@ -15,9 +15,9 @@
     <atom:link href="https://kerolt.github.io/tags/frontend/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>函数防抖</title>
-      <link>https://kerolt.github.io/posts/%E5%89%8D%E7%AB%AF/%E5%87%BD%E6%95%B0%E9%98%B2%E6%8A%96/</link>
+      <link>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/%E5%89%8D%E7%AB%AF/%E5%87%BD%E6%95%B0%E9%98%B2%E6%8A%96/</link>
       <pubDate>Sun, 22 Sep 2024 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E5%89%8D%E7%AB%AF/%E5%87%BD%E6%95%B0%E9%98%B2%E6%8A%96/</guid>
+      <guid>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/%E5%89%8D%E7%AB%AF/%E5%87%BD%E6%95%B0%E9%98%B2%E6%8A%96/</guid>
       <description>&lt;p&gt;最近的练手项目web-terminal中（也就是一个网页终端，可执行一些命令），在按下键盘后会显示可能匹配的命令列表（假设对应的函数是&lt;code&gt;setHintList&lt;/code&gt;），这不仅是按下字母按键会触发，按下删除键、tab键都会触发。那就不得不考虑一个问题，如果我们手速太快，那么&lt;code&gt;setHintList&lt;/code&gt;就会频繁触发，但我们只需要响应用户最后一次输入的命令即可，虽然在这个小项目中没啥问题，但是由此可以引出一些对于以后大项目的考虑：如何减小这种多次频繁执行函数带来的性能开销问题？那就是函数防抖~&lt;/p&gt;</description>
     </item>
   </channel>

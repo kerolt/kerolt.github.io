@@ -15,9 +15,9 @@
     <atom:link href="https://kerolt.github.io/tags/typescript/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>记一次项目构建部署的总结</title>
-      <link>https://kerolt.github.io/posts/%E5%89%8D%E7%AB%AF/%E8%AE%B0%E4%B8%80%E6%AC%A1%E9%A1%B9%E7%9B%AE%E6%9E%84%E5%BB%BA%E9%83%A8%E7%BD%B2%E7%9A%84%E6%80%BB%E7%BB%93/</link>
+      <link>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/%E5%89%8D%E7%AB%AF/%E8%AE%B0%E4%B8%80%E6%AC%A1%E9%A1%B9%E7%9B%AE%E6%9E%84%E5%BB%BA%E9%83%A8%E7%BD%B2%E7%9A%84%E6%80%BB%E7%BB%93/</link>
       <pubDate>Fri, 30 Aug 2024 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E5%89%8D%E7%AB%AF/%E8%AE%B0%E4%B8%80%E6%AC%A1%E9%A1%B9%E7%9B%AE%E6%9E%84%E5%BB%BA%E9%83%A8%E7%BD%B2%E7%9A%84%E6%80%BB%E7%BB%93/</guid>
+      <guid>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/%E5%89%8D%E7%AB%AF/%E8%AE%B0%E4%B8%80%E6%AC%A1%E9%A1%B9%E7%9B%AE%E6%9E%84%E5%BB%BA%E9%83%A8%E7%BD%B2%E7%9A%84%E6%80%BB%E7%BB%93/</guid>
       <description>&lt;h2 id=&#34;前言&#34;&gt;前言&lt;/h2&gt;
 &lt;p&gt;暑假里跟着鱼皮的&lt;code&gt;yuindex&lt;/code&gt;项目写了个web终端的小玩具，完成的终端命令不多，但是大体上成型了。由于我打算做一个纯前端的项目，并没有写后端api，这样也方便我最终直接部署到&lt;strong&gt;Github Pages&lt;/strong&gt;上（这样就不用花钱了hh）。&lt;/p&gt;
 &lt;p&gt;项目使用vite构建，并使用了ts。在构建部署时遇到了一些问题，由于是第一次将前端项目发布到github pages上，这里记录下。&lt;/p&gt;</description>

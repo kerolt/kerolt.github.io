@@ -15,9 +15,9 @@
     <atom:link href="https://kerolt.github.io/categories/%E5%90%8E%E7%AB%AF/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>API开放平台</title>
-      <link>https://kerolt.github.io/posts/%E5%90%8E%E7%AB%AF/api%E5%BC%80%E6%94%BE%E5%B9%B3%E5%8F%B0/</link>
+      <link>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/%E5%90%8E%E7%AB%AF/api%E5%BC%80%E6%94%BE%E5%B9%B3%E5%8F%B0/</link>
       <pubDate>Thu, 21 Mar 2024 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E5%90%8E%E7%AB%AF/api%E5%BC%80%E6%94%BE%E5%B9%B3%E5%8F%B0/</guid>
+      <guid>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/%E5%90%8E%E7%AB%AF/api%E5%BC%80%E6%94%BE%E5%B9%B3%E5%8F%B0/</guid>
       <description>&lt;h2 id=&#34;前言&#34;&gt;前言&lt;/h2&gt;
 &lt;p&gt;通过一个项目来学习一下如何设计一个多服务的系统。同时也能学习Spring Cloud Gateway、Dubbo、API签名等一些知识。&lt;/p&gt;
 &lt;h2 id=&#34;项目架构&#34;&gt;项目架构&lt;/h2&gt;
