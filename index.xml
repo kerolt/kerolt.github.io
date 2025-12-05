@@ -11,8 +11,16 @@
     </image>
     <generator>Hugo -- 0.152.2</generator>
     <language>en</language>
-    <lastBuildDate>Thu, 27 Nov 2025 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Fri, 05 Dec 2025 00:00:00 +0000</lastBuildDate>
     <atom:link href="https://kerolt.github.io/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>原分布式缓存项目的问题</title>
+      <link>https://kerolt.github.io/posts/%E9%A1%B9%E7%9B%AE/%E5%8E%9F%E5%88%86%E5%B8%83%E5%BC%8F%E7%BC%93%E5%AD%98%E9%A1%B9%E7%9B%AE%E7%9A%84%E9%97%AE%E9%A2%98/</link>
+      <pubDate>Fri, 05 Dec 2025 00:00:00 +0000</pubDate>
+      <guid>https://kerolt.github.io/posts/%E9%A1%B9%E7%9B%AE/%E5%8E%9F%E5%88%86%E5%B8%83%E5%BC%8F%E7%BC%93%E5%AD%98%E9%A1%B9%E7%9B%AE%E7%9A%84%E9%97%AE%E9%A2%98/</guid>
+      <description>&lt;p&gt;KamaCache-Go 是在 Groupcache 的基础上修改的，引入了 set、delete 操作和 etcd 服务发现，但是这样就改变了 groupcache 的架构和本意，并且带来了一些问题。&lt;/p&gt;
+&lt;p&gt;groupcache 的本意是一个在&lt;strong&gt;读多写少&lt;/strong&gt;的环境下为了应用自身的服务设计的&lt;strong&gt;内嵌式&lt;/strong&gt;缓存系统。节点既是 app 又是 cache，并且&lt;/p&gt;</description>
+    </item>
     <item>
       <title>Windows修改默认文件夹名为英文</title>
       <link>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/windows%E4%BF%AE%E6%94%B9%E9%BB%98%E8%AE%A4%E6%96%87%E4%BB%B6%E5%A4%B9%E5%90%8D%E4%B8%BA%E8%8B%B1%E6%96%87/</link>
