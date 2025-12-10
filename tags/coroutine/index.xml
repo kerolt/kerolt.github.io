@@ -15,9 +15,9 @@
     <atom:link href="https://kerolt.github.io/tags/coroutine/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>【动手写协程库 5】常用IO函数的HOOK功能</title>
-      <link>https://kerolt.github.io/posts/%E9%A1%B9%E7%9B%AE/%E5%8A%A8%E6%89%8B%E5%86%99%E5%8D%8F%E7%A8%8B%E5%BA%93-5%E5%B8%B8%E7%94%A8io%E5%87%BD%E6%95%B0%E7%9A%84hook%E5%8A%9F%E8%83%BD/</link>
+      <link>https://kerolt.github.io/posts/%E5%8A%A8%E6%89%8B%E5%AE%9E%E7%8E%B0x/%E5%8A%A8%E6%89%8B%E5%86%99%E5%8D%8F%E7%A8%8B%E5%BA%93-5%E5%B8%B8%E7%94%A8io%E5%87%BD%E6%95%B0%E7%9A%84hook%E5%8A%9F%E8%83%BD/</link>
       <pubDate>Mon, 30 Sep 2024 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E9%A1%B9%E7%9B%AE/%E5%8A%A8%E6%89%8B%E5%86%99%E5%8D%8F%E7%A8%8B%E5%BA%93-5%E5%B8%B8%E7%94%A8io%E5%87%BD%E6%95%B0%E7%9A%84hook%E5%8A%9F%E8%83%BD/</guid>
+      <guid>https://kerolt.github.io/posts/%E5%8A%A8%E6%89%8B%E5%AE%9E%E7%8E%B0x/%E5%8A%A8%E6%89%8B%E5%86%99%E5%8D%8F%E7%A8%8B%E5%BA%93-5%E5%B8%B8%E7%94%A8io%E5%87%BD%E6%95%B0%E7%9A%84hook%E5%8A%9F%E8%83%BD/</guid>
       <description>&lt;blockquote&gt;
 &lt;p&gt;【动手写协程库】系列笔记是学习sylar的协程库时的记录，参考了&lt;a href=&#34;https://www.midlane.top/wiki/pages/viewpage.action?pageId=10060952&#34;&gt;从零开始重写sylar C++高性能分布式服务器框架&lt;/a&gt;和代码随想录中的&lt;a href=&#34;https://www.programmercarl.com/other/project_coroutine.html#%E4%B8%8B%E8%BD%BD%E6%96%B9%E5%BC%8F&#34;&gt;文档&lt;/a&gt;。文章并不是对所有代码的详细解释，而是为了自己理解一些片段所做的笔记。&lt;/p&gt;
 &lt;p&gt;hook函数的具体定义实现可以在这里查看：&lt;a href=&#34;https://github.com/kerolt/coroutine-lib/blob/master/src/hook.cpp&#34;&gt;Github: src/hook.cpp&lt;/a&gt;&lt;/p&gt;
@@ -27,9 +27,9 @@
     </item>
     <item>
       <title>【动手写协程库 4】IO协程调度器</title>
-      <link>https://kerolt.github.io/posts/%E9%A1%B9%E7%9B%AE/%E5%8A%A8%E6%89%8B%E5%86%99%E5%8D%8F%E7%A8%8B%E5%BA%93-4io%E5%8D%8F%E7%A8%8B%E8%B0%83%E5%BA%A6%E5%99%A8/</link>
+      <link>https://kerolt.github.io/posts/%E5%8A%A8%E6%89%8B%E5%AE%9E%E7%8E%B0x/%E5%8A%A8%E6%89%8B%E5%86%99%E5%8D%8F%E7%A8%8B%E5%BA%93-4io%E5%8D%8F%E7%A8%8B%E8%B0%83%E5%BA%A6%E5%99%A8/</link>
       <pubDate>Sun, 29 Sep 2024 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E9%A1%B9%E7%9B%AE/%E5%8A%A8%E6%89%8B%E5%86%99%E5%8D%8F%E7%A8%8B%E5%BA%93-4io%E5%8D%8F%E7%A8%8B%E8%B0%83%E5%BA%A6%E5%99%A8/</guid>
+      <guid>https://kerolt.github.io/posts/%E5%8A%A8%E6%89%8B%E5%AE%9E%E7%8E%B0x/%E5%8A%A8%E6%89%8B%E5%86%99%E5%8D%8F%E7%A8%8B%E5%BA%93-4io%E5%8D%8F%E7%A8%8B%E8%B0%83%E5%BA%A6%E5%99%A8/</guid>
       <description>&lt;blockquote&gt;
 &lt;p&gt;【动手写协程库】系列笔记是学习sylar的协程库时的记录，参考了&lt;a href=&#34;https://www.midlane.top/wiki/pages/viewpage.action?pageId=10060952&#34;&gt;从零开始重写sylar C++高性能分布式服务器框架&lt;/a&gt;和代码随想录中的&lt;a href=&#34;https://www.programmercarl.com/other/project_coroutine.html#%E4%B8%8B%E8%BD%BD%E6%96%B9%E5%BC%8F&#34;&gt;文档&lt;/a&gt;。文章并不是对所有代码的详细解释，而是为了自己理解一些片段所做的笔记。&lt;/p&gt;
 &lt;p&gt;&lt;code&gt;IOManager&lt;/code&gt;类中具体定义实现可以在这里查看：&lt;a href=&#34;https://github.com/kerolt/coroutine-lib/blob/master/src/iomanager.cpp&#34;&gt;Github: src/iomanager.cpp&lt;/a&gt;&lt;/p&gt;
@@ -39,9 +39,9 @@
     </item>
     <item>
       <title>【动手写协程库 3】定时器</title>
-      <link>https://kerolt.github.io/posts/%E9%A1%B9%E7%9B%AE/%E5%8A%A8%E6%89%8B%E5%86%99%E5%8D%8F%E7%A8%8B%E5%BA%93-3%E5%AE%9A%E6%97%B6%E5%99%A8/</link>
+      <link>https://kerolt.github.io/posts/%E5%8A%A8%E6%89%8B%E5%AE%9E%E7%8E%B0x/%E5%8A%A8%E6%89%8B%E5%86%99%E5%8D%8F%E7%A8%8B%E5%BA%93-3%E5%AE%9A%E6%97%B6%E5%99%A8/</link>
       <pubDate>Sat, 28 Sep 2024 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E9%A1%B9%E7%9B%AE/%E5%8A%A8%E6%89%8B%E5%86%99%E5%8D%8F%E7%A8%8B%E5%BA%93-3%E5%AE%9A%E6%97%B6%E5%99%A8/</guid>
+      <guid>https://kerolt.github.io/posts/%E5%8A%A8%E6%89%8B%E5%AE%9E%E7%8E%B0x/%E5%8A%A8%E6%89%8B%E5%86%99%E5%8D%8F%E7%A8%8B%E5%BA%93-3%E5%AE%9A%E6%97%B6%E5%99%A8/</guid>
       <description>&lt;blockquote&gt;
 &lt;p&gt;【动手写协程库】系列笔记是学习sylar的协程库时的记录，参考了&lt;a href=&#34;https://www.midlane.top/wiki/pages/viewpage.action?pageId=10060952&#34;&gt;从零开始重写sylar C++高性能分布式服务器框架&lt;/a&gt;和代码随想录中的&lt;a href=&#34;https://www.programmercarl.com/other/project_coroutine.html#%E4%B8%8B%E8%BD%BD%E6%96%B9%E5%BC%8F&#34;&gt;文档&lt;/a&gt;。文章并不是对所有代码的详细解释，而是为了自己理解一些片段所做的笔记。&lt;/p&gt;
 &lt;p&gt;&lt;code&gt;TimerManager&lt;/code&gt;类中具体定义实现可以在这里查看：&lt;a href=&#34;https://github.com/kerolt/coroutine-lib/blob/master/src/timer.cpp&#34;&gt;Github: src/timer.cpp&lt;/a&gt;&lt;/p&gt;
@@ -50,9 +50,9 @@
     </item>
     <item>
       <title>【动手写协程库 2】协程调度器</title>
-      <link>https://kerolt.github.io/posts/%E9%A1%B9%E7%9B%AE/%E5%8A%A8%E6%89%8B%E5%86%99%E5%8D%8F%E7%A8%8B%E5%BA%93-2%E5%8D%8F%E7%A8%8B%E8%B0%83%E5%BA%A6%E5%99%A8/</link>
+      <link>https://kerolt.github.io/posts/%E5%8A%A8%E6%89%8B%E5%AE%9E%E7%8E%B0x/%E5%8A%A8%E6%89%8B%E5%86%99%E5%8D%8F%E7%A8%8B%E5%BA%93-2%E5%8D%8F%E7%A8%8B%E8%B0%83%E5%BA%A6%E5%99%A8/</link>
       <pubDate>Wed, 11 Sep 2024 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E9%A1%B9%E7%9B%AE/%E5%8A%A8%E6%89%8B%E5%86%99%E5%8D%8F%E7%A8%8B%E5%BA%93-2%E5%8D%8F%E7%A8%8B%E8%B0%83%E5%BA%A6%E5%99%A8/</guid>
+      <guid>https://kerolt.github.io/posts/%E5%8A%A8%E6%89%8B%E5%AE%9E%E7%8E%B0x/%E5%8A%A8%E6%89%8B%E5%86%99%E5%8D%8F%E7%A8%8B%E5%BA%93-2%E5%8D%8F%E7%A8%8B%E8%B0%83%E5%BA%A6%E5%99%A8/</guid>
       <description>&lt;blockquote&gt;
 &lt;p&gt;【动手写协程库】系列笔记是学习sylar的协程库时的记录，参考了&lt;a href=&#34;https://www.midlane.top/wiki/pages/viewpage.action?pageId=10060952&#34;&gt;从零开始重写sylar C++高性能分布式服务器框架&lt;/a&gt;和代码随想录中的&lt;a href=&#34;https://www.programmercarl.com/other/project_coroutine.html#%E4%B8%8B%E8%BD%BD%E6%96%B9%E5%BC%8F&#34;&gt;文档&lt;/a&gt;。文章并不是对所有代码的详细解释，而是为了自己理解一些片段所做的笔记。&lt;/p&gt;
 &lt;p&gt;&lt;code&gt;Scheduler&lt;/code&gt;类中其他函数的定义可以在这里查看：&lt;a href=&#34;https://github.com/kerolt/coroutine-lib/blob/master/src/scheduler.cpp&#34;&gt;Github: src/scheduler.cpp&lt;/a&gt;&lt;/p&gt;
@@ -62,9 +62,9 @@
     </item>
     <item>
       <title>【动手写协程库 1】协程定义</title>
-      <link>https://kerolt.github.io/posts/%E9%A1%B9%E7%9B%AE/%E5%8A%A8%E6%89%8B%E5%86%99%E5%8D%8F%E7%A8%8B%E5%BA%93-1%E5%8D%8F%E7%A8%8B%E5%AE%9A%E4%B9%89/</link>
+      <link>https://kerolt.github.io/posts/%E5%8A%A8%E6%89%8B%E5%AE%9E%E7%8E%B0x/%E5%8A%A8%E6%89%8B%E5%86%99%E5%8D%8F%E7%A8%8B%E5%BA%93-1%E5%8D%8F%E7%A8%8B%E5%AE%9A%E4%B9%89/</link>
       <pubDate>Tue, 10 Sep 2024 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E9%A1%B9%E7%9B%AE/%E5%8A%A8%E6%89%8B%E5%86%99%E5%8D%8F%E7%A8%8B%E5%BA%93-1%E5%8D%8F%E7%A8%8B%E5%AE%9A%E4%B9%89/</guid>
+      <guid>https://kerolt.github.io/posts/%E5%8A%A8%E6%89%8B%E5%AE%9E%E7%8E%B0x/%E5%8A%A8%E6%89%8B%E5%86%99%E5%8D%8F%E7%A8%8B%E5%BA%93-1%E5%8D%8F%E7%A8%8B%E5%AE%9A%E4%B9%89/</guid>
       <description>&lt;blockquote&gt;
 &lt;p&gt;【动手写协程库】系列笔记是学习sylar的协程库时的记录，参考了&lt;a href=&#34;https://www.midlane.top/wiki/pages/viewpage.action?pageId=10060952&#34;&gt;从零开始重写sylar C++高性能分布式服务器框架&lt;/a&gt;和代码随想录中的&lt;a href=&#34;https://www.programmercarl.com/other/project_coroutine.html#%E4%B8%8B%E8%BD%BD%E6%96%B9%E5%BC%8F&#34;&gt;文档&lt;/a&gt;。文章并不是对所有代码的详细解释，而是为了自己理解一些片段所做的笔记。&lt;/p&gt;
 &lt;p&gt;&lt;code&gt;Coroutine&lt;/code&gt;类中其他函数的定义可以在这里查看：&lt;a href=&#34;https://github.com/kerolt/coroutine-lib/blob/master/src/coroutine.cpp&#34;&gt;Github: src/coroutine.cpp&lt;/a&gt;&lt;/p&gt;
