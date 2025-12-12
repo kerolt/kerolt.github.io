@@ -11,8 +11,25 @@
     </image>
     <generator>Hugo -- 0.152.2</generator>
     <language>en</language>
-    <lastBuildDate>Thu, 27 Nov 2025 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Fri, 12 Dec 2025 00:00:00 +0000</lastBuildDate>
     <atom:link href="https://kerolt.github.io/categories/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>uv包安装网络超时解决</title>
+      <link>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/uv%E5%8C%85%E5%AE%89%E8%A3%85%E7%BD%91%E7%BB%9C%E8%B6%85%E6%97%B6%E8%A7%A3%E5%86%B3/</link>
+      <pubDate>Fri, 12 Dec 2025 00:00:00 +0000</pubDate>
+      <guid>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/uv%E5%8C%85%E5%AE%89%E8%A3%85%E7%BD%91%E7%BB%9C%E8%B6%85%E6%97%B6%E8%A7%A3%E5%86%B3/</guid>
+      <description>&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;$ uv add numpy pandas torch scikit-learn matplotlib
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Resolved &lt;span style=&#34;color:#f60&#34;&gt;45&lt;/span&gt; packages in 21ms
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  × Failed to download &lt;span style=&#34;color:#c30&#34;&gt;`&lt;/span&gt;nvidia-cufft-cu12&lt;span style=&#34;color:#555&#34;&gt;==&lt;/span&gt;11.3.3.83&lt;span style=&#34;color:#c30&#34;&gt;`&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  ├─▶ Failed to fetch:
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  │   &lt;span style=&#34;color:#c30&#34;&gt;`&lt;/span&gt;https://files.pythonhosted.org/packages/1f/13/ee4e00f30e676b66ae65b4f08cb5bcbb8392c03f54f2d5413ea99a5d1c80/nvidia_cufft_cu12-11.3.3.83-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl&lt;span style=&#34;color:#c30&#34;&gt;`&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  ├─▶ Request failed after &lt;span style=&#34;color:#f60&#34;&gt;3&lt;/span&gt; retries
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  ├─▶ error sending request &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;for&lt;/span&gt; url
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  │   &lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;https://files.pythonhosted.org/packages/1f/13/ee4e00f30e676b66ae65b4f08cb5bcbb8392c03f54f2d5413ea99a5d1c80/nvidia_cufft_cu12-11.3.3.83-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  ╰─▶ operation timed out
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  help: If you want to add the package regardless of the failed resolution, provide the &lt;span style=&#34;color:#c30&#34;&gt;`&lt;/span&gt;--frozen&lt;span style=&#34;color:#c30&#34;&gt;`&lt;/span&gt; flag to skip locking and syncing.
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;这个错误是因为 &lt;code&gt;uv&lt;/code&gt; 在尝试从官方源下载 NVIDIA 的 CUDA 组件包（&lt;code&gt;nvidia-cufft-cu12&lt;/code&gt;）时&lt;strong&gt;网络超时&lt;/strong&gt;了。&lt;/p&gt;</description>
+    </item>
     <item>
       <title>Windows修改默认文件夹名为英文</title>
       <link>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/windows%E4%BF%AE%E6%94%B9%E9%BB%98%E8%AE%A4%E6%96%87%E4%BB%B6%E5%A4%B9%E5%90%8D%E4%B8%BA%E8%8B%B1%E6%96%87/</link>
