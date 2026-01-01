@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Linux on Kerolt&#39;s Blog</title>
+    <link>https://kerolt.github.io/categories/linux/</link>
+    <description>Recent content in Linux on Kerolt&#39;s Blog</description>
+    <image>
+      <title>Kerolt&#39;s Blog</title>
+      <url>https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</url>
+      <link>https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</link>
+    </image>
+    <generator>Hugo -- 0.154.0</generator>
+    <language>en</language>
+    <lastBuildDate>Fri, 07 Nov 2025 00:00:00 +0000</lastBuildDate>
+    <atom:link href="https://kerolt.github.io/categories/linux/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Linux校准时间</title>
+      <link>https://kerolt.github.io/posts/linux/linux%E6%A0%A1%E5%87%86%E6%97%B6%E9%97%B4/</link>
+      <pubDate>Fri, 07 Nov 2025 00:00:00 +0000</pubDate>
+      <guid>https://kerolt.github.io/posts/linux/linux%E6%A0%A1%E5%87%86%E6%97%B6%E9%97%B4/</guid>
+      <description>&lt;p&gt;服务器是用旧笔记本装的 Debian13，然后用 ddns-go 做动态域名解析，但是装好之后貌似由于时钟没有校准因此 ddns-go 无法更新域名解析（使用的 aliyun），以下是解决方法。&lt;/p&gt;
+&lt;hr&gt;
+&lt;p&gt;首先我使用 &lt;code&gt;timedatectl&lt;/code&gt; 的结果如下：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;~ $ timedatectl 
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Local time: 六 2025-11-08 00:20:49 CST 
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Universal time: 五 2025-11-07 16:20:49 UTC 
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;RTC time: 五 2025-11-07 16:20:49 
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Time zone: Asia/Shanghai &lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;CST, +0800&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt; 
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;System clock synchronized: no 
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;NTP service: n/a 
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;RTC in &lt;span style=&#34;color:#366&#34;&gt;local&lt;/span&gt; TZ: no
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;使用 &lt;code&gt;systemd-timesyncd&lt;/code&gt; 可以让系统自动校时：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;sudo timedatectl set-ntp &lt;span style=&#34;color:#366&#34;&gt;true&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;如果显示：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Failed to &lt;span style=&#34;color:#366&#34;&gt;set&lt;/span&gt; ntp: NTP not supported
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;说明当前系统里没有可用的 NTP 同步服务（比如 &lt;code&gt;systemd-timesyncd&lt;/code&gt;、&lt;code&gt;chronyd&lt;/code&gt; 或 &lt;code&gt;ntpd&lt;/code&gt;）被启用或支持，可以执行：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;sudo apt install systemd-timesyncd
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;sudo systemctl &lt;span style=&#34;color:#366&#34;&gt;enable&lt;/span&gt; --now systemd-timesyncd.service
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;之后再执行 &lt;code&gt;timedatectl&lt;/code&gt; 可以看到：&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>如何理解内核态与用户态切换的上下文开销</title>
+      <link>https://kerolt.github.io/posts/linux/%E5%A6%82%E4%BD%95%E7%90%86%E8%A7%A3%E5%86%85%E6%A0%B8%E6%80%81%E4%B8%8E%E7%94%A8%E6%88%B7%E6%80%81%E5%88%87%E6%8D%A2%E7%9A%84%E4%B8%8A%E4%B8%8B%E6%96%87%E5%BC%80%E9%94%80/</link>
+      <pubDate>Thu, 06 Nov 2025 00:00:00 +0000</pubDate>
+      <guid>https://kerolt.github.io/posts/linux/%E5%A6%82%E4%BD%95%E7%90%86%E8%A7%A3%E5%86%85%E6%A0%B8%E6%80%81%E4%B8%8E%E7%94%A8%E6%88%B7%E6%80%81%E5%88%87%E6%8D%A2%E7%9A%84%E4%B8%8A%E4%B8%8B%E6%96%87%E5%BC%80%E9%94%80/</guid>
+      <description>&lt;h2 id=&#34;一什么是用户态和内核态&#34;&gt;一、什么是“用户态”和“内核态”&lt;/h2&gt;
+&lt;p&gt;CPU 有不同的 &lt;strong&gt;特权级（Privilege Level）&lt;/strong&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;用户态（User Mode）&lt;/strong&gt;：
+应用程序在这里运行，权限受限，比如不能直接访问硬件、不能修改页表等。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;内核态（Kernel Mode）&lt;/strong&gt;：
+操作系统内核运行在这里，拥有完全的访问权限，可以管理内存、设备、中断等。&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;二什么是上下文切换context-switch&#34;&gt;二、什么是“上下文切换（Context Switch）”&lt;/h2&gt;
+&lt;p&gt;“上下文”就是 CPU 当前正在执行的任务的所有状态，包括：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;寄存器内容（RIP、RSP、RAX 等）&lt;/li&gt;
+&lt;li&gt;程序计数器（Program Counter）&lt;/li&gt;
+&lt;li&gt;栈指针&lt;/li&gt;
+&lt;li&gt;内存映射（页表）&lt;/li&gt;
+&lt;li&gt;调度信息（优先级、时间片等）&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;上下文切换&lt;/strong&gt;指的是 CPU 从一个执行上下文切换到另一个（比如进程 A → 进程 B）。&lt;/p&gt;
+&lt;h2 id=&#34;三内核态与用户态切换--进程切换但都属于上下文切换&#34;&gt;三、内核态与用户态切换 ≠ 进程切换，但都属于“上下文切换”&lt;/h2&gt;
+&lt;p&gt;这两种是不同层次的“切换”：&lt;/p&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;类型&lt;/th&gt;
+          &lt;th&gt;示例&lt;/th&gt;
+          &lt;th&gt;是否涉及调度&lt;/th&gt;
+          &lt;th&gt;开销大小&lt;/th&gt;
+          &lt;th&gt;备注&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;用户态 → 内核态&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;系统调用、I/O、中断&lt;/td&gt;
+          &lt;td&gt;否&lt;/td&gt;
+          &lt;td&gt;小（几十到几百纳秒）&lt;/td&gt;
+          &lt;td&gt;同一线程，只是 CPU 特权级变化&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;进程上下文切换&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;从进程 A → 进程 B&lt;/td&gt;
+          &lt;td&gt;是&lt;/td&gt;
+          &lt;td&gt;大（微秒级）&lt;/td&gt;
+          &lt;td&gt;不仅换栈，还要换虚拟内存上下文&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h2 id=&#34;四为什么内核用户态切换有开销&#34;&gt;四、为什么内核/用户态切换有“开销”&lt;/h2&gt;
+&lt;p&gt;内核态切换的代价来自几个部分：&lt;/p&gt;
+&lt;h3 id=&#34;1-cpu-特权级变化&#34;&gt;1. CPU 特权级变化&lt;/h3&gt;
+&lt;p&gt;切换时 CPU 会：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;保存当前寄存器状态；&lt;/li&gt;
+&lt;li&gt;改变特权级（从 ring3 → ring0）；&lt;/li&gt;
+&lt;li&gt;切换到内核栈（每个线程有独立内核栈）；&lt;/li&gt;
+&lt;li&gt;执行系统调用入口代码（&lt;code&gt;syscall&lt;/code&gt;、&lt;code&gt;sysenter&lt;/code&gt; 指令）；&lt;/li&gt;
+&lt;li&gt;执行完后再反向恢复回用户态。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;这些过程虽然不是“线程切换”，但都需要 CPU 做额外操作。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Linux NAPI机制知识点总结</title>
+      <link>https://kerolt.github.io/posts/linux/linux-napi%E6%9C%BA%E5%88%B6%E7%9F%A5%E8%AF%86%E7%82%B9%E6%80%BB%E7%BB%93/</link>
+      <pubDate>Wed, 17 Sep 2025 00:00:00 +0000</pubDate>
+      <guid>https://kerolt.github.io/posts/linux/linux-napi%E6%9C%BA%E5%88%B6%E7%9F%A5%E8%AF%86%E7%82%B9%E6%80%BB%E7%BB%93/</guid>
+      <description>&lt;blockquote&gt;
+&lt;p&gt;对 &lt;a href=&#34;https://docs.kernel.org/networking/napi.html&#34;&gt;https://docs.kernel.org/networking/napi.html&lt;/a&gt; 的总结&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;NAPI (New API，但现已无特定含义) 是 Linux 内核中用于高效处理网络数据包的一种机制，旨在减少高负载下的中断开销。&lt;/p&gt;
+&lt;p&gt;其​目的​​是为了解决传统基于中断的包处理在高流量下的性能问题（“中断活锁”）。通过混合​&lt;strong&gt;​中断​&lt;/strong&gt;​和​&lt;strong&gt;​轮询​&lt;/strong&gt;​模式，在低负载时使用中断保证低延迟，在高负载时切换到轮询保证高吞吐量。&lt;/p&gt;
+&lt;p&gt;设备通过中断通知有新数据包 -&amp;gt; 内核调度对应的 NAPI 实例 -&amp;gt; 在软中断上下文（或内核线程）中轮询处理多个数据包 -&amp;gt; 处理完毕后再打开中断。&lt;/p&gt;
+&lt;h2 id=&#34;核心数据结构与-api&#34;&gt;核心数据结构与 API&lt;/h2&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;​&lt;strong&gt;​&lt;code&gt;struct napi_struct&lt;/code&gt;​&lt;/strong&gt;​：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;核心数据结构，代表一个 NAPI 实例，保存其状态信息。&lt;/li&gt;
+&lt;li&gt;通常与一个中断或一个队列（RX/TX）相关联。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;​&lt;strong&gt;​控制 API (初始化和状态管理)​&lt;/strong&gt;​：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;netif_napi_add()&lt;/code&gt; / &lt;code&gt;netif_napi_del()&lt;/code&gt;: 向系统添加/删除一个 NAPI 实例（通常附加到网络设备上）。&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;napi_enable()&lt;/code&gt; / &lt;code&gt;napi_disable()&lt;/code&gt;: 启用/禁用 NAPI 实例。禁用状态下实例不会被调度，&lt;code&gt;poll&lt;/code&gt; 方法不会被调用。​&lt;strong&gt;​注意​&lt;/strong&gt;​：API 非幂等，错误调用顺序可能导致死锁或竞态。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;​&lt;strong&gt;​数据路径 API (调度与处理)​&lt;/strong&gt;​：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;napi_schedule()&lt;/code&gt;: ​&lt;strong&gt;​核心调度函数​&lt;/strong&gt;​。通常在设备的中断处理程序中调用，通知内核有数据需要处理，并获取 NAPI 实例的所有权。&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;napi_schedule_irqoff()&lt;/code&gt;: &lt;code&gt;napi_schedule()&lt;/code&gt; 的变体，用于已知在中断上下文中调用的情况，可优化中断屏蔽操作。&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;napi_complete_done()&lt;/code&gt;: ​&lt;strong&gt;​完成处理函数​&lt;/strong&gt;​。当驱动程序的 &lt;code&gt;poll&lt;/code&gt; 方法处理完所有事件后调用此函数，释放实例的所有权。​&lt;strong&gt;​警告​&lt;/strong&gt;​：&lt;code&gt;budget&lt;/code&gt; 为 0 时绝不能调用；若处理恰好用完 &lt;code&gt;budget&lt;/code&gt; 且工作已完成，需谨慎返回 &lt;code&gt;budget - 1&lt;/code&gt; 或等待下次调用。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h2 id=&#34;驱动程序实现要点&#34;&gt;驱动程序实现要点&lt;/h2&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;​&lt;strong&gt;​&lt;code&gt;poll&lt;/code&gt; 方法​&lt;/strong&gt;​：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;驱动必须实现的回调函数，由内核调度执行实际的数据包处理工作。&lt;/li&gt;
+&lt;li&gt;​&lt;strong&gt;​参数 &lt;code&gt;budget&lt;/code&gt;​&lt;/strong&gt;​：限制一次 &lt;code&gt;poll&lt;/code&gt; 调用最多可处理的​&lt;strong&gt;​接收​&lt;/strong&gt;​（RX）数据包数量（发送 TX 处理无此限制）。若返回值为 &lt;code&gt;budget&lt;/code&gt;，表示还有工作未完成，内核会再次调度；若小于 &lt;code&gt;budget&lt;/code&gt;，表示本轮处理已完成。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;​&lt;strong&gt;​中断屏蔽策略​&lt;/strong&gt;​：&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>【解决】Fedora42升级启动时显示kernel panic</title>
+      <link>https://kerolt.github.io/posts/linux/%E8%A7%A3%E5%86%B3fedora42%E5%8D%87%E7%BA%A7%E5%90%AF%E5%8A%A8%E6%97%B6%E6%98%BE%E7%A4%BAkernel-panic/</link>
+      <pubDate>Sun, 27 Apr 2025 00:00:00 +0000</pubDate>
+      <guid>https://kerolt.github.io/posts/linux/%E8%A7%A3%E5%86%B3fedora42%E5%8D%87%E7%BA%A7%E5%90%AF%E5%8A%A8%E6%97%B6%E6%98%BE%E7%A4%BAkernel-panic/</guid>
+      <description>&lt;p&gt;最近 Fedora42 更新了，因此我打算升级一下玩玩。在执行完下面的命令后：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;sudo dnf upgrade --refresh
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;sudo dnf system-upgrade download --releasever&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#f60&#34;&gt;42&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;sudo dnf system-upgrade reboot
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;重启开机成了这样:(&lt;/p&gt;
+&lt;p&gt;
+&lt;div class=&#34;post-img-view&#34;&gt;
+  &lt;a data-fancybox=&#34;gallery&#34; href=&#34;&#34;&gt;
+    &lt;img src=&#34;&#34; alt=&#34;&#34;  /&gt;
+  &lt;/a&gt;
+&lt;/div&gt;
+&lt;/p&gt;
+&lt;p&gt;在网上搜索一圈后，执行以下命令系统就 ok 了：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;sudo dracut --regenerate-all --force
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;错误的原因可能是更新内核后没有正确生成新的 initramfs 文件，系统可能会使用旧的、不兼容的 initramfs 文件，从而导致启动失败。&lt;/p&gt;
+&lt;p&gt;而 &lt;code&gt;dracut&lt;/code&gt; 是一个用于生成 Linux 系统 initramfs（初始内存文件系统）的工具。运行 这条命令后，&lt;code&gt;dracut&lt;/code&gt; 会重新生成与当前系统中所有已安装内核对应的 initramfs 文件。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;参考：https://www.reddit.com/r/Fedora/comments/1hfkqnq/boot_error_after_updating_to_6124200&lt;/p&gt;
+&lt;/blockquote&gt;</description>
+    </item>
+    <item>
+      <title>Linux下微信无法使用中文输入法问题解决</title>
+      <link>https://kerolt.github.io/posts/linux/linux%E4%B8%8B%E5%BE%AE%E4%BF%A1%E6%97%A0%E6%B3%95%E4%BD%BF%E7%94%A8%E4%B8%AD%E6%96%87%E8%BE%93%E5%85%A5%E6%B3%95%E9%97%AE%E9%A2%98%E8%A7%A3%E5%86%B3/</link>
+      <pubDate>Tue, 31 Dec 2024 00:00:00 +0000</pubDate>
+      <guid>https://kerolt.github.io/posts/linux/linux%E4%B8%8B%E5%BE%AE%E4%BF%A1%E6%97%A0%E6%B3%95%E4%BD%BF%E7%94%A8%E4%B8%AD%E6%96%87%E8%BE%93%E5%85%A5%E6%B3%95%E9%97%AE%E9%A2%98%E8%A7%A3%E5%86%B3/</guid>
+      <description>&lt;p&gt;微信在不久前终于有了 Linux 原生版本，我的电脑是 Fedora41，之前安装的是 flatpak 打包的微信，现在在官网下载 rpm 包后运行发现无法使用 fcitx 的中文输入法，找了一下是环境遍历的问题。&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

@@ -13,7 +13,7 @@
 </span></span></code></pre></div><p>其实<code>move</code>的实现并没有很复杂，粗略一点的理解就是将一个左值强制转换为右值。</p><p>std::move 并不会真正地移动对象，真正的移动操作是在移动构造函数、移动赋值函数等完成的，std::move 只是将参数转换为右值引用而已。</p><p>写一个简单的例子如下：</p><div class=highlight><pre tabindex=0 style=background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-cpp data-lang=cpp><span style=display:flex><span><span style=color:#099>#include</span> <span style=color:#099>&lt;fmt/core.h&gt;</span><span style=color:#099>
 </span></span></span><span style=display:flex><span><span style=color:#099>#include</span> <span style=color:#099>&lt;string&gt;</span><span style=color:#099>
 </span></span></span><span style=display:flex><span><span style=color:#099>#include</span> <span style=color:#099>&lt;utility&gt;</span><span style=color:#099>
-</span></span></span><span style=display:flex><span><span style=color:#099></span>
+</span></span></span><span style=display:flex><span>
 </span></span><span style=display:flex><span><span style=color:#069;font-weight:700>struct</span> <span style=color:#0a8;font-weight:700>A</span> {
 </span></span><span style=display:flex><span>    A(std<span style=color:#555>::</span>string str)
 </span></span><span style=display:flex><span>        <span style=color:#555>:</span> data(str) {}
@@ -46,7 +46,7 @@
 </span></span><span style=display:flex><span>};
 </span></span></code></pre></div><p>这样，运行结果为</p><div class=highlight><pre tabindex=0 style=background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-fallback data-lang=fallback><span style=display:flex><span>a: , a2: hello
 </span></span></code></pre></div><p>这是因为当我们不显式指定移动构造函数（或是拷贝构造函数、移动or拷贝运算符）编译器会自动生成，貌似也一并实现了数据的移动（？这我也还不清楚）</p><p>我们通常使用std::move能够实现标准库中一些资源的转移，是因为标准库中已经实现了这些资源类的移动构造函数or移动赋值运算符。</p></div><footer class=post-footer><nav class=paginav><a class=prev href=https://kerolt.github.io/posts/c++/%E9%81%BF%E5%85%8Dcout%E7%BA%BF%E7%A8%8B%E4%B8%8D%E5%AE%89%E5%85%A8%E7%9A%84%E4%B8%80%E4%B8%AA%E5%81%9A%E6%B3%95/><span class=title>« Prev</span><br><span>避免cout线程不安全的一个做法</span>
-</a><a class=next href=https://kerolt.github.io/posts/c++/c++%E4%B8%ADlambda%E4%B8%8Epriority_queue%E4%B8%80%E8%B5%B7%E4%BD%BF%E7%94%A8/><span class=title>Next »</span><br><span>C++中lambda与priority_queue一起使用</span></a></nav></footer></article></main><footer class=footer><span>&copy; 2025 <a href=https://kerolt.github.io/>Kerolt's Blog</a></span> ·
+</a><a class=next href=https://kerolt.github.io/posts/c++/c++%E4%B8%ADlambda%E4%B8%8Epriority_queue%E4%B8%80%E8%B5%B7%E4%BD%BF%E7%94%A8/><span class=title>Next »</span><br><span>C++中lambda与priority_queue一起使用</span></a></nav></footer></article></main><footer class=footer><span>&copy; 2026 <a href=https://kerolt.github.io/>Kerolt's Blog</a></span> ·
 <span>Powered by
 <a href=https://gohugo.io/ rel="noopener noreferrer" target=_blank>Hugo</a> &
 <a href=https://github.com/adityatelange/hugo-PaperMod/ rel=noopener target=_blank>PaperMod</a></span></footer><a href=#top aria-label="go to top" title="Go to Top (Alt + G)" class=top-link id=top-link accesskey=g><svg viewBox="0 0 12 6" fill="currentColor"><path d="M12 6H0l6-6z"/></svg>

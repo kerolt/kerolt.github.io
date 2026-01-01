@@ -85,14 +85,14 @@ bpftool btf dump file /sys/kernel/btf/vmlinux format c > vmlinux.h
 </span></span><span style=display:flex><span>}
 </span></span></code></pre></div><ul><li><code>do_unlinkat</code> 是内核中实际执行文件删除逻辑的最终汇聚点</li><li>用户空间调用 <code>unlink()</code>、<code>unlinkat()</code> 或 <code>rmdir()</code> 等系统调用时，最终都会通过系统调用表路由到这个函数</li><li>采用文件描述符 (AT_FDCWD) 和路径名的组合方式，提供了灵活的路径解析能力</li></ul><h2 id=vmlinuxh>vmlinux.h<a hidden class=anchor aria-hidden=true href=#vmlinuxh>#</a></h2><p>不同内核版本之间，内核数据结构如结构体字段位置、字段名称等都可能发生变化。传统的 eBPF 程序直接使用内核头文件会导致：</p><ul><li>兼容性问题：程序在​<strong>​不同内核版本​</strong>​中崩溃</li><li>字段偏移错误：读取到​<strong>​无效内存数据​</strong>​</li><li>维护困难：需要针对​<strong>​每个内核版本​</strong>​进行适配</li></ul><p><code>vmlinux.h</code> 利用内核的​<strong>​BTF（BPF Type Format）​</strong>​ 信息生成与当前运行内核完全匹配的类型定义：</p><div class=highlight><pre tabindex=0 style=background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sh data-lang=sh><span style=display:flex><span>bpftool btf dump file /sys/kernel/btf/vmlinux format c &gt; vmlinux.h
 </span></span></code></pre></div><h2 id=内核态程序-kprobe_unlinkbpfc>内核态程序 kprobe_unlink.bpf.c<a hidden class=anchor aria-hidden=true href=#内核态程序-kprobe_unlinkbpfc>#</a></h2><p>为 <code>do_unlinkat</code> 函数同时设置入口探针和返回探针：</p><ol><li>​<strong>​函数入口​</strong>​：<ul><li>捕获调用进程的 PID</li><li>获取要删除的文件名</li></ul></li><li>​<strong>​函数返回​</strong>​：<ul><li>捕获调用进程的 PID</li><li>获取函数返回值（删除操作的结果）</li></ul></li></ol><div class=highlight><pre tabindex=0 style=background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c data-lang=c><span style=display:flex><span><span style=color:#09f;font-style:italic>//go:build ignore
-</span></span></span><span style=display:flex><span><span style=color:#09f;font-style:italic></span>
+</span></span></span><span style=display:flex><span>
 </span></span><span style=display:flex><span><span style=color:#099>#include</span> <span style=color:#099>&#34;vmlinux.h&#34;</span><span style=color:#099>
-</span></span></span><span style=display:flex><span><span style=color:#099></span>
+</span></span></span><span style=display:flex><span>
 </span></span><span style=display:flex><span><span style=color:#09f;font-style:italic>// 下面几个头文件需要安装了libbpf库
-</span></span></span><span style=display:flex><span><span style=color:#09f;font-style:italic></span><span style=color:#099>#include</span> <span style=color:#099>&lt;bpf/bpf_core_read.h&gt;</span><span style=color:#099>
+</span></span></span><span style=display:flex><span><span style=color:#099>#include</span> <span style=color:#099>&lt;bpf/bpf_core_read.h&gt;</span><span style=color:#099>
 </span></span></span><span style=display:flex><span><span style=color:#099>#include</span> <span style=color:#099>&lt;bpf/bpf_helpers.h&gt;</span><span style=color:#099>
 </span></span></span><span style=display:flex><span><span style=color:#099>#include</span> <span style=color:#099>&lt;bpf/bpf_tracing.h&gt;</span><span style=color:#099>
-</span></span></span><span style=display:flex><span><span style=color:#099></span>
+</span></span></span><span style=display:flex><span>
 </span></span><span style=display:flex><span><span style=color:#078;font-weight:700>char</span> LICENSE[] <span style=color:#c0f>SEC</span>(<span style=color:#c30>&#34;license&#34;</span>) <span style=color:#555>=</span> <span style=color:#c30>&#34;Dual BSD/GPL&#34;</span>;
 </span></span><span style=display:flex><span>
 </span></span><span style=display:flex><span><span style=color:#c0f>SEC</span>(<span style=color:#c30>&#34;kprobe/do_unlinkat&#34;</span>)
@@ -116,7 +116,7 @@ bpftool btf dump file /sys/kernel/btf/vmlinux format c > vmlinux.h
 </span></span><span style=display:flex><span>}
 </span></span></code></pre></div><h2 id=用户态-go-程序>用户态 Go 程序<a hidden class=anchor aria-hidden=true href=#用户态-go-程序>#</a></h2><p>用户态程序负责三个主要任务：</p><ol><li>​<strong>​环境初始化​</strong>​：<ul><li>移除 eBPF 的内存限制</li><li>加载编译好的 eBPF 程序</li></ul></li><li>​<strong>​探针附加​</strong>​：<ul><li>将 kprobe 绑定到 <code>do_unlinkat</code></li><li>将 kretprobe 绑定到 <code>do_unlinkat</code> 的返回点</li></ul></li><li>​<strong>​日志处理​</strong>​：<ul><li>读取内核的跟踪日志</li><li>筛选并显示与文件删除相关的事件</li></ul></li></ol><div class=highlight><pre tabindex=0 style=background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=display:flex><span><span style=color:#069;font-weight:700>package</span><span style=color:#bbb> </span>main<span style=color:#bbb>
 </span></span></span><span style=display:flex><span><span style=color:#bbb>
-</span></span></span><span style=display:flex><span><span style=color:#bbb></span><span style=color:#069;font-weight:700>import</span><span style=color:#bbb> </span>(<span style=color:#bbb>
+</span></span></span><span style=display:flex><span><span style=color:#069;font-weight:700>import</span><span style=color:#bbb> </span>(<span style=color:#bbb>
 </span></span></span><span style=display:flex><span><span style=color:#bbb>	</span><span style=color:#c30>&#34;bufio&#34;</span><span style=color:#bbb>
 </span></span></span><span style=display:flex><span><span style=color:#bbb>	</span><span style=color:#c30>&#34;context&#34;</span><span style=color:#bbb>
 </span></span></span><span style=display:flex><span><span style=color:#bbb>	</span><span style=color:#c30>&#34;fmt&#34;</span><span style=color:#bbb>
@@ -129,9 +129,9 @@ bpftool btf dump file /sys/kernel/btf/vmlinux format c > vmlinux.h
 </span></span></span><span style=display:flex><span><span style=color:#bbb>
 </span></span></span><span style=display:flex><span><span style=color:#bbb>	</span><span style=color:#c30>&#34;github.com/cilium/ebpf/link&#34;</span><span style=color:#bbb>
 </span></span></span><span style=display:flex><span><span style=color:#bbb>	</span><span style=color:#c30>&#34;github.com/cilium/ebpf/rlimit&#34;</span><span style=color:#bbb>
-</span></span></span><span style=display:flex><span><span style=color:#bbb></span>)<span style=color:#bbb>
+</span></span></span><span style=display:flex><span>)<span style=color:#bbb>
 </span></span></span><span style=display:flex><span><span style=color:#bbb>
-</span></span></span><span style=display:flex><span><span style=color:#bbb></span><span style=color:#069;font-weight:700>func</span><span style=color:#bbb> </span><span style=color:#c0f>main</span>()<span style=color:#bbb> </span>{<span style=color:#bbb>
+</span></span></span><span style=display:flex><span><span style=color:#069;font-weight:700>func</span><span style=color:#bbb> </span><span style=color:#c0f>main</span>()<span style=color:#bbb> </span>{<span style=color:#bbb>
 </span></span></span><span style=display:flex><span><span style=color:#bbb>	</span><span style=color:#09f;font-style:italic>// 移除内存限制</span><span style=color:#bbb>
 </span></span></span><span style=display:flex><span><span style=color:#bbb>	</span><span style=color:#069;font-weight:700>if</span><span style=color:#bbb> </span>err<span style=color:#bbb> </span><span style=color:#555>:=</span><span style=color:#bbb> </span>rlimit.<span style=color:#c0f>RemoveMemlock</span>();<span style=color:#bbb> </span>err<span style=color:#bbb> </span><span style=color:#555>!=</span><span style=color:#bbb> </span><span style=color:#069;font-weight:700>nil</span><span style=color:#bbb> </span>{<span style=color:#bbb>
 </span></span></span><span style=display:flex><span><span style=color:#bbb>		</span>log.<span style=color:#c0f>Fatal</span>(err)<span style=color:#bbb>
@@ -173,10 +173,10 @@ bpftool btf dump file /sys/kernel/btf/vmlinux format c > vmlinux.h
 </span></span></span><span style=display:flex><span><span style=color:#bbb>
 </span></span></span><span style=display:flex><span><span style=color:#bbb>	</span><span style=color:#555>&lt;-</span>ctx.<span style=color:#c0f>Done</span>()<span style=color:#bbb>
 </span></span></span><span style=display:flex><span><span style=color:#bbb>	</span>fmt.<span style=color:#c0f>Println</span>(<span style=color:#c30>&#34;\n正在退出...&#34;</span>)<span style=color:#bbb>
-</span></span></span><span style=display:flex><span><span style=color:#bbb></span>}<span style=color:#bbb>
+</span></span></span><span style=display:flex><span>}<span style=color:#bbb>
 </span></span></span><span style=display:flex><span><span style=color:#bbb>
-</span></span></span><span style=display:flex><span><span style=color:#bbb></span><span style=color:#09f;font-style:italic>// 读取内核跟踪日志</span><span style=color:#bbb>
-</span></span></span><span style=display:flex><span><span style=color:#bbb></span><span style=color:#069;font-weight:700>func</span><span style=color:#bbb> </span><span style=color:#c0f>readTraceLog</span>()<span style=color:#bbb> </span>{<span style=color:#bbb>
+</span></span></span><span style=display:flex><span><span style=color:#09f;font-style:italic>// 读取内核跟踪日志</span><span style=color:#bbb>
+</span></span></span><span style=display:flex><span><span style=color:#069;font-weight:700>func</span><span style=color:#bbb> </span><span style=color:#c0f>readTraceLog</span>()<span style=color:#bbb> </span>{<span style=color:#bbb>
 </span></span></span><span style=display:flex><span><span style=color:#bbb>	</span>file,<span style=color:#bbb> </span>err<span style=color:#bbb> </span><span style=color:#555>:=</span><span style=color:#bbb> </span>os.<span style=color:#c0f>Open</span>(<span style=color:#c30>&#34;/sys/kernel/debug/tracing/trace_pipe&#34;</span>)<span style=color:#bbb>
 </span></span></span><span style=display:flex><span><span style=color:#bbb>	</span><span style=color:#069;font-weight:700>if</span><span style=color:#bbb> </span>err<span style=color:#bbb> </span><span style=color:#555>!=</span><span style=color:#bbb> </span><span style=color:#069;font-weight:700>nil</span><span style=color:#bbb> </span>{<span style=color:#bbb>
 </span></span></span><span style=display:flex><span><span style=color:#bbb>		</span>log.<span style=color:#c0f>Printf</span>(<span style=color:#c30>&#34;无法打开 trace_pipe: %v&#34;</span>,<span style=color:#bbb> </span>err)<span style=color:#bbb>
@@ -197,7 +197,7 @@ bpftool btf dump file /sys/kernel/btf/vmlinux format c > vmlinux.h
 </span></span></span><span style=display:flex><span><span style=color:#bbb>	</span><span style=color:#069;font-weight:700>if</span><span style=color:#bbb> </span>err<span style=color:#bbb> </span><span style=color:#555>:=</span><span style=color:#bbb> </span>scanner.<span style=color:#c0f>Err</span>();<span style=color:#bbb> </span>err<span style=color:#bbb> </span><span style=color:#555>!=</span><span style=color:#bbb> </span><span style=color:#069;font-weight:700>nil</span><span style=color:#bbb> </span>{<span style=color:#bbb>
 </span></span></span><span style=display:flex><span><span style=color:#bbb>		</span>log.<span style=color:#c0f>Printf</span>(<span style=color:#c30>&#34;读取 trace_pipe 出错: %v&#34;</span>,<span style=color:#bbb> </span>err)<span style=color:#bbb>
 </span></span></span><span style=display:flex><span><span style=color:#bbb>	</span>}<span style=color:#bbb>
-</span></span></span><span style=display:flex><span><span style=color:#bbb></span>}<span style=color:#bbb>
+</span></span></span><span style=display:flex><span>}<span style=color:#bbb>
 </span></span></span></code></pre></div><h2 id=编译与运行>编译与运行<a hidden class=anchor aria-hidden=true href=#编译与运行>#</a></h2><p><strong>Makefile</strong>：</p><div class=highlight><pre tabindex=0 style=background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sh data-lang=sh><span style=display:flex><span><span style=color:#09f;font-style:italic># 1. 克隆项目并进入目录</span>
 </span></span><span style=display:flex><span>git clone https://github.com/kerolt/learn-ebpf
 </span></span><span style=display:flex><span>
@@ -211,7 +211,7 @@ bpftool btf dump file /sys/kernel/btf/vmlinux format c > vmlinux.h
 </span></span><span style=display:flex><span><span style=color:#09f;font-style:italic># 4. 运行程序</span>
 </span></span><span style=display:flex><span>sudo go run .
 </span></span></code></pre></div><p>运行后会得到类似的结果：</p><p><div class=post-img-view><a data-fancybox=gallery href=https://obsidian-image-oss.oss-cn-shanghai.aliyuncs.com/undefined2025-06-11-12%3A26%3A11.png><img src=https://obsidian-image-oss.oss-cn-shanghai.aliyuncs.com/undefined2025-06-11-12%3A26%3A11.png alt></a></div></p></div><footer class=post-footer><nav class=paginav><a class=prev href=https://kerolt.github.io/posts/c++/c++%E9%80%8F%E6%98%8E%E8%BF%90%E7%AE%97%E7%AC%A6/><span class=title>« Prev</span><br><span>C++透明运算符</span>
-</a><a class=next href=https://kerolt.github.io/posts/%E5%8A%A8%E6%89%8B%E5%AE%9E%E7%8E%B0x/%E5%88%86%E5%B8%83%E5%BC%8F%E7%BC%93%E5%AD%98/><span class=title>Next »</span><br><span>分布式缓存</span></a></nav></footer></article></main><footer class=footer><span>&copy; 2025 <a href=https://kerolt.github.io/>Kerolt's Blog</a></span> ·
+</a><a class=next href=https://kerolt.github.io/posts/%E5%8A%A8%E6%89%8B%E5%AE%9E%E7%8E%B0x/%E5%88%86%E5%B8%83%E5%BC%8F%E7%BC%93%E5%AD%98/><span class=title>Next »</span><br><span>分布式缓存</span></a></nav></footer></article></main><footer class=footer><span>&copy; 2026 <a href=https://kerolt.github.io/>Kerolt's Blog</a></span> ·
 <span>Powered by
 <a href=https://gohugo.io/ rel="noopener noreferrer" target=_blank>Hugo</a> &
 <a href=https://github.com/adityatelange/hugo-PaperMod/ rel=noopener target=_blank>PaperMod</a></span></footer><a href=#top aria-label="go to top" title="Go to Top (Alt + G)" class=top-link id=top-link accesskey=g><svg viewBox="0 0 12 6" fill="currentColor"><path d="M12 6H0l6-6z"/></svg>

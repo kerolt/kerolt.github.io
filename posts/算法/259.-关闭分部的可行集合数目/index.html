@@ -23,17 +23,17 @@
 </span></span><span style=display:flex><span>            g[y][x] <span style=color:#555>=</span> min(g[y][x], w);
 </span></span><span style=display:flex><span>        }
 </span></span><span style=display:flex><span>        vector<span style=color:#555>&lt;</span>vector<span style=color:#555>&lt;</span><span style=color:#078;font-weight:700>int</span><span style=color:#555>&gt;&gt;</span> f(n); <span style=color:#09f;font-style:italic>// 用f来存储每一种情况对应的图
-</span></span></span><span style=display:flex><span><span style=color:#09f;font-style:italic></span>        <span style=color:#069;font-weight:700>auto</span> check <span style=color:#555>=</span> [<span style=color:#555>&amp;</span>](<span style=color:#078;font-weight:700>int</span> set) {
+</span></span></span><span style=display:flex><span>        <span style=color:#069;font-weight:700>auto</span> check <span style=color:#555>=</span> [<span style=color:#555>&amp;</span>](<span style=color:#078;font-weight:700>int</span> set) {
 </span></span><span style=display:flex><span>            <span style=color:#069;font-weight:700>for</span> (<span style=color:#078;font-weight:700>int</span> i <span style=color:#555>=</span> <span style=color:#f60>0</span>; i <span style=color:#555>&lt;</span> n; i<span style=color:#555>++</span>) {
 </span></span><span style=display:flex><span>	            <span style=color:#09f;font-style:italic>// 只要每种情况对应集合中的分部构成的图
-</span></span></span><span style=display:flex><span><span style=color:#09f;font-style:italic></span>                <span style=color:#069;font-weight:700>if</span> ((set <span style=color:#555>&gt;&gt;</span> i) <span style=color:#555>&amp;</span> <span style=color:#f60>1</span>) {
+</span></span></span><span style=display:flex><span>                <span style=color:#069;font-weight:700>if</span> ((set <span style=color:#555>&gt;&gt;</span> i) <span style=color:#555>&amp;</span> <span style=color:#f60>1</span>) {
 </span></span><span style=display:flex><span>                    f[i] <span style=color:#555>=</span> g[i];
 </span></span><span style=display:flex><span>                }
 </span></span><span style=display:flex><span>            }
 </span></span><span style=display:flex><span>
 </span></span><span style=display:flex><span>			<span style=color:#09f;font-style:italic>// Floyd算法，处理f中分部之间的最短距离，需要根据set的值来选择进行计算
-</span></span></span><span style=display:flex><span><span style=color:#09f;font-style:italic></span>			<span style=color:#09f;font-style:italic>// 因为在之前我们只选择了集合中有的分部建图
-</span></span></span><span style=display:flex><span><span style=color:#09f;font-style:italic></span>            <span style=color:#069;font-weight:700>for</span> (<span style=color:#078;font-weight:700>int</span> k <span style=color:#555>=</span> <span style=color:#f60>0</span>; k <span style=color:#555>&lt;</span> n; k<span style=color:#555>++</span>) {
+</span></span></span><span style=display:flex><span>			<span style=color:#09f;font-style:italic>// 因为在之前我们只选择了集合中有的分部建图
+</span></span></span><span style=display:flex><span>            <span style=color:#069;font-weight:700>for</span> (<span style=color:#078;font-weight:700>int</span> k <span style=color:#555>=</span> <span style=color:#f60>0</span>; k <span style=color:#555>&lt;</span> n; k<span style=color:#555>++</span>) {
 </span></span><span style=display:flex><span>                <span style=color:#069;font-weight:700>if</span> (((set <span style=color:#555>&gt;&gt;</span> k) <span style=color:#555>&amp;</span> <span style=color:#f60>1</span>) <span style=color:#555>==</span> <span style=color:#f60>0</span>) <span style=color:#069;font-weight:700>continue</span>;
 </span></span><span style=display:flex><span>                <span style=color:#069;font-weight:700>for</span> (<span style=color:#078;font-weight:700>int</span> i <span style=color:#555>=</span> <span style=color:#f60>0</span>; i <span style=color:#555>&lt;</span> n; i<span style=color:#555>++</span>) {
 </span></span><span style=display:flex><span>                    <span style=color:#069;font-weight:700>if</span> (((set <span style=color:#555>&gt;&gt;</span> i) <span style=color:#555>&amp;</span> <span style=color:#f60>1</span>) <span style=color:#555>==</span> <span style=color:#f60>0</span>) <span style=color:#069;font-weight:700>continue</span>;
@@ -45,7 +45,7 @@
 </span></span><span style=display:flex><span>            }
 </span></span><span style=display:flex><span>
 </span></span><span style=display:flex><span>			<span style=color:#09f;font-style:italic>// 检查图中各个分部的最短距离
-</span></span></span><span style=display:flex><span><span style=color:#09f;font-style:italic></span>            <span style=color:#069;font-weight:700>for</span> (<span style=color:#078;font-weight:700>int</span> i <span style=color:#555>=</span> <span style=color:#f60>0</span>; i <span style=color:#555>&lt;</span> n; i<span style=color:#555>++</span>) {
+</span></span></span><span style=display:flex><span>            <span style=color:#069;font-weight:700>for</span> (<span style=color:#078;font-weight:700>int</span> i <span style=color:#555>=</span> <span style=color:#f60>0</span>; i <span style=color:#555>&lt;</span> n; i<span style=color:#555>++</span>) {
 </span></span><span style=display:flex><span>                <span style=color:#069;font-weight:700>if</span> (((set <span style=color:#555>&gt;&gt;</span> i) <span style=color:#555>&amp;</span> <span style=color:#f60>1</span>) <span style=color:#555>==</span> <span style=color:#f60>0</span>) <span style=color:#069;font-weight:700>continue</span>;
 </span></span><span style=display:flex><span>                <span style=color:#069;font-weight:700>for</span> (<span style=color:#078;font-weight:700>int</span> j <span style=color:#555>=</span> <span style=color:#f60>0</span>; j <span style=color:#555>&lt;</span> n; j<span style=color:#555>++</span>) {
 </span></span><span style=display:flex><span>                    <span style=color:#069;font-weight:700>if</span> (((set <span style=color:#555>&gt;&gt;</span> j) <span style=color:#555>&amp;</span> <span style=color:#f60>1</span>) <span style=color:#555>&amp;&amp;</span> f[i][j] <span style=color:#555>&gt;</span> maxDistance) {
@@ -58,14 +58,14 @@
 </span></span><span style=display:flex><span>        
 </span></span><span style=display:flex><span>        <span style=color:#078;font-weight:700>int</span> res <span style=color:#555>=</span> <span style=color:#f60>0</span>;
 </span></span><span style=display:flex><span>        <span style=color:#09f;font-style:italic>// 暴力枚举所有情况
-</span></span></span><span style=display:flex><span><span style=color:#09f;font-style:italic></span>        <span style=color:#069;font-weight:700>for</span> (<span style=color:#078;font-weight:700>int</span> i <span style=color:#555>=</span> <span style=color:#f60>0</span>; i <span style=color:#555>&lt;</span> (<span style=color:#f60>1</span> <span style=color:#555>&lt;&lt;</span> n); i<span style=color:#555>++</span>) {
+</span></span></span><span style=display:flex><span>        <span style=color:#069;font-weight:700>for</span> (<span style=color:#078;font-weight:700>int</span> i <span style=color:#555>=</span> <span style=color:#f60>0</span>; i <span style=color:#555>&lt;</span> (<span style=color:#f60>1</span> <span style=color:#555>&lt;&lt;</span> n); i<span style=color:#555>++</span>) {
 </span></span><span style=display:flex><span>            res <span style=color:#555>+=</span> check(i); <span style=color:#09f;font-style:italic>// true和false分别隐式转换为1和0
-</span></span></span><span style=display:flex><span><span style=color:#09f;font-style:italic></span>        }
+</span></span></span><span style=display:flex><span>        }
 </span></span><span style=display:flex><span>        <span style=color:#069;font-weight:700>return</span> res;
 </span></span><span style=display:flex><span>    }
 </span></span><span style=display:flex><span>};
 </span></span></code></pre></div></div><footer class=post-footer><nav class=paginav><a class=prev href=https://kerolt.github.io/posts/c++/%E5%8D%8F%E7%A8%8Bc++20%E5%8D%8F%E7%A8%8B%E5%88%9D%E4%BD%93%E9%AA%8C/><span class=title>« Prev</span><br><span>【协程】C++20协程初体验</span>
-</a><a class=next href=https://kerolt.github.io/posts/%E7%AE%97%E6%B3%95/76.-%E6%9C%80%E5%B0%8F%E8%A6%86%E7%9B%96%E5%AD%90%E4%B8%B2/><span class=title>Next »</span><br><span>76. 最小覆盖子串</span></a></nav></footer></article></main><footer class=footer><span>&copy; 2025 <a href=https://kerolt.github.io/>Kerolt's Blog</a></span> ·
+</a><a class=next href=https://kerolt.github.io/posts/%E7%AE%97%E6%B3%95/76.-%E6%9C%80%E5%B0%8F%E8%A6%86%E7%9B%96%E5%AD%90%E4%B8%B2/><span class=title>Next »</span><br><span>76. 最小覆盖子串</span></a></nav></footer></article></main><footer class=footer><span>&copy; 2026 <a href=https://kerolt.github.io/>Kerolt's Blog</a></span> ·
 <span>Powered by
 <a href=https://gohugo.io/ rel="noopener noreferrer" target=_blank>Hugo</a> &
 <a href=https://github.com/adityatelange/hugo-PaperMod/ rel=noopener target=_blank>PaperMod</a></span></footer><a href=#top aria-label="go to top" title="Go to Top (Alt + G)" class=top-link id=top-link accesskey=g><svg viewBox="0 0 12 6" fill="currentColor"><path d="M12 6H0l6-6z"/></svg>

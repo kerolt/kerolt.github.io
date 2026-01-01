@@ -9,15 +9,15 @@
       <url>https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</url>
       <link>https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</link>
     </image>
-    <generator>Hugo -- 0.152.2</generator>
+    <generator>Hugo -- 0.154.0</generator>
     <language>en</language>
     <lastBuildDate>Thu, 27 Nov 2025 00:00:00 +0000</lastBuildDate>
     <atom:link href="https://kerolt.github.io/tags/windows/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Windows修改默认文件夹名为英文</title>
-      <link>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/windows%E4%BF%AE%E6%94%B9%E9%BB%98%E8%AE%A4%E6%96%87%E4%BB%B6%E5%A4%B9%E5%90%8D%E4%B8%BA%E8%8B%B1%E6%96%87/</link>
+      <link>https://kerolt.github.io/posts/windows/windows%E4%BF%AE%E6%94%B9%E9%BB%98%E8%AE%A4%E6%96%87%E4%BB%B6%E5%A4%B9%E5%90%8D%E4%B8%BA%E8%8B%B1%E6%96%87/</link>
       <pubDate>Thu, 27 Nov 2025 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/windows%E4%BF%AE%E6%94%B9%E9%BB%98%E8%AE%A4%E6%96%87%E4%BB%B6%E5%A4%B9%E5%90%8D%E4%B8%BA%E8%8B%B1%E6%96%87/</guid>
+      <guid>https://kerolt.github.io/posts/windows/windows%E4%BF%AE%E6%94%B9%E9%BB%98%E8%AE%A4%E6%96%87%E4%BB%B6%E5%A4%B9%E5%90%8D%E4%B8%BA%E8%8B%B1%E6%96%87/</guid>
       <description>&lt;p&gt;系统路径 内的&lt;strong&gt;文件夹不仅有图标还显示中文名称&lt;/strong&gt;，&lt;strong&gt;但是打开路径的时候显示的却是英文&lt;/strong&gt;，如何修改呢？&lt;/p&gt;
 &lt;p&gt;
 &lt;div class=&#34;post-img-view&#34;&gt;

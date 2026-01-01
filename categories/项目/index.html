@@ -27,7 +27,7 @@ Sylar的协程调度器是一个N-M模型，意味着N个线程可以运行M个�
 Coroutine类中其他函数的定义可以在这里查看：Github: src/coroutine.cpp
 对于什么是协程，为什么要使用协程，可以看看之前的笔记：【协程】C++20协程初体验。
 对于我们自己来实现协程，其实在之前Xv6的Lab中就有做过：【MIT6.S081】Lab6 multithreading，当初做这个lab的时候没有意识到这就是协程。协程的切换最重要的就是要保存和恢复上下文，在这个lab中，我们通过保存每个协程在切换之前的寄存器的值，以此可用来恢复原来的执行流。
-...</p></div><footer class=entry-footer><span title='2024-09-10 00:00:00 +0000 UTC'>发布于2024-09-10</span>&nbsp;&nbsp;·&nbsp;&nbsp;Kerolt</footer><a class=entry-link aria-label="post link to 【动手写协程库 1】协程定义" href=https://kerolt.github.io/posts/%E5%8A%A8%E6%89%8B%E5%AE%9E%E7%8E%B0x/%E5%8A%A8%E6%89%8B%E5%86%99%E5%8D%8F%E7%A8%8B%E5%BA%93-1%E5%8D%8F%E7%A8%8B%E5%AE%9A%E4%B9%89/></a></article></main><footer class=footer><span>&copy; 2025 <a href=https://kerolt.github.io/>Kerolt's Blog</a></span> ·
+...</p></div><footer class=entry-footer><span title='2024-09-10 00:00:00 +0000 UTC'>发布于2024-09-10</span>&nbsp;&nbsp;·&nbsp;&nbsp;Kerolt</footer><a class=entry-link aria-label="post link to 【动手写协程库 1】协程定义" href=https://kerolt.github.io/posts/%E5%8A%A8%E6%89%8B%E5%AE%9E%E7%8E%B0x/%E5%8A%A8%E6%89%8B%E5%86%99%E5%8D%8F%E7%A8%8B%E5%BA%93-1%E5%8D%8F%E7%A8%8B%E5%AE%9A%E4%B9%89/></a></article></main><footer class=footer><span>&copy; 2026 <a href=https://kerolt.github.io/>Kerolt's Blog</a></span> ·
 <span>Powered by
 <a href=https://gohugo.io/ rel="noopener noreferrer" target=_blank>Hugo</a> &
 <a href=https://github.com/adityatelange/hugo-PaperMod/ rel=noopener target=_blank>PaperMod</a></span></footer><a href=#top aria-label="go to top" title="Go to Top (Alt + G)" class=top-link id=top-link accesskey=g><svg viewBox="0 0 12 6" fill="currentColor"><path d="M12 6H0l6-6z"/></svg>

@@ -9,15 +9,15 @@
       <url>https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</url>
       <link>https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</link>
     </image>
-    <generator>Hugo -- 0.152.2</generator>
+    <generator>Hugo -- 0.154.0</generator>
     <language>en</language>
-    <lastBuildDate>Sun, 09 Nov 2025 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Mon, 22 Dec 2025 00:00:00 +0000</lastBuildDate>
     <atom:link href="https://kerolt.github.io/tags/linux/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Linux修改IP</title>
-      <link>https://kerolt.github.io/posts/os/network/linux%E4%BF%AE%E6%94%B9ip/</link>
+      <link>https://kerolt.github.io/posts/network/linux%E4%BF%AE%E6%94%B9ip/</link>
       <pubDate>Sun, 09 Nov 2025 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/os/network/linux%E4%BF%AE%E6%94%B9ip/</guid>
+      <guid>https://kerolt.github.io/posts/network/linux%E4%BF%AE%E6%94%B9ip/</guid>
       <description>&lt;p&gt;首先确定网络是用什么工具管理：&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-sh&#34; data-lang=&#34;sh&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;$ systemctl is-active NetworkManager
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;active
@@ -26,8 +26,8 @@
 &lt;h3 id=&#34;看当前连接名&#34;&gt;看当前连接名&lt;/h3&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;nmcli connection show
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;输出类似：&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;NAME                UUID                                  TYPE      DEVICE
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Wired connection 1  2d3e1f6a-4e87-4a76-8f23-2f459c8c112b  ethernet  enp60s0
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;NAME                UUID                                  TYPE      DEVICE
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Wired connection &lt;span style=&#34;color:#f60&#34;&gt;1&lt;/span&gt;  2d3e1f6a-4e87-4a76-8f23-2f459c8c112b  ethernet  enp60s0
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;这里的 &lt;code&gt;NAME&lt;/code&gt;（如 &lt;code&gt;Wired connection 1&lt;/code&gt;）就是连接名，后面命令要用到。&lt;/p&gt;
 &lt;h3 id=&#34;修改为静态-ip&#34;&gt;修改为静态 IP&lt;/h3&gt;
 &lt;p&gt;假设你想把 IP 设置为：&lt;/p&gt;
@@ -42,14 +42,14 @@
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;sudo nmcli con mod &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;Wired connection 1&amp;#34;&lt;/span&gt; ipv4.dns &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;8.8.8.8,1.1.1.1&amp;#34;&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;sudo nmcli con mod &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;Wired connection 1&amp;#34;&lt;/span&gt; ipv4.method manual
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;blockquote&gt;
-&lt;p&gt;注意 &lt;code&gt;&amp;quot;Wired connection 1&amp;quot;&lt;/code&gt; 需要替换为你自己的连接名。&lt;br&gt;
+&lt;p&gt;注意 &lt;code&gt;&amp;quot;Wired connection 1&amp;quot;&lt;/code&gt; 需要替换为你自己的连接名。
 如果名字里有空格，必须加引号。&lt;/p&gt;</description>
     </item>
     <item>
       <title>Linux校准时间</title>
-      <link>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/linux%E6%A0%A1%E5%87%86%E6%97%B6%E9%97%B4/</link>
+      <link>https://kerolt.github.io/posts/linux/linux%E6%A0%A1%E5%87%86%E6%97%B6%E9%97%B4/</link>
       <pubDate>Fri, 07 Nov 2025 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/linux%E6%A0%A1%E5%87%86%E6%97%B6%E9%97%B4/</guid>
+      <guid>https://kerolt.github.io/posts/linux/linux%E6%A0%A1%E5%87%86%E6%97%B6%E9%97%B4/</guid>
       <description>&lt;p&gt;服务器是用旧笔记本装的 Debian13，然后用 ddns-go 做动态域名解析，但是装好之后貌似由于时钟没有校准因此 ddns-go 无法更新域名解析（使用的 aliyun），以下是解决方法。&lt;/p&gt;
 &lt;hr&gt;
 &lt;p&gt;首先我使用 &lt;code&gt;timedatectl&lt;/code&gt; 的结果如下：&lt;/p&gt;
@@ -72,10 +72,79 @@
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;之后再执行 &lt;code&gt;timedatectl&lt;/code&gt; 可以看到：&lt;/p&gt;</description>
     </item>
     <item>
+      <title>如何理解内核态与用户态切换的上下文开销</title>
+      <link>https://kerolt.github.io/posts/linux/%E5%A6%82%E4%BD%95%E7%90%86%E8%A7%A3%E5%86%85%E6%A0%B8%E6%80%81%E4%B8%8E%E7%94%A8%E6%88%B7%E6%80%81%E5%88%87%E6%8D%A2%E7%9A%84%E4%B8%8A%E4%B8%8B%E6%96%87%E5%BC%80%E9%94%80/</link>
+      <pubDate>Thu, 06 Nov 2025 00:00:00 +0000</pubDate>
+      <guid>https://kerolt.github.io/posts/linux/%E5%A6%82%E4%BD%95%E7%90%86%E8%A7%A3%E5%86%85%E6%A0%B8%E6%80%81%E4%B8%8E%E7%94%A8%E6%88%B7%E6%80%81%E5%88%87%E6%8D%A2%E7%9A%84%E4%B8%8A%E4%B8%8B%E6%96%87%E5%BC%80%E9%94%80/</guid>
+      <description>&lt;h2 id=&#34;一什么是用户态和内核态&#34;&gt;一、什么是“用户态”和“内核态”&lt;/h2&gt;
+&lt;p&gt;CPU 有不同的 &lt;strong&gt;特权级（Privilege Level）&lt;/strong&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;用户态（User Mode）&lt;/strong&gt;：
+应用程序在这里运行，权限受限，比如不能直接访问硬件、不能修改页表等。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;内核态（Kernel Mode）&lt;/strong&gt;：
+操作系统内核运行在这里，拥有完全的访问权限，可以管理内存、设备、中断等。&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;二什么是上下文切换context-switch&#34;&gt;二、什么是“上下文切换（Context Switch）”&lt;/h2&gt;
+&lt;p&gt;“上下文”就是 CPU 当前正在执行的任务的所有状态，包括：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;寄存器内容（RIP、RSP、RAX 等）&lt;/li&gt;
+&lt;li&gt;程序计数器（Program Counter）&lt;/li&gt;
+&lt;li&gt;栈指针&lt;/li&gt;
+&lt;li&gt;内存映射（页表）&lt;/li&gt;
+&lt;li&gt;调度信息（优先级、时间片等）&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;上下文切换&lt;/strong&gt;指的是 CPU 从一个执行上下文切换到另一个（比如进程 A → 进程 B）。&lt;/p&gt;
+&lt;h2 id=&#34;三内核态与用户态切换--进程切换但都属于上下文切换&#34;&gt;三、内核态与用户态切换 ≠ 进程切换，但都属于“上下文切换”&lt;/h2&gt;
+&lt;p&gt;这两种是不同层次的“切换”：&lt;/p&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;类型&lt;/th&gt;
+          &lt;th&gt;示例&lt;/th&gt;
+          &lt;th&gt;是否涉及调度&lt;/th&gt;
+          &lt;th&gt;开销大小&lt;/th&gt;
+          &lt;th&gt;备注&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;用户态 → 内核态&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;系统调用、I/O、中断&lt;/td&gt;
+          &lt;td&gt;否&lt;/td&gt;
+          &lt;td&gt;小（几十到几百纳秒）&lt;/td&gt;
+          &lt;td&gt;同一线程，只是 CPU 特权级变化&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;进程上下文切换&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;从进程 A → 进程 B&lt;/td&gt;
+          &lt;td&gt;是&lt;/td&gt;
+          &lt;td&gt;大（微秒级）&lt;/td&gt;
+          &lt;td&gt;不仅换栈，还要换虚拟内存上下文&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h2 id=&#34;四为什么内核用户态切换有开销&#34;&gt;四、为什么内核/用户态切换有“开销”&lt;/h2&gt;
+&lt;p&gt;内核态切换的代价来自几个部分：&lt;/p&gt;
+&lt;h3 id=&#34;1-cpu-特权级变化&#34;&gt;1. CPU 特权级变化&lt;/h3&gt;
+&lt;p&gt;切换时 CPU 会：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;保存当前寄存器状态；&lt;/li&gt;
+&lt;li&gt;改变特权级（从 ring3 → ring0）；&lt;/li&gt;
+&lt;li&gt;切换到内核栈（每个线程有独立内核栈）；&lt;/li&gt;
+&lt;li&gt;执行系统调用入口代码（&lt;code&gt;syscall&lt;/code&gt;、&lt;code&gt;sysenter&lt;/code&gt; 指令）；&lt;/li&gt;
+&lt;li&gt;执行完后再反向恢复回用户态。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;这些过程虽然不是“线程切换”，但都需要 CPU 做额外操作。&lt;/p&gt;</description>
+    </item>
+    <item>
       <title>Linux NAPI机制知识点总结</title>
-      <link>https://kerolt.github.io/posts/os/linux-napi%E6%9C%BA%E5%88%B6%E7%9F%A5%E8%AF%86%E7%82%B9%E6%80%BB%E7%BB%93/</link>
+      <link>https://kerolt.github.io/posts/linux/linux-napi%E6%9C%BA%E5%88%B6%E7%9F%A5%E8%AF%86%E7%82%B9%E6%80%BB%E7%BB%93/</link>
       <pubDate>Wed, 17 Sep 2025 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/os/linux-napi%E6%9C%BA%E5%88%B6%E7%9F%A5%E8%AF%86%E7%82%B9%E6%80%BB%E7%BB%93/</guid>
+      <guid>https://kerolt.github.io/posts/linux/linux-napi%E6%9C%BA%E5%88%B6%E7%9F%A5%E8%AF%86%E7%82%B9%E6%80%BB%E7%BB%93/</guid>
       <description>&lt;blockquote&gt;
 &lt;p&gt;对 &lt;a href=&#34;https://docs.kernel.org/networking/napi.html&#34;&gt;https://docs.kernel.org/networking/napi.html&lt;/a&gt; 的总结&lt;/p&gt;
 &lt;/blockquote&gt;
@@ -121,9 +190,9 @@
     </item>
     <item>
       <title>【问题记录】ddns-go与IPv6网络配置</title>
-      <link>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/%E9%97%AE%E9%A2%98%E8%A7%A3%E5%86%B3/%E9%97%AE%E9%A2%98%E8%AE%B0%E5%BD%95ddns-go%E4%B8%8Eipv6%E7%BD%91%E7%BB%9C%E9%85%8D%E7%BD%AE/</link>
+      <link>https://kerolt.github.io/posts/network/%E9%97%AE%E9%A2%98%E8%AE%B0%E5%BD%95ddns-go%E4%B8%8Eipv6%E7%BD%91%E7%BB%9C%E9%85%8D%E7%BD%AE/</link>
       <pubDate>Fri, 29 Aug 2025 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/%E9%97%AE%E9%A2%98%E8%A7%A3%E5%86%B3/%E9%97%AE%E9%A2%98%E8%AE%B0%E5%BD%95ddns-go%E4%B8%8Eipv6%E7%BD%91%E7%BB%9C%E9%85%8D%E7%BD%AE/</guid>
+      <guid>https://kerolt.github.io/posts/network/%E9%97%AE%E9%A2%98%E8%AE%B0%E5%BD%95ddns-go%E4%B8%8Eipv6%E7%BD%91%E7%BB%9C%E9%85%8D%E7%BD%AE/</guid>
       <description>&lt;p&gt;在完成 &lt;a href=&#34;https://zhuanlan.zhihu.com/p/1943305270387275457&#34;&gt;Rustdesk 自建服务器&lt;/a&gt; 的搭建后，我又想到：由于实验室服务器的公网 &lt;strong&gt;IPv6 地址&lt;/strong&gt; 并非永久不变，直接使用 IP 进行远程连接（如 SSH 或 Rustdesk）并不现实，如何确保远程访问的稳定性和便利性呢。为了解决这一痛点，我决定利用 &lt;strong&gt;动态域名解析（DDNS）&lt;/strong&gt; 技术，配合 &lt;strong&gt;ddns-go&lt;/strong&gt; 和 &lt;strong&gt;阿里云 DNS&lt;/strong&gt; 服务，将服务器的动态 IP 地址实时绑定到一个易于记忆的域名上。&lt;/p&gt;
 &lt;p&gt;本文将记录我在配置过程中遇到的四个主要问题及其解决方案。&lt;/p&gt;
 &lt;hr&gt;
@@ -148,9 +217,9 @@
     </item>
     <item>
       <title>【解决】Fedora42升级启动时显示kernel panic</title>
-      <link>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/%E9%97%AE%E9%A2%98%E8%A7%A3%E5%86%B3/%E8%A7%A3%E5%86%B3fedora42%E5%8D%87%E7%BA%A7%E5%90%AF%E5%8A%A8%E6%97%B6%E6%98%BE%E7%A4%BAkernel-panic/</link>
+      <link>https://kerolt.github.io/posts/linux/%E8%A7%A3%E5%86%B3fedora42%E5%8D%87%E7%BA%A7%E5%90%AF%E5%8A%A8%E6%97%B6%E6%98%BE%E7%A4%BAkernel-panic/</link>
       <pubDate>Sun, 27 Apr 2025 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/%E9%97%AE%E9%A2%98%E8%A7%A3%E5%86%B3/%E8%A7%A3%E5%86%B3fedora42%E5%8D%87%E7%BA%A7%E5%90%AF%E5%8A%A8%E6%97%B6%E6%98%BE%E7%A4%BAkernel-panic/</guid>
+      <guid>https://kerolt.github.io/posts/linux/%E8%A7%A3%E5%86%B3fedora42%E5%8D%87%E7%BA%A7%E5%90%AF%E5%8A%A8%E6%97%B6%E6%98%BE%E7%A4%BAkernel-panic/</guid>
       <description>&lt;p&gt;最近 Fedora42 更新了，因此我打算升级一下玩玩。在执行完下面的命令后：&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;sudo dnf upgrade --refresh
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;sudo dnf system-upgrade download --releasever&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#f60&#34;&gt;42&lt;/span&gt;
@@ -173,9 +242,9 @@
     </item>
     <item>
       <title>解决X11下窗口拖动撕裂的一个方法</title>
-      <link>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/%E9%97%AE%E9%A2%98%E8%A7%A3%E5%86%B3/%E8%A7%A3%E5%86%B3x11%E4%B8%8B%E7%AA%97%E5%8F%A3%E6%8B%96%E5%8A%A8%E6%92%95%E8%A3%82%E7%9A%84%E4%B8%80%E4%B8%AA%E6%96%B9%E6%B3%95/</link>
+      <link>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/%E8%A7%A3%E5%86%B3x11%E4%B8%8B%E7%AA%97%E5%8F%A3%E6%8B%96%E5%8A%A8%E6%92%95%E8%A3%82%E7%9A%84%E4%B8%80%E4%B8%AA%E6%96%B9%E6%B3%95/</link>
       <pubDate>Tue, 03 Sep 2024 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/%E9%97%AE%E9%A2%98%E8%A7%A3%E5%86%B3/%E8%A7%A3%E5%86%B3x11%E4%B8%8B%E7%AA%97%E5%8F%A3%E6%8B%96%E5%8A%A8%E6%92%95%E8%A3%82%E7%9A%84%E4%B8%80%E4%B8%AA%E6%96%B9%E6%B3%95/</guid>
+      <guid>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/%E8%A7%A3%E5%86%B3x11%E4%B8%8B%E7%AA%97%E5%8F%A3%E6%8B%96%E5%8A%A8%E6%92%95%E8%A3%82%E7%9A%84%E4%B8%80%E4%B8%AA%E6%96%B9%E6%B3%95/</guid>
       <description>&lt;blockquote&gt;
 &lt;p&gt;Debian 系 Linux 安装 N 卡驱动参考这篇 &lt;a href=&#34;https://www.if-not-true-then-false.com/2021/debian-ubuntu-linux-mint-nvidia-guide/&#34;&gt;博客&lt;/a&gt;&lt;/p&gt;
 &lt;/blockquote&gt;

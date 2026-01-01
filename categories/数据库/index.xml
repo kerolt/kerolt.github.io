@@ -9,7 +9,7 @@
       <url>https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</url>
       <link>https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</link>
     </image>
-    <generator>Hugo -- 0.152.2</generator>
+    <generator>Hugo -- 0.154.0</generator>
     <language>en</language>
     <lastBuildDate>Tue, 06 May 2025 00:00:00 +0000</lastBuildDate>
     <atom:link href="https://kerolt.github.io/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/index.xml" rel="self" type="application/rss+xml" />
@@ -76,38 +76,38 @@
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;                                   std&lt;span style=&#34;color:#555&#34;&gt;::&lt;/span&gt;shared_ptr&lt;span style=&#34;color:#555&#34;&gt;&amp;lt;&lt;/span&gt;CheckOptions&lt;span style=&#34;color:#555&#34;&gt;&amp;gt;&lt;/span&gt; check_options) &lt;span style=&#34;color:#555&#34;&gt;-&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#078;font-weight:bold&#34;&gt;bool&lt;/span&gt; {
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;if&lt;/span&gt; (&lt;span style=&#34;color:#555&#34;&gt;!&lt;/span&gt;sql.empty() &lt;span style=&#34;color:#555&#34;&gt;&amp;amp;&amp;amp;&lt;/span&gt; sql[&lt;span style=&#34;color:#f60&#34;&gt;0&lt;/span&gt;] &lt;span style=&#34;color:#555&#34;&gt;==&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;\\&amp;#39;&lt;/span&gt;) {
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;// 处理元命令
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;&lt;/span&gt;    ... 
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    ... 
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  }
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;// binder，但是在其中会使用libpg_query来解析sql语句
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;&lt;/span&gt;  bustub&lt;span style=&#34;color:#555&#34;&gt;::&lt;/span&gt;Binder binder(&lt;span style=&#34;color:#555&#34;&gt;*&lt;/span&gt;catalog_);
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  bustub&lt;span style=&#34;color:#555&#34;&gt;::&lt;/span&gt;Binder binder(&lt;span style=&#34;color:#555&#34;&gt;*&lt;/span&gt;catalog_);
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  binder.ParseAndSave(sql);
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;// 经过上一步后，binder中的statement_nodes_存储着所有的语句解析节点
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;&lt;/span&gt;  &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;for&lt;/span&gt; (&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;auto&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;*&lt;/span&gt;&lt;span style=&#34;color:#99f&#34;&gt;stmt&lt;/span&gt; : binder.statement_nodes_) {
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;for&lt;/span&gt; (&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;auto&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;*&lt;/span&gt;&lt;span style=&#34;color:#99f&#34;&gt;stmt&lt;/span&gt; : binder.statement_nodes_) {
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;// 将stmt转换成BoundStatement对象，方便后面处理数据
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;&lt;/span&gt;    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;auto&lt;/span&gt; statement &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; binder.BindStatement(stmt);
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;auto&lt;/span&gt; statement &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; binder.BindStatement(stmt);
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;// 只有不需要构建plan树、不需要进行优化的sql语句才会在switch之后继续执行
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;&lt;/span&gt;    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;switch&lt;/span&gt; (statement&lt;span style=&#34;color:#555&#34;&gt;-&amp;gt;&lt;/span&gt;type_) {
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;switch&lt;/span&gt; (statement&lt;span style=&#34;color:#555&#34;&gt;-&amp;gt;&lt;/span&gt;type_) {
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;      ...
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    }
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;// 生成初步的执行计划
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;&lt;/span&gt;    bustub&lt;span style=&#34;color:#555&#34;&gt;::&lt;/span&gt;Planner planner(&lt;span style=&#34;color:#555&#34;&gt;*&lt;/span&gt;catalog_);
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    bustub&lt;span style=&#34;color:#555&#34;&gt;::&lt;/span&gt;Planner planner(&lt;span style=&#34;color:#555&#34;&gt;*&lt;/span&gt;catalog_);
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    planner.PlanQuery(&lt;span style=&#34;color:#555&#34;&gt;*&lt;/span&gt;statement);
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;// 优化刚刚的执行计划
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;&lt;/span&gt;    bustub&lt;span style=&#34;color:#555&#34;&gt;::&lt;/span&gt;Optimizer optimizer(&lt;span style=&#34;color:#555&#34;&gt;*&lt;/span&gt;catalog_, IsForceStarterRule());
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    bustub&lt;span style=&#34;color:#555&#34;&gt;::&lt;/span&gt;Optimizer optimizer(&lt;span style=&#34;color:#555&#34;&gt;*&lt;/span&gt;catalog_, IsForceStarterRule());
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;auto&lt;/span&gt; optimized_plan &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; optimizer.Optimize(planner.plan_);
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	...
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;// 执行优化后的plan，这里会使用火山模型去根据下面节点的Next函数来执行相应的算子
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;&lt;/span&gt;	execution_engine_&lt;span style=&#34;color:#555&#34;&gt;-&amp;gt;&lt;/span&gt;Execute(optimized_plan, &lt;span style=&#34;color:#555&#34;&gt;&amp;amp;&lt;/span&gt;result_set, txn, exec_ctx.get());
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	execution_engine_&lt;span style=&#34;color:#555&#34;&gt;-&amp;gt;&lt;/span&gt;Execute(optimized_plan, &lt;span style=&#34;color:#555&#34;&gt;&amp;amp;&lt;/span&gt;result_set, txn, exec_ctx.get());
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;// 将执行结果输出至指定位置
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;&lt;/span&gt;	...
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	...
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  }
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color:#a00;background-color:#faa&#34;&gt;是否执行成功&lt;/span&gt;;	
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;}
@@ -142,7 +142,7 @@
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;*&lt;/span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;this&lt;/span&gt;;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  }
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;// ... 其他操作
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;&lt;/span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;}
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;在&lt;code&gt;ReadPageGuard&lt;/code&gt;和&lt;code&gt;WritePageGuard&lt;/code&gt;的&lt;code&gt;Drop()&lt;/code&gt;中，还需要考虑释放管理的page的锁。对应的，锁的获取发生在&lt;code&gt;FetchPageWrite()&lt;/code&gt;和&lt;code&gt;FetchPageWrite()&lt;/code&gt;中。&lt;/p&gt;
 &lt;h2 id=&#34;task2---extendible-hash-table-pages&#34;&gt;Task2 - Extendible Hash Table Pages&lt;/h2&gt;
 &lt;p&gt;为什么我们需要可扩展哈希？&lt;/p&gt;

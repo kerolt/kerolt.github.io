@@ -15,7 +15,7 @@ Sylar的协程调度器是一个N-M模型，意味着N个线程可以运行M个�
 <svg id="moon" width="24" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
 <svg id="sun" width="24" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></button></div></div><ul id=menu><li><a href=https://kerolt.github.io/posts/ title=文章><span>文章</span></a></li><li><a href=https://kerolt.github.io/categories/ title=分类><span>分类</span></a></li><li><a href=https://kerolt.github.io/tags/ title=标签><span>标签</span></a></li><li><a href=https://kerolt.github.io/archives/ title=归档><span>归档</span></a></li><li><a href=https://kerolt.github.io/about/ title=关于我><span>关于我</span></a></li><li><a href=https://kerolt.github.io/search/ title="🔍 (Alt + /)" accesskey=/><span>🔍</span></a></li></ul></nav></header><main class=main><article class=post-single><header class=post-header><div class=breadcrumbs><a href=https://kerolt.github.io/>Home</a>&nbsp;»&nbsp;<a href=https://kerolt.github.io/posts/>Posts</a></div><h1 class="post-title entry-hint-parent">【动手写协程库 2】协程调度器</h1><div class=post-meta><span title='2024-09-11 00:00:00 +0000 UTC'>发布于2024-09-11</span>&nbsp;&nbsp;·&nbsp;&nbsp;Kerolt</div><ul class=post-tags><li><a href=https://kerolt.github.io/tags/cplusplus/>CPlusPlus</a></li><li><a href=https://kerolt.github.io/tags/coroutine/>Coroutine</a></li></ul></header><div class=post-content><blockquote><p>【动手写协程库】系列笔记是学习sylar的协程库时的记录，参考了<a href="https://www.midlane.top/wiki/pages/viewpage.action?pageId=10060952">从零开始重写sylar C++高性能分布式服务器框架</a>和代码随想录中的<a href=https://www.programmercarl.com/other/project_coroutine.html#%E4%B8%8B%E8%BD%BD%E6%96%B9%E5%BC%8F>文档</a>。文章并不是对所有代码的详细解释，而是为了自己理解一些片段所做的笔记。</p><p><code>Scheduler</code>类中其他函数的定义可以在这里查看：<a href=https://github.com/kerolt/coroutine-lib/blob/master/src/scheduler.cpp>Github: src/scheduler.cpp</a></p></blockquote><p>Sylar的协程调度器是一个N-M模型，意味着N个线程可以运行M个协程，协程能够在线程之间进行切换，也可以被绑定到特定的线程上执行。</p><p>调度器可以由应用程序中的任何线程创建，但创建它的线程（称为caller线程）可以选择是否参与协程的调度。如果caller线程参与调度，那么调度器的线程数会相应减少一个，因为caller线程本身也会作为一个调度线程。</p><p>Scheduler相关API如下：</p><div class=highlight><pre tabindex=0 style=background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-cpp data-lang=cpp><span style=display:flex><span><span style=color:#099>#ifndef SCHEDULER_H_
 </span></span></span><span style=display:flex><span><span style=color:#099>#define SCHEDULER_H_
-</span></span></span><span style=display:flex><span><span style=color:#099></span>
+</span></span></span><span style=display:flex><span>
 </span></span><span style=display:flex><span><span style=color:#099>#include</span> <span style=color:#099>&lt;atomic&gt;</span><span style=color:#099>
 </span></span></span><span style=display:flex><span><span style=color:#099>#include</span> <span style=color:#099>&lt;cstddef&gt;</span><span style=color:#099>
 </span></span></span><span style=display:flex><span><span style=color:#099>#include</span> <span style=color:#099>&lt;functional&gt;</span><span style=color:#099>
@@ -28,12 +28,12 @@ Sylar的协程调度器是一个N-M模型，意味着N个线程可以运行M个�
 </span></span></span><span style=display:flex><span><span style=color:#099>#include</span> <span style=color:#099>&lt;vector&gt;</span><span style=color:#099>
 </span></span></span><span style=display:flex><span><span style=color:#099>#include</span> <span style=color:#099>&#34;coroutine.h&#34;</span><span style=color:#099>
 </span></span></span><span style=display:flex><span><span style=color:#099>#include</span> <span style=color:#099>&#34;util.h&#34;</span><span style=color:#099>
-</span></span></span><span style=display:flex><span><span style=color:#099></span>
+</span></span></span><span style=display:flex><span>
 </span></span><span style=display:flex><span><span style=color:#09f;font-style:italic>// 协程调度器
-</span></span></span><span style=display:flex><span><span style=color:#09f;font-style:italic></span><span style=color:#069;font-weight:700>class</span> <span style=color:#0a8;font-weight:700>Scheduler</span> {
+</span></span></span><span style=display:flex><span><span style=color:#069;font-weight:700>class</span> <span style=color:#0a8;font-weight:700>Scheduler</span> {
 </span></span><span style=display:flex><span><span style=color:#069;font-weight:700>private</span><span style=color:#555>:</span>
 </span></span><span style=display:flex><span>    <span style=color:#09f;font-style:italic>// 调度任务，任务类型可以是协程/函数二选一，并且可指定调度线程
-</span></span></span><span style=display:flex><span><span style=color:#09f;font-style:italic></span>    <span style=color:#069;font-weight:700>using</span> ThreadIdPtr <span style=color:#555>=</span> std<span style=color:#555>::</span>shared_ptr<span style=color:#555>&lt;</span>std<span style=color:#555>::</span><span style=color:#069;font-weight:700>thread</span><span style=color:#555>::</span>id<span style=color:#555>&gt;</span>;
+</span></span></span><span style=display:flex><span>    <span style=color:#069;font-weight:700>using</span> ThreadIdPtr <span style=color:#555>=</span> std<span style=color:#555>::</span>shared_ptr<span style=color:#555>&lt;</span>std<span style=color:#555>::</span><span style=color:#069;font-weight:700>thread</span><span style=color:#555>::</span>id<span style=color:#555>&gt;</span>;
 </span></span><span style=display:flex><span>
 </span></span><span style=display:flex><span>    <span style=color:#069;font-weight:700>struct</span> <span style=color:#0a8;font-weight:700>SchedulerTask</span> {
 </span></span><span style=display:flex><span>        ThreadIdPtr thread_id_;
@@ -120,19 +120,19 @@ Sylar的协程调度器是一个N-M模型，意味着N个线程可以运行M个�
 </span></span><span style=display:flex><span>    std<span style=color:#555>::</span>atomic_size_t idle_threads_{<span style=color:#f60>0</span>};
 </span></span><span style=display:flex><span>
 </span></span><span style=display:flex><span>    std<span style=color:#555>::</span><span style=color:#069;font-weight:700>thread</span><span style=color:#555>::</span>id sched_id_; <span style=color:#09f;font-style:italic>// use_caller为true时，调度器所在的线程id
-</span></span></span><span style=display:flex><span><span style=color:#09f;font-style:italic></span>    Coroutine<span style=color:#555>::</span>Ptr sched_co_;  <span style=color:#09f;font-style:italic>// use_caller为true时调度器所在线程的调度协程
-</span></span></span><span style=display:flex><span><span style=color:#09f;font-style:italic></span>    <span style=color:#078;font-weight:700>bool</span> is_stop_;
+</span></span></span><span style=display:flex><span>    Coroutine<span style=color:#555>::</span>Ptr sched_co_;  <span style=color:#09f;font-style:italic>// use_caller为true时调度器所在线程的调度协程
+</span></span></span><span style=display:flex><span>    <span style=color:#078;font-weight:700>bool</span> is_stop_;
 </span></span><span style=display:flex><span>    <span style=color:#078;font-weight:700>bool</span> is_use_caller_;
 </span></span><span style=display:flex><span>};
 </span></span><span style=display:flex><span>
 </span></span><span style=display:flex><span><span style=color:#099>#endif </span><span style=color:#09f;font-style:italic>/* SCHEDULER_H_ */</span><span style=color:#099>
 </span></span></span></code></pre></div><p>调度器的工作流大致为：</p><ul><li><strong>协程调度器在初始化时</strong>可传入线程数和一个布尔型的<code>use_caller</code>参数，表示是否使用caller线程。在使用caller线程的情况下，线程数自动减一，并且调度器内部会初始化一个属于caller线程的调度协程并保存起来（比如，在main函数中创建的调度器，如果use_caller为true，那调度器会初始化一个属于main函数线程的调度协程）。</li><li><strong>调度器创建好后</strong> ，即可调用调度器的<code>Sched</code>函数向调度器添加调度任务，但此时调度器并不会立刻执行这些任务，而是将它们保存到内部的一个任务队列中。</li><li><strong>调用<code>Scheduler::Start()</code>函数启动调度</strong> 。调用Start会创建调度线程池，线程数量由初始化时的线程数和use_caller确定。调度线程一旦创建，就会<strong>立刻</strong>从任务队列里取任务执行。比较特殊的一点是，如果初始化时指定线程数为1且use_caller为true，那么Start方法什么也不做，因为不需要创建新线程用于调度。并且，由于没有创建新的调度线程，那只能由caller线程的调度协程来负责调度协程（这里有点绕），而caller线程的调度协程的执行时机与Start函数并不在同一个地方。caller线程的调度协程的执行时机在Stop函数中。</li><li><strong>接下来是调度协程，对应<code>Scheduler::Run()</code></strong> 。调度协程负责从调度器的任务队列中取任务执行。取出的任务即子协程，每个子协程执行完后都必须返回调度协程，由调度协程重新从任务队列中取新的协程并执行。如果任务队列空了，那么调度协程会切换到一个idle协程，等有新任务进来时，idle协程才会退出并回到调度协程，重新开始下一轮调度。（在Scheduler中，idle函数的定义十分简单粗暴，因为实际使用协程库时并不是直接使用Scheduler类，而是使用它的派生类，在派生类中将会实现更为完善的调度）</li><li><strong>接下来是添加调度任务，对应<code>Scheduler::Sched()</code></strong> ，这个方法支持传入协程或函数，并且支持一个线程id参数，表示是否将这个协程或函数绑定到一个具体的线程上执行。如果任务队列为空，那么在添加任务之后，要调用一次tickle方法以通知各调度线程的调度协程有新任务来了。在执行调度任务时，还可以通过调度器的<code>GetScheduler()</code>获取到当前调度器，再通过<code>Sched</code>函数继续添加新的任务，这就变相实现了在子协程中创建并运行新的子协程的功能。</li><li><strong>接下来是调度器的停止</strong>。调度器的停止行为要分两种情况讨论，首先是use_caller为false的情况，这种情况下，由于没有使用caller线程进行调度，那么只需要简单地等各个调度线程的调度协程退出就行了。如果use_caller为true，表示caller线程也要参于调度，这时，调度器初始化时记录的属于caller线程的调度协程就要起作用了，在调度器停止前，应该让这个caller线程的调度协程也运行一次，让caller线程完成调度工作后再退出。如果调度器只使用了caller线程进行调度，那么所有的调度任务要在调度器停止时才会被调度。</li></ul><p>调度器中最重要的一个函数我认为就是<code>Run()</code>函数了，这个函数用于协程的调度，或者，你可以将他理解为是一个调度协程（名词）。</p><p>创建Scheduler时会为每一个内部线程池中的每一个线程都绑定一个调度协程，线程数量默认为1，此时也默认会使用caller线程，也就是使用的主线程。调度协程<code>Scheduler::Run()</code>会从任务队列Task Queue中不断去取任务去执行。如果有任务可执行，那就切换至任务协程执行，任务协程执行完毕后又切换回调度协程；无任务执行时，调度协程切换至Idle协程进行等待。</p><p><div class=post-img-view><a data-fancybox=gallery href=https://gitee.com/kerolt/picture/raw/main/20241216-143744.png><img src=https://gitee.com/kerolt/picture/raw/main/20241216-143744.png alt></a></div></p><div class=highlight><pre tabindex=0 style=background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-cpp data-lang=cpp><span style=display:flex><span><span style=color:#09f;font-style:italic>// 用于协程的调度
-</span></span></span><span style=display:flex><span><span style=color:#09f;font-style:italic></span><span style=color:#078;font-weight:700>void</span> Scheduler<span style=color:#555>::</span>Run() {
+</span></span></span><span style=display:flex><span><span style=color:#078;font-weight:700>void</span> Scheduler<span style=color:#555>::</span>Run() {
 </span></span><span style=display:flex><span>    LOG <span style=color:#555>&lt;&lt;</span> <span style=color:#c30>&#34;Scheduler running...</span><span style=color:#c30;font-weight:700>\n</span><span style=color:#c30>&#34;</span>;
 </span></span><span style=display:flex><span>    SetThisAsScheduler();
 </span></span><span style=display:flex><span>
 </span></span><span style=display:flex><span>    <span style=color:#09f;font-style:italic>// 如果当前线程不是调度器所在线程，设置调度的协程为当前线程运行的协程
-</span></span></span><span style=display:flex><span><span style=color:#09f;font-style:italic></span>    <span style=color:#069;font-weight:700>if</span> (std<span style=color:#555>::</span>this_thread<span style=color:#555>::</span>get_id() <span style=color:#555>!=</span> sched_id_) {
+</span></span></span><span style=display:flex><span>    <span style=color:#069;font-weight:700>if</span> (std<span style=color:#555>::</span>this_thread<span style=color:#555>::</span>get_id() <span style=color:#555>!=</span> sched_id_) {
 </span></span><span style=display:flex><span>        sched_coroutine <span style=color:#555>=</span> Coroutine<span style=color:#555>::</span>GetNowCoroutine().get();
 </span></span><span style=display:flex><span>    }
 </span></span><span style=display:flex><span>
@@ -149,7 +149,7 @@ Sylar的协程调度器是一个N-M模型，意味着N个线程可以运行M个�
 </span></span><span style=display:flex><span>            <span style=color:#069;font-weight:700>auto</span> iter <span style=color:#555>=</span> tasks_.begin();
 </span></span><span style=display:flex><span>            <span style=color:#069;font-weight:700>while</span> (iter <span style=color:#555>!=</span> tasks_.end()) {
 </span></span><span style=display:flex><span>                <span style=color:#09f;font-style:italic>// 当前遍历的task已经分配了线程去执行且这个线程不是当前线程，则不用管
-</span></span></span><span style=display:flex><span><span style=color:#09f;font-style:italic></span>                <span style=color:#069;font-weight:700>if</span> (iter<span style=color:#555>-&gt;</span>thread_id_ <span style=color:#555>&amp;&amp;</span> <span style=color:#555>*</span>iter<span style=color:#555>-&gt;</span>thread_id_ <span style=color:#555>!=</span> std<span style=color:#555>::</span>this_thread<span style=color:#555>::</span>get_id()) {
+</span></span></span><span style=display:flex><span>                <span style=color:#069;font-weight:700>if</span> (iter<span style=color:#555>-&gt;</span>thread_id_ <span style=color:#555>&amp;&amp;</span> <span style=color:#555>*</span>iter<span style=color:#555>-&gt;</span>thread_id_ <span style=color:#555>!=</span> std<span style=color:#555>::</span>this_thread<span style=color:#555>::</span>get_id()) {
 </span></span><span style=display:flex><span>                    <span style=color:#555>++</span>iter;
 </span></span><span style=display:flex><span>                    tickle <span style=color:#555>=</span> <span style=color:#366>true</span>;
 </span></span><span style=display:flex><span>                    <span style=color:#069;font-weight:700>continue</span>;
@@ -164,20 +164,20 @@ Sylar的协程调度器是一个N-M模型，意味着N个线程可以运行M个�
 </span></span><span style=display:flex><span>                <span style=color:#069;font-weight:700>break</span>;
 </span></span><span style=display:flex><span>            }
 </span></span><span style=display:flex><span>            <span style=color:#09f;font-style:italic>// 有任务可以去执行，需要tickle一下
-</span></span></span><span style=display:flex><span><span style=color:#09f;font-style:italic></span>            tickle <span style=color:#555>|=</span> (iter <span style=color:#555>!=</span> tasks_.end());
+</span></span></span><span style=display:flex><span>            tickle <span style=color:#555>|=</span> (iter <span style=color:#555>!=</span> tasks_.end());
 </span></span><span style=display:flex><span>        }
 </span></span><span style=display:flex><span>        <span style=color:#069;font-weight:700>if</span> (tickle) {
 </span></span><span style=display:flex><span>            Tickle();
 </span></span><span style=display:flex><span>        }
 </span></span><span style=display:flex><span>
 </span></span><span style=display:flex><span>        <span style=color:#09f;font-style:italic>// 子协程执行完毕后yield会回到Run()中
-</span></span></span><span style=display:flex><span><span style=color:#09f;font-style:italic></span>        <span style=color:#069;font-weight:700>if</span> (task.coroutine_) {
+</span></span></span><span style=display:flex><span>        <span style=color:#069;font-weight:700>if</span> (task.coroutine_) {
 </span></span><span style=display:flex><span>            <span style=color:#09f;font-style:italic>// 任务类型为协程
-</span></span></span><span style=display:flex><span><span style=color:#09f;font-style:italic></span>            task.coroutine_<span style=color:#555>-&gt;</span>Resume();
+</span></span></span><span style=display:flex><span>            task.coroutine_<span style=color:#555>-&gt;</span>Resume();
 </span></span><span style=display:flex><span>            active_threads_<span style=color:#555>--</span>;
 </span></span><span style=display:flex><span>        } <span style=color:#069;font-weight:700>else</span> <span style=color:#c0f>if</span> (task.callback_) {
 </span></span><span style=display:flex><span>            <span style=color:#09f;font-style:italic>// 任务类型为回调函数
-</span></span></span><span style=display:flex><span><span style=color:#09f;font-style:italic></span>            <span style=color:#069;font-weight:700>if</span> (callback_co) {
+</span></span></span><span style=display:flex><span>            <span style=color:#069;font-weight:700>if</span> (callback_co) {
 </span></span><span style=display:flex><span>                callback_co<span style=color:#555>-&gt;</span>Reset(task.callback_);
 </span></span><span style=display:flex><span>            } <span style=color:#069;font-weight:700>else</span> {
 </span></span><span style=display:flex><span>                callback_co <span style=color:#555>=</span> std<span style=color:#555>::</span>make_shared<span style=color:#555>&lt;</span>Coroutine<span style=color:#555>&gt;</span>(task.callback_);
@@ -186,19 +186,19 @@ Sylar的协程调度器是一个N-M模型，意味着N个线程可以运行M个�
 </span></span><span style=display:flex><span>            active_threads_<span style=color:#555>--</span>;
 </span></span><span style=display:flex><span>        } <span style=color:#069;font-weight:700>else</span> {
 </span></span><span style=display:flex><span>            <span style=color:#09f;font-style:italic>// 无任务，任务队列为空
-</span></span></span><span style=display:flex><span><span style=color:#09f;font-style:italic></span>            <span style=color:#069;font-weight:700>if</span> (idle_co<span style=color:#555>-&gt;</span>GetState() <span style=color:#555>==</span> Coroutine<span style=color:#555>::</span>FINISH) {
+</span></span></span><span style=display:flex><span>            <span style=color:#069;font-weight:700>if</span> (idle_co<span style=color:#555>-&gt;</span>GetState() <span style=color:#555>==</span> Coroutine<span style=color:#555>::</span>FINISH) {
 </span></span><span style=display:flex><span>                LOG <span style=color:#555>&lt;&lt;</span> <span style=color:#c30>&#34;Idle coroutine finish</span><span style=color:#c30;font-weight:700>\n</span><span style=color:#c30>&#34;</span>;
 </span></span><span style=display:flex><span>                <span style=color:#069;font-weight:700>break</span>;
 </span></span><span style=display:flex><span>            }
 </span></span><span style=display:flex><span>            idle_threads_<span style=color:#555>++</span>;
 </span></span><span style=display:flex><span>            idle_co<span style=color:#555>-&gt;</span>Resume(); <span style=color:#09f;font-style:italic>// Idle最后Yeild时回到这里
-</span></span></span><span style=display:flex><span><span style=color:#09f;font-style:italic></span>            idle_threads_<span style=color:#555>--</span>;
+</span></span></span><span style=display:flex><span>            idle_threads_<span style=color:#555>--</span>;
 </span></span><span style=display:flex><span>        }
 </span></span><span style=display:flex><span>    }
 </span></span><span style=display:flex><span>    LOG <span style=color:#555>&lt;&lt;</span> <span style=color:#c30>&#34;Scheduler Run() exit</span><span style=color:#c30;font-weight:700>\n</span><span style=color:#c30>&#34;</span>;
 </span></span><span style=display:flex><span>}
 </span></span></code></pre></div><p>这个Scheduler是一个很简单的调度器，要对任务做更好的调度，少不了Idle协程的帮助。Idle协程的具体实现要在之后的IOManager中，其继承自Scheduler，重写了<code>Tickle()</code>、<code>Idle()</code>等函数，并且使用epoll来实现在不同的 I/O 事件发生时，触发相应的处理逻辑。这使得程序可以以非阻塞的方式处理多个 I/O 操作，而不必等待每个操作完成后再进行下一个操作。</p></div><footer class=post-footer><nav class=paginav><a class=prev href=https://kerolt.github.io/posts/c++/enable_shared_from_this%E7%9A%84%E4%BD%9C%E7%94%A8/><span class=title>« Prev</span><br><span>enable_shared_from_this的作用</span>
-</a><a class=next href=https://kerolt.github.io/posts/%E5%8A%A8%E6%89%8B%E5%AE%9E%E7%8E%B0x/%E5%8A%A8%E6%89%8B%E5%86%99%E5%8D%8F%E7%A8%8B%E5%BA%93-1%E5%8D%8F%E7%A8%8B%E5%AE%9A%E4%B9%89/><span class=title>Next »</span><br><span>【动手写协程库 1】协程定义</span></a></nav></footer></article></main><footer class=footer><span>&copy; 2025 <a href=https://kerolt.github.io/>Kerolt's Blog</a></span> ·
+</a><a class=next href=https://kerolt.github.io/posts/%E5%8A%A8%E6%89%8B%E5%AE%9E%E7%8E%B0x/%E5%8A%A8%E6%89%8B%E5%86%99%E5%8D%8F%E7%A8%8B%E5%BA%93-1%E5%8D%8F%E7%A8%8B%E5%AE%9A%E4%B9%89/><span class=title>Next »</span><br><span>【动手写协程库 1】协程定义</span></a></nav></footer></article></main><footer class=footer><span>&copy; 2026 <a href=https://kerolt.github.io/>Kerolt's Blog</a></span> ·
 <span>Powered by
 <a href=https://gohugo.io/ rel="noopener noreferrer" target=_blank>Hugo</a> &
 <a href=https://github.com/adityatelange/hugo-PaperMod/ rel=noopener target=_blank>PaperMod</a></span></footer><a href=#top aria-label="go to top" title="Go to Top (Alt + G)" class=top-link id=top-link accesskey=g><svg viewBox="0 0 12 6" fill="currentColor"><path d="M12 6H0l6-6z"/></svg>

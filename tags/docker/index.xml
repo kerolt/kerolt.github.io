@@ -9,7 +9,7 @@
       <url>https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</url>
       <link>https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</link>
     </image>
-    <generator>Hugo -- 0.152.2</generator>
+    <generator>Hugo -- 0.154.0</generator>
     <language>en</language>
     <lastBuildDate>Mon, 13 Oct 2025 00:00:00 +0000</lastBuildDate>
     <atom:link href="https://kerolt.github.io/tags/docker/index.xml" rel="self" type="application/rss+xml" />
@@ -26,7 +26,7 @@
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;# 2. 添加仓库&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#366&#34;&gt;echo&lt;/span&gt; &lt;span style=&#34;color:#c30;font-weight:bold&#34;&gt;\
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#c30;font-weight:bold&#34;&gt;&lt;/span&gt;  &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;deb [arch=&lt;/span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;$(&lt;/span&gt;dpkg --print-architecture&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;)&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt; signed-by=/etc/apt/keyrings/aliyun-docker.gpg] https://mirrors.aliyun.com/docker-ce/linux/debian \
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;deb [arch=&lt;/span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;$(&lt;/span&gt;dpkg --print-architecture&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;)&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt; signed-by=/etc/apt/keyrings/aliyun-docker.gpg] https://mirrors.aliyun.com/docker-ce/linux/debian \
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#c30&#34;&gt;  &lt;/span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;$(&lt;/span&gt;lsb_release -cs&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;)&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt; stable&amp;#34;&lt;/span&gt; | sudo tee /etc/apt/sources.list.d/docker.list &amp;gt; /dev/null
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;# 3. 安装&lt;/span&gt;

@@ -9,7 +9,7 @@
       <url>https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</url>
       <link>https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</link>
     </image>
-    <generator>Hugo -- 0.152.2</generator>
+    <generator>Hugo -- 0.154.0</generator>
     <language>en</language>
     <lastBuildDate>Thu, 21 Aug 2025 00:00:00 +0000</lastBuildDate>
     <atom:link href="https://kerolt.github.io/categories/c++/index.xml" rel="self" type="application/rss+xml" />
@@ -19,7 +19,7 @@
       <pubDate>Thu, 21 Aug 2025 00:00:00 +0000</pubDate>
       <guid>https://kerolt.github.io/posts/c&#43;&#43;/cc&#43;&#43;%E7%B1%BB%E5%9E%8B%E5%8F%8C%E5%85%B3%E8%BD%AC%E6%8D%A2/</guid>
       <description>&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-cpp&#34; data-lang=&#34;cpp&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#099&#34;&gt;#include&lt;/span&gt; &lt;span style=&#34;color:#099&#34;&gt;&amp;lt;iostream&amp;gt;&lt;/span&gt;&lt;span style=&#34;color:#099&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#099&#34;&gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;auto&lt;/span&gt; &lt;span style=&#34;color:#c0f&#34;&gt;ASSERT&lt;/span&gt;(&lt;span style=&#34;color:#078;font-weight:bold&#34;&gt;bool&lt;/span&gt; flag, &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;const&lt;/span&gt; &lt;span style=&#34;color:#078;font-weight:bold&#34;&gt;char&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;*&lt;/span&gt; msg) {
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;if&lt;/span&gt; (&lt;span style=&#34;color:#555&#34;&gt;!&lt;/span&gt;flag) {
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        std&lt;span style=&#34;color:#555&#34;&gt;::&lt;/span&gt;cerr &lt;span style=&#34;color:#555&#34;&gt;&amp;lt;&amp;lt;&lt;/span&gt; msg &lt;span style=&#34;color:#555&#34;&gt;&amp;lt;&amp;lt;&lt;/span&gt; std&lt;span style=&#34;color:#555&#34;&gt;::&lt;/span&gt;endl;
@@ -27,12 +27,12 @@
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;}
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;// READ: 枚举类型 &amp;lt;https://zh.cppreference.com/w/cpp/language/enum&amp;gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;// `enum` 是 C 的兼容类型，本质上其对应类型的常量。
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;// 在 `enum` 中定义标识符等价于定义 constexpr 常量，
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;// 这些标识符不需要前缀，可以直接引用。
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;// 因此 `enum` 定义会污染命名空间。
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;enum&lt;/span&gt; &lt;span style=&#34;color:#0a8;font-weight:bold&#34;&gt;ColorEnum&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#078;font-weight:bold&#34;&gt;unsigned&lt;/span&gt; &lt;span style=&#34;color:#078;font-weight:bold&#34;&gt;char&lt;/span&gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;enum&lt;/span&gt; &lt;span style=&#34;color:#0a8;font-weight:bold&#34;&gt;ColorEnum&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#078;font-weight:bold&#34;&gt;unsigned&lt;/span&gt; &lt;span style=&#34;color:#078;font-weight:bold&#34;&gt;char&lt;/span&gt; {
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    COLOR_RED &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#f60&#34;&gt;31&lt;/span&gt;,
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    COLOR_GREEN,
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    COLOR_YELLOW,
@@ -42,7 +42,7 @@
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;// 有作用域枚举型是 C++ 引入的类型安全枚举。
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;// 其内部标识符需要带前缀引用，如 `Color::Red`。
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;// 作用域枚举型可以避免命名空间污染，并提供类型安全保证。
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;enum&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color:#0a8;font-weight:bold&#34;&gt;Color&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#078;font-weight:bold&#34;&gt;int&lt;/span&gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;enum&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color:#0a8;font-weight:bold&#34;&gt;Color&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#078;font-weight:bold&#34;&gt;int&lt;/span&gt; {
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    Red &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; COLOR_RED,
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    Green,
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    Yellow,
@@ -51,12 +51,12 @@
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;ColorEnum &lt;span style=&#34;color:#c0f&#34;&gt;convert_by_pun&lt;/span&gt;(Color c) {
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;// READ: &amp;lt;https://zh.cppreference.com/w/cpp/language/union&amp;gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;&lt;/span&gt;    &lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;// `union` 表示在同一内存位置存储的不同类型的值。
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;&lt;/span&gt;    &lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;// 其常见用法是实现类型双关转换，即将一种类型的值转换为另一种无关类型的值。
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;&lt;/span&gt;    &lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;// 但这种写法实际上仅在 C 语言良定义，在 C++ 中是未定义行为。
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;&lt;/span&gt;    &lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;// 这是比较少见的 C++ 不与 C 保持兼容的特性。
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;&lt;/span&gt;    &lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;// READ: 类型双关 &amp;lt;https://tttapa.github.io/Pages/Programming/Cpp/Practices/type-punning.html&amp;gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;&lt;/span&gt;    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;union&lt;/span&gt; &lt;span style=&#34;color:#0a8;font-weight:bold&#34;&gt;TypePun&lt;/span&gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;// `union` 表示在同一内存位置存储的不同类型的值。
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;// 其常见用法是实现类型双关转换，即将一种类型的值转换为另一种无关类型的值。
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;// 但这种写法实际上仅在 C 语言良定义，在 C++ 中是未定义行为。
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;// 这是比较少见的 C++ 不与 C 保持兼容的特性。
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;// READ: 类型双关 &amp;lt;https://tttapa.github.io/Pages/Programming/Cpp/Practices/type-punning.html&amp;gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;union&lt;/span&gt; &lt;span style=&#34;color:#0a8;font-weight:bold&#34;&gt;TypePun&lt;/span&gt; {
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        ColorEnum e;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        Color c;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    };
@@ -141,13 +141,13 @@
 &lt;h3 id=&#34;模板元编程技巧&#34;&gt;模板元编程技巧&lt;/h3&gt;
 &lt;p&gt;透明运算符的核心实现依赖于&lt;strong&gt;空模板参数列表&lt;/strong&gt;（&lt;code&gt;operator&amp;lt;&amp;gt;&lt;/code&gt;）这一巧妙设计。观察 &lt;code&gt;std::less&lt;/code&gt; 的标准库实现，我们会发现它提供了两种形式：&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-cpp&#34; data-lang=&#34;cpp&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;// 传统形式：指定比较类型
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;template&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;&amp;lt;&lt;/span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color:#0a8;font-weight:bold&#34;&gt;T&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;&amp;gt;&lt;/span&gt; 
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;template&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;&amp;lt;&lt;/span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color:#0a8;font-weight:bold&#34;&gt;T&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;&amp;gt;&lt;/span&gt; 
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;struct&lt;/span&gt; &lt;span style=&#34;color:#0a8;font-weight:bold&#34;&gt;less&lt;/span&gt; {
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#078;font-weight:bold&#34;&gt;bool&lt;/span&gt; &lt;span style=&#34;color:#c0f&#34;&gt;operator&lt;/span&gt;()(&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;const&lt;/span&gt; T&lt;span style=&#34;color:#555&#34;&gt;&amp;amp;&lt;/span&gt; lhs, &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;const&lt;/span&gt; T&lt;span style=&#34;color:#555&#34;&gt;&amp;amp;&lt;/span&gt; rhs) &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;const&lt;/span&gt;;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;};
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;// 透明形式：自动类型推导
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;template&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;&amp;lt;&amp;gt;&lt;/span&gt; 
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;template&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;&amp;lt;&amp;gt;&lt;/span&gt; 
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;struct&lt;/span&gt; &lt;span style=&#34;color:#0a8;font-weight:bold&#34;&gt;less&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;&amp;lt;&lt;/span&gt;&lt;span style=&#34;color:#078;font-weight:bold&#34;&gt;void&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;&amp;gt;&lt;/span&gt; {
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;template&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;&amp;lt;&lt;/span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color:#0a8;font-weight:bold&#34;&gt;T&lt;/span&gt;, &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color:#0a8;font-weight:bold&#34;&gt;U&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;&amp;gt;&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;auto&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;operator&lt;/span&gt;()(T&lt;span style=&#34;color:#555&#34;&gt;&amp;amp;&amp;amp;&lt;/span&gt; t, U&lt;span style=&#34;color:#555&#34;&gt;&amp;amp;&amp;amp;&lt;/span&gt; u) &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;const&lt;/span&gt; 
@@ -293,9 +293,9 @@
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-cpp&#34; data-lang=&#34;cpp&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color:#0a8;font-weight:bold&#34;&gt;Example&lt;/span&gt; {
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;public&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;:&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    Example() &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;default&lt;/span&gt;;          &lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;// 允许生成默认构造函数
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;&lt;/span&gt;    Example(&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;const&lt;/span&gt; Example&lt;span style=&#34;color:#555&#34;&gt;&amp;amp;&lt;/span&gt;) {}    &lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;// 用户定义的拷贝构造函数
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;&lt;/span&gt;    &lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;// 编译器不再生成默认的移动构造函数和移动赋值运算符
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;&lt;/span&gt;};
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    Example(&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;const&lt;/span&gt; Example&lt;span style=&#34;color:#555&#34;&gt;&amp;amp;&lt;/span&gt;) {}    &lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;// 用户定义的拷贝构造函数
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;// 编译器不再生成默认的移动构造函数和移动赋值运算符
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;};
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h2 id=&#34;2-用户定义析构函数拷贝移动操作的影响&#34;&gt;2. 用户定义析构函数、拷贝/移动操作的影响&lt;/h2&gt;
 &lt;ul&gt;
 &lt;li&gt;
@@ -306,8 +306,8 @@
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-cpp&#34; data-lang=&#34;cpp&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color:#0a8;font-weight:bold&#34;&gt;Example&lt;/span&gt; {
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;public&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;:&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	&lt;span style=&#34;color:#555&#34;&gt;~&lt;/span&gt;Example() {}  &lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;// 用户定义的析构函数
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;&lt;/span&gt;	&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;// 移动操作被隐式删除，拷贝操作可能生成（若无其他限制）
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;&lt;/span&gt;};
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;// 移动操作被隐式删除，拷贝操作可能生成（若无其他限制）
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;};
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;ul&gt;
 &lt;li&gt;
 &lt;p&gt;&lt;strong&gt;定义拷贝操作&lt;/strong&gt;：&lt;/p&gt;
@@ -317,8 +317,8 @@
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-cpp&#34; data-lang=&#34;cpp&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color:#0a8;font-weight:bold&#34;&gt;Example&lt;/span&gt; {
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;public&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;:&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  Example(&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;const&lt;/span&gt; Example&lt;span style=&#34;color:#555&#34;&gt;&amp;amp;&lt;/span&gt;) {}  &lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;// 用户定义的拷贝构造函数
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;&lt;/span&gt;  &lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;// 移动操作被隐式删除
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;&lt;/span&gt;};
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;// 移动操作被隐式删除
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;};
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;ul&gt;
 &lt;li&gt;
 &lt;p&gt;&lt;strong&gt;定义移动操作&lt;/strong&gt;：&lt;/p&gt;
@@ -328,7 +328,7 @@
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-cpp&#34; data-lang=&#34;cpp&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#099&#34;&gt;#include&lt;/span&gt; &lt;span style=&#34;color:#099&#34;&gt;&amp;lt;utility&amp;gt;&lt;/span&gt;&lt;span style=&#34;color:#099&#34;&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#099&#34;&gt;#include&lt;/span&gt; &lt;span style=&#34;color:#099&#34;&gt;&amp;lt;string&amp;gt;&lt;/span&gt;&lt;span style=&#34;color:#099&#34;&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#099&#34;&gt;#include&lt;/span&gt; &lt;span style=&#34;color:#099&#34;&gt;&amp;lt;iostream&amp;gt;&lt;/span&gt;&lt;span style=&#34;color:#099&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#099&#34;&gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;struct&lt;/span&gt; &lt;span style=&#34;color:#0a8;font-weight:bold&#34;&gt;Example&lt;/span&gt; {
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  	std&lt;span style=&#34;color:#555&#34;&gt;::&lt;/span&gt;string str;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;

@@ -9,16 +9,17 @@
       <url>https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</url>
       <link>https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</link>
     </image>
-    <generator>Hugo -- 0.152.2</generator>
+    <generator>Hugo -- 0.154.0</generator>
     <language>en</language>
     <lastBuildDate>Thu, 16 Oct 2025 00:00:00 +0000</lastBuildDate>
     <atom:link href="https://kerolt.github.io/tags/vite/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Vue3路由与Vite的base</title>
-      <link>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/%E5%89%8D%E7%AB%AF/vue3%E8%B7%AF%E7%94%B1%E4%B8%8Evite%E7%9A%84base/</link>
+      <link>https://kerolt.github.io/posts/%E5%89%8D%E7%AB%AF/vue3%E8%B7%AF%E7%94%B1%E4%B8%8Evite%E7%9A%84base/</link>
       <pubDate>Thu, 16 Oct 2025 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/%E5%89%8D%E7%AB%AF/vue3%E8%B7%AF%E7%94%B1%E4%B8%8Evite%E7%9A%84base/</guid>
-      <description>&lt;p&gt;虽然我不是一个专门搞前端的，但也会写点点 Vue。最近实验室项目写完后需要部署一下，这里我就使用了 Docker Compose 来部署。由于前端项目有前台用户端访问和后台管理端两个，而老师申请的服务器只开了 80 端口，因此我就打算使用 nginx 来反向代理：&lt;/p&gt;
+      <guid>https://kerolt.github.io/posts/%E5%89%8D%E7%AB%AF/vue3%E8%B7%AF%E7%94%B1%E4%B8%8Evite%E7%9A%84base/</guid>
+      <description>&lt;p&gt;前端&lt;/p&gt;
+&lt;p&gt;虽然我不是一个专门搞前端的，但也会写点点 Vue。最近实验室项目写完后需要部署一下，这里我就使用了 Docker Compose 来部署。由于前端项目有前台用户端访问和后台管理端两个，而老师申请的服务器只开了 80 端口，因此我就打算使用 nginx 来反向代理：&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;code&gt;http://example.com&lt;/code&gt; 为前台&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;http://example.com/admin&lt;/code&gt; 为后台&lt;/li&gt;
@@ -31,28 +32,28 @@
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;server_name&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;_&lt;/span&gt;;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;# 后台管理
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;&lt;/span&gt;	&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;location&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;/admin/&lt;/span&gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;location&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;/admin/&lt;/span&gt; {
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;		&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;proxy_pass&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;http://frontend-admin&lt;/span&gt;;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;		&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;proxy_set_header&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;Host&lt;/span&gt; &lt;span style=&#34;color:#033&#34;&gt;$host&lt;/span&gt;;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;		&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;proxy_set_header&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;X-Real-IP&lt;/span&gt; &lt;span style=&#34;color:#033&#34;&gt;$remote_addr&lt;/span&gt;;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	} 
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;# 后端接口
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;&lt;/span&gt;	&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;location&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;/api&lt;/span&gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;location&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;/api&lt;/span&gt; {
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;		&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;proxy_pass&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;http://backend:8080/&lt;/span&gt;;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;		&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;proxy_set_header&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;Host&lt;/span&gt; &lt;span style=&#34;color:#033&#34;&gt;$host&lt;/span&gt;;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;		&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;proxy_set_header&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;X-Real-IP&lt;/span&gt; &lt;span style=&#34;color:#033&#34;&gt;$remote_addr&lt;/span&gt;;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	}
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;# minio
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;&lt;/span&gt;	&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;location&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;/images/&lt;/span&gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;location&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;/images/&lt;/span&gt; {
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;		&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;proxy_pass&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;http://minio:9000/&lt;/span&gt;;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;		&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;proxy_set_header&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;Host&lt;/span&gt; &lt;span style=&#34;color:#033&#34;&gt;$host&lt;/span&gt;;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;		&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;proxy_set_header&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;X-Real-IP&lt;/span&gt; &lt;span style=&#34;color:#033&#34;&gt;$remote_addr&lt;/span&gt;;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	}
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;# 前台用户
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;&lt;/span&gt;	&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;location&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;/&lt;/span&gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;location&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;/&lt;/span&gt; {
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;		&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;proxy_pass&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;http://frontend-user/&lt;/span&gt;;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;		&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;proxy_set_header&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;Host&lt;/span&gt; &lt;span style=&#34;color:#033&#34;&gt;$host&lt;/span&gt;;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;		&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;proxy_set_header&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;X-Real-IP&lt;/span&gt; &lt;span style=&#34;color:#033&#34;&gt;$remote_addr&lt;/span&gt;;
@@ -66,9 +67,9 @@
     </item>
     <item>
       <title>记一次项目构建部署的总结</title>
-      <link>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/%E5%89%8D%E7%AB%AF/%E8%AE%B0%E4%B8%80%E6%AC%A1%E9%A1%B9%E7%9B%AE%E6%9E%84%E5%BB%BA%E9%83%A8%E7%BD%B2%E7%9A%84%E6%80%BB%E7%BB%93/</link>
+      <link>https://kerolt.github.io/posts/%E5%89%8D%E7%AB%AF/%E8%AE%B0%E4%B8%80%E6%AC%A1%E9%A1%B9%E7%9B%AE%E6%9E%84%E5%BB%BA%E9%83%A8%E7%BD%B2%E7%9A%84%E6%80%BB%E7%BB%93/</link>
       <pubDate>Fri, 30 Aug 2024 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/%E5%89%8D%E7%AB%AF/%E8%AE%B0%E4%B8%80%E6%AC%A1%E9%A1%B9%E7%9B%AE%E6%9E%84%E5%BB%BA%E9%83%A8%E7%BD%B2%E7%9A%84%E6%80%BB%E7%BB%93/</guid>
+      <guid>https://kerolt.github.io/posts/%E5%89%8D%E7%AB%AF/%E8%AE%B0%E4%B8%80%E6%AC%A1%E9%A1%B9%E7%9B%AE%E6%9E%84%E5%BB%BA%E9%83%A8%E7%BD%B2%E7%9A%84%E6%80%BB%E7%BB%93/</guid>
       <description>&lt;h2 id=&#34;前言&#34;&gt;前言&lt;/h2&gt;
 &lt;p&gt;暑假里跟着鱼皮的&lt;code&gt;yuindex&lt;/code&gt;项目写了个web终端的小玩具，完成的终端命令不多，但是大体上成型了。由于我打算做一个纯前端的项目，并没有写后端api，这样也方便我最终直接部署到&lt;strong&gt;Github Pages&lt;/strong&gt;上（这样就不用花钱了hh）。&lt;/p&gt;
 &lt;p&gt;项目使用vite构建，并使用了ts。在构建部署时遇到了一些问题，由于是第一次将前端项目发布到github pages上，这里记录下。&lt;/p&gt;</description>

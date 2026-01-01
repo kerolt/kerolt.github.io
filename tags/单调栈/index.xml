@@ -9,7 +9,7 @@
       <url>https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</url>
       <link>https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</link>
     </image>
-    <generator>Hugo -- 0.152.2</generator>
+    <generator>Hugo -- 0.154.0</generator>
     <language>en</language>
     <lastBuildDate>Sun, 22 Jun 2025 00:00:00 +0000</lastBuildDate>
     <atom:link href="https://kerolt.github.io/tags/%E5%8D%95%E8%B0%83%E6%A0%88/index.xml" rel="self" type="application/rss+xml" />
@@ -40,7 +40,7 @@
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;                &lt;span style=&#34;color:#078;font-weight:bold&#34;&gt;int&lt;/span&gt; h &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; heights[st.top()];
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;                st.pop();
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;                &lt;span style=&#34;color:#078;font-weight:bold&#34;&gt;int&lt;/span&gt; w &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; i; &lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;// 即 w = i - (-1) - 1
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;&lt;/span&gt;                &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;if&lt;/span&gt; (&lt;span style=&#34;color:#555&#34;&gt;!&lt;/span&gt;st.empty()) {
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;                &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;if&lt;/span&gt; (&lt;span style=&#34;color:#555&#34;&gt;!&lt;/span&gt;st.empty()) {
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;                    w &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; i &lt;span style=&#34;color:#555&#34;&gt;-&lt;/span&gt; st.top() &lt;span style=&#34;color:#555&#34;&gt;-&lt;/span&gt; &lt;span style=&#34;color:#f60&#34;&gt;1&lt;/span&gt;;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;                }
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;                res &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; max(res, h &lt;span style=&#34;color:#555&#34;&gt;*&lt;/span&gt; w);

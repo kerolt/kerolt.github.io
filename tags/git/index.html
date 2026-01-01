@@ -13,7 +13,7 @@ git push --force 这个方法我有时候用来同步一下两台电脑上的代
 不过，使用 git push --force 强制推送后，远程仓库的历史记录会被改写。这种操作可能会导致本地和远程分支的提交历史不一致。我自己通常这么解决：
 git fetch origin git reset --hard origin/&lt;branch> 这一般是不需要保留本地未推送的更改，可以直接将本地分支强制更新为远程分支的状态。
 git 如何移除 submodule git submodule deinit -f path/to/submodule git rm -f path/to/submodule rm -rf path/to/submodule # 如果要删除物理目录 git commit -m "Removed submodule path/to/submodule" rm -rf .git/modules/path/to/submodule # 可选清理 推送分支 第一次推送（远程分支可能还不存在） git push -u origin 分支名 ## 推送到远程的另一个分支名 如果想把本地分支 dev 推送到远程的 test 分支：
-...</p></div><footer class=entry-footer><span title='2025-05-18 00:00:00 +0000 UTC'>发布于2025-05-18</span>&nbsp;&nbsp;·&nbsp;&nbsp;Kerolt</footer><a class=entry-link aria-label="post link to Git使用" href=https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/git%E4%BD%BF%E7%94%A8/></a></article></main><footer class=footer><span>&copy; 2025 <a href=https://kerolt.github.io/>Kerolt's Blog</a></span> ·
+...</p></div><footer class=entry-footer><span title='2025-05-18 00:00:00 +0000 UTC'>发布于2025-05-18</span>&nbsp;&nbsp;·&nbsp;&nbsp;Kerolt</footer><a class=entry-link aria-label="post link to Git使用" href=https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/git%E4%BD%BF%E7%94%A8/></a></article></main><footer class=footer><span>&copy; 2026 <a href=https://kerolt.github.io/>Kerolt's Blog</a></span> ·
 <span>Powered by
 <a href=https://gohugo.io/ rel="noopener noreferrer" target=_blank>Hugo</a> &
 <a href=https://github.com/adityatelange/hugo-PaperMod/ rel=noopener target=_blank>PaperMod</a></span></footer><a href=#top aria-label="go to top" title="Go to Top (Alt + G)" class=top-link id=top-link accesskey=g><svg viewBox="0 0 12 6" fill="currentColor"><path d="M12 6H0l6-6z"/></svg>

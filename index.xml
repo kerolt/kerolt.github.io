@@ -9,9 +9,9 @@
       <url>https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</url>
       <link>https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</link>
     </image>
-    <generator>Hugo -- 0.152.2</generator>
+    <generator>Hugo -- 0.154.0</generator>
     <language>en</language>
-    <lastBuildDate>Fri, 12 Dec 2025 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Thu, 01 Jan 2026 00:00:00 +0000</lastBuildDate>
     <atom:link href="https://kerolt.github.io/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>uv包安装网络超时解决</title>
@@ -32,9 +32,9 @@
     </item>
     <item>
       <title>Windows修改默认文件夹名为英文</title>
-      <link>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/windows%E4%BF%AE%E6%94%B9%E9%BB%98%E8%AE%A4%E6%96%87%E4%BB%B6%E5%A4%B9%E5%90%8D%E4%B8%BA%E8%8B%B1%E6%96%87/</link>
+      <link>https://kerolt.github.io/posts/windows/windows%E4%BF%AE%E6%94%B9%E9%BB%98%E8%AE%A4%E6%96%87%E4%BB%B6%E5%A4%B9%E5%90%8D%E4%B8%BA%E8%8B%B1%E6%96%87/</link>
       <pubDate>Thu, 27 Nov 2025 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/windows%E4%BF%AE%E6%94%B9%E9%BB%98%E8%AE%A4%E6%96%87%E4%BB%B6%E5%A4%B9%E5%90%8D%E4%B8%BA%E8%8B%B1%E6%96%87/</guid>
+      <guid>https://kerolt.github.io/posts/windows/windows%E4%BF%AE%E6%94%B9%E9%BB%98%E8%AE%A4%E6%96%87%E4%BB%B6%E5%A4%B9%E5%90%8D%E4%B8%BA%E8%8B%B1%E6%96%87/</guid>
       <description>&lt;p&gt;系统路径 内的&lt;strong&gt;文件夹不仅有图标还显示中文名称&lt;/strong&gt;，&lt;strong&gt;但是打开路径的时候显示的却是英文&lt;/strong&gt;，如何修改呢？&lt;/p&gt;
 &lt;p&gt;
 &lt;div class=&#34;post-img-view&#34;&gt;
@@ -98,9 +98,9 @@
     </item>
     <item>
       <title>Linux修改IP</title>
-      <link>https://kerolt.github.io/posts/os/network/linux%E4%BF%AE%E6%94%B9ip/</link>
+      <link>https://kerolt.github.io/posts/network/linux%E4%BF%AE%E6%94%B9ip/</link>
       <pubDate>Sun, 09 Nov 2025 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/os/network/linux%E4%BF%AE%E6%94%B9ip/</guid>
+      <guid>https://kerolt.github.io/posts/network/linux%E4%BF%AE%E6%94%B9ip/</guid>
       <description>&lt;p&gt;首先确定网络是用什么工具管理：&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-sh&#34; data-lang=&#34;sh&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;$ systemctl is-active NetworkManager
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;active
@@ -109,8 +109,8 @@
 &lt;h3 id=&#34;看当前连接名&#34;&gt;看当前连接名&lt;/h3&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;nmcli connection show
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;输出类似：&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;NAME                UUID                                  TYPE      DEVICE
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Wired connection 1  2d3e1f6a-4e87-4a76-8f23-2f459c8c112b  ethernet  enp60s0
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;NAME                UUID                                  TYPE      DEVICE
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Wired connection &lt;span style=&#34;color:#f60&#34;&gt;1&lt;/span&gt;  2d3e1f6a-4e87-4a76-8f23-2f459c8c112b  ethernet  enp60s0
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;这里的 &lt;code&gt;NAME&lt;/code&gt;（如 &lt;code&gt;Wired connection 1&lt;/code&gt;）就是连接名，后面命令要用到。&lt;/p&gt;
 &lt;h3 id=&#34;修改为静态-ip&#34;&gt;修改为静态 IP&lt;/h3&gt;
 &lt;p&gt;假设你想把 IP 设置为：&lt;/p&gt;
@@ -125,36 +125,37 @@
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;sudo nmcli con mod &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;Wired connection 1&amp;#34;&lt;/span&gt; ipv4.dns &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;8.8.8.8,1.1.1.1&amp;#34;&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;sudo nmcli con mod &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;Wired connection 1&amp;#34;&lt;/span&gt; ipv4.method manual
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;blockquote&gt;
-&lt;p&gt;注意 &lt;code&gt;&amp;quot;Wired connection 1&amp;quot;&lt;/code&gt; 需要替换为你自己的连接名。&lt;br&gt;
+&lt;p&gt;注意 &lt;code&gt;&amp;quot;Wired connection 1&amp;quot;&lt;/code&gt; 需要替换为你自己的连接名。
 如果名字里有空格，必须加引号。&lt;/p&gt;</description>
     </item>
     <item>
       <title>Linux中的veth与bridge</title>
-      <link>https://kerolt.github.io/posts/os/network/linux%E4%B8%AD%E7%9A%84veth%E4%B8%8Ebridge/</link>
+      <link>https://kerolt.github.io/posts/network/linux%E4%B8%AD%E7%9A%84veth%E4%B8%8Ebridge/</link>
       <pubDate>Sat, 08 Nov 2025 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/os/network/linux%E4%B8%AD%E7%9A%84veth%E4%B8%8Ebridge/</guid>
+      <guid>https://kerolt.github.io/posts/network/linux%E4%B8%AD%E7%9A%84veth%E4%B8%8Ebridge/</guid>
       <description>&lt;p&gt;容器网络最典型的基础模型 —— &lt;strong&gt;两个不同的命名空间通过 bridge 通信&lt;/strong&gt; 。&lt;/p&gt;
 &lt;p&gt;Docker 默认的 bridge 模式就是基于此原理,创建 &lt;code&gt;docker0&lt;/code&gt; bridge，容器 veth 对一端连接容器，一端连接 docker0，提供 NAT 功能让容器可以访问外网。&lt;/p&gt;
 &lt;p&gt;一个简单的结构如下👇：&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;                      +---------------------+
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;                      |      root NS        |   (宿主机 / default netns)
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;                      |  bridge: br0(10.0.0.254/24)
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;                      +---------------------+
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;                      |      root NS        |   &lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;宿主机 / default netns&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;                      |  bridge: br0&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;10.0.0.254/24&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;                      |                     |
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;                      |   veth0 ─────────┐  |   &amp;lt;- veth0 在 root，master=br0
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;                      |   veth0 ─────────┐  |   &amp;lt;- veth0 在 root，master&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;br0
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;                      |                  │  |
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;                      |   veth2 ─────────┴──┘  &amp;lt;- veth2 在 root，master=br0
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;                      |   veth2 ─────────┴──┘  &amp;lt;- veth2 在 root，master&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;br0
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;                      +---------------------+
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;                               │
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;             ┌─────────────────┴─────────────────┐
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;             │                                   │
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;       veth0 &amp;lt;-&amp;gt; veth1                       veth2 &amp;lt;-&amp;gt; veth3
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  (root, peer)   (in ns1)                 (root, peer)   (in ns2)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;root, peer&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt;   &lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;in ns1&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt;                 &lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;root, peer&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt;   &lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;in ns2&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;                ns1 namespace                          ns2 namespace
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;                ┌───────────────┐                     ┌───────────────┐
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;                │ veth1         │                     │ veth3         │
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;                │ 10.0.0.1/24   │                     │ 10.0.0.2/24   │
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;                └───────────────┘                     └───────────────┘
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+            &lt;link rel=&#34;stylesheet&#34; href=&#34;https://kerolt.github.io/css/vendors/admonitions.4fd9a0b8ec8899f2ca952048d255a569f433f77dfb3f52f5bc87e7d65cdce449.css&#34; integrity=&#34;sha256-T9mguOyImfLKlSBI0lWlafQz9337P1L1vIfn1lzc5Ek=&#34; crossorigin=&#34;anonymous&#34;&gt;
     &lt;div class=&#34;admonition note&#34;&gt;
       &lt;div class=&#34;admonition-header&#34;&gt;&lt;svg xmlns=&#34;http://www.w3.org/2000/svg&#34; viewBox=&#34;0 0 576 512&#34;&gt;&lt;path d=&#34;M0 64C0 28.7 28.7 0 64 0L224 0l0 128c0 17.7 14.3 32 32 32l128 0 0 125.7-86.8 86.8c-10.3 10.3-17.5 23.1-21 37.2l-18.7 74.9c-2.3 9.2-1.8 18.8 1.3 27.5L64 512c-35.3 0-64-28.7-64-64L0 64zm384 64l-128 0L256 0 384 128zM549.8 235.7l14.4 14.4c15.6 15.6 15.6 40.9 0 56.6l-29.4 29.4-71-71 29.4-29.4c15.6-15.6 40.9-15.6 56.6 0zM311.9 417L441.1 287.8l71 71L382.9 487.9c-4.1 4.1-9.2 7-14.9 8.4l-60.1 15c-5.5 1.4-11.2-.2-15.2-4.2s-5.6-9.7-4.2-15.2l15-60.1c1.4-5.6 4.3-10.8 8.4-14.9z&#34;/&gt;&lt;/svg&gt;
         &lt;span&gt;veth (Virtual Ethernet Device)&lt;/span&gt;
@@ -164,9 +165,9 @@
     </item>
     <item>
       <title>Linux校准时间</title>
-      <link>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/linux%E6%A0%A1%E5%87%86%E6%97%B6%E9%97%B4/</link>
+      <link>https://kerolt.github.io/posts/linux/linux%E6%A0%A1%E5%87%86%E6%97%B6%E9%97%B4/</link>
       <pubDate>Fri, 07 Nov 2025 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/linux%E6%A0%A1%E5%87%86%E6%97%B6%E9%97%B4/</guid>
+      <guid>https://kerolt.github.io/posts/linux/linux%E6%A0%A1%E5%87%86%E6%97%B6%E9%97%B4/</guid>
       <description>&lt;p&gt;服务器是用旧笔记本装的 Debian13，然后用 ddns-go 做动态域名解析，但是装好之后貌似由于时钟没有校准因此 ddns-go 无法更新域名解析（使用的 aliyun），以下是解决方法。&lt;/p&gt;
 &lt;hr&gt;
 &lt;p&gt;首先我使用 &lt;code&gt;timedatectl&lt;/code&gt; 的结果如下：&lt;/p&gt;
@@ -190,18 +191,18 @@
     </item>
     <item>
       <title>如何理解内核态与用户态切换的上下文开销</title>
-      <link>https://kerolt.github.io/posts/os/%E5%A6%82%E4%BD%95%E7%90%86%E8%A7%A3%E5%86%85%E6%A0%B8%E6%80%81%E4%B8%8E%E7%94%A8%E6%88%B7%E6%80%81%E5%88%87%E6%8D%A2%E7%9A%84%E4%B8%8A%E4%B8%8B%E6%96%87%E5%BC%80%E9%94%80/</link>
+      <link>https://kerolt.github.io/posts/linux/%E5%A6%82%E4%BD%95%E7%90%86%E8%A7%A3%E5%86%85%E6%A0%B8%E6%80%81%E4%B8%8E%E7%94%A8%E6%88%B7%E6%80%81%E5%88%87%E6%8D%A2%E7%9A%84%E4%B8%8A%E4%B8%8B%E6%96%87%E5%BC%80%E9%94%80/</link>
       <pubDate>Thu, 06 Nov 2025 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/os/%E5%A6%82%E4%BD%95%E7%90%86%E8%A7%A3%E5%86%85%E6%A0%B8%E6%80%81%E4%B8%8E%E7%94%A8%E6%88%B7%E6%80%81%E5%88%87%E6%8D%A2%E7%9A%84%E4%B8%8A%E4%B8%8B%E6%96%87%E5%BC%80%E9%94%80/</guid>
+      <guid>https://kerolt.github.io/posts/linux/%E5%A6%82%E4%BD%95%E7%90%86%E8%A7%A3%E5%86%85%E6%A0%B8%E6%80%81%E4%B8%8E%E7%94%A8%E6%88%B7%E6%80%81%E5%88%87%E6%8D%A2%E7%9A%84%E4%B8%8A%E4%B8%8B%E6%96%87%E5%BC%80%E9%94%80/</guid>
       <description>&lt;h2 id=&#34;一什么是用户态和内核态&#34;&gt;一、什么是“用户态”和“内核态”&lt;/h2&gt;
 &lt;p&gt;CPU 有不同的 &lt;strong&gt;特权级（Privilege Level）&lt;/strong&gt;：&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;
-&lt;p&gt;&lt;strong&gt;用户态（User Mode）&lt;/strong&gt;：&lt;br&gt;
+&lt;p&gt;&lt;strong&gt;用户态（User Mode）&lt;/strong&gt;：
 应用程序在这里运行，权限受限，比如不能直接访问硬件、不能修改页表等。&lt;/p&gt;
 &lt;/li&gt;
 &lt;li&gt;
-&lt;p&gt;&lt;strong&gt;内核态（Kernel Mode）&lt;/strong&gt;：&lt;br&gt;
+&lt;p&gt;&lt;strong&gt;内核态（Kernel Mode）&lt;/strong&gt;：
 操作系统内核运行在这里，拥有完全的访问权限，可以管理内存、设备、中断等。&lt;/p&gt;
 &lt;/li&gt;
 &lt;/ul&gt;
@@ -470,10 +471,11 @@ JSON 格式，描述网络的类型、IPAM 配置、路由等。&lt;/p&gt;
     </item>
     <item>
       <title>Vue3路由与Vite的base</title>
-      <link>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/%E5%89%8D%E7%AB%AF/vue3%E8%B7%AF%E7%94%B1%E4%B8%8Evite%E7%9A%84base/</link>
+      <link>https://kerolt.github.io/posts/%E5%89%8D%E7%AB%AF/vue3%E8%B7%AF%E7%94%B1%E4%B8%8Evite%E7%9A%84base/</link>
       <pubDate>Thu, 16 Oct 2025 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/%E5%89%8D%E7%AB%AF/vue3%E8%B7%AF%E7%94%B1%E4%B8%8Evite%E7%9A%84base/</guid>
-      <description>&lt;p&gt;虽然我不是一个专门搞前端的，但也会写点点 Vue。最近实验室项目写完后需要部署一下，这里我就使用了 Docker Compose 来部署。由于前端项目有前台用户端访问和后台管理端两个，而老师申请的服务器只开了 80 端口，因此我就打算使用 nginx 来反向代理：&lt;/p&gt;
+      <guid>https://kerolt.github.io/posts/%E5%89%8D%E7%AB%AF/vue3%E8%B7%AF%E7%94%B1%E4%B8%8Evite%E7%9A%84base/</guid>
+      <description>&lt;p&gt;前端&lt;/p&gt;
+&lt;p&gt;虽然我不是一个专门搞前端的，但也会写点点 Vue。最近实验室项目写完后需要部署一下，这里我就使用了 Docker Compose 来部署。由于前端项目有前台用户端访问和后台管理端两个，而老师申请的服务器只开了 80 端口，因此我就打算使用 nginx 来反向代理：&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;code&gt;http://example.com&lt;/code&gt; 为前台&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;http://example.com/admin&lt;/code&gt; 为后台&lt;/li&gt;
@@ -486,28 +488,28 @@ JSON 格式，描述网络的类型、IPAM 配置、路由等。&lt;/p&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;server_name&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;_&lt;/span&gt;;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;# 后台管理
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;&lt;/span&gt;	&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;location&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;/admin/&lt;/span&gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;location&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;/admin/&lt;/span&gt; {
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;		&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;proxy_pass&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;http://frontend-admin&lt;/span&gt;;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;		&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;proxy_set_header&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;Host&lt;/span&gt; &lt;span style=&#34;color:#033&#34;&gt;$host&lt;/span&gt;;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;		&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;proxy_set_header&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;X-Real-IP&lt;/span&gt; &lt;span style=&#34;color:#033&#34;&gt;$remote_addr&lt;/span&gt;;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	} 
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;# 后端接口
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;&lt;/span&gt;	&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;location&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;/api&lt;/span&gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;location&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;/api&lt;/span&gt; {
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;		&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;proxy_pass&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;http://backend:8080/&lt;/span&gt;;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;		&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;proxy_set_header&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;Host&lt;/span&gt; &lt;span style=&#34;color:#033&#34;&gt;$host&lt;/span&gt;;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;		&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;proxy_set_header&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;X-Real-IP&lt;/span&gt; &lt;span style=&#34;color:#033&#34;&gt;$remote_addr&lt;/span&gt;;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	}
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;# minio
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;&lt;/span&gt;	&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;location&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;/images/&lt;/span&gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;location&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;/images/&lt;/span&gt; {
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;		&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;proxy_pass&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;http://minio:9000/&lt;/span&gt;;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;		&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;proxy_set_header&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;Host&lt;/span&gt; &lt;span style=&#34;color:#033&#34;&gt;$host&lt;/span&gt;;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;		&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;proxy_set_header&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;X-Real-IP&lt;/span&gt; &lt;span style=&#34;color:#033&#34;&gt;$remote_addr&lt;/span&gt;;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	}
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;# 前台用户
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;&lt;/span&gt;	&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;location&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;/&lt;/span&gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;location&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;/&lt;/span&gt; {
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;		&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;proxy_pass&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;http://frontend-user/&lt;/span&gt;;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;		&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;proxy_set_header&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;Host&lt;/span&gt; &lt;span style=&#34;color:#033&#34;&gt;$host&lt;/span&gt;;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;		&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;proxy_set_header&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;X-Real-IP&lt;/span&gt; &lt;span style=&#34;color:#033&#34;&gt;$remote_addr&lt;/span&gt;;
@@ -532,7 +534,7 @@ JSON 格式，描述网络的类型、IPAM 配置、路由等。&lt;/p&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;# 2. 添加仓库&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#366&#34;&gt;echo&lt;/span&gt; &lt;span style=&#34;color:#c30;font-weight:bold&#34;&gt;\
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#c30;font-weight:bold&#34;&gt;&lt;/span&gt;  &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;deb [arch=&lt;/span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;$(&lt;/span&gt;dpkg --print-architecture&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;)&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt; signed-by=/etc/apt/keyrings/aliyun-docker.gpg] https://mirrors.aliyun.com/docker-ce/linux/debian \
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;deb [arch=&lt;/span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;$(&lt;/span&gt;dpkg --print-architecture&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;)&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt; signed-by=/etc/apt/keyrings/aliyun-docker.gpg] https://mirrors.aliyun.com/docker-ce/linux/debian \
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#c30&#34;&gt;  &lt;/span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;$(&lt;/span&gt;lsb_release -cs&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;)&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt; stable&amp;#34;&lt;/span&gt; | sudo tee /etc/apt/sources.list.d/docker.list &amp;gt; /dev/null
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;# 3. 安装&lt;/span&gt;
@@ -564,9 +566,9 @@ JSON 格式，描述网络的类型、IPAM 配置、路由等。&lt;/p&gt;
     </item>
     <item>
       <title>Windows Terminal分屏快捷键</title>
-      <link>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/windows-terminal%E5%88%86%E5%B1%8F%E5%BF%AB%E6%8D%B7%E9%94%AE/</link>
+      <link>https://kerolt.github.io/posts/windows/windows-terminal%E5%88%86%E5%B1%8F%E5%BF%AB%E6%8D%B7%E9%94%AE/</link>
       <pubDate>Thu, 18 Sep 2025 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/windows-terminal%E5%88%86%E5%B1%8F%E5%BF%AB%E6%8D%B7%E9%94%AE/</guid>
+      <guid>https://kerolt.github.io/posts/windows/windows-terminal%E5%88%86%E5%B1%8F%E5%BF%AB%E6%8D%B7%E9%94%AE/</guid>
       <description>&lt;ul&gt;
 &lt;li&gt;&lt;strong&gt;左右分屏&lt;/strong&gt;: 使用 &lt;code&gt;Alt+Shift+=&lt;/code&gt; 或 &lt;code&gt;Alt+Shift+-&lt;/code&gt; 快捷键。&lt;/li&gt;
 &lt;li&gt;&lt;strong&gt;上下分屏&lt;/strong&gt;: 使用 &lt;code&gt;Alt+Shift+=&lt;/code&gt; 或 &lt;code&gt;Alt+Shift+-&lt;/code&gt; 快捷键。&lt;/li&gt;
@@ -576,9 +578,9 @@ JSON 格式，描述网络的类型、IPAM 配置、路由等。&lt;/p&gt;
     </item>
     <item>
       <title>Linux NAPI机制知识点总结</title>
-      <link>https://kerolt.github.io/posts/os/linux-napi%E6%9C%BA%E5%88%B6%E7%9F%A5%E8%AF%86%E7%82%B9%E6%80%BB%E7%BB%93/</link>
+      <link>https://kerolt.github.io/posts/linux/linux-napi%E6%9C%BA%E5%88%B6%E7%9F%A5%E8%AF%86%E7%82%B9%E6%80%BB%E7%BB%93/</link>
       <pubDate>Wed, 17 Sep 2025 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/os/linux-napi%E6%9C%BA%E5%88%B6%E7%9F%A5%E8%AF%86%E7%82%B9%E6%80%BB%E7%BB%93/</guid>
+      <guid>https://kerolt.github.io/posts/linux/linux-napi%E6%9C%BA%E5%88%B6%E7%9F%A5%E8%AF%86%E7%82%B9%E6%80%BB%E7%BB%93/</guid>
       <description>&lt;blockquote&gt;
 &lt;p&gt;对 &lt;a href=&#34;https://docs.kernel.org/networking/napi.html&#34;&gt;https://docs.kernel.org/networking/napi.html&lt;/a&gt; 的总结&lt;/p&gt;
 &lt;/blockquote&gt;
@@ -851,9 +853,9 @@ JSON 格式，描述网络的类型、IPAM 配置、路由等。&lt;/p&gt;
     </item>
     <item>
       <title>Windows11右键菜单关闭扩展</title>
-      <link>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/windows11%E5%8F%B3%E9%94%AE%E8%8F%9C%E5%8D%95%E5%85%B3%E9%97%AD%E6%89%A9%E5%B1%95/</link>
+      <link>https://kerolt.github.io/posts/windows/windows11%E5%8F%B3%E9%94%AE%E8%8F%9C%E5%8D%95%E5%85%B3%E9%97%AD%E6%89%A9%E5%B1%95/</link>
       <pubDate>Wed, 03 Sep 2025 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/windows11%E5%8F%B3%E9%94%AE%E8%8F%9C%E5%8D%95%E5%85%B3%E9%97%AD%E6%89%A9%E5%B1%95/</guid>
+      <guid>https://kerolt.github.io/posts/windows/windows11%E5%8F%B3%E9%94%AE%E8%8F%9C%E5%8D%95%E5%85%B3%E9%97%AD%E6%89%A9%E5%B1%95/</guid>
       <description>&lt;p&gt;关闭右键扩展：&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-powershell&#34; data-lang=&#34;powershell&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;reg add &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;HKCU\Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32&amp;#34;&lt;/span&gt; /f /ve
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;taskkill /f /im explorer.exe &amp;amp; &lt;span style=&#34;color:#366&#34;&gt;start &lt;/span&gt;explorer.exe
@@ -864,9 +866,9 @@ JSON 格式，描述网络的类型、IPAM 配置、路由等。&lt;/p&gt;
     </item>
     <item>
       <title>【问题记录】ddns-go与IPv6网络配置</title>
-      <link>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/%E9%97%AE%E9%A2%98%E8%A7%A3%E5%86%B3/%E9%97%AE%E9%A2%98%E8%AE%B0%E5%BD%95ddns-go%E4%B8%8Eipv6%E7%BD%91%E7%BB%9C%E9%85%8D%E7%BD%AE/</link>
+      <link>https://kerolt.github.io/posts/network/%E9%97%AE%E9%A2%98%E8%AE%B0%E5%BD%95ddns-go%E4%B8%8Eipv6%E7%BD%91%E7%BB%9C%E9%85%8D%E7%BD%AE/</link>
       <pubDate>Fri, 29 Aug 2025 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/%E9%97%AE%E9%A2%98%E8%A7%A3%E5%86%B3/%E9%97%AE%E9%A2%98%E8%AE%B0%E5%BD%95ddns-go%E4%B8%8Eipv6%E7%BD%91%E7%BB%9C%E9%85%8D%E7%BD%AE/</guid>
+      <guid>https://kerolt.github.io/posts/network/%E9%97%AE%E9%A2%98%E8%AE%B0%E5%BD%95ddns-go%E4%B8%8Eipv6%E7%BD%91%E7%BB%9C%E9%85%8D%E7%BD%AE/</guid>
       <description>&lt;p&gt;在完成 &lt;a href=&#34;https://zhuanlan.zhihu.com/p/1943305270387275457&#34;&gt;Rustdesk 自建服务器&lt;/a&gt; 的搭建后，我又想到：由于实验室服务器的公网 &lt;strong&gt;IPv6 地址&lt;/strong&gt; 并非永久不变，直接使用 IP 进行远程连接（如 SSH 或 Rustdesk）并不现实，如何确保远程访问的稳定性和便利性呢。为了解决这一痛点，我决定利用 &lt;strong&gt;动态域名解析（DDNS）&lt;/strong&gt; 技术，配合 &lt;strong&gt;ddns-go&lt;/strong&gt; 和 &lt;strong&gt;阿里云 DNS&lt;/strong&gt; 服务，将服务器的动态 IP 地址实时绑定到一个易于记忆的域名上。&lt;/p&gt;
 &lt;p&gt;本文将记录我在配置过程中遇到的四个主要问题及其解决方案。&lt;/p&gt;
 &lt;hr&gt;
@@ -933,7 +935,7 @@ JSON 格式，描述网络的类型、IPAM 配置、路由等。&lt;/p&gt;
       <pubDate>Thu, 21 Aug 2025 00:00:00 +0000</pubDate>
       <guid>https://kerolt.github.io/posts/c&#43;&#43;/cc&#43;&#43;%E7%B1%BB%E5%9E%8B%E5%8F%8C%E5%85%B3%E8%BD%AC%E6%8D%A2/</guid>
       <description>&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-cpp&#34; data-lang=&#34;cpp&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#099&#34;&gt;#include&lt;/span&gt; &lt;span style=&#34;color:#099&#34;&gt;&amp;lt;iostream&amp;gt;&lt;/span&gt;&lt;span style=&#34;color:#099&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#099&#34;&gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;auto&lt;/span&gt; &lt;span style=&#34;color:#c0f&#34;&gt;ASSERT&lt;/span&gt;(&lt;span style=&#34;color:#078;font-weight:bold&#34;&gt;bool&lt;/span&gt; flag, &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;const&lt;/span&gt; &lt;span style=&#34;color:#078;font-weight:bold&#34;&gt;char&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;*&lt;/span&gt; msg) {
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;if&lt;/span&gt; (&lt;span style=&#34;color:#555&#34;&gt;!&lt;/span&gt;flag) {
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        std&lt;span style=&#34;color:#555&#34;&gt;::&lt;/span&gt;cerr &lt;span style=&#34;color:#555&#34;&gt;&amp;lt;&amp;lt;&lt;/span&gt; msg &lt;span style=&#34;color:#555&#34;&gt;&amp;lt;&amp;lt;&lt;/span&gt; std&lt;span style=&#34;color:#555&#34;&gt;::&lt;/span&gt;endl;
@@ -941,12 +943,12 @@ JSON 格式，描述网络的类型、IPAM 配置、路由等。&lt;/p&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;}
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;// READ: 枚举类型 &amp;lt;https://zh.cppreference.com/w/cpp/language/enum&amp;gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;// `enum` 是 C 的兼容类型，本质上其对应类型的常量。
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;// 在 `enum` 中定义标识符等价于定义 constexpr 常量，
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;// 这些标识符不需要前缀，可以直接引用。
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;// 因此 `enum` 定义会污染命名空间。
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;enum&lt;/span&gt; &lt;span style=&#34;color:#0a8;font-weight:bold&#34;&gt;ColorEnum&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#078;font-weight:bold&#34;&gt;unsigned&lt;/span&gt; &lt;span style=&#34;color:#078;font-weight:bold&#34;&gt;char&lt;/span&gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;enum&lt;/span&gt; &lt;span style=&#34;color:#0a8;font-weight:bold&#34;&gt;ColorEnum&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#078;font-weight:bold&#34;&gt;unsigned&lt;/span&gt; &lt;span style=&#34;color:#078;font-weight:bold&#34;&gt;char&lt;/span&gt; {
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    COLOR_RED &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#f60&#34;&gt;31&lt;/span&gt;,
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    COLOR_GREEN,
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    COLOR_YELLOW,
@@ -956,7 +958,7 @@ JSON 格式，描述网络的类型、IPAM 配置、路由等。&lt;/p&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;// 有作用域枚举型是 C++ 引入的类型安全枚举。
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;// 其内部标识符需要带前缀引用，如 `Color::Red`。
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;// 作用域枚举型可以避免命名空间污染，并提供类型安全保证。
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;enum&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color:#0a8;font-weight:bold&#34;&gt;Color&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#078;font-weight:bold&#34;&gt;int&lt;/span&gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;enum&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color:#0a8;font-weight:bold&#34;&gt;Color&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#078;font-weight:bold&#34;&gt;int&lt;/span&gt; {
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    Red &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; COLOR_RED,
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    Green,
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    Yellow,
@@ -965,12 +967,12 @@ JSON 格式，描述网络的类型、IPAM 配置、路由等。&lt;/p&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;ColorEnum &lt;span style=&#34;color:#c0f&#34;&gt;convert_by_pun&lt;/span&gt;(Color c) {
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;// READ: &amp;lt;https://zh.cppreference.com/w/cpp/language/union&amp;gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;&lt;/span&gt;    &lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;// `union` 表示在同一内存位置存储的不同类型的值。
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;&lt;/span&gt;    &lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;// 其常见用法是实现类型双关转换，即将一种类型的值转换为另一种无关类型的值。
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;&lt;/span&gt;    &lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;// 但这种写法实际上仅在 C 语言良定义，在 C++ 中是未定义行为。
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;&lt;/span&gt;    &lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;// 这是比较少见的 C++ 不与 C 保持兼容的特性。
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;&lt;/span&gt;    &lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;// READ: 类型双关 &amp;lt;https://tttapa.github.io/Pages/Programming/Cpp/Practices/type-punning.html&amp;gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;&lt;/span&gt;    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;union&lt;/span&gt; &lt;span style=&#34;color:#0a8;font-weight:bold&#34;&gt;TypePun&lt;/span&gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;// `union` 表示在同一内存位置存储的不同类型的值。
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;// 其常见用法是实现类型双关转换，即将一种类型的值转换为另一种无关类型的值。
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;// 但这种写法实际上仅在 C 语言良定义，在 C++ 中是未定义行为。
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;// 这是比较少见的 C++ 不与 C 保持兼容的特性。
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;// READ: 类型双关 &amp;lt;https://tttapa.github.io/Pages/Programming/Cpp/Practices/type-punning.html&amp;gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;union&lt;/span&gt; &lt;span style=&#34;color:#0a8;font-weight:bold&#34;&gt;TypePun&lt;/span&gt; {
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        ColorEnum e;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        Color c;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    };
@@ -1343,7 +1345,7 @@ JSON 格式，描述网络的类型、IPAM 配置、路由等。&lt;/p&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;                &lt;span style=&#34;color:#078;font-weight:bold&#34;&gt;int&lt;/span&gt; h &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; heights[st.top()];
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;                st.pop();
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;                &lt;span style=&#34;color:#078;font-weight:bold&#34;&gt;int&lt;/span&gt; w &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; i; &lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;// 即 w = i - (-1) - 1
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;&lt;/span&gt;                &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;if&lt;/span&gt; (&lt;span style=&#34;color:#555&#34;&gt;!&lt;/span&gt;st.empty()) {
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;                &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;if&lt;/span&gt; (&lt;span style=&#34;color:#555&#34;&gt;!&lt;/span&gt;st.empty()) {
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;                    w &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; i &lt;span style=&#34;color:#555&#34;&gt;-&lt;/span&gt; st.top() &lt;span style=&#34;color:#555&#34;&gt;-&lt;/span&gt; &lt;span style=&#34;color:#f60&#34;&gt;1&lt;/span&gt;;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;                }
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;                res &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; max(res, h &lt;span style=&#34;color:#555&#34;&gt;*&lt;/span&gt; w);
@@ -1369,13 +1371,13 @@ JSON 格式，描述网络的类型、IPAM 配置、路由等。&lt;/p&gt;
 &lt;h3 id=&#34;模板元编程技巧&#34;&gt;模板元编程技巧&lt;/h3&gt;
 &lt;p&gt;透明运算符的核心实现依赖于&lt;strong&gt;空模板参数列表&lt;/strong&gt;（&lt;code&gt;operator&amp;lt;&amp;gt;&lt;/code&gt;）这一巧妙设计。观察 &lt;code&gt;std::less&lt;/code&gt; 的标准库实现，我们会发现它提供了两种形式：&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-cpp&#34; data-lang=&#34;cpp&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;// 传统形式：指定比较类型
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;template&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;&amp;lt;&lt;/span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color:#0a8;font-weight:bold&#34;&gt;T&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;&amp;gt;&lt;/span&gt; 
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;template&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;&amp;lt;&lt;/span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color:#0a8;font-weight:bold&#34;&gt;T&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;&amp;gt;&lt;/span&gt; 
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;struct&lt;/span&gt; &lt;span style=&#34;color:#0a8;font-weight:bold&#34;&gt;less&lt;/span&gt; {
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#078;font-weight:bold&#34;&gt;bool&lt;/span&gt; &lt;span style=&#34;color:#c0f&#34;&gt;operator&lt;/span&gt;()(&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;const&lt;/span&gt; T&lt;span style=&#34;color:#555&#34;&gt;&amp;amp;&lt;/span&gt; lhs, &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;const&lt;/span&gt; T&lt;span style=&#34;color:#555&#34;&gt;&amp;amp;&lt;/span&gt; rhs) &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;const&lt;/span&gt;;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;};
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;// 透明形式：自动类型推导
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;template&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;&amp;lt;&amp;gt;&lt;/span&gt; 
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;template&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;&amp;lt;&amp;gt;&lt;/span&gt; 
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;struct&lt;/span&gt; &lt;span style=&#34;color:#0a8;font-weight:bold&#34;&gt;less&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;&amp;lt;&lt;/span&gt;&lt;span style=&#34;color:#078;font-weight:bold&#34;&gt;void&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;&amp;gt;&lt;/span&gt; {
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;template&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;&amp;lt;&lt;/span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color:#0a8;font-weight:bold&#34;&gt;T&lt;/span&gt;, &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color:#0a8;font-weight:bold&#34;&gt;U&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;&amp;gt;&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;auto&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;operator&lt;/span&gt;()(T&lt;span style=&#34;color:#555&#34;&gt;&amp;amp;&amp;amp;&lt;/span&gt; t, U&lt;span style=&#34;color:#555&#34;&gt;&amp;amp;&amp;amp;&lt;/span&gt; u) &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;const&lt;/span&gt; 
@@ -1751,9 +1753,9 @@ JSON 格式，描述网络的类型、IPAM 配置、路由等。&lt;/p&gt;
     </item>
     <item>
       <title>【解决】Fedora42升级启动时显示kernel panic</title>
-      <link>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/%E9%97%AE%E9%A2%98%E8%A7%A3%E5%86%B3/%E8%A7%A3%E5%86%B3fedora42%E5%8D%87%E7%BA%A7%E5%90%AF%E5%8A%A8%E6%97%B6%E6%98%BE%E7%A4%BAkernel-panic/</link>
+      <link>https://kerolt.github.io/posts/linux/%E8%A7%A3%E5%86%B3fedora42%E5%8D%87%E7%BA%A7%E5%90%AF%E5%8A%A8%E6%97%B6%E6%98%BE%E7%A4%BAkernel-panic/</link>
       <pubDate>Sun, 27 Apr 2025 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/%E9%97%AE%E9%A2%98%E8%A7%A3%E5%86%B3/%E8%A7%A3%E5%86%B3fedora42%E5%8D%87%E7%BA%A7%E5%90%AF%E5%8A%A8%E6%97%B6%E6%98%BE%E7%A4%BAkernel-panic/</guid>
+      <guid>https://kerolt.github.io/posts/linux/%E8%A7%A3%E5%86%B3fedora42%E5%8D%87%E7%BA%A7%E5%90%AF%E5%8A%A8%E6%97%B6%E6%98%BE%E7%A4%BAkernel-panic/</guid>
       <description>&lt;p&gt;最近 Fedora42 更新了，因此我打算升级一下玩玩。在执行完下面的命令后：&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;sudo dnf upgrade --refresh
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;sudo dnf system-upgrade download --releasever&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#f60&#34;&gt;42&lt;/span&gt;
@@ -1799,12 +1801,12 @@ JSON 格式，描述网络的类型、IPAM 配置、路由等。&lt;/p&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        &lt;span style=&#34;color:#078;font-weight:bold&#34;&gt;int&lt;/span&gt; n &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; nums.size();
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        &lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;// 将每个相同值的元素的下标收集起来
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;&lt;/span&gt;        &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;for&lt;/span&gt; (&lt;span style=&#34;color:#078;font-weight:bold&#34;&gt;int&lt;/span&gt; i &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#f60&#34;&gt;0&lt;/span&gt;; i &lt;span style=&#34;color:#555&#34;&gt;&amp;lt;&lt;/span&gt; nums.size(); &lt;span style=&#34;color:#555&#34;&gt;++&lt;/span&gt;i) {
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;for&lt;/span&gt; (&lt;span style=&#34;color:#078;font-weight:bold&#34;&gt;int&lt;/span&gt; i &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#f60&#34;&gt;0&lt;/span&gt;; i &lt;span style=&#34;color:#555&#34;&gt;&amp;lt;&lt;/span&gt; nums.size(); &lt;span style=&#34;color:#555&#34;&gt;++&lt;/span&gt;i) {
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;            m[nums[i]].push_back(i);
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        }
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        &lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;// 增加左右两个哨兵
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;&lt;/span&gt;        &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;for&lt;/span&gt; (&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;auto&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;&amp;amp;&lt;/span&gt; [_, p] &lt;span style=&#34;color:#555&#34;&gt;:&lt;/span&gt; m) {
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;for&lt;/span&gt; (&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;auto&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;&amp;amp;&lt;/span&gt; [_, p] &lt;span style=&#34;color:#555&#34;&gt;:&lt;/span&gt; m) {
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;            &lt;span style=&#34;color:#078;font-weight:bold&#34;&gt;int&lt;/span&gt; t &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; p[&lt;span style=&#34;color:#f60&#34;&gt;0&lt;/span&gt;];
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;            p.insert(p.begin(), p.back() &lt;span style=&#34;color:#555&#34;&gt;-&lt;/span&gt; n);
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;            p.push_back(n &lt;span style=&#34;color:#555&#34;&gt;+&lt;/span&gt; t);
@@ -1814,7 +1816,7 @@ JSON 格式，描述网络的类型、IPAM 配置、路由等。&lt;/p&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;            &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;auto&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;&amp;amp;&lt;/span&gt; p &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; m[nums[x]];
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;            &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;if&lt;/span&gt; (p.size() &lt;span style=&#34;color:#555&#34;&gt;==&lt;/span&gt; &lt;span style=&#34;color:#f60&#34;&gt;3&lt;/span&gt;) {
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	            &lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;// 由于添加了两个哨兵，所以当集合长度为 3 时说明集合中实际只有1个元素，即这个元素在 nums 中是唯一的
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;&lt;/span&gt;                x &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;-&lt;/span&gt;&lt;span style=&#34;color:#f60&#34;&gt;1&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;                x &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;-&lt;/span&gt;&lt;span style=&#34;color:#f60&#34;&gt;1&lt;/span&gt;;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;            } &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;else&lt;/span&gt; {
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;                &lt;span style=&#34;color:#078;font-weight:bold&#34;&gt;int&lt;/span&gt; i &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; ranges&lt;span style=&#34;color:#555&#34;&gt;::&lt;/span&gt;lower_bound(p, x) &lt;span style=&#34;color:#555&#34;&gt;-&lt;/span&gt; p.begin();
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;                x &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; min(p[i &lt;span style=&#34;color:#555&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#f60&#34;&gt;1&lt;/span&gt;] &lt;span style=&#34;color:#555&#34;&gt;-&lt;/span&gt; x, x &lt;span style=&#34;color:#555&#34;&gt;-&lt;/span&gt; p[i &lt;span style=&#34;color:#555&#34;&gt;-&lt;/span&gt; &lt;span style=&#34;color:#f60&#34;&gt;1&lt;/span&gt;]);
@@ -1841,9 +1843,9 @@ JSON 格式，描述网络的类型、IPAM 配置、路由等。&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-cpp&#34; data-lang=&#34;cpp&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color:#0a8;font-weight:bold&#34;&gt;Example&lt;/span&gt; {
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;public&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;:&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    Example() &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;default&lt;/span&gt;;          &lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;// 允许生成默认构造函数
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;&lt;/span&gt;    Example(&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;const&lt;/span&gt; Example&lt;span style=&#34;color:#555&#34;&gt;&amp;amp;&lt;/span&gt;) {}    &lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;// 用户定义的拷贝构造函数
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;&lt;/span&gt;    &lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;// 编译器不再生成默认的移动构造函数和移动赋值运算符
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;&lt;/span&gt;};
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    Example(&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;const&lt;/span&gt; Example&lt;span style=&#34;color:#555&#34;&gt;&amp;amp;&lt;/span&gt;) {}    &lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;// 用户定义的拷贝构造函数
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;// 编译器不再生成默认的移动构造函数和移动赋值运算符
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;};
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h2 id=&#34;2-用户定义析构函数拷贝移动操作的影响&#34;&gt;2. 用户定义析构函数、拷贝/移动操作的影响&lt;/h2&gt;
 &lt;ul&gt;
 &lt;li&gt;
@@ -1854,8 +1856,8 @@ JSON 格式，描述网络的类型、IPAM 配置、路由等。&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-cpp&#34; data-lang=&#34;cpp&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color:#0a8;font-weight:bold&#34;&gt;Example&lt;/span&gt; {
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;public&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;:&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	&lt;span style=&#34;color:#555&#34;&gt;~&lt;/span&gt;Example() {}  &lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;// 用户定义的析构函数
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;&lt;/span&gt;	&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;// 移动操作被隐式删除，拷贝操作可能生成（若无其他限制）
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;&lt;/span&gt;};
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;// 移动操作被隐式删除，拷贝操作可能生成（若无其他限制）
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;};
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;ul&gt;
 &lt;li&gt;
 &lt;p&gt;&lt;strong&gt;定义拷贝操作&lt;/strong&gt;：&lt;/p&gt;
@@ -1865,8 +1867,8 @@ JSON 格式，描述网络的类型、IPAM 配置、路由等。&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-cpp&#34; data-lang=&#34;cpp&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color:#0a8;font-weight:bold&#34;&gt;Example&lt;/span&gt; {
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;public&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;:&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  Example(&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;const&lt;/span&gt; Example&lt;span style=&#34;color:#555&#34;&gt;&amp;amp;&lt;/span&gt;) {}  &lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;// 用户定义的拷贝构造函数
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;&lt;/span&gt;  &lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;// 移动操作被隐式删除
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;&lt;/span&gt;};
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;// 移动操作被隐式删除
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;};
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;ul&gt;
 &lt;li&gt;
 &lt;p&gt;&lt;strong&gt;定义移动操作&lt;/strong&gt;：&lt;/p&gt;
@@ -1876,7 +1878,7 @@ JSON 格式，描述网络的类型、IPAM 配置、路由等。&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-cpp&#34; data-lang=&#34;cpp&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#099&#34;&gt;#include&lt;/span&gt; &lt;span style=&#34;color:#099&#34;&gt;&amp;lt;utility&amp;gt;&lt;/span&gt;&lt;span style=&#34;color:#099&#34;&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#099&#34;&gt;#include&lt;/span&gt; &lt;span style=&#34;color:#099&#34;&gt;&amp;lt;string&amp;gt;&lt;/span&gt;&lt;span style=&#34;color:#099&#34;&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#099&#34;&gt;#include&lt;/span&gt; &lt;span style=&#34;color:#099&#34;&gt;&amp;lt;iostream&amp;gt;&lt;/span&gt;&lt;span style=&#34;color:#099&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#099&#34;&gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;struct&lt;/span&gt; &lt;span style=&#34;color:#0a8;font-weight:bold&#34;&gt;Example&lt;/span&gt; {
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  	std&lt;span style=&#34;color:#555&#34;&gt;::&lt;/span&gt;string str;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
@@ -1929,38 +1931,38 @@ JSON 格式，描述网络的类型、IPAM 配置、路由等。&lt;/p&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;                                   std&lt;span style=&#34;color:#555&#34;&gt;::&lt;/span&gt;shared_ptr&lt;span style=&#34;color:#555&#34;&gt;&amp;lt;&lt;/span&gt;CheckOptions&lt;span style=&#34;color:#555&#34;&gt;&amp;gt;&lt;/span&gt; check_options) &lt;span style=&#34;color:#555&#34;&gt;-&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#078;font-weight:bold&#34;&gt;bool&lt;/span&gt; {
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;if&lt;/span&gt; (&lt;span style=&#34;color:#555&#34;&gt;!&lt;/span&gt;sql.empty() &lt;span style=&#34;color:#555&#34;&gt;&amp;amp;&amp;amp;&lt;/span&gt; sql[&lt;span style=&#34;color:#f60&#34;&gt;0&lt;/span&gt;] &lt;span style=&#34;color:#555&#34;&gt;==&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;\\&amp;#39;&lt;/span&gt;) {
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;// 处理元命令
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;&lt;/span&gt;    ... 
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    ... 
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  }
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;// binder，但是在其中会使用libpg_query来解析sql语句
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;&lt;/span&gt;  bustub&lt;span style=&#34;color:#555&#34;&gt;::&lt;/span&gt;Binder binder(&lt;span style=&#34;color:#555&#34;&gt;*&lt;/span&gt;catalog_);
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  bustub&lt;span style=&#34;color:#555&#34;&gt;::&lt;/span&gt;Binder binder(&lt;span style=&#34;color:#555&#34;&gt;*&lt;/span&gt;catalog_);
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  binder.ParseAndSave(sql);
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;// 经过上一步后，binder中的statement_nodes_存储着所有的语句解析节点
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;&lt;/span&gt;  &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;for&lt;/span&gt; (&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;auto&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;*&lt;/span&gt;&lt;span style=&#34;color:#99f&#34;&gt;stmt&lt;/span&gt; : binder.statement_nodes_) {
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;for&lt;/span&gt; (&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;auto&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;*&lt;/span&gt;&lt;span style=&#34;color:#99f&#34;&gt;stmt&lt;/span&gt; : binder.statement_nodes_) {
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;// 将stmt转换成BoundStatement对象，方便后面处理数据
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;&lt;/span&gt;    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;auto&lt;/span&gt; statement &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; binder.BindStatement(stmt);
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;auto&lt;/span&gt; statement &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; binder.BindStatement(stmt);
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;// 只有不需要构建plan树、不需要进行优化的sql语句才会在switch之后继续执行
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;&lt;/span&gt;    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;switch&lt;/span&gt; (statement&lt;span style=&#34;color:#555&#34;&gt;-&amp;gt;&lt;/span&gt;type_) {
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;switch&lt;/span&gt; (statement&lt;span style=&#34;color:#555&#34;&gt;-&amp;gt;&lt;/span&gt;type_) {
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;      ...
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    }
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;// 生成初步的执行计划
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;&lt;/span&gt;    bustub&lt;span style=&#34;color:#555&#34;&gt;::&lt;/span&gt;Planner planner(&lt;span style=&#34;color:#555&#34;&gt;*&lt;/span&gt;catalog_);
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    bustub&lt;span style=&#34;color:#555&#34;&gt;::&lt;/span&gt;Planner planner(&lt;span style=&#34;color:#555&#34;&gt;*&lt;/span&gt;catalog_);
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    planner.PlanQuery(&lt;span style=&#34;color:#555&#34;&gt;*&lt;/span&gt;statement);
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;// 优化刚刚的执行计划
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;&lt;/span&gt;    bustub&lt;span style=&#34;color:#555&#34;&gt;::&lt;/span&gt;Optimizer optimizer(&lt;span style=&#34;color:#555&#34;&gt;*&lt;/span&gt;catalog_, IsForceStarterRule());
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    bustub&lt;span style=&#34;color:#555&#34;&gt;::&lt;/span&gt;Optimizer optimizer(&lt;span style=&#34;color:#555&#34;&gt;*&lt;/span&gt;catalog_, IsForceStarterRule());
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;auto&lt;/span&gt; optimized_plan &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; optimizer.Optimize(planner.plan_);
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	...
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;// 执行优化后的plan，这里会使用火山模型去根据下面节点的Next函数来执行相应的算子
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;&lt;/span&gt;	execution_engine_&lt;span style=&#34;color:#555&#34;&gt;-&amp;gt;&lt;/span&gt;Execute(optimized_plan, &lt;span style=&#34;color:#555&#34;&gt;&amp;amp;&lt;/span&gt;result_set, txn, exec_ctx.get());
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	execution_engine_&lt;span style=&#34;color:#555&#34;&gt;-&amp;gt;&lt;/span&gt;Execute(optimized_plan, &lt;span style=&#34;color:#555&#34;&gt;&amp;amp;&lt;/span&gt;result_set, txn, exec_ctx.get());
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;// 将执行结果输出至指定位置
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;&lt;/span&gt;	...
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	...
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  }
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color:#a00;background-color:#faa&#34;&gt;是否执行成功&lt;/span&gt;;	
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;}
@@ -1968,9 +1970,9 @@ JSON 格式，描述网络的类型、IPAM 配置、路由等。&lt;/p&gt;
     </item>
     <item>
       <title>Linux下微信无法使用中文输入法问题解决</title>
-      <link>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/%E9%97%AE%E9%A2%98%E8%A7%A3%E5%86%B3/linux%E4%B8%8B%E5%BE%AE%E4%BF%A1%E6%97%A0%E6%B3%95%E4%BD%BF%E7%94%A8%E4%B8%AD%E6%96%87%E8%BE%93%E5%85%A5%E6%B3%95%E9%97%AE%E9%A2%98%E8%A7%A3%E5%86%B3/</link>
+      <link>https://kerolt.github.io/posts/linux/linux%E4%B8%8B%E5%BE%AE%E4%BF%A1%E6%97%A0%E6%B3%95%E4%BD%BF%E7%94%A8%E4%B8%AD%E6%96%87%E8%BE%93%E5%85%A5%E6%B3%95%E9%97%AE%E9%A2%98%E8%A7%A3%E5%86%B3/</link>
       <pubDate>Tue, 31 Dec 2024 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/%E9%97%AE%E9%A2%98%E8%A7%A3%E5%86%B3/linux%E4%B8%8B%E5%BE%AE%E4%BF%A1%E6%97%A0%E6%B3%95%E4%BD%BF%E7%94%A8%E4%B8%AD%E6%96%87%E8%BE%93%E5%85%A5%E6%B3%95%E9%97%AE%E9%A2%98%E8%A7%A3%E5%86%B3/</guid>
+      <guid>https://kerolt.github.io/posts/linux/linux%E4%B8%8B%E5%BE%AE%E4%BF%A1%E6%97%A0%E6%B3%95%E4%BD%BF%E7%94%A8%E4%B8%AD%E6%96%87%E8%BE%93%E5%85%A5%E6%B3%95%E9%97%AE%E9%A2%98%E8%A7%A3%E5%86%B3/</guid>
       <description>&lt;p&gt;微信在不久前终于有了 Linux 原生版本，我的电脑是 Fedora41，之前安装的是 flatpak 打包的微信，现在在官网下载 rpm 包后运行发现无法使用 fcitx 的中文输入法，找了一下是环境遍历的问题。&lt;/p&gt;</description>
     </item>
     <item>
@@ -1996,41 +1998,41 @@ JSON 格式，描述网络的类型、IPAM 配置、路由等。&lt;/p&gt;
     </item>
     <item>
       <title>【MIT6.S081】Lab10 mmap</title>
-      <link>https://kerolt.github.io/posts/os/mit6.s081/mit6.s081lab10-mmap/</link>
+      <link>https://kerolt.github.io/posts/%E5%8A%A8%E6%89%8B%E5%AE%9E%E7%8E%B0x/mit6.s081/mit6.s081lab10-mmap/</link>
       <pubDate>Fri, 22 Nov 2024 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/os/mit6.s081/mit6.s081lab10-mmap/</guid>
+      <guid>https://kerolt.github.io/posts/%E5%8A%A8%E6%89%8B%E5%AE%9E%E7%8E%B0x/mit6.s081/mit6.s081lab10-mmap/</guid>
       <description>&lt;h2 id=&#34;什么是mmap&#34;&gt;什么是mmap？&lt;/h2&gt;
 &lt;p&gt;&lt;code&gt;mmap&lt;/code&gt; 是一种用于将文件或设备与进程的地址空间关联起来的内存映射技术。通过 &lt;code&gt;mmap&lt;/code&gt;，可以将文件的内容直接映射到进程的虚拟内存地址空间，使得文件的内容可以像操作普通内存一样进行读取和写入。&lt;/p&gt;</description>
     </item>
     <item>
       <title>【MIT6.S081】Lab9 file system</title>
-      <link>https://kerolt.github.io/posts/os/mit6.s081/mit6.s081lab9-file-system/</link>
+      <link>https://kerolt.github.io/posts/%E5%8A%A8%E6%89%8B%E5%AE%9E%E7%8E%B0x/mit6.s081/mit6.s081lab9-file-system/</link>
       <pubDate>Tue, 19 Nov 2024 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/os/mit6.s081/mit6.s081lab9-file-system/</guid>
+      <guid>https://kerolt.github.io/posts/%E5%8A%A8%E6%89%8B%E5%AE%9E%E7%8E%B0x/mit6.s081/mit6.s081lab9-file-system/</guid>
       <description>&lt;h2 id=&#34;intro&#34;&gt;Intro&lt;/h2&gt;
 &lt;p&gt;在这个实验中，我们需要让xv6支持更大的文件和软链接。实验总体不是特别难，不过需要我们理解好文件系统是如何工作的。&lt;code&gt;Lab8 lock&lt;/code&gt;中的Buffer Cache也是文件系统的一部分，不过它位于文件系统的下层，这里我们需要处理的更多在上层，偏应用层。&lt;/p&gt;</description>
     </item>
     <item>
       <title>【MIT6.S081】Lab8 lock</title>
-      <link>https://kerolt.github.io/posts/os/mit6.s081/mit6.s081lab8-lock/</link>
+      <link>https://kerolt.github.io/posts/%E5%8A%A8%E6%89%8B%E5%AE%9E%E7%8E%B0x/mit6.s081/mit6.s081lab8-lock/</link>
       <pubDate>Sun, 17 Nov 2024 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/os/mit6.s081/mit6.s081lab8-lock/</guid>
+      <guid>https://kerolt.github.io/posts/%E5%8A%A8%E6%89%8B%E5%AE%9E%E7%8E%B0x/mit6.s081/mit6.s081lab8-lock/</guid>
       <description>&lt;h2 id=&#34;intro&#34;&gt;Intro&lt;/h2&gt;
 &lt;p&gt;这个实验个人感觉挺难的，需要我们重新设计数据结构，还要考虑在并发（并行）情况下对于锁的操作，以减少多核情况下对于锁的竞争。其中主要涉及内存分配和IO缓冲块分配，在这个lab之前，xv6对于这两个分配都是使用的全局对象，并只有一把全局锁进行操作，这样的话在并行情况下锁的竞争是很激烈的，我们的任务就是重新设计这两个分配器，它们的重构思路并不完全一致，需要具体问题具体分析。&lt;/p&gt;</description>
     </item>
     <item>
       <title>【MIT6.S081】xv6进程调度分析</title>
-      <link>https://kerolt.github.io/posts/os/mit6.s081/mit6.s081xv6%E8%BF%9B%E7%A8%8B%E8%B0%83%E5%BA%A6%E5%88%86%E6%9E%90/</link>
+      <link>https://kerolt.github.io/posts/%E5%8A%A8%E6%89%8B%E5%AE%9E%E7%8E%B0x/mit6.s081/mit6.s081xv6%E8%BF%9B%E7%A8%8B%E8%B0%83%E5%BA%A6%E5%88%86%E6%9E%90/</link>
       <pubDate>Sat, 16 Nov 2024 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/os/mit6.s081/mit6.s081xv6%E8%BF%9B%E7%A8%8B%E8%B0%83%E5%BA%A6%E5%88%86%E6%9E%90/</guid>
+      <guid>https://kerolt.github.io/posts/%E5%8A%A8%E6%89%8B%E5%AE%9E%E7%8E%B0x/mit6.s081/mit6.s081xv6%E8%BF%9B%E7%A8%8B%E8%B0%83%E5%BA%A6%E5%88%86%E6%9E%90/</guid>
       <description>&lt;p&gt;在做thread lab的时候，阅读xv6的源码后对于进程调度的实现有了大致的了解，但是其中锁的获取与释放顺序让我困惑了好久：在yield函数中，不是先获取了进程p的锁吗，那么之后在调度器中又获取p的锁，那不是会死锁吗？在调度器内使用swtch发生进程切换后，又会跳转到哪里？&lt;/p&gt;
 &lt;p&gt;而在我观摩大佬的一些博客和视频后，发现我之前的想法有很大的问题，归根结底是没有弄明白xv6何时发生了切换，切换后应该从哪里开始运行。这篇笔记就是对于分析xv6进程调度的总结。&lt;/p&gt;</description>
     </item>
     <item>
       <title>【MIT6.S081】Lab6 multithreading</title>
-      <link>https://kerolt.github.io/posts/os/mit6.s081/mit6.s081lab6-multithreading/</link>
+      <link>https://kerolt.github.io/posts/%E5%8A%A8%E6%89%8B%E5%AE%9E%E7%8E%B0x/mit6.s081/mit6.s081lab6-multithreading/</link>
       <pubDate>Fri, 15 Nov 2024 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/os/mit6.s081/mit6.s081lab6-multithreading/</guid>
+      <guid>https://kerolt.github.io/posts/%E5%8A%A8%E6%89%8B%E5%AE%9E%E7%8E%B0x/mit6.s081/mit6.s081lab6-multithreading/</guid>
       <description>&lt;p&gt;本次的实验总体都不是很难，第一个练习让我们在用户态模拟了线程的切换，这里重要的就是进程/线程上下文的保存与恢复；第二三个练习则是让我们跳出了xv6，去熟悉pthread库和线程的同步互斥。&lt;/p&gt;</description>
     </item>
     <item>
@@ -2071,7 +2073,7 @@ JSON 格式，描述网络的类型、IPAM 配置、路由等。&lt;/p&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;*&lt;/span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;this&lt;/span&gt;;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  }
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;// ... 其他操作
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;&lt;/span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;}
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;在&lt;code&gt;ReadPageGuard&lt;/code&gt;和&lt;code&gt;WritePageGuard&lt;/code&gt;的&lt;code&gt;Drop()&lt;/code&gt;中，还需要考虑释放管理的page的锁。对应的，锁的获取发生在&lt;code&gt;FetchPageWrite()&lt;/code&gt;和&lt;code&gt;FetchPageWrite()&lt;/code&gt;中。&lt;/p&gt;
 &lt;h2 id=&#34;task2---extendible-hash-table-pages&#34;&gt;Task2 - Extendible Hash Table Pages&lt;/h2&gt;
 &lt;p&gt;为什么我们需要可扩展哈希？&lt;/p&gt;
@@ -2106,9 +2108,9 @@ JSON 格式，描述网络的类型、IPAM 配置、路由等。&lt;/p&gt;
     </item>
     <item>
       <title>【MIT6.S081】Lab5 copy-on-write fork</title>
-      <link>https://kerolt.github.io/posts/os/mit6.s081/mit6.s081lab5-copy-on-write-fork/</link>
+      <link>https://kerolt.github.io/posts/%E5%8A%A8%E6%89%8B%E5%AE%9E%E7%8E%B0x/mit6.s081/mit6.s081lab5-copy-on-write-fork/</link>
       <pubDate>Tue, 12 Nov 2024 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/os/mit6.s081/mit6.s081lab5-copy-on-write-fork/</guid>
+      <guid>https://kerolt.github.io/posts/%E5%8A%A8%E6%89%8B%E5%AE%9E%E7%8E%B0x/mit6.s081/mit6.s081lab5-copy-on-write-fork/</guid>
       <description>&lt;h2 id=&#34;为什么我们需要copy-on-write&#34;&gt;为什么我们需要copy on write&lt;/h2&gt;
 &lt;p&gt;通过xv6的实验指导书，我们可以知道：&lt;/p&gt;
 &lt;p&gt;xv6中的&lt;code&gt;fork()&lt;/code&gt;系统调用将父进程的所有用户空间内存复制到子进程中。如果父进程所使用的页数很大，复制可能需要很长时间，而这样的复制操作经常是没有用的：&lt;code&gt;fork()&lt;/code&gt;之后通常是子进程中的&lt;code&gt;exec()&lt;/code&gt;，这会丢弃复制的内存而不是使用它们。&lt;/p&gt;
@@ -2119,9 +2121,9 @@ JSON 格式，描述网络的类型、IPAM 配置、路由等。&lt;/p&gt;
     </item>
     <item>
       <title>【MIT6.S081】Lab4 trap backtrace</title>
-      <link>https://kerolt.github.io/posts/os/mit6.s081/mit6.s081lab4-trap-backtrace/</link>
+      <link>https://kerolt.github.io/posts/%E5%8A%A8%E6%89%8B%E5%AE%9E%E7%8E%B0x/mit6.s081/mit6.s081lab4-trap-backtrace/</link>
       <pubDate>Sun, 10 Nov 2024 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/os/mit6.s081/mit6.s081lab4-trap-backtrace/</guid>
+      <guid>https://kerolt.github.io/posts/%E5%8A%A8%E6%89%8B%E5%AE%9E%E7%8E%B0x/mit6.s081/mit6.s081lab4-trap-backtrace/</guid>
       <description>&lt;p&gt;backtrace这个lab非常有意思，虽然实现的代码量不多，但是能让我们更好地理解栈、栈帧、指针、gdb的一些知识。&lt;/p&gt;
 &lt;blockquote&gt;
 &lt;p&gt;该实验的代码实现见：&lt;a href=&#34;https://github.com/kerolt/xv6-labs-2023/commit/d1dba8ae4a1a71604e8bb6df5238f8cac1771683&#34;&gt;仓库commit&lt;/a&gt;&lt;/p&gt;
@@ -2129,9 +2131,9 @@ JSON 格式，描述网络的类型、IPAM 配置、路由等。&lt;/p&gt;
     </item>
     <item>
       <title>【MIT6.S081】Lab4 trap alarm</title>
-      <link>https://kerolt.github.io/posts/os/mit6.s081/mit6.s081lab4-trap-alarm/</link>
+      <link>https://kerolt.github.io/posts/%E5%8A%A8%E6%89%8B%E5%AE%9E%E7%8E%B0x/mit6.s081/mit6.s081lab4-trap-alarm/</link>
       <pubDate>Thu, 07 Nov 2024 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/os/mit6.s081/mit6.s081lab4-trap-alarm/</guid>
+      <guid>https://kerolt.github.io/posts/%E5%8A%A8%E6%89%8B%E5%AE%9E%E7%8E%B0x/mit6.s081/mit6.s081lab4-trap-alarm/</guid>
       <description>&lt;p&gt;Alarm综合了该lab中前几个练习的知识点：系统调用、中断、寄存器等，我们需要对trap机制有比较好的认识才能理解。Alarm的任务是需要我们完成一个定时器的实现：&lt;code&gt;sigalarm(interval, handler)&lt;/code&gt;，当调用&lt;code&gt;sigalarm(n, fn)&lt;/code&gt;时，内核会每n个时间间隔（tick）执行fn函数。&lt;/p&gt;
 &lt;blockquote&gt;
 &lt;p&gt;该实验的代码实现见：&lt;a href=&#34;https://github.com/kerolt/xv6-labs-2023/commit/0f70ef7d68ab1273262b8d43a2deaf7345a87698&#34;&gt;仓库commit&lt;/a&gt;&lt;/p&gt;
@@ -2139,17 +2141,17 @@ JSON 格式，描述网络的类型、IPAM 配置、路由等。&lt;/p&gt;
     </item>
     <item>
       <title>【MIT6.S081】Lab3 page tables（上）</title>
-      <link>https://kerolt.github.io/posts/os/mit6.s081/mit6.s081lab3-page-tables%E4%B8%8A/</link>
+      <link>https://kerolt.github.io/posts/%E5%8A%A8%E6%89%8B%E5%AE%9E%E7%8E%B0x/mit6.s081/mit6.s081lab3-page-tables%E4%B8%8A/</link>
       <pubDate>Tue, 05 Nov 2024 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/os/mit6.s081/mit6.s081lab3-page-tables%E4%B8%8A/</guid>
+      <guid>https://kerolt.github.io/posts/%E5%8A%A8%E6%89%8B%E5%AE%9E%E7%8E%B0x/mit6.s081/mit6.s081lab3-page-tables%E4%B8%8A/</guid>
       <description>&lt;h2 id=&#34;前言&#34;&gt;前言&lt;/h2&gt;
 &lt;p&gt;页表是最常用的机制，操作系统通过它为每个进程提供自己的私有地址空间和内存。页表决定了内存地址的含义，以及可以访问物理内存的哪些部分。在本文中，记录了&lt;code&gt;Lab: page tables&lt;/code&gt;的前两个实验：加速系统调用和打印页表。&lt;/p&gt;</description>
     </item>
     <item>
       <title>【MIT6.S081】Lab3 page tables（下）</title>
-      <link>https://kerolt.github.io/posts/os/mit6.s081/mit6.s081lab3-page-tables%E4%B8%8B/</link>
+      <link>https://kerolt.github.io/posts/%E5%8A%A8%E6%89%8B%E5%AE%9E%E7%8E%B0x/mit6.s081/mit6.s081lab3-page-tables%E4%B8%8B/</link>
       <pubDate>Tue, 05 Nov 2024 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/os/mit6.s081/mit6.s081lab3-page-tables%E4%B8%8B/</guid>
+      <guid>https://kerolt.github.io/posts/%E5%8A%A8%E6%89%8B%E5%AE%9E%E7%8E%B0x/mit6.s081/mit6.s081lab3-page-tables%E4%B8%8B/</guid>
       <description>&lt;p&gt;本关的任务为“Detect which pages have been accessed”，需要实现一个新的系统调用&lt;code&gt;pgaccess&lt;/code&gt;，它指出访问了哪些页面被访问了（读、写等）。系统调用需要三个参数：&lt;/p&gt;
 &lt;ol&gt;
 &lt;li&gt;第一个用户页面的起始虚拟地址&lt;/li&gt;
@@ -2162,17 +2164,17 @@ JSON 格式，描述网络的类型、IPAM 配置、路由等。&lt;/p&gt;
     </item>
     <item>
       <title>【MIT6.S081】Lab2 system calls</title>
-      <link>https://kerolt.github.io/posts/os/mit6.s081/mit6.s081lab2-system-calls/</link>
+      <link>https://kerolt.github.io/posts/%E5%8A%A8%E6%89%8B%E5%AE%9E%E7%8E%B0x/mit6.s081/mit6.s081lab2-system-calls/</link>
       <pubDate>Mon, 28 Oct 2024 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/os/mit6.s081/mit6.s081lab2-system-calls/</guid>
+      <guid>https://kerolt.github.io/posts/%E5%8A%A8%E6%89%8B%E5%AE%9E%E7%8E%B0x/mit6.s081/mit6.s081lab2-system-calls/</guid>
       <description>&lt;h2 id=&#34;前言&#34;&gt;前言&lt;/h2&gt;
 &lt;p&gt;这个lab开始我们就正式进入了xv6的世界了，这一次我们可以了解到内核中系统调用的注册和运行原理，这可以说是之后lab的一个基石。&lt;/p&gt;</description>
     </item>
     <item>
       <title>【MIT6.S081】Lab1 utilities</title>
-      <link>https://kerolt.github.io/posts/os/mit6.s081/mit6.s081lab1-utilities/</link>
+      <link>https://kerolt.github.io/posts/%E5%8A%A8%E6%89%8B%E5%AE%9E%E7%8E%B0x/mit6.s081/mit6.s081lab1-utilities/</link>
       <pubDate>Sun, 27 Oct 2024 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/os/mit6.s081/mit6.s081lab1-utilities/</guid>
+      <guid>https://kerolt.github.io/posts/%E5%8A%A8%E6%89%8B%E5%AE%9E%E7%8E%B0x/mit6.s081/mit6.s081lab1-utilities/</guid>
       <description>&lt;h2 id=&#34;前言&#34;&gt;前言&lt;/h2&gt;
 &lt;p&gt;该Lab通过实现几个命令来熟悉 xv6 及其系统调用&lt;/p&gt;
 &lt;ul&gt;
@@ -2242,9 +2244,9 @@ JSON 格式，描述网络的类型、IPAM 配置、路由等。&lt;/p&gt;
     </item>
     <item>
       <title>函数防抖</title>
-      <link>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/%E5%89%8D%E7%AB%AF/%E5%87%BD%E6%95%B0%E9%98%B2%E6%8A%96/</link>
+      <link>https://kerolt.github.io/posts/%E5%89%8D%E7%AB%AF/%E5%87%BD%E6%95%B0%E9%98%B2%E6%8A%96/</link>
       <pubDate>Sun, 22 Sep 2024 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/%E5%89%8D%E7%AB%AF/%E5%87%BD%E6%95%B0%E9%98%B2%E6%8A%96/</guid>
+      <guid>https://kerolt.github.io/posts/%E5%89%8D%E7%AB%AF/%E5%87%BD%E6%95%B0%E9%98%B2%E6%8A%96/</guid>
       <description>&lt;p&gt;最近的练手项目web-terminal中（也就是一个网页终端，可执行一些命令），在按下键盘后会显示可能匹配的命令列表（假设对应的函数是&lt;code&gt;setHintList&lt;/code&gt;），这不仅是按下字母按键会触发，按下删除键、tab键都会触发。那就不得不考虑一个问题，如果我们手速太快，那么&lt;code&gt;setHintList&lt;/code&gt;就会频繁触发，但我们只需要响应用户最后一次输入的命令即可，虽然在这个小项目中没啥问题，但是由此可以引出一些对于以后大项目的考虑：如何减小这种多次频繁执行函数带来的性能开销问题？那就是函数防抖~&lt;/p&gt;</description>
     </item>
     <item>
@@ -2280,9 +2282,9 @@ JSON 格式，描述网络的类型、IPAM 配置、路由等。&lt;/p&gt;
     </item>
     <item>
       <title>解决X11下窗口拖动撕裂的一个方法</title>
-      <link>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/%E9%97%AE%E9%A2%98%E8%A7%A3%E5%86%B3/%E8%A7%A3%E5%86%B3x11%E4%B8%8B%E7%AA%97%E5%8F%A3%E6%8B%96%E5%8A%A8%E6%92%95%E8%A3%82%E7%9A%84%E4%B8%80%E4%B8%AA%E6%96%B9%E6%B3%95/</link>
+      <link>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/%E8%A7%A3%E5%86%B3x11%E4%B8%8B%E7%AA%97%E5%8F%A3%E6%8B%96%E5%8A%A8%E6%92%95%E8%A3%82%E7%9A%84%E4%B8%80%E4%B8%AA%E6%96%B9%E6%B3%95/</link>
       <pubDate>Tue, 03 Sep 2024 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/%E9%97%AE%E9%A2%98%E8%A7%A3%E5%86%B3/%E8%A7%A3%E5%86%B3x11%E4%B8%8B%E7%AA%97%E5%8F%A3%E6%8B%96%E5%8A%A8%E6%92%95%E8%A3%82%E7%9A%84%E4%B8%80%E4%B8%AA%E6%96%B9%E6%B3%95/</guid>
+      <guid>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/%E8%A7%A3%E5%86%B3x11%E4%B8%8B%E7%AA%97%E5%8F%A3%E6%8B%96%E5%8A%A8%E6%92%95%E8%A3%82%E7%9A%84%E4%B8%80%E4%B8%AA%E6%96%B9%E6%B3%95/</guid>
       <description>&lt;blockquote&gt;
 &lt;p&gt;Debian 系 Linux 安装 N 卡驱动参考这篇 &lt;a href=&#34;https://www.if-not-true-then-false.com/2021/debian-ubuntu-linux-mint-nvidia-guide/&#34;&gt;博客&lt;/a&gt;&lt;/p&gt;
 &lt;/blockquote&gt;
@@ -2305,18 +2307,18 @@ JSON 格式，描述网络的类型、IPAM 配置、路由等。&lt;/p&gt;
     </item>
     <item>
       <title>记一次项目构建部署的总结</title>
-      <link>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/%E5%89%8D%E7%AB%AF/%E8%AE%B0%E4%B8%80%E6%AC%A1%E9%A1%B9%E7%9B%AE%E6%9E%84%E5%BB%BA%E9%83%A8%E7%BD%B2%E7%9A%84%E6%80%BB%E7%BB%93/</link>
+      <link>https://kerolt.github.io/posts/%E5%89%8D%E7%AB%AF/%E8%AE%B0%E4%B8%80%E6%AC%A1%E9%A1%B9%E7%9B%AE%E6%9E%84%E5%BB%BA%E9%83%A8%E7%BD%B2%E7%9A%84%E6%80%BB%E7%BB%93/</link>
       <pubDate>Fri, 30 Aug 2024 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/%E5%89%8D%E7%AB%AF/%E8%AE%B0%E4%B8%80%E6%AC%A1%E9%A1%B9%E7%9B%AE%E6%9E%84%E5%BB%BA%E9%83%A8%E7%BD%B2%E7%9A%84%E6%80%BB%E7%BB%93/</guid>
+      <guid>https://kerolt.github.io/posts/%E5%89%8D%E7%AB%AF/%E8%AE%B0%E4%B8%80%E6%AC%A1%E9%A1%B9%E7%9B%AE%E6%9E%84%E5%BB%BA%E9%83%A8%E7%BD%B2%E7%9A%84%E6%80%BB%E7%BB%93/</guid>
       <description>&lt;h2 id=&#34;前言&#34;&gt;前言&lt;/h2&gt;
 &lt;p&gt;暑假里跟着鱼皮的&lt;code&gt;yuindex&lt;/code&gt;项目写了个web终端的小玩具，完成的终端命令不多，但是大体上成型了。由于我打算做一个纯前端的项目，并没有写后端api，这样也方便我最终直接部署到&lt;strong&gt;Github Pages&lt;/strong&gt;上（这样就不用花钱了hh）。&lt;/p&gt;
 &lt;p&gt;项目使用vite构建，并使用了ts。在构建部署时遇到了一些问题，由于是第一次将前端项目发布到github pages上，这里记录下。&lt;/p&gt;</description>
     </item>
     <item>
       <title>写一个简单的浏览器脚本来屏蔽CSDN</title>
-      <link>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/%E5%89%8D%E7%AB%AF/%E5%86%99%E4%B8%80%E4%B8%AA%E7%AE%80%E5%8D%95%E7%9A%84%E6%B5%8F%E8%A7%88%E5%99%A8%E8%84%9A%E6%9C%AC%E6%9D%A5%E5%B1%8F%E8%94%BDcsdn/</link>
+      <link>https://kerolt.github.io/posts/%E5%89%8D%E7%AB%AF/%E5%86%99%E4%B8%80%E4%B8%AA%E7%AE%80%E5%8D%95%E7%9A%84%E6%B5%8F%E8%A7%88%E5%99%A8%E8%84%9A%E6%9C%AC%E6%9D%A5%E5%B1%8F%E8%94%BDcsdn/</link>
       <pubDate>Thu, 29 Aug 2024 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/%E5%89%8D%E7%AB%AF/%E5%86%99%E4%B8%80%E4%B8%AA%E7%AE%80%E5%8D%95%E7%9A%84%E6%B5%8F%E8%A7%88%E5%99%A8%E8%84%9A%E6%9C%AC%E6%9D%A5%E5%B1%8F%E8%94%BDcsdn/</guid>
+      <guid>https://kerolt.github.io/posts/%E5%89%8D%E7%AB%AF/%E5%86%99%E4%B8%80%E4%B8%AA%E7%AE%80%E5%8D%95%E7%9A%84%E6%B5%8F%E8%A7%88%E5%99%A8%E8%84%9A%E6%9C%AC%E6%9D%A5%E5%B1%8F%E8%94%BDcsdn/</guid>
       <description>&lt;p&gt;在使用手机浏览器搜索时为了免于CSDN垃圾信息的影响，我们可以使用Bing（其他搜索引擎也有类似的功能，但是国内不借助其他方法的情况下体验感最好的也只有Bing了）的“&lt;code&gt;-site:*.csdn.net&lt;/code&gt;”来屏蔽CSDN，但是每次输入搜索内容后还要加这么一个字符串真是太麻烦了，因此可以写一个浏览器脚本来完成这一操作。&lt;/p&gt;</description>
     </item>
     <item>
@@ -2358,9 +2360,9 @@ JSON 格式，描述网络的类型、IPAM 配置、路由等。&lt;/p&gt;
     </item>
     <item>
       <title>用uni-cli创建项目后使用eslint</title>
-      <link>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/%E5%89%8D%E7%AB%AF/%E7%94%A8uni-cli%E5%88%9B%E5%BB%BA%E9%A1%B9%E7%9B%AE%E5%90%8E%E4%BD%BF%E7%94%A8eslint/</link>
+      <link>https://kerolt.github.io/posts/%E5%89%8D%E7%AB%AF/%E7%94%A8uni-cli%E5%88%9B%E5%BB%BA%E9%A1%B9%E7%9B%AE%E5%90%8E%E4%BD%BF%E7%94%A8eslint/</link>
       <pubDate>Sat, 08 Jun 2024 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/%E5%89%8D%E7%AB%AF/%E7%94%A8uni-cli%E5%88%9B%E5%BB%BA%E9%A1%B9%E7%9B%AE%E5%90%8E%E4%BD%BF%E7%94%A8eslint/</guid>
+      <guid>https://kerolt.github.io/posts/%E5%89%8D%E7%AB%AF/%E7%94%A8uni-cli%E5%88%9B%E5%BB%BA%E9%A1%B9%E7%9B%AE%E5%90%8E%E4%BD%BF%E7%94%A8eslint/</guid>
       <description>&lt;p&gt;记录一下如何配置eslint（其实是怕下一次又被折磨）。&lt;/p&gt;</description>
     </item>
     <item>
@@ -2376,9 +2378,9 @@ JSON 格式，描述网络的类型、IPAM 配置、路由等。&lt;/p&gt;
     </item>
     <item>
       <title>VMware17.5.2启动踩坑</title>
-      <link>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/%E9%97%AE%E9%A2%98%E8%A7%A3%E5%86%B3/vmware17.5.2%E5%90%AF%E5%8A%A8%E8%B8%A9%E5%9D%91/</link>
+      <link>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/vmware17.5.2%E5%90%AF%E5%8A%A8%E8%B8%A9%E5%9D%91/</link>
       <pubDate>Mon, 27 May 2024 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/%E9%97%AE%E9%A2%98%E8%A7%A3%E5%86%B3/vmware17.5.2%E5%90%AF%E5%8A%A8%E8%B8%A9%E5%9D%91/</guid>
+      <guid>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/vmware17.5.2%E5%90%AF%E5%8A%A8%E8%B8%A9%E5%9D%91/</guid>
       <description>&lt;p&gt;最近听说 VMware17.5.2 个人版可以免费使用了，故在 Linux 下安装用用，顺便记录一下踩的坑。&lt;/p&gt;</description>
     </item>
     <item>
@@ -2393,22 +2395,6 @@ JSON 格式，描述网络的类型、IPAM 配置、路由等。&lt;/p&gt;
 &lt;li&gt;&lt;a href=&#34;https://leetcode.cn/problems/best-time-to-buy-and-sell-stock-iv/&#34;&gt;188. 买卖股票的最佳时机 IV&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href=&#34;https://leetcode.cn/problems/best-time-to-buy-and-sell-stock-with-cooldown/&#34;&gt;309. 买卖股票的最佳时机含冷冻期&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;</description>
-    </item>
-    <item>
-      <title>API开放平台</title>
-      <link>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/%E5%90%8E%E7%AB%AF/api%E5%BC%80%E6%94%BE%E5%B9%B3%E5%8F%B0/</link>
-      <pubDate>Thu, 21 Mar 2024 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/%E5%90%8E%E7%AB%AF/api%E5%BC%80%E6%94%BE%E5%B9%B3%E5%8F%B0/</guid>
-      <description>&lt;h2 id=&#34;前言&#34;&gt;前言&lt;/h2&gt;
-&lt;p&gt;通过一个项目来学习一下如何设计一个多服务的系统。同时也能学习Spring Cloud Gateway、Dubbo、API签名等一些知识。&lt;/p&gt;
-&lt;h2 id=&#34;项目架构&#34;&gt;项目架构&lt;/h2&gt;
-&lt;p&gt;
-&lt;div class=&#34;post-img-view&#34;&gt;
-  &lt;a data-fancybox=&#34;gallery&#34; href=&#34;https://gitee.com/kerolt/picture/raw/main/20241216-143608.png&#34;&gt;
-    &lt;img src=&#34;https://gitee.com/kerolt/picture/raw/main/20241216-143608.png&#34; alt=&#34;&#34;  /&gt;
-  &lt;/a&gt;
-&lt;/div&gt;
-&lt;/p&gt;</description>
     </item>
     <item>
       <title>避免cout线程不安全的一个做法</title>
@@ -2453,9 +2439,9 @@ JSON 格式，描述网络的类型、IPAM 配置、路由等。&lt;/p&gt;
     </item>
     <item>
       <title>Vue3封装el-upload</title>
-      <link>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/%E5%89%8D%E7%AB%AF/vue3%E5%B0%81%E8%A3%85el-upload/</link>
+      <link>https://kerolt.github.io/posts/%E5%89%8D%E7%AB%AF/vue3%E5%B0%81%E8%A3%85el-upload/</link>
       <pubDate>Sun, 10 Dec 2023 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/%E5%89%8D%E7%AB%AF/vue3%E5%B0%81%E8%A3%85el-upload/</guid>
+      <guid>https://kerolt.github.io/posts/%E5%89%8D%E7%AB%AF/vue3%E5%B0%81%E8%A3%85el-upload/</guid>
       <description>&lt;h2 id=&#34;前言&#34;&gt;前言&lt;/h2&gt;
 &lt;p&gt;在Vue3项目中，如果我们想上传图片一般可以利用element-ui中的&lt;code&gt;el-upload&lt;/code&gt;，为了避免代码的重复，我们可以自己封装一个图片上传组件。&lt;/p&gt;
 &lt;p&gt;其中，主要实现思想为前端利用el-upload组件选择上传的图片，并利用其&lt;code&gt;http-request&lt;/code&gt;属性来自定义函数来实现文件上传请求：该请求函数使用七牛云的对象存储，在通过后端得到的上传凭证token后来实现文件上传。&lt;/p&gt;</description>

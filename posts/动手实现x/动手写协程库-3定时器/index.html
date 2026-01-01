@@ -26,9 +26,9 @@ TimerManager类中具体定义实现可以在这里查看：Github: src/timer.cp
 </span></span><span style=display:flex><span>
 </span></span><span style=display:flex><span><span style=color:#069;font-weight:700>private</span><span style=color:#555>:</span>
 </span></span><span style=display:flex><span>    <span style=color:#078;font-weight:700>bool</span> is_recur_;       <span style=color:#09f;font-style:italic>// 是否循环定时器
-</span></span></span><span style=display:flex><span><span style=color:#09f;font-style:italic></span>    <span style=color:#078;font-weight:700>uint64_t</span> exec_cycle_; <span style=color:#09f;font-style:italic>// 执行周期
-</span></span></span><span style=display:flex><span><span style=color:#09f;font-style:italic></span>    <span style=color:#078;font-weight:700>uint64_t</span> next_;       <span style=color:#09f;font-style:italic>// 下一次的到期时间
-</span></span></span><span style=display:flex><span><span style=color:#09f;font-style:italic></span>    std<span style=color:#555>::</span>function<span style=color:#555>&lt;</span><span style=color:#078;font-weight:700>void</span>()<span style=color:#555>&gt;</span> callback_;
+</span></span></span><span style=display:flex><span>    <span style=color:#078;font-weight:700>uint64_t</span> exec_cycle_; <span style=color:#09f;font-style:italic>// 执行周期
+</span></span></span><span style=display:flex><span>    <span style=color:#078;font-weight:700>uint64_t</span> next_;       <span style=color:#09f;font-style:italic>// 下一次的到期时间
+</span></span></span><span style=display:flex><span>    std<span style=color:#555>::</span>function<span style=color:#555>&lt;</span><span style=color:#078;font-weight:700>void</span>()<span style=color:#555>&gt;</span> callback_;
 </span></span><span style=display:flex><span>    TimerManager<span style=color:#555>*</span> manager_;
 </span></span><span style=display:flex><span>
 </span></span><span style=display:flex><span>    <span style=color:#069;font-weight:700>struct</span> <span style=color:#0a8;font-weight:700>Comp</span> {
@@ -49,20 +49,20 @@ TimerManager类中具体定义实现可以在这里查看：Github: src/timer.cp
 </span></span><span style=display:flex><span>    <span style=color:#069;font-weight:700>virtual</span> <span style=color:#555>~</span>TimerManager();
 </span></span><span style=display:flex><span>
 </span></span><span style=display:flex><span>    <span style=color:#09f;font-style:italic>// public 添加定时器
-</span></span></span><span style=display:flex><span><span style=color:#09f;font-style:italic></span>    Timer<span style=color:#555>::</span>Ptr AddTimer(<span style=color:#078;font-weight:700>uint64_t</span> ms, std<span style=color:#555>::</span>function<span style=color:#555>&lt;</span><span style=color:#078;font-weight:700>void</span>()<span style=color:#555>&gt;</span> cb, <span style=color:#078;font-weight:700>bool</span> is_recur <span style=color:#555>=</span> <span style=color:#366>false</span>);
+</span></span></span><span style=display:flex><span>    Timer<span style=color:#555>::</span>Ptr AddTimer(<span style=color:#078;font-weight:700>uint64_t</span> ms, std<span style=color:#555>::</span>function<span style=color:#555>&lt;</span><span style=color:#078;font-weight:700>void</span>()<span style=color:#555>&gt;</span> cb, <span style=color:#078;font-weight:700>bool</span> is_recur <span style=color:#555>=</span> <span style=color:#366>false</span>);
 </span></span><span style=display:flex><span>
 </span></span><span style=display:flex><span>    <span style=color:#09f;font-style:italic>// 添加条件定时器，如果条件成立则定时器才有效
-</span></span></span><span style=display:flex><span><span style=color:#09f;font-style:italic></span>    Timer<span style=color:#555>::</span>Ptr AddConditionTimer(<span style=color:#078;font-weight:700>uint64_t</span> ms, std<span style=color:#555>::</span>function<span style=color:#555>&lt;</span><span style=color:#078;font-weight:700>void</span>()<span style=color:#555>&gt;</span> cb, std<span style=color:#555>::</span>weak_ptr<span style=color:#555>&lt;</span><span style=color:#078;font-weight:700>void</span><span style=color:#555>&gt;</span> cond, <span style=color:#078;font-weight:700>bool</span> is_recur <span style=color:#555>=</span> <span style=color:#366>false</span>);
+</span></span></span><span style=display:flex><span>    Timer<span style=color:#555>::</span>Ptr AddConditionTimer(<span style=color:#078;font-weight:700>uint64_t</span> ms, std<span style=color:#555>::</span>function<span style=color:#555>&lt;</span><span style=color:#078;font-weight:700>void</span>()<span style=color:#555>&gt;</span> cb, std<span style=color:#555>::</span>weak_ptr<span style=color:#555>&lt;</span><span style=color:#078;font-weight:700>void</span><span style=color:#555>&gt;</span> cond, <span style=color:#078;font-weight:700>bool</span> is_recur <span style=color:#555>=</span> <span style=color:#366>false</span>);
 </span></span><span style=display:flex><span>
 </span></span><span style=display:flex><span>    <span style=color:#09f;font-style:italic>// 获取下一个定时器到现在的执行间隔时间
-</span></span></span><span style=display:flex><span><span style=color:#09f;font-style:italic></span>    <span style=color:#09f;font-style:italic>// 如果没有定时器了，就返回uint64_t的最大值
-</span></span></span><span style=display:flex><span><span style=color:#09f;font-style:italic></span>    <span style=color:#078;font-weight:700>uint64_t</span> <span style=color:#c0f>GetNextTimerInterval</span>();
+</span></span></span><span style=display:flex><span>    <span style=color:#09f;font-style:italic>// 如果没有定时器了，就返回uint64_t的最大值
+</span></span></span><span style=display:flex><span>    <span style=color:#078;font-weight:700>uint64_t</span> <span style=color:#c0f>GetNextTimerInterval</span>();
 </span></span><span style=display:flex><span>
 </span></span><span style=display:flex><span>    <span style=color:#09f;font-style:italic>// 获取需要执行的定时器的回调函数列表
-</span></span></span><span style=display:flex><span><span style=color:#09f;font-style:italic></span>    std<span style=color:#555>::</span>vector<span style=color:#555>&lt;</span>std<span style=color:#555>::</span>function<span style=color:#555>&lt;</span><span style=color:#078;font-weight:700>void</span>()<span style=color:#555>&gt;&gt;</span> GetExpiredCbList();
+</span></span></span><span style=display:flex><span>    std<span style=color:#555>::</span>vector<span style=color:#555>&lt;</span>std<span style=color:#555>::</span>function<span style=color:#555>&lt;</span><span style=color:#078;font-weight:700>void</span>()<span style=color:#555>&gt;&gt;</span> GetExpiredCbList();
 </span></span><span style=display:flex><span>
 </span></span><span style=display:flex><span>    <span style=color:#09f;font-style:italic>// 是否还有定时器
-</span></span></span><span style=display:flex><span><span style=color:#09f;font-style:italic></span>    <span style=color:#078;font-weight:700>bool</span> <span style=color:#c0f>HasTimer</span>();
+</span></span></span><span style=display:flex><span>    <span style=color:#078;font-weight:700>bool</span> <span style=color:#c0f>HasTimer</span>();
 </span></span><span style=display:flex><span>
 </span></span><span style=display:flex><span><span style=color:#069;font-weight:700>protected</span><span style=color:#555>:</span>
 </span></span><span style=display:flex><span>    <span style=color:#069;font-weight:700>virtual</span> <span style=color:#078;font-weight:700>void</span> OnTimerInsertAtFront() <span style=color:#555>=</span> <span style=color:#f60>0</span>;
@@ -71,8 +71,8 @@ TimerManager类中具体定义实现可以在这里查看：Github: src/timer.cp
 </span></span><span style=display:flex><span>
 </span></span><span style=display:flex><span><span style=color:#069;font-weight:700>private</span><span style=color:#555>:</span>
 </span></span><span style=display:flex><span>    <span style=color:#09f;font-style:italic>// 系统时钟是否出现了回绕（rollover）现象，即当前时间比之前记录的时间要小很多
-</span></span></span><span style=display:flex><span><span style=color:#09f;font-style:italic></span>    <span style=color:#09f;font-style:italic>// 用于检测服务器时间是否被调后了
-</span></span></span><span style=display:flex><span><span style=color:#09f;font-style:italic></span>    <span style=color:#078;font-weight:700>bool</span> DetectClockRollover(<span style=color:#078;font-weight:700>uint64_t</span> now_ms);
+</span></span></span><span style=display:flex><span>    <span style=color:#09f;font-style:italic>// 用于检测服务器时间是否被调后了
+</span></span></span><span style=display:flex><span>    <span style=color:#078;font-weight:700>bool</span> DetectClockRollover(<span style=color:#078;font-weight:700>uint64_t</span> now_ms);
 </span></span><span style=display:flex><span>
 </span></span><span style=display:flex><span><span style=color:#069;font-weight:700>private</span><span style=color:#555>:</span>
 </span></span><span style=display:flex><span>    std<span style=color:#555>::</span>shared_mutex rw_mutex_;
@@ -81,13 +81,13 @@ TimerManager类中具体定义实现可以在这里查看：Github: src/timer.cp
 </span></span><span style=display:flex><span>    <span style=color:#078;font-weight:700>uint64_t</span> pre_exec_time_;
 </span></span><span style=display:flex><span>};
 </span></span></code></pre></div><p>个人感觉最重要的API是<code>AddTimer</code>、<code>GetNextTimerInterval</code>和<code>GetExpiredCbList</code>。</p><ul><li><code>AddTimer</code>向时间堆中添加超时超时时间到了后的回调函数（利用<code>Timer</code>类来封装）。</li><li><code>GetNextTimerInterval</code>用于获取下一个定时器到现在的执行间隔时间，这会用于<code>IOManager::Idle()</code>中用于与规定的最大超时时间进行比较，用较小者作为<code>epoll_wait</code>的超时时间参数。</li><li><code>GetExpiredCbList</code>获取的是所有超时定时器的回调函数。在<code>IOManager::Idle()</code>会调用这个函数将所有超时定时器的回调函数作为调度任务加入任务队列进行处理。</li></ul><p>在定时器中，使用<code>GetElapsedMS()</code>来获取系统自启动来经过的时间，其内部使用<code>clock_gettime</code>来获取时间，这相比于一些传统时间获取函数（如<code>time</code>或<code>gettimeofday</code>）有更高的精度：</p><div class=highlight><pre tabindex=0 style=background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-cpp data-lang=cpp><span style=display:flex><span><span style=color:#09f;font-style:italic>// 获取系统自启动来经过的时间
-</span></span></span><span style=display:flex><span><span style=color:#09f;font-style:italic></span><span style=color:#069;font-weight:700>static</span> <span style=color:#078;font-weight:700>uint64_t</span> <span style=color:#c0f>GetElapsedMS</span>() {
+</span></span></span><span style=display:flex><span><span style=color:#069;font-weight:700>static</span> <span style=color:#078;font-weight:700>uint64_t</span> <span style=color:#c0f>GetElapsedMS</span>() {
 </span></span><span style=display:flex><span>    <span style=color:#069;font-weight:700>struct</span> <span style=color:#0a8;font-weight:700>timespec</span> ts <span style=color:#555>=</span> {<span style=color:#f60>0</span>};
 </span></span><span style=display:flex><span>    clock_gettime(CLOCK_MONOTONIC_RAW, <span style=color:#555>&amp;</span>ts);
 </span></span><span style=display:flex><span>    <span style=color:#069;font-weight:700>return</span> ts.tv_sec <span style=color:#555>*</span> <span style=color:#f60>1000</span> <span style=color:#555>+</span> ts.tv_nsec <span style=color:#555>/</span> <span style=color:#f60>1000000</span>;
 </span></span><span style=display:flex><span>}
 </span></span></code></pre></div></div><footer class=post-footer><nav class=paginav><a class=prev href=https://kerolt.github.io/posts/%E5%8A%A8%E6%89%8B%E5%AE%9E%E7%8E%B0x/%E5%8A%A8%E6%89%8B%E5%86%99%E5%8D%8F%E7%A8%8B%E5%BA%93-4io%E5%8D%8F%E7%A8%8B%E8%B0%83%E5%BA%A6%E5%99%A8/><span class=title>« Prev</span><br><span>【动手写协程库 4】IO协程调度器</span>
-</a><a class=next href=https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/%E5%89%8D%E7%AB%AF/%E5%87%BD%E6%95%B0%E9%98%B2%E6%8A%96/><span class=title>Next »</span><br><span>函数防抖</span></a></nav></footer></article></main><footer class=footer><span>&copy; 2025 <a href=https://kerolt.github.io/>Kerolt's Blog</a></span> ·
+</a><a class=next href=https://kerolt.github.io/posts/%E5%89%8D%E7%AB%AF/%E5%87%BD%E6%95%B0%E9%98%B2%E6%8A%96/><span class=title>Next »</span><br><span>函数防抖</span></a></nav></footer></article></main><footer class=footer><span>&copy; 2026 <a href=https://kerolt.github.io/>Kerolt's Blog</a></span> ·
 <span>Powered by
 <a href=https://gohugo.io/ rel="noopener noreferrer" target=_blank>Hugo</a> &
 <a href=https://github.com/adityatelange/hugo-PaperMod/ rel=noopener target=_blank>PaperMod</a></span></footer><a href=#top aria-label="go to top" title="Go to Top (Alt + G)" class=top-link id=top-link accesskey=g><svg viewBox="0 0 12 6" fill="currentColor"><path d="M12 6H0l6-6z"/></svg>

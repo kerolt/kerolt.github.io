@@ -19,32 +19,32 @@
 </span></span><span style=display:flex><span>        vector<span style=color:#555>&lt;</span><span style=color:#078;font-weight:700>int</span><span style=color:#555>&gt;</span> res;
 </span></span><span style=display:flex><span>        unordered_map<span style=color:#555>&lt;</span>string, <span style=color:#078;font-weight:700>int</span><span style=color:#555>&gt;</span> dict;
 </span></span><span style=display:flex><span>        <span style=color:#09f;font-style:italic>// 记录每个单词的出现次数
-</span></span></span><span style=display:flex><span><span style=color:#09f;font-style:italic></span>        <span style=color:#069;font-weight:700>for</span> (<span style=color:#069;font-weight:700>auto</span><span style=color:#555>&amp;</span> <span style=color:#99f>w</span> : words) {
+</span></span></span><span style=display:flex><span>        <span style=color:#069;font-weight:700>for</span> (<span style=color:#069;font-weight:700>auto</span><span style=color:#555>&amp;</span> <span style=color:#99f>w</span> : words) {
 </span></span><span style=display:flex><span>            dict[w]<span style=color:#555>++</span>;
 </span></span><span style=display:flex><span>        }
 </span></span><span style=display:flex><span>        <span style=color:#09f;font-style:italic>// 外循环遍历的次数为单个单词的长度
-</span></span></span><span style=display:flex><span><span style=color:#09f;font-style:italic></span>        <span style=color:#069;font-weight:700>for</span> (<span style=color:#078;font-weight:700>int</span> i <span style=color:#555>=</span> <span style=color:#f60>0</span>; i <span style=color:#555>&lt;</span> uni_len; i<span style=color:#555>++</span>) {
+</span></span></span><span style=display:flex><span>        <span style=color:#069;font-weight:700>for</span> (<span style=color:#078;font-weight:700>int</span> i <span style=color:#555>=</span> <span style=color:#f60>0</span>; i <span style=color:#555>&lt;</span> uni_len; i<span style=color:#555>++</span>) {
 </span></span><span style=display:flex><span>            <span style=color:#078;font-weight:700>int</span> start <span style=color:#555>=</span> i; <span style=color:#09f;font-style:italic>// start为子串开始的索引
-</span></span></span><span style=display:flex><span><span style=color:#09f;font-style:italic></span>            unordered_map<span style=color:#555>&lt;</span>string, <span style=color:#078;font-weight:700>int</span><span style=color:#555>&gt;</span> cache; <span style=color:#09f;font-style:italic>// cache用于记录内循环中，位于dict中的单词的出现次数
-</span></span></span><span style=display:flex><span><span style=color:#09f;font-style:italic></span>            <span style=color:#09f;font-style:italic>// 内循环，每次增加一个单词长度（即以一个单词长度为最小单位）
-</span></span></span><span style=display:flex><span><span style=color:#09f;font-style:italic></span>            <span style=color:#069;font-weight:700>for</span> (<span style=color:#078;font-weight:700>int</span> j <span style=color:#555>=</span> i; j <span style=color:#555>&lt;</span> n; j <span style=color:#555>+=</span> uni_len) {
+</span></span></span><span style=display:flex><span>            unordered_map<span style=color:#555>&lt;</span>string, <span style=color:#078;font-weight:700>int</span><span style=color:#555>&gt;</span> cache; <span style=color:#09f;font-style:italic>// cache用于记录内循环中，位于dict中的单词的出现次数
+</span></span></span><span style=display:flex><span>            <span style=color:#09f;font-style:italic>// 内循环，每次增加一个单词长度（即以一个单词长度为最小单位）
+</span></span></span><span style=display:flex><span>            <span style=color:#069;font-weight:700>for</span> (<span style=color:#078;font-weight:700>int</span> j <span style=color:#555>=</span> i; j <span style=color:#555>&lt;</span> n; j <span style=color:#555>+=</span> uni_len) {
 </span></span><span style=display:flex><span>                string sub <span style=color:#555>=</span> s.substr(j, uni_len);
 </span></span><span style=display:flex><span>                <span style=color:#09f;font-style:italic>// 判断当前截取的字符串是否存在于dict中
-</span></span></span><span style=display:flex><span><span style=color:#09f;font-style:italic></span>                <span style=color:#069;font-weight:700>if</span> (dict.find(sub) <span style=color:#555>!=</span> dict.end()) {
+</span></span></span><span style=display:flex><span>                <span style=color:#069;font-weight:700>if</span> (dict.find(sub) <span style=color:#555>!=</span> dict.end()) {
 </span></span><span style=display:flex><span>                    cache[sub]<span style=color:#555>++</span>;
 </span></span><span style=display:flex><span>                    <span style=color:#09f;font-style:italic>// 当sub在cache中出现次数大于dict中，说明当前start不可能为子串的开始索引（因为单词数目都不相等了），不断移动start位置（移动单元为uni_len），直到cache[sub] &lt;= dict[sub]
-</span></span></span><span style=display:flex><span><span style=color:#09f;font-style:italic></span>                    <span style=color:#069;font-weight:700>while</span> (cache[sub] <span style=color:#555>&gt;</span> dict[sub]) {
+</span></span></span><span style=display:flex><span>                    <span style=color:#069;font-weight:700>while</span> (cache[sub] <span style=color:#555>&gt;</span> dict[sub]) {
 </span></span><span style=display:flex><span>                        string remove_str <span style=color:#555>=</span> s.substr(start, uni_len);
 </span></span><span style=display:flex><span>                        cache[remove_str]<span style=color:#555>--</span>;
 </span></span><span style=display:flex><span>                        start <span style=color:#555>+=</span> uni_len;
 </span></span><span style=display:flex><span>                    }
 </span></span><span style=display:flex><span>                    <span style=color:#09f;font-style:italic>// 若cache和dict中内容一致，说明找到了一个符合要求的子串
-</span></span></span><span style=display:flex><span><span style=color:#09f;font-style:italic></span>                    <span style=color:#069;font-weight:700>if</span> (dict <span style=color:#555>==</span> cache) {
+</span></span></span><span style=display:flex><span>                    <span style=color:#069;font-weight:700>if</span> (dict <span style=color:#555>==</span> cache) {
 </span></span><span style=display:flex><span>                        res.push_back(start);
 </span></span><span style=display:flex><span>                    }
 </span></span><span style=display:flex><span>                } <span style=color:#069;font-weight:700>else</span> {
 </span></span><span style=display:flex><span>                    <span style=color:#09f;font-style:italic>// 若当前截取字符串不存在于dict中，跳过这个单词
-</span></span></span><span style=display:flex><span><span style=color:#09f;font-style:italic></span>                    start <span style=color:#555>=</span> j <span style=color:#555>+</span> uni_len;
+</span></span></span><span style=display:flex><span>                    start <span style=color:#555>=</span> j <span style=color:#555>+</span> uni_len;
 </span></span><span style=display:flex><span>                    cache.clear();
 </span></span><span style=display:flex><span>                }
 </span></span><span style=display:flex><span>            }
@@ -52,8 +52,8 @@
 </span></span><span style=display:flex><span>        <span style=color:#069;font-weight:700>return</span> res;
 </span></span><span style=display:flex><span>    }
 </span></span><span style=display:flex><span>};
-</span></span></code></pre></div></div><footer class=post-footer><nav class=paginav><a class=prev href=https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/%E5%89%8D%E7%AB%AF/%E7%94%A8uni-cli%E5%88%9B%E5%BB%BA%E9%A1%B9%E7%9B%AE%E5%90%8E%E4%BD%BF%E7%94%A8eslint/><span class=title>« Prev</span><br><span>用uni-cli创建项目后使用eslint</span>
-</a><a class=next href=https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/%E9%97%AE%E9%A2%98%E8%A7%A3%E5%86%B3/vmware17.5.2%E5%90%AF%E5%8A%A8%E8%B8%A9%E5%9D%91/><span class=title>Next »</span><br><span>VMware17.5.2启动踩坑</span></a></nav></footer></article></main><footer class=footer><span>&copy; 2025 <a href=https://kerolt.github.io/>Kerolt's Blog</a></span> ·
+</span></span></code></pre></div></div><footer class=post-footer><nav class=paginav><a class=prev href=https://kerolt.github.io/posts/%E5%89%8D%E7%AB%AF/%E7%94%A8uni-cli%E5%88%9B%E5%BB%BA%E9%A1%B9%E7%9B%AE%E5%90%8E%E4%BD%BF%E7%94%A8eslint/><span class=title>« Prev</span><br><span>用uni-cli创建项目后使用eslint</span>
+</a><a class=next href=https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/vmware17.5.2%E5%90%AF%E5%8A%A8%E8%B8%A9%E5%9D%91/><span class=title>Next »</span><br><span>VMware17.5.2启动踩坑</span></a></nav></footer></article></main><footer class=footer><span>&copy; 2026 <a href=https://kerolt.github.io/>Kerolt's Blog</a></span> ·
 <span>Powered by
 <a href=https://gohugo.io/ rel="noopener noreferrer" target=_blank>Hugo</a> &
 <a href=https://github.com/adityatelange/hugo-PaperMod/ rel=noopener target=_blank>PaperMod</a></span></footer><a href=#top aria-label="go to top" title="Go to Top (Alt + G)" class=top-link id=top-link accesskey=g><svg viewBox="0 0 12 6" fill="currentColor"><path d="M12 6H0l6-6z"/></svg>

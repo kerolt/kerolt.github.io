@@ -9,7 +9,7 @@
       <url>https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</url>
       <link>https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</link>
     </image>
-    <generator>Hugo -- 0.152.2</generator>
+    <generator>Hugo -- 0.154.0</generator>
     <language>en</language>
     <lastBuildDate>Fri, 12 Dec 2025 00:00:00 +0000</lastBuildDate>
     <atom:link href="https://kerolt.github.io/categories/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/index.xml" rel="self" type="application/rss+xml" />
@@ -31,149 +31,6 @@
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;这个错误是因为 &lt;code&gt;uv&lt;/code&gt; 在尝试从官方源下载 NVIDIA 的 CUDA 组件包（&lt;code&gt;nvidia-cufft-cu12&lt;/code&gt;）时&lt;strong&gt;网络超时&lt;/strong&gt;了。&lt;/p&gt;</description>
     </item>
     <item>
-      <title>Windows修改默认文件夹名为英文</title>
-      <link>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/windows%E4%BF%AE%E6%94%B9%E9%BB%98%E8%AE%A4%E6%96%87%E4%BB%B6%E5%A4%B9%E5%90%8D%E4%B8%BA%E8%8B%B1%E6%96%87/</link>
-      <pubDate>Thu, 27 Nov 2025 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/windows%E4%BF%AE%E6%94%B9%E9%BB%98%E8%AE%A4%E6%96%87%E4%BB%B6%E5%A4%B9%E5%90%8D%E4%B8%BA%E8%8B%B1%E6%96%87/</guid>
-      <description>&lt;p&gt;系统路径 内的&lt;strong&gt;文件夹不仅有图标还显示中文名称&lt;/strong&gt;，&lt;strong&gt;但是打开路径的时候显示的却是英文&lt;/strong&gt;，如何修改呢？&lt;/p&gt;
-&lt;p&gt;
-&lt;div class=&#34;post-img-view&#34;&gt;
-  &lt;a data-fancybox=&#34;gallery&#34; href=&#34;https://img2020.cnblogs.com/blog/1528674/202009/1528674-20200902195936468-2033057250.png&#34;&gt;
-    &lt;img src=&#34;https://img2020.cnblogs.com/blog/1528674/202009/1528674-20200902195936468-2033057250.png&#34; alt=&#34;&#34;  /&gt;
-  &lt;/a&gt;
-&lt;/div&gt;
-&lt;/p&gt;
-&lt;h2 id=&#34;修改文件夹图标的步骤&#34;&gt;修改文件夹图标的步骤 &lt;/h2&gt;
-&lt;blockquote&gt;
-&lt;p&gt;选中文件夹点击鼠标右键&amp;gt;选择属性&amp;gt;选择自定义&amp;gt;选择更改图标&amp;gt;选择应用&amp;gt;选择确定&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;p&gt;
-&lt;div class=&#34;post-img-view&#34;&gt;
-  &lt;a data-fancybox=&#34;gallery&#34; href=&#34;https://img2020.cnblogs.com/blog/1528674/202009/1528674-20200902200522495-1480817730.png&#34;&gt;
-    &lt;img src=&#34;https://img2020.cnblogs.com/blog/1528674/202009/1528674-20200902200522495-1480817730.png&#34; alt=&#34;&#34;  /&gt;
-  &lt;/a&gt;
-&lt;/div&gt;
-&lt;/p&gt;
-&lt;h2 id=&#34;设置文件夹别名&#34;&gt;设置文件夹别名&lt;/h2&gt;
-&lt;ol&gt;
-&lt;li&gt;先要显示受保护的操作系统文件，设置完成之后将会看到 desktop.ini 文件（ desktop.ini 在每个文件夹内都有一个）&lt;/li&gt;
-&lt;/ol&gt;
-&lt;p&gt;
-&lt;div class=&#34;post-img-view&#34;&gt;
-  &lt;a data-fancybox=&#34;gallery&#34; href=&#34;https://img2020.cnblogs.com/blog/1528674/202009/1528674-20200902200843706-1405130835.png&#34;&gt;
-    &lt;img src=&#34;https://img2020.cnblogs.com/blog/1528674/202009/1528674-20200902200843706-1405130835.png&#34; alt=&#34;&#34;  /&gt;
-  &lt;/a&gt;
-&lt;/div&gt;
-&lt;/p&gt;
-&lt;p&gt;
-&lt;div class=&#34;post-img-view&#34;&gt;
-  &lt;a data-fancybox=&#34;gallery&#34; href=&#34;https://img2020.cnblogs.com/blog/1528674/202009/1528674-20200902200848982-785622283.png&#34;&gt;
-    &lt;img src=&#34;https://img2020.cnblogs.com/blog/1528674/202009/1528674-20200902200848982-785622283.png&#34; alt=&#34;&#34;  /&gt;
-  &lt;/a&gt;
-&lt;/div&gt;
-&lt;/p&gt;
-&lt;p&gt;
-&lt;div class=&#34;post-img-view&#34;&gt;
-  &lt;a data-fancybox=&#34;gallery&#34; href=&#34;https://img2020.cnblogs.com/blog/1528674/202009/1528674-20200902200852966-830505444.png&#34;&gt;
-    &lt;img src=&#34;https://img2020.cnblogs.com/blog/1528674/202009/1528674-20200902200852966-830505444.png&#34; alt=&#34;&#34;  /&gt;
-  &lt;/a&gt;
-&lt;/div&gt;
-&lt;/p&gt;
-&lt;ol start=&#34;2&#34;&gt;
-&lt;li&gt;如果要设置哪个文件夹的别名就找到哪个文件夹内的 desktop.ini 文件，并编辑其内容如下：&lt;/li&gt;
-&lt;/ol&gt;
-&lt;p&gt;
-&lt;div class=&#34;post-img-view&#34;&gt;
-  &lt;a data-fancybox=&#34;gallery&#34; href=&#34;https://img2020.cnblogs.com/blog/1528674/202009/1528674-20200903082525017-972445781.png&#34;&gt;
-    &lt;img src=&#34;https://img2020.cnblogs.com/blog/1528674/202009/1528674-20200903082525017-972445781.png&#34; alt=&#34;&#34;  /&gt;
-  &lt;/a&gt;
-&lt;/div&gt;
-&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#555&#34;&gt;[&lt;/span&gt;.ShellClassInfo&lt;span style=&#34;color:#555&#34;&gt;]&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#033&#34;&gt;LocalizedResourceName&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;@%SystemRoot%&lt;span style=&#34;color:#c30;font-weight:bold&#34;&gt;\s&lt;/span&gt;ystem32&lt;span style=&#34;color:#c30;font-weight:bold&#34;&gt;\s&lt;/span&gt;hell32.dll,-9227
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#033&#34;&gt;IconResource&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;C:&lt;span style=&#34;color:#c30;font-weight:bold&#34;&gt;\W&lt;/span&gt;indows&lt;span style=&#34;color:#c30;font-weight:bold&#34;&gt;\\&lt;/span&gt;System32&lt;span style=&#34;color:#c30;font-weight:bold&#34;&gt;\S&lt;/span&gt;HELL32.dll,1
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;设置完成之后保存 刷新就 OK 了，设置完成注意要  隐藏受保护的操作系统文件。&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;好像不同版本后面的数字不同，在修改前记得保存。&lt;/strong&gt;&lt;/p&gt;</description>
-    </item>
-    <item>
-      <title>Linux校准时间</title>
-      <link>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/linux%E6%A0%A1%E5%87%86%E6%97%B6%E9%97%B4/</link>
-      <pubDate>Fri, 07 Nov 2025 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/linux%E6%A0%A1%E5%87%86%E6%97%B6%E9%97%B4/</guid>
-      <description>&lt;p&gt;服务器是用旧笔记本装的 Debian13，然后用 ddns-go 做动态域名解析，但是装好之后貌似由于时钟没有校准因此 ddns-go 无法更新域名解析（使用的 aliyun），以下是解决方法。&lt;/p&gt;
-&lt;hr&gt;
-&lt;p&gt;首先我使用 &lt;code&gt;timedatectl&lt;/code&gt; 的结果如下：&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;~ $ timedatectl 
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Local time: 六 2025-11-08 00:20:49 CST 
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Universal time: 五 2025-11-07 16:20:49 UTC 
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;RTC time: 五 2025-11-07 16:20:49 
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Time zone: Asia/Shanghai &lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;CST, +0800&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt; 
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;System clock synchronized: no 
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;NTP service: n/a 
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;RTC in &lt;span style=&#34;color:#366&#34;&gt;local&lt;/span&gt; TZ: no
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;使用 &lt;code&gt;systemd-timesyncd&lt;/code&gt; 可以让系统自动校时：&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;sudo timedatectl set-ntp &lt;span style=&#34;color:#366&#34;&gt;true&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;如果显示：&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Failed to &lt;span style=&#34;color:#366&#34;&gt;set&lt;/span&gt; ntp: NTP not supported
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;说明当前系统里没有可用的 NTP 同步服务（比如 &lt;code&gt;systemd-timesyncd&lt;/code&gt;、&lt;code&gt;chronyd&lt;/code&gt; 或 &lt;code&gt;ntpd&lt;/code&gt;）被启用或支持，可以执行：&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;sudo apt install systemd-timesyncd
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;sudo systemctl &lt;span style=&#34;color:#366&#34;&gt;enable&lt;/span&gt; --now systemd-timesyncd.service
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;之后再执行 &lt;code&gt;timedatectl&lt;/code&gt; 可以看到：&lt;/p&gt;</description>
-    </item>
-    <item>
-      <title>Vue3路由与Vite的base</title>
-      <link>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/%E5%89%8D%E7%AB%AF/vue3%E8%B7%AF%E7%94%B1%E4%B8%8Evite%E7%9A%84base/</link>
-      <pubDate>Thu, 16 Oct 2025 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/%E5%89%8D%E7%AB%AF/vue3%E8%B7%AF%E7%94%B1%E4%B8%8Evite%E7%9A%84base/</guid>
-      <description>&lt;p&gt;虽然我不是一个专门搞前端的，但也会写点点 Vue。最近实验室项目写完后需要部署一下，这里我就使用了 Docker Compose 来部署。由于前端项目有前台用户端访问和后台管理端两个，而老师申请的服务器只开了 80 端口，因此我就打算使用 nginx 来反向代理：&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;code&gt;http://example.com&lt;/code&gt; 为前台&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;http://example.com/admin&lt;/code&gt; 为后台&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;ok，那我就用了一个 nginx 容器做网关，其 &lt;code&gt;nginx.conf&lt;/code&gt; 如下：&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-nginx&#34; data-lang=&#34;nginx&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;server&lt;/span&gt; {
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;listen&lt;/span&gt; &lt;span style=&#34;color:#f60&#34;&gt;80&lt;/span&gt;;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;listen&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;[::]:80&lt;/span&gt;;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;server_name&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;_&lt;/span&gt;;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;# 后台管理
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;&lt;/span&gt;	&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;location&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;/admin/&lt;/span&gt; {
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;		&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;proxy_pass&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;http://frontend-admin&lt;/span&gt;;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;		&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;proxy_set_header&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;Host&lt;/span&gt; &lt;span style=&#34;color:#033&#34;&gt;$host&lt;/span&gt;;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;		&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;proxy_set_header&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;X-Real-IP&lt;/span&gt; &lt;span style=&#34;color:#033&#34;&gt;$remote_addr&lt;/span&gt;;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	} 
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;# 后端接口
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;&lt;/span&gt;	&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;location&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;/api&lt;/span&gt; {
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;		&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;proxy_pass&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;http://backend:8080/&lt;/span&gt;;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;		&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;proxy_set_header&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;Host&lt;/span&gt; &lt;span style=&#34;color:#033&#34;&gt;$host&lt;/span&gt;;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;		&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;proxy_set_header&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;X-Real-IP&lt;/span&gt; &lt;span style=&#34;color:#033&#34;&gt;$remote_addr&lt;/span&gt;;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	}
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;# minio
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;&lt;/span&gt;	&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;location&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;/images/&lt;/span&gt; {
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;		&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;proxy_pass&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;http://minio:9000/&lt;/span&gt;;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;		&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;proxy_set_header&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;Host&lt;/span&gt; &lt;span style=&#34;color:#033&#34;&gt;$host&lt;/span&gt;;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;		&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;proxy_set_header&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;X-Real-IP&lt;/span&gt; &lt;span style=&#34;color:#033&#34;&gt;$remote_addr&lt;/span&gt;;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	}
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;# 前台用户
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;&lt;/span&gt;	&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;location&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;/&lt;/span&gt; {
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;		&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;proxy_pass&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;http://frontend-user/&lt;/span&gt;;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;		&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;proxy_set_header&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;Host&lt;/span&gt; &lt;span style=&#34;color:#033&#34;&gt;$host&lt;/span&gt;;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;		&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;proxy_set_header&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;X-Real-IP&lt;/span&gt; &lt;span style=&#34;color:#033&#34;&gt;$remote_addr&lt;/span&gt;;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	}
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;location&lt;/span&gt; = &lt;span style=&#34;color:#c30&#34;&gt;/admin&lt;/span&gt; {
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;		&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color:#f60&#34;&gt;301&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;/admin/&lt;/span&gt;;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	}
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;}
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;code&gt;docker compose up -d&lt;/code&gt; 后，用户端能访问并且接口没问题，但是一到管理端 &lt;code&gt;http://xx.xx.xx.xx/admin&lt;/code&gt;，就会是白屏，我检查了一下，管理端页面的标签栏标题是正确的，也就是 nginx 反向代理没问题，获取的 index-xxx.js 和 index-yyy.css 也没问题，那就奇了个怪了。&lt;/p&gt;</description>
-    </item>
-    <item>
       <title>国内安装Docker CE</title>
       <link>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/%E5%9B%BD%E5%86%85%E5%AE%89%E8%A3%85docker-ce/</link>
       <pubDate>Mon, 13 Oct 2025 00:00:00 +0000</pubDate>
@@ -186,7 +43,7 @@
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;# 2. 添加仓库&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#366&#34;&gt;echo&lt;/span&gt; &lt;span style=&#34;color:#c30;font-weight:bold&#34;&gt;\
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#c30;font-weight:bold&#34;&gt;&lt;/span&gt;  &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;deb [arch=&lt;/span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;$(&lt;/span&gt;dpkg --print-architecture&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;)&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt; signed-by=/etc/apt/keyrings/aliyun-docker.gpg] https://mirrors.aliyun.com/docker-ce/linux/debian \
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;deb [arch=&lt;/span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;$(&lt;/span&gt;dpkg --print-architecture&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;)&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt; signed-by=/etc/apt/keyrings/aliyun-docker.gpg] https://mirrors.aliyun.com/docker-ce/linux/debian \
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#c30&#34;&gt;  &lt;/span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;$(&lt;/span&gt;lsb_release -cs&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;)&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt; stable&amp;#34;&lt;/span&gt; | sudo tee /etc/apt/sources.list.d/docker.list &amp;gt; /dev/null
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;# 3. 安装&lt;/span&gt;
@@ -204,58 +61,6 @@
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	]
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;}
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;</description>
-    </item>
-    <item>
-      <title>Windows Terminal分屏快捷键</title>
-      <link>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/windows-terminal%E5%88%86%E5%B1%8F%E5%BF%AB%E6%8D%B7%E9%94%AE/</link>
-      <pubDate>Thu, 18 Sep 2025 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/windows-terminal%E5%88%86%E5%B1%8F%E5%BF%AB%E6%8D%B7%E9%94%AE/</guid>
-      <description>&lt;ul&gt;
-&lt;li&gt;&lt;strong&gt;左右分屏&lt;/strong&gt;: 使用 &lt;code&gt;Alt+Shift+=&lt;/code&gt; 或 &lt;code&gt;Alt+Shift+-&lt;/code&gt; 快捷键。&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;上下分屏&lt;/strong&gt;: 使用 &lt;code&gt;Alt+Shift+=&lt;/code&gt; 或 &lt;code&gt;Alt+Shift+-&lt;/code&gt; 快捷键。&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;取消分屏&lt;/strong&gt;: 使用 &lt;code&gt;Ctrl+Shift+w&lt;/code&gt; 快捷键。&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;关闭当前标签&lt;/strong&gt;: 使用 &lt;code&gt;Ctrl+Shift+w&lt;/code&gt; 快捷键。&lt;/li&gt;
-&lt;/ul&gt;</description>
-    </item>
-    <item>
-      <title>Windows11右键菜单关闭扩展</title>
-      <link>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/windows11%E5%8F%B3%E9%94%AE%E8%8F%9C%E5%8D%95%E5%85%B3%E9%97%AD%E6%89%A9%E5%B1%95/</link>
-      <pubDate>Wed, 03 Sep 2025 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/windows11%E5%8F%B3%E9%94%AE%E8%8F%9C%E5%8D%95%E5%85%B3%E9%97%AD%E6%89%A9%E5%B1%95/</guid>
-      <description>&lt;p&gt;关闭右键扩展：&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-powershell&#34; data-lang=&#34;powershell&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;reg add &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;HKCU\Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32&amp;#34;&lt;/span&gt; /f /ve
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;taskkill /f /im explorer.exe &amp;amp; &lt;span style=&#34;color:#366&#34;&gt;start &lt;/span&gt;explorer.exe
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;如果想要恢复右键扩展：&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-powershell&#34; data-lang=&#34;powershell&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;reg delete &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;HKCU\Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}&amp;#34;&lt;/span&gt; /f
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;taskkill /f /im explorer.exe &amp;amp; &lt;span style=&#34;color:#366&#34;&gt;start &lt;/span&gt;explorer.exe
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;</description>
-    </item>
-    <item>
-      <title>【问题记录】ddns-go与IPv6网络配置</title>
-      <link>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/%E9%97%AE%E9%A2%98%E8%A7%A3%E5%86%B3/%E9%97%AE%E9%A2%98%E8%AE%B0%E5%BD%95ddns-go%E4%B8%8Eipv6%E7%BD%91%E7%BB%9C%E9%85%8D%E7%BD%AE/</link>
-      <pubDate>Fri, 29 Aug 2025 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/%E9%97%AE%E9%A2%98%E8%A7%A3%E5%86%B3/%E9%97%AE%E9%A2%98%E8%AE%B0%E5%BD%95ddns-go%E4%B8%8Eipv6%E7%BD%91%E7%BB%9C%E9%85%8D%E7%BD%AE/</guid>
-      <description>&lt;p&gt;在完成 &lt;a href=&#34;https://zhuanlan.zhihu.com/p/1943305270387275457&#34;&gt;Rustdesk 自建服务器&lt;/a&gt; 的搭建后，我又想到：由于实验室服务器的公网 &lt;strong&gt;IPv6 地址&lt;/strong&gt; 并非永久不变，直接使用 IP 进行远程连接（如 SSH 或 Rustdesk）并不现实，如何确保远程访问的稳定性和便利性呢。为了解决这一痛点，我决定利用 &lt;strong&gt;动态域名解析（DDNS）&lt;/strong&gt; 技术，配合 &lt;strong&gt;ddns-go&lt;/strong&gt; 和 &lt;strong&gt;阿里云 DNS&lt;/strong&gt; 服务，将服务器的动态 IP 地址实时绑定到一个易于记忆的域名上。&lt;/p&gt;
-&lt;p&gt;本文将记录我在配置过程中遇到的四个主要问题及其解决方案。&lt;/p&gt;
-&lt;hr&gt;
-&lt;h2 id=&#34;问题-1ipv6-临时地址导致域名解析不稳定&#34;&gt;问题 1：IPv6 临时地址导致域名解析不稳定&lt;/h2&gt;
-&lt;p&gt;在启用 &lt;strong&gt;ddns-go&lt;/strong&gt; 服务后，我发现尽管程序运行正常，但我的域名解析记录却频繁失效。经过排查，我意识到罪魁祸首是 &lt;strong&gt;IPv6 临时地址（Temporary Address）&lt;/strong&gt;。这是一种为了增强用户隐私而设计的特性，系统会定期生成新的、临时的 IPv6 地址用于出站连接。当服务器的地址发生变化时，DDNS 服务来不及同步更新，就会导致域名无法解析到正确的 IP 地址。&lt;/p&gt;
-&lt;h3 id=&#34;解决方案禁用-ipv6-临时地址&#34;&gt;解决方案：禁用 IPv6 临时地址&lt;/h3&gt;
-&lt;p&gt;要解决这个问题，最直接的方法就是从系统层面禁用 IPv6 临时地址功能，强制使用稳定的、非临时的地址。&lt;/p&gt;
-&lt;ol&gt;
-&lt;li&gt;&lt;strong&gt;编辑 sysctl 配置文件&lt;/strong&gt;：
-使用 &lt;code&gt;vim&lt;/code&gt; 或其他编辑器打开 &lt;code&gt;sysctl.conf&lt;/code&gt; 文件，该文件用于在系统启动时配置内核参数。&lt;/li&gt;
-&lt;/ol&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-sh&#34; data-lang=&#34;sh&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;sudo vim /etc/sysctl.conf
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;ol start=&#34;2&#34;&gt;
-&lt;li&gt;&lt;strong&gt;添加配置项&lt;/strong&gt;：
-在文件末尾添加以下两行，分别用于&lt;strong&gt;全局禁用&lt;/strong&gt;和&lt;strong&gt;默认禁用&lt;/strong&gt;所有网络接口的 IPv6 临时地址功能。&lt;/li&gt;
-&lt;/ol&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-sh&#34; data-lang=&#34;sh&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;# 禁用 IPv6 临时地址&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;net.ipv6.conf.all.use_tempaddr &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#f60&#34;&gt;0&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;net.ipv6.conf.enp4s0.use_tempaddr &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#f60&#34;&gt;0&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;blockquote&gt;
-&lt;p&gt;&lt;strong&gt;注意&lt;/strong&gt;：如果只想针对特定网卡（例如 &lt;code&gt;enp4s0&lt;/code&gt;）进行配置，可以添加 &lt;code&gt;net.ipv6.conf.enp4s0.use_tempaddr = 0&lt;/code&gt;。你可以通过 &lt;code&gt;ip a&lt;/code&gt; 命令查看你机器的网卡名称。&lt;/p&gt;</description>
     </item>
     <item>
       <title>Rustdesk自建服务器</title>
@@ -494,38 +299,6 @@
 &lt;p&gt;ps：CMake 相比 xmake 来说确实太繁琐，但还是得学习🍭&lt;/p&gt;</description>
     </item>
     <item>
-      <title>【解决】Fedora42升级启动时显示kernel panic</title>
-      <link>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/%E9%97%AE%E9%A2%98%E8%A7%A3%E5%86%B3/%E8%A7%A3%E5%86%B3fedora42%E5%8D%87%E7%BA%A7%E5%90%AF%E5%8A%A8%E6%97%B6%E6%98%BE%E7%A4%BAkernel-panic/</link>
-      <pubDate>Sun, 27 Apr 2025 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/%E9%97%AE%E9%A2%98%E8%A7%A3%E5%86%B3/%E8%A7%A3%E5%86%B3fedora42%E5%8D%87%E7%BA%A7%E5%90%AF%E5%8A%A8%E6%97%B6%E6%98%BE%E7%A4%BAkernel-panic/</guid>
-      <description>&lt;p&gt;最近 Fedora42 更新了，因此我打算升级一下玩玩。在执行完下面的命令后：&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;sudo dnf upgrade --refresh
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;sudo dnf system-upgrade download --releasever&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#f60&#34;&gt;42&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;sudo dnf system-upgrade reboot
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;重启开机成了这样:(&lt;/p&gt;
-&lt;p&gt;
-&lt;div class=&#34;post-img-view&#34;&gt;
-  &lt;a data-fancybox=&#34;gallery&#34; href=&#34;&#34;&gt;
-    &lt;img src=&#34;&#34; alt=&#34;&#34;  /&gt;
-  &lt;/a&gt;
-&lt;/div&gt;
-&lt;/p&gt;
-&lt;p&gt;在网上搜索一圈后，执行以下命令系统就 ok 了：&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;sudo dracut --regenerate-all --force
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;错误的原因可能是更新内核后没有正确生成新的 initramfs 文件，系统可能会使用旧的、不兼容的 initramfs 文件，从而导致启动失败。&lt;/p&gt;
-&lt;p&gt;而 &lt;code&gt;dracut&lt;/code&gt; 是一个用于生成 Linux 系统 initramfs（初始内存文件系统）的工具。运行 这条命令后，&lt;code&gt;dracut&lt;/code&gt; 会重新生成与当前系统中所有已安装内核对应的 initramfs 文件。&lt;/p&gt;
-&lt;blockquote&gt;
-&lt;p&gt;参考：https://www.reddit.com/r/Fedora/comments/1hfkqnq/boot_error_after_updating_to_6124200&lt;/p&gt;
-&lt;/blockquote&gt;</description>
-    </item>
-    <item>
-      <title>Linux下微信无法使用中文输入法问题解决</title>
-      <link>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/%E9%97%AE%E9%A2%98%E8%A7%A3%E5%86%B3/linux%E4%B8%8B%E5%BE%AE%E4%BF%A1%E6%97%A0%E6%B3%95%E4%BD%BF%E7%94%A8%E4%B8%AD%E6%96%87%E8%BE%93%E5%85%A5%E6%B3%95%E9%97%AE%E9%A2%98%E8%A7%A3%E5%86%B3/</link>
-      <pubDate>Tue, 31 Dec 2024 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/%E9%97%AE%E9%A2%98%E8%A7%A3%E5%86%B3/linux%E4%B8%8B%E5%BE%AE%E4%BF%A1%E6%97%A0%E6%B3%95%E4%BD%BF%E7%94%A8%E4%B8%AD%E6%96%87%E8%BE%93%E5%85%A5%E6%B3%95%E9%97%AE%E9%A2%98%E8%A7%A3%E5%86%B3/</guid>
-      <description>&lt;p&gt;微信在不久前终于有了 Linux 原生版本，我的电脑是 Fedora41，之前安装的是 flatpak 打包的微信，现在在官网下载 rpm 包后运行发现无法使用 fcitx 的中文输入法，找了一下是环境遍历的问题。&lt;/p&gt;</description>
-    </item>
-    <item>
       <title>在VSCode中配置LLDB</title>
       <link>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/%E5%9C%A8vscode%E4%B8%AD%E9%85%8D%E7%BD%AElldb/</link>
       <pubDate>Tue, 31 Dec 2024 00:00:00 +0000</pubDate>
@@ -557,9 +330,9 @@
     </item>
     <item>
       <title>解决X11下窗口拖动撕裂的一个方法</title>
-      <link>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/%E9%97%AE%E9%A2%98%E8%A7%A3%E5%86%B3/%E8%A7%A3%E5%86%B3x11%E4%B8%8B%E7%AA%97%E5%8F%A3%E6%8B%96%E5%8A%A8%E6%92%95%E8%A3%82%E7%9A%84%E4%B8%80%E4%B8%AA%E6%96%B9%E6%B3%95/</link>
+      <link>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/%E8%A7%A3%E5%86%B3x11%E4%B8%8B%E7%AA%97%E5%8F%A3%E6%8B%96%E5%8A%A8%E6%92%95%E8%A3%82%E7%9A%84%E4%B8%80%E4%B8%AA%E6%96%B9%E6%B3%95/</link>
       <pubDate>Tue, 03 Sep 2024 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/%E9%97%AE%E9%A2%98%E8%A7%A3%E5%86%B3/%E8%A7%A3%E5%86%B3x11%E4%B8%8B%E7%AA%97%E5%8F%A3%E6%8B%96%E5%8A%A8%E6%92%95%E8%A3%82%E7%9A%84%E4%B8%80%E4%B8%AA%E6%96%B9%E6%B3%95/</guid>
+      <guid>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/%E8%A7%A3%E5%86%B3x11%E4%B8%8B%E7%AA%97%E5%8F%A3%E6%8B%96%E5%8A%A8%E6%92%95%E8%A3%82%E7%9A%84%E4%B8%80%E4%B8%AA%E6%96%B9%E6%B3%95/</guid>
       <description>&lt;blockquote&gt;
 &lt;p&gt;Debian 系 Linux 安装 N 卡驱动参考这篇 &lt;a href=&#34;https://www.if-not-true-then-false.com/2021/debian-ubuntu-linux-mint-nvidia-guide/&#34;&gt;博客&lt;/a&gt;&lt;/p&gt;
 &lt;/blockquote&gt;
@@ -567,9 +340,9 @@
     </item>
     <item>
       <title>VMware17.5.2启动踩坑</title>
-      <link>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/%E9%97%AE%E9%A2%98%E8%A7%A3%E5%86%B3/vmware17.5.2%E5%90%AF%E5%8A%A8%E8%B8%A9%E5%9D%91/</link>
+      <link>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/vmware17.5.2%E5%90%AF%E5%8A%A8%E8%B8%A9%E5%9D%91/</link>
       <pubDate>Mon, 27 May 2024 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/%E9%97%AE%E9%A2%98%E8%A7%A3%E5%86%B3/vmware17.5.2%E5%90%AF%E5%8A%A8%E8%B8%A9%E5%9D%91/</guid>
+      <guid>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/vmware17.5.2%E5%90%AF%E5%8A%A8%E8%B8%A9%E5%9D%91/</guid>
       <description>&lt;p&gt;最近听说 VMware17.5.2 个人版可以免费使用了，故在 Linux 下安装用用，顺便记录一下踩的坑。&lt;/p&gt;</description>
     </item>
   </channel>

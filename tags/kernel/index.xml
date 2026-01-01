@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Kernel on Kerolt&#39;s Blog</title>
+    <link>https://kerolt.github.io/tags/kernel/</link>
+    <description>Recent content in Kernel on Kerolt&#39;s Blog</description>
+    <image>
+      <title>Kerolt&#39;s Blog</title>
+      <url>https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</url>
+      <link>https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</link>
+    </image>
+    <generator>Hugo -- 0.154.0</generator>
+    <language>en</language>
+    <lastBuildDate>Thu, 06 Nov 2025 00:00:00 +0000</lastBuildDate>
+    <atom:link href="https://kerolt.github.io/tags/kernel/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>如何理解内核态与用户态切换的上下文开销</title>
+      <link>https://kerolt.github.io/posts/linux/%E5%A6%82%E4%BD%95%E7%90%86%E8%A7%A3%E5%86%85%E6%A0%B8%E6%80%81%E4%B8%8E%E7%94%A8%E6%88%B7%E6%80%81%E5%88%87%E6%8D%A2%E7%9A%84%E4%B8%8A%E4%B8%8B%E6%96%87%E5%BC%80%E9%94%80/</link>
+      <pubDate>Thu, 06 Nov 2025 00:00:00 +0000</pubDate>
+      <guid>https://kerolt.github.io/posts/linux/%E5%A6%82%E4%BD%95%E7%90%86%E8%A7%A3%E5%86%85%E6%A0%B8%E6%80%81%E4%B8%8E%E7%94%A8%E6%88%B7%E6%80%81%E5%88%87%E6%8D%A2%E7%9A%84%E4%B8%8A%E4%B8%8B%E6%96%87%E5%BC%80%E9%94%80/</guid>
+      <description>&lt;h2 id=&#34;一什么是用户态和内核态&#34;&gt;一、什么是“用户态”和“内核态”&lt;/h2&gt;
+&lt;p&gt;CPU 有不同的 &lt;strong&gt;特权级（Privilege Level）&lt;/strong&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;用户态（User Mode）&lt;/strong&gt;：
+应用程序在这里运行，权限受限，比如不能直接访问硬件、不能修改页表等。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;内核态（Kernel Mode）&lt;/strong&gt;：
+操作系统内核运行在这里，拥有完全的访问权限，可以管理内存、设备、中断等。&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;二什么是上下文切换context-switch&#34;&gt;二、什么是“上下文切换（Context Switch）”&lt;/h2&gt;
+&lt;p&gt;“上下文”就是 CPU 当前正在执行的任务的所有状态，包括：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;寄存器内容（RIP、RSP、RAX 等）&lt;/li&gt;
+&lt;li&gt;程序计数器（Program Counter）&lt;/li&gt;
+&lt;li&gt;栈指针&lt;/li&gt;
+&lt;li&gt;内存映射（页表）&lt;/li&gt;
+&lt;li&gt;调度信息（优先级、时间片等）&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;上下文切换&lt;/strong&gt;指的是 CPU 从一个执行上下文切换到另一个（比如进程 A → 进程 B）。&lt;/p&gt;
+&lt;h2 id=&#34;三内核态与用户态切换--进程切换但都属于上下文切换&#34;&gt;三、内核态与用户态切换 ≠ 进程切换，但都属于“上下文切换”&lt;/h2&gt;
+&lt;p&gt;这两种是不同层次的“切换”：&lt;/p&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;类型&lt;/th&gt;
+          &lt;th&gt;示例&lt;/th&gt;
+          &lt;th&gt;是否涉及调度&lt;/th&gt;
+          &lt;th&gt;开销大小&lt;/th&gt;
+          &lt;th&gt;备注&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;用户态 → 内核态&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;系统调用、I/O、中断&lt;/td&gt;
+          &lt;td&gt;否&lt;/td&gt;
+          &lt;td&gt;小（几十到几百纳秒）&lt;/td&gt;
+          &lt;td&gt;同一线程，只是 CPU 特权级变化&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;进程上下文切换&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;从进程 A → 进程 B&lt;/td&gt;
+          &lt;td&gt;是&lt;/td&gt;
+          &lt;td&gt;大（微秒级）&lt;/td&gt;
+          &lt;td&gt;不仅换栈，还要换虚拟内存上下文&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h2 id=&#34;四为什么内核用户态切换有开销&#34;&gt;四、为什么内核/用户态切换有“开销”&lt;/h2&gt;
+&lt;p&gt;内核态切换的代价来自几个部分：&lt;/p&gt;
+&lt;h3 id=&#34;1-cpu-特权级变化&#34;&gt;1. CPU 特权级变化&lt;/h3&gt;
+&lt;p&gt;切换时 CPU 会：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;保存当前寄存器状态；&lt;/li&gt;
+&lt;li&gt;改变特权级（从 ring3 → ring0）；&lt;/li&gt;
+&lt;li&gt;切换到内核栈（每个线程有独立内核栈）；&lt;/li&gt;
+&lt;li&gt;执行系统调用入口代码（&lt;code&gt;syscall&lt;/code&gt;、&lt;code&gt;sysenter&lt;/code&gt; 指令）；&lt;/li&gt;
+&lt;li&gt;执行完后再反向恢复回用户态。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;这些过程虽然不是“线程切换”，但都需要 CPU 做额外操作。&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>
