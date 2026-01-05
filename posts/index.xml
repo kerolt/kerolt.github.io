@@ -9,10 +9,65 @@
       <url>https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</url>
       <link>https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</link>
     </image>
-    <generator>Hugo -- 0.154.0</generator>
+    <generator>Hugo -- 0.154.2</generator>
     <language>en</language>
-    <lastBuildDate>Thu, 01 Jan 2026 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Mon, 05 Jan 2026 00:00:00 +0000</lastBuildDate>
     <atom:link href="https://kerolt.github.io/posts/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>【Nginx】location与proxy_pass配置中的斜杠差异</title>
+      <link>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/nginxlocation%E4%B8%8Eproxy_pass%E9%85%8D%E7%BD%AE%E4%B8%AD%E7%9A%84%E6%96%9C%E6%9D%A0%E5%B7%AE%E5%BC%82/</link>
+      <pubDate>Mon, 05 Jan 2026 00:00:00 +0000</pubDate>
+      <guid>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/nginxlocation%E4%B8%8Eproxy_pass%E9%85%8D%E7%BD%AE%E4%B8%AD%E7%9A%84%E6%96%9C%E6%9D%A0%E5%B7%AE%E5%BC%82/</guid>
+      <description>&lt;p&gt;Nginx 作为反向代理服务器，需要精确匹配客户端请求路径，并将请求转发到后端服务。在这个过程中：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;&lt;code&gt;location&lt;/code&gt; 指令&lt;/strong&gt;：决定哪些请求会被当前配置块处理&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;&lt;code&gt;proxy_pass&lt;/code&gt; 指令&lt;/strong&gt;：决定如何将请求转发到后端&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;而斜杠在这两个指令中的不同位置，会改变 Nginx 的匹配逻辑和路径传递行为，配置不当可能导致 404 错误、路径污染或安全风险。&lt;/p&gt;
+&lt;h2 id=&#34;1location-配置apivs-api-的核心差异&#34;&gt;1、Location 配置：&lt;code&gt;/api/&lt;/code&gt;vs &lt;code&gt;/api&lt;/code&gt; 的核心差异&lt;/h2&gt;
+&lt;h3 id=&#34;11-语法对比&#34;&gt;1.1 语法对比&lt;/h3&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;配置&lt;/th&gt;
+          &lt;th&gt;匹配模式&lt;/th&gt;
+          &lt;th&gt;精确要求&lt;/th&gt;
+          &lt;th&gt;示例匹配结果&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;code&gt;location /api/&lt;/code&gt;&lt;/td&gt;
+          &lt;td&gt;前缀匹配（带斜杠）&lt;/td&gt;
+          &lt;td&gt;必须以 &lt;code&gt;/api/&lt;/code&gt; 开头&lt;/td&gt;
+          &lt;td&gt;&lt;code&gt;/api/user&lt;/code&gt;✅  &lt;br&gt;&lt;code&gt;/api&lt;/code&gt;❌  &lt;br&gt;&lt;code&gt;/api-test&lt;/code&gt;❌&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;code&gt;location /api&lt;/code&gt;&lt;/td&gt;
+          &lt;td&gt;前缀匹配（无斜杠）&lt;/td&gt;
+          &lt;td&gt;以 &lt;code&gt;/api&lt;/code&gt; 开头即可&lt;/td&gt;
+          &lt;td&gt;&lt;code&gt;/api/user&lt;/code&gt;✅  &lt;br&gt;&lt;code&gt;/api&lt;/code&gt;✅  &lt;br&gt;&lt;code&gt;/api-test&lt;/code&gt;✅&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h3 id=&#34;12-语义解释&#34;&gt;1.2 语义解释&lt;/h3&gt;
+&lt;p&gt;&lt;strong&gt;&lt;code&gt;/api/&lt;/code&gt;&lt;/strong&gt;：表示一个 &amp;quot; 目录 &amp;quot; 路径，Nginx 会将其视为完整的路径段，只匹配以 &lt;code&gt;/api/&lt;/code&gt; 开头的请求。这种配置更精确，避免了意外匹配。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;&lt;code&gt;/api&lt;/code&gt;&lt;/strong&gt;：表示一个 &amp;quot; 前缀字符串 &amp;ldquo;，匹配所有以 &lt;code&gt;/api&lt;/code&gt; 开头的请求，包括 &lt;code&gt;/api&lt;/code&gt; 本身、&lt;code&gt;/api/xxx&lt;/code&gt; 以及 &lt;code&gt;/api-anything&lt;/code&gt;。这种配置更宽泛，可能产生误匹配。&lt;/p&gt;
+&lt;h3 id=&#34;13-实际场景分析&#34;&gt;1.3 实际场景分析&lt;/h3&gt;
+&lt;p&gt;&lt;strong&gt;场景 1：API 接口路由（推荐使用 &lt;code&gt;/api/&lt;/code&gt;）&lt;/strong&gt;&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;# 推荐配置：精确匹配API目录&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;location /api/ &lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    proxy_pass http://backend;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;# 只处理/api/下的所有请求，不会误匹配/api-test&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#555&#34;&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;# 不推荐：可能误匹配其他路径&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;location /api &lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;# 会匹配/api、/api/、/api-test、/api-v2等&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;# 如果后端没有/api-test接口，可能返回404或错误数据&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#555&#34;&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;strong&gt;场景 2：静态资源目录（必须使用 &lt;code&gt;/xxx/&lt;/code&gt;）&lt;/strong&gt;&lt;/p&gt;</description>
+    </item>
     <item>
       <title>uv包安装网络超时解决</title>
       <link>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/uv%E5%8C%85%E5%AE%89%E8%A3%85%E7%BD%91%E7%BB%9C%E8%B6%85%E6%97%B6%E8%A7%A3%E5%86%B3/</link>
@@ -98,9 +153,9 @@
     </item>
     <item>
       <title>Linux修改IP</title>
-      <link>https://kerolt.github.io/posts/network/linux%E4%BF%AE%E6%94%B9ip/</link>
+      <link>https://kerolt.github.io/posts/net/linux%E4%BF%AE%E6%94%B9ip/</link>
       <pubDate>Sun, 09 Nov 2025 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/network/linux%E4%BF%AE%E6%94%B9ip/</guid>
+      <guid>https://kerolt.github.io/posts/net/linux%E4%BF%AE%E6%94%B9ip/</guid>
       <description>&lt;p&gt;首先确定网络是用什么工具管理：&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-sh&#34; data-lang=&#34;sh&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;$ systemctl is-active NetworkManager
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;active
@@ -130,9 +185,9 @@
     </item>
     <item>
       <title>Linux中的veth与bridge</title>
-      <link>https://kerolt.github.io/posts/network/linux%E4%B8%AD%E7%9A%84veth%E4%B8%8Ebridge/</link>
+      <link>https://kerolt.github.io/posts/net/linux%E4%B8%AD%E7%9A%84veth%E4%B8%8Ebridge/</link>
       <pubDate>Sat, 08 Nov 2025 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/network/linux%E4%B8%AD%E7%9A%84veth%E4%B8%8Ebridge/</guid>
+      <guid>https://kerolt.github.io/posts/net/linux%E4%B8%AD%E7%9A%84veth%E4%B8%8Ebridge/</guid>
       <description>&lt;p&gt;容器网络最典型的基础模型 —— &lt;strong&gt;两个不同的命名空间通过 bridge 通信&lt;/strong&gt; 。&lt;/p&gt;
 &lt;p&gt;Docker 默认的 bridge 模式就是基于此原理,创建 &lt;code&gt;docker0&lt;/code&gt; bridge，容器 veth 对一端连接容器，一端连接 docker0，提供 NAT 功能让容器可以访问外网。&lt;/p&gt;
 &lt;p&gt;一个简单的结构如下👇：&lt;/p&gt;
@@ -866,9 +921,9 @@ JSON 格式，描述网络的类型、IPAM 配置、路由等。&lt;/p&gt;
     </item>
     <item>
       <title>【问题记录】ddns-go与IPv6网络配置</title>
-      <link>https://kerolt.github.io/posts/network/%E9%97%AE%E9%A2%98%E8%AE%B0%E5%BD%95ddns-go%E4%B8%8Eipv6%E7%BD%91%E7%BB%9C%E9%85%8D%E7%BD%AE/</link>
+      <link>https://kerolt.github.io/posts/net/%E9%97%AE%E9%A2%98%E8%AE%B0%E5%BD%95ddns-go%E4%B8%8Eipv6%E7%BD%91%E7%BB%9C%E9%85%8D%E7%BD%AE/</link>
       <pubDate>Fri, 29 Aug 2025 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/network/%E9%97%AE%E9%A2%98%E8%AE%B0%E5%BD%95ddns-go%E4%B8%8Eipv6%E7%BD%91%E7%BB%9C%E9%85%8D%E7%BD%AE/</guid>
+      <guid>https://kerolt.github.io/posts/net/%E9%97%AE%E9%A2%98%E8%AE%B0%E5%BD%95ddns-go%E4%B8%8Eipv6%E7%BD%91%E7%BB%9C%E9%85%8D%E7%BD%AE/</guid>
       <description>&lt;p&gt;在完成 &lt;a href=&#34;https://zhuanlan.zhihu.com/p/1943305270387275457&#34;&gt;Rustdesk 自建服务器&lt;/a&gt; 的搭建后，我又想到：由于实验室服务器的公网 &lt;strong&gt;IPv6 地址&lt;/strong&gt; 并非永久不变，直接使用 IP 进行远程连接（如 SSH 或 Rustdesk）并不现实，如何确保远程访问的稳定性和便利性呢。为了解决这一痛点，我决定利用 &lt;strong&gt;动态域名解析（DDNS）&lt;/strong&gt; 技术，配合 &lt;strong&gt;ddns-go&lt;/strong&gt; 和 &lt;strong&gt;阿里云 DNS&lt;/strong&gt; 服务，将服务器的动态 IP 地址实时绑定到一个易于记忆的域名上。&lt;/p&gt;
 &lt;p&gt;本文将记录我在配置过程中遇到的四个主要问题及其解决方案。&lt;/p&gt;
 &lt;hr&gt;

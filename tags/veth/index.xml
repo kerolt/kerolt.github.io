@@ -9,15 +9,15 @@
       <url>https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</url>
       <link>https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</link>
     </image>
-    <generator>Hugo -- 0.154.0</generator>
+    <generator>Hugo -- 0.154.2</generator>
     <language>en</language>
     <lastBuildDate>Thu, 01 Jan 2026 00:00:00 +0000</lastBuildDate>
     <atom:link href="https://kerolt.github.io/tags/veth/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Linux中的veth与bridge</title>
-      <link>https://kerolt.github.io/posts/network/linux%E4%B8%AD%E7%9A%84veth%E4%B8%8Ebridge/</link>
+      <link>https://kerolt.github.io/posts/net/linux%E4%B8%AD%E7%9A%84veth%E4%B8%8Ebridge/</link>
       <pubDate>Sat, 08 Nov 2025 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/network/linux%E4%B8%AD%E7%9A%84veth%E4%B8%8Ebridge/</guid>
+      <guid>https://kerolt.github.io/posts/net/linux%E4%B8%AD%E7%9A%84veth%E4%B8%8Ebridge/</guid>
       <description>&lt;p&gt;容器网络最典型的基础模型 —— &lt;strong&gt;两个不同的命名空间通过 bridge 通信&lt;/strong&gt; 。&lt;/p&gt;
 &lt;p&gt;Docker 默认的 bridge 模式就是基于此原理,创建 &lt;code&gt;docker0&lt;/code&gt; bridge，容器 veth 对一端连接容器，一端连接 docker0，提供 NAT 功能让容器可以访问外网。&lt;/p&gt;
 &lt;p&gt;一个简单的结构如下👇：&lt;/p&gt;

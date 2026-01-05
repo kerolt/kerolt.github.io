@@ -1,23 +1,23 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
   <channel>
-    <title>Network on Kerolt&#39;s Blog</title>
-    <link>https://kerolt.github.io/categories/network/</link>
-    <description>Recent content in Network on Kerolt&#39;s Blog</description>
+    <title>Net on Kerolt&#39;s Blog</title>
+    <link>https://kerolt.github.io/categories/net/</link>
+    <description>Recent content in Net on Kerolt&#39;s Blog</description>
     <image>
       <title>Kerolt&#39;s Blog</title>
       <url>https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</url>
       <link>https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</link>
     </image>
-    <generator>Hugo -- 0.154.0</generator>
+    <generator>Hugo -- 0.154.2</generator>
     <language>en</language>
     <lastBuildDate>Thu, 01 Jan 2026 00:00:00 +0000</lastBuildDate>
-    <atom:link href="https://kerolt.github.io/categories/network/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="https://kerolt.github.io/categories/net/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Linux修改IP</title>
-      <link>https://kerolt.github.io/posts/network/linux%E4%BF%AE%E6%94%B9ip/</link>
+      <link>https://kerolt.github.io/posts/net/linux%E4%BF%AE%E6%94%B9ip/</link>
       <pubDate>Sun, 09 Nov 2025 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/network/linux%E4%BF%AE%E6%94%B9ip/</guid>
+      <guid>https://kerolt.github.io/posts/net/linux%E4%BF%AE%E6%94%B9ip/</guid>
       <description>&lt;p&gt;首先确定网络是用什么工具管理：&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-sh&#34; data-lang=&#34;sh&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;$ systemctl is-active NetworkManager
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;active
@@ -47,9 +47,9 @@
     </item>
     <item>
       <title>Linux中的veth与bridge</title>
-      <link>https://kerolt.github.io/posts/network/linux%E4%B8%AD%E7%9A%84veth%E4%B8%8Ebridge/</link>
+      <link>https://kerolt.github.io/posts/net/linux%E4%B8%AD%E7%9A%84veth%E4%B8%8Ebridge/</link>
       <pubDate>Sat, 08 Nov 2025 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/network/linux%E4%B8%AD%E7%9A%84veth%E4%B8%8Ebridge/</guid>
+      <guid>https://kerolt.github.io/posts/net/linux%E4%B8%AD%E7%9A%84veth%E4%B8%8Ebridge/</guid>
       <description>&lt;p&gt;容器网络最典型的基础模型 —— &lt;strong&gt;两个不同的命名空间通过 bridge 通信&lt;/strong&gt; 。&lt;/p&gt;
 &lt;p&gt;Docker 默认的 bridge 模式就是基于此原理,创建 &lt;code&gt;docker0&lt;/code&gt; bridge，容器 veth 对一端连接容器，一端连接 docker0，提供 NAT 功能让容器可以访问外网。&lt;/p&gt;
 &lt;p&gt;一个简单的结构如下👇：&lt;/p&gt;
@@ -82,9 +82,9 @@
     </item>
     <item>
       <title>【问题记录】ddns-go与IPv6网络配置</title>
-      <link>https://kerolt.github.io/posts/network/%E9%97%AE%E9%A2%98%E8%AE%B0%E5%BD%95ddns-go%E4%B8%8Eipv6%E7%BD%91%E7%BB%9C%E9%85%8D%E7%BD%AE/</link>
+      <link>https://kerolt.github.io/posts/net/%E9%97%AE%E9%A2%98%E8%AE%B0%E5%BD%95ddns-go%E4%B8%8Eipv6%E7%BD%91%E7%BB%9C%E9%85%8D%E7%BD%AE/</link>
       <pubDate>Fri, 29 Aug 2025 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/network/%E9%97%AE%E9%A2%98%E8%AE%B0%E5%BD%95ddns-go%E4%B8%8Eipv6%E7%BD%91%E7%BB%9C%E9%85%8D%E7%BD%AE/</guid>
+      <guid>https://kerolt.github.io/posts/net/%E9%97%AE%E9%A2%98%E8%AE%B0%E5%BD%95ddns-go%E4%B8%8Eipv6%E7%BD%91%E7%BB%9C%E9%85%8D%E7%BD%AE/</guid>
       <description>&lt;p&gt;在完成 &lt;a href=&#34;https://zhuanlan.zhihu.com/p/1943305270387275457&#34;&gt;Rustdesk 自建服务器&lt;/a&gt; 的搭建后，我又想到：由于实验室服务器的公网 &lt;strong&gt;IPv6 地址&lt;/strong&gt; 并非永久不变，直接使用 IP 进行远程连接（如 SSH 或 Rustdesk）并不现实，如何确保远程访问的稳定性和便利性呢。为了解决这一痛点，我决定利用 &lt;strong&gt;动态域名解析（DDNS）&lt;/strong&gt; 技术，配合 &lt;strong&gt;ddns-go&lt;/strong&gt; 和 &lt;strong&gt;阿里云 DNS&lt;/strong&gt; 服务，将服务器的动态 IP 地址实时绑定到一个易于记忆的域名上。&lt;/p&gt;
 &lt;p&gt;本文将记录我在配置过程中遇到的四个主要问题及其解决方案。&lt;/p&gt;
 &lt;hr&gt;

@@ -2,25 +2,31 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
+    <loc>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/nginxlocation%E4%B8%8Eproxy_pass%E9%85%8D%E7%BD%AE%E4%B8%AD%E7%9A%84%E6%96%9C%E6%9D%A0%E5%B7%AE%E5%BC%82/</loc>
+    <lastmod>2026-01-05T00:00:00+00:00</lastmod>
+  </url><url>
     <loc>https://kerolt.github.io/categories/</loc>
-    <lastmod>2026-01-01T00:00:00+00:00</lastmod>
+    <lastmod>2026-01-05T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://kerolt.github.io/</loc>
-    <lastmod>2026-01-01T00:00:00+00:00</lastmod>
+    <lastmod>2026-01-05T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://kerolt.github.io/tags/nginx/</loc>
+    <lastmod>2026-01-05T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://kerolt.github.io/posts/</loc>
-    <lastmod>2026-01-01T00:00:00+00:00</lastmod>
+    <lastmod>2026-01-05T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://kerolt.github.io/tags/</loc>
-    <lastmod>2026-01-01T00:00:00+00:00</lastmod>
+    <lastmod>2026-01-05T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://kerolt.github.io/categories/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/</loc>
+    <lastmod>2026-01-05T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://kerolt.github.io/tags/uv/</loc>
     <lastmod>2025-12-12T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/uv%E5%8C%85%E5%AE%89%E8%A3%85%E7%BD%91%E7%BB%9C%E8%B6%85%E6%97%B6%E8%A7%A3%E5%86%B3/</loc>
-    <lastmod>2025-12-12T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>https://kerolt.github.io/categories/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/</loc>
     <lastmod>2025-12-12T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://kerolt.github.io/categories/windows/</loc>
@@ -35,10 +41,10 @@
     <loc>https://kerolt.github.io/tags/linux/</loc>
     <lastmod>2025-12-22T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://kerolt.github.io/posts/network/linux%E4%BF%AE%E6%94%B9ip/</loc>
+    <loc>https://kerolt.github.io/posts/net/linux%E4%BF%AE%E6%94%B9ip/</loc>
     <lastmod>2025-12-22T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://kerolt.github.io/categories/network/</loc>
+    <loc>https://kerolt.github.io/categories/net/</loc>
     <lastmod>2026-01-01T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://kerolt.github.io/tags/network/</loc>
@@ -47,7 +53,7 @@
     <loc>https://kerolt.github.io/tags/bridge/</loc>
     <lastmod>2026-01-01T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://kerolt.github.io/posts/network/linux%E4%B8%AD%E7%9A%84veth%E4%B8%8Ebridge/</loc>
+    <loc>https://kerolt.github.io/posts/net/linux%E4%B8%AD%E7%9A%84veth%E4%B8%8Ebridge/</loc>
     <lastmod>2026-01-01T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://kerolt.github.io/tags/veth/</loc>
@@ -98,9 +104,6 @@
     <loc>https://kerolt.github.io/posts/ebpf/ebpf%E5%A2%9E%E5%BC%BAnginx%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1/</loc>
     <lastmod>2025-10-21T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://kerolt.github.io/tags/nginx/</loc>
-    <lastmod>2025-10-21T00:00:00+00:00</lastmod>
-  </url><url>
     <loc>https://kerolt.github.io/tags/vite/</loc>
     <lastmod>2025-10-16T00:00:00+00:00</lastmod>
   </url><url>
@@ -146,7 +149,7 @@
     <loc>https://kerolt.github.io/posts/windows/windows11%E5%8F%B3%E9%94%AE%E8%8F%9C%E5%8D%95%E5%85%B3%E9%97%AD%E6%89%A9%E5%B1%95/</loc>
     <lastmod>2025-09-03T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://kerolt.github.io/posts/network/%E9%97%AE%E9%A2%98%E8%AE%B0%E5%BD%95ddns-go%E4%B8%8Eipv6%E7%BD%91%E7%BB%9C%E9%85%8D%E7%BD%AE/</loc>
+    <loc>https://kerolt.github.io/posts/net/%E9%97%AE%E9%A2%98%E8%AE%B0%E5%BD%95ddns-go%E4%B8%8Eipv6%E7%BD%91%E7%BB%9C%E9%85%8D%E7%BD%AE/</loc>
     <lastmod>2025-08-29T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://kerolt.github.io/tags/ddns/</loc>

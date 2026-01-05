@@ -9,15 +9,15 @@
       <url>https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</url>
       <link>https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</link>
     </image>
-    <generator>Hugo -- 0.154.0</generator>
+    <generator>Hugo -- 0.154.2</generator>
     <language>en</language>
     <lastBuildDate>Fri, 29 Aug 2025 00:00:00 +0000</lastBuildDate>
     <atom:link href="https://kerolt.github.io/tags/ddns/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>【问题记录】ddns-go与IPv6网络配置</title>
-      <link>https://kerolt.github.io/posts/network/%E9%97%AE%E9%A2%98%E8%AE%B0%E5%BD%95ddns-go%E4%B8%8Eipv6%E7%BD%91%E7%BB%9C%E9%85%8D%E7%BD%AE/</link>
+      <link>https://kerolt.github.io/posts/net/%E9%97%AE%E9%A2%98%E8%AE%B0%E5%BD%95ddns-go%E4%B8%8Eipv6%E7%BD%91%E7%BB%9C%E9%85%8D%E7%BD%AE/</link>
       <pubDate>Fri, 29 Aug 2025 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/network/%E9%97%AE%E9%A2%98%E8%AE%B0%E5%BD%95ddns-go%E4%B8%8Eipv6%E7%BD%91%E7%BB%9C%E9%85%8D%E7%BD%AE/</guid>
+      <guid>https://kerolt.github.io/posts/net/%E9%97%AE%E9%A2%98%E8%AE%B0%E5%BD%95ddns-go%E4%B8%8Eipv6%E7%BD%91%E7%BB%9C%E9%85%8D%E7%BD%AE/</guid>
       <description>&lt;p&gt;在完成 &lt;a href=&#34;https://zhuanlan.zhihu.com/p/1943305270387275457&#34;&gt;Rustdesk 自建服务器&lt;/a&gt; 的搭建后，我又想到：由于实验室服务器的公网 &lt;strong&gt;IPv6 地址&lt;/strong&gt; 并非永久不变，直接使用 IP 进行远程连接（如 SSH 或 Rustdesk）并不现实，如何确保远程访问的稳定性和便利性呢。为了解决这一痛点，我决定利用 &lt;strong&gt;动态域名解析（DDNS）&lt;/strong&gt; 技术，配合 &lt;strong&gt;ddns-go&lt;/strong&gt; 和 &lt;strong&gt;阿里云 DNS&lt;/strong&gt; 服务，将服务器的动态 IP 地址实时绑定到一个易于记忆的域名上。&lt;/p&gt;
 &lt;p&gt;本文将记录我在配置过程中遇到的四个主要问题及其解决方案。&lt;/p&gt;
 &lt;hr&gt;
