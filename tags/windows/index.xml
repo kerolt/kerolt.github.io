@@ -2,7 +2,7 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
   <channel>
     <title>Windows on Kerolt&#39;s Blog</title>
-    <link>https://kerolt.github.io/categories/windows/</link>
+    <link>https://kerolt.github.io/tags/windows/</link>
     <description>Recent content in Windows on Kerolt&#39;s Blog</description>
     <image>
       <title>Kerolt&#39;s Blog</title>
@@ -12,7 +12,7 @@
     <generator>Hugo -- 0.154.2</generator>
     <language>en</language>
     <lastBuildDate>Tue, 06 Jan 2026 00:00:00 +0000</lastBuildDate>
-    <atom:link href="https://kerolt.github.io/categories/windows/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="https://kerolt.github.io/tags/windows/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>【个性化】个人装机配置</title>
       <link>https://kerolt.github.io/posts/windows/%E4%B8%AA%E6%80%A7%E5%8C%96%E4%B8%AA%E4%BA%BA%E8%A3%85%E6%9C%BA%E9%85%8D%E7%BD%AE/</link>
@@ -67,18 +67,6 @@
 &lt;p&gt;&lt;strong&gt;好像不同版本后面的数字不同，在修改前记得保存。&lt;/strong&gt;&lt;/p&gt;
 &lt;h2 id=&#34;7用户目录下创建数据盘的目录软连接&#34;&gt;7、用户目录下创建数据盘的目录软连接&lt;/h2&gt;
 &lt;p&gt;这样做的目的是我个人想要让用户目录和 Linux 中的 home 目录比较一致，但软件、图片、文档我又不想保存在 C 盘，而是用软连接连接到数据盘（例如 D 盘）。&lt;/p&gt;</description>
-    </item>
-    <item>
-      <title>Windows Terminal分屏快捷键</title>
-      <link>https://kerolt.github.io/posts/windows/windows-terminal%E5%88%86%E5%B1%8F%E5%BF%AB%E6%8D%B7%E9%94%AE/</link>
-      <pubDate>Thu, 18 Sep 2025 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/windows/windows-terminal%E5%88%86%E5%B1%8F%E5%BF%AB%E6%8D%B7%E9%94%AE/</guid>
-      <description>&lt;ul&gt;
-&lt;li&gt;&lt;strong&gt;左右分屏&lt;/strong&gt;: 使用 &lt;code&gt;Alt+Shift+=&lt;/code&gt; 或 &lt;code&gt;Alt+Shift+-&lt;/code&gt; 快捷键。&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;上下分屏&lt;/strong&gt;: 使用 &lt;code&gt;Alt+Shift+=&lt;/code&gt; 或 &lt;code&gt;Alt+Shift+-&lt;/code&gt; 快捷键。&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;取消分屏&lt;/strong&gt;: 使用 &lt;code&gt;Ctrl+Shift+w&lt;/code&gt; 快捷键。&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;关闭当前标签&lt;/strong&gt;: 使用 &lt;code&gt;Ctrl+Shift+w&lt;/code&gt; 快捷键。&lt;/li&gt;
-&lt;/ul&gt;</description>
     </item>
   </channel>
 </rss>
