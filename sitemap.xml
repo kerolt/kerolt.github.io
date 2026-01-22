@@ -2,9 +2,6 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
-    <loc>https://kerolt.github.io/tags/cargo/</loc>
-    <lastmod>2026-01-22T00:00:00+00:00</lastmod>
-  </url><url>
     <loc>https://kerolt.github.io/categories/</loc>
     <lastmod>2026-01-22T00:00:00+00:00</lastmod>
   </url><url>
@@ -27,9 +24,6 @@
     <lastmod>2026-01-22T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://kerolt.github.io/tags/</loc>
-    <lastmod>2026-01-22T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>https://kerolt.github.io/posts/cmake/%E5%A6%82%E4%BD%95%E5%9C%A8cmake%E5%B7%A5%E7%A8%8B%E4%B8%AD%E4%BD%BF%E7%94%A8rust%E5%BA%93/</loc>
     <lastmod>2026-01-22T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://kerolt.github.io/categories/c&#43;&#43;/</loc>
