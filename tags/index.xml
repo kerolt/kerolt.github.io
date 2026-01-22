@@ -14,6 +14,13 @@
     <lastBuildDate>Thu, 22 Jan 2026 00:00:00 +0000</lastBuildDate>
     <atom:link href="https://kerolt.github.io/tags/index.xml" rel="self" type="application/rss+xml" />
     <item>
+      <title>Cargo</title>
+      <link>https://kerolt.github.io/tags/cargo/</link>
+      <pubDate>Thu, 22 Jan 2026 00:00:00 +0000</pubDate>
+      <guid>https://kerolt.github.io/tags/cargo/</guid>
+      <description></description>
+    </item>
+    <item>
       <title>CMake</title>
       <link>https://kerolt.github.io/tags/cmake/</link>
       <pubDate>Thu, 22 Jan 2026 00:00:00 +0000</pubDate>
