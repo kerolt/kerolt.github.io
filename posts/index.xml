@@ -9,10 +9,122 @@
       <url>https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</url>
       <link>https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</link>
     </image>
-    <generator>Hugo -- 0.154.2</generator>
+    <generator>Hugo -- 0.154.5</generator>
     <language>en</language>
-    <lastBuildDate>Tue, 06 Jan 2026 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Thu, 22 Jan 2026 00:00:00 +0000</lastBuildDate>
     <atom:link href="https://kerolt.github.io/posts/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>CMake与Conan协同工作理解</title>
+      <link>https://kerolt.github.io/posts/cmake/cmake%E4%B8%8Econan%E5%8D%8F%E5%90%8C%E5%B7%A5%E4%BD%9C%E7%90%86%E8%A7%A3/</link>
+      <pubDate>Thu, 22 Jan 2026 00:00:00 +0000</pubDate>
+      <guid>https://kerolt.github.io/posts/cmake/cmake%E4%B8%8Econan%E5%8D%8F%E5%90%8C%E5%B7%A5%E4%BD%9C%E7%90%86%E8%A7%A3/</guid>
+      <description>&lt;h2 id=&#34;背景&#34;&gt;背景&lt;/h2&gt;
+&lt;p&gt;最近根据 &lt;a href=&#34;https://eunomia.dev/zh/tutorials/12-profile/&#34;&gt;【eBPF 入门实践教程十二：使用 eBPF 程序 profile 进行性能分析】&lt;/a&gt; 这篇文章，写了一个性能分析的小工具。不过文章中的实现是 rust，但我还不怎么熟悉 rust，因而打算参考其代码使用 c++ 来实现相同的功能。&lt;/p&gt;
+&lt;p&gt;rust 中使用 cargo 就能非常方便的管理依赖与构建项目，c++ 中我使用 CMake 来构建项目，Conan 来管理依赖。在使用期间，我对于这二者的协同工作原理感到好奇，因此有了这篇笔记。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;文中的出现的“依赖”、“包”、“库”等名词都是指代同一个概念，只是不同的说法而已~&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id=&#34;cmake-查找依赖&#34;&gt;CMake 查找依赖&lt;/h2&gt;
+&lt;p&gt;在 CMake 中查找和管理项目依赖，主要是通过内置的 &lt;code&gt;find_package&lt;/code&gt; 命令完成，其会在系统中寻找指定的库。&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;find_package&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;&amp;lt;PackageName&amp;gt; &lt;span style=&#34;color:#555&#34;&gt;[&lt;/span&gt;version&lt;span style=&#34;color:#555&#34;&gt;]&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;[&lt;/span&gt;REQUIRED&lt;span style=&#34;color:#555&#34;&gt;]&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;[&lt;/span&gt;COMPONENTS components...&lt;span style=&#34;color:#555&#34;&gt;])&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;PackageName&lt;/strong&gt;: 库的名称（区分大小写，如 &lt;code&gt;OpenCV&lt;/code&gt;、&lt;code&gt;Qt5&lt;/code&gt;）。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;REQUIRED&lt;/strong&gt;: 如果找不到该库，CMake 会直接报错并停止配置。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;COMPONENTS&lt;/strong&gt;: 查找库中的特定模块（例如 &lt;code&gt;Qt5&lt;/code&gt; 里的 &lt;code&gt;Widgets&lt;/code&gt;）。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;CMake 有两种查找库的逻辑：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;Module 模式 (查找 &lt;code&gt;Find&amp;lt;PackageName&amp;gt;.cmake&lt;/code&gt;)&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;CMake 预置了一系列脚本（在 &lt;code&gt;/usr/share/cmake/Modules&lt;/code&gt; 下）。它会寻找名为 &lt;code&gt;FindGSL.cmake&lt;/code&gt; 这样的文件。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;适用场景&lt;/strong&gt;: 较老或不直接支持 CMake 的库（如 &lt;code&gt;CURL&lt;/code&gt;, &lt;code&gt;ZLIB&lt;/code&gt;）。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;ol start=&#34;2&#34;&gt;
+&lt;li&gt;Config 模式 (查找 &lt;code&gt;&amp;lt;PackageName&amp;gt;Config.cmake&lt;/code&gt;)&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;这是现代库推荐的方式。库在安装时会自带一个配置文件。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;适用场景&lt;/strong&gt;: &lt;code&gt;OpenCV&lt;/code&gt;, &lt;code&gt;Qt&lt;/code&gt;, &lt;code&gt;Protobuf&lt;/code&gt; 等现代库。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;查找路径&lt;/strong&gt;: 库的安装路径、&lt;code&gt;CMAKE_PREFIX_PATH&lt;/code&gt; 或环境变量。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;cmake_prefix_path&#34;&gt;CMAKE_PREFIX_PATH&lt;/h3&gt;
+&lt;p&gt;当在 CMake 中使用 &lt;code&gt;find_package&lt;/code&gt;、&lt;code&gt;find_library&lt;/code&gt; 或 &lt;code&gt;find_path&lt;/code&gt; 等指令去寻找一个外部库时，CMake 并不知道这个库安装在哪里。&lt;code&gt;CMAKE_PREFIX_PATH&lt;/code&gt; 就是用来告诉 CMake 去这些目录下找找看。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>C&#43;&#43;对Rust中Result的简单模仿</title>
+      <link>https://kerolt.github.io/posts/c&#43;&#43;/c&#43;&#43;%E5%AF%B9rust%E4%B8%ADresult%E7%9A%84%E7%AE%80%E5%8D%95%E6%A8%A1%E4%BB%BF/</link>
+      <pubDate>Tue, 20 Jan 2026 00:00:00 +0000</pubDate>
+      <guid>https://kerolt.github.io/posts/c&#43;&#43;/c&#43;&#43;%E5%AF%B9rust%E4%B8%ADresult%E7%9A%84%E7%AE%80%E5%8D%95%E6%A8%A1%E4%BB%BF/</guid>
+      <description>&lt;link rel=&#34;stylesheet&#34; href=&#34;https://kerolt.github.io/css/vendors/admonitions.4fd9a0b8ec8899f2ca952048d255a569f433f77dfb3f52f5bc87e7d65cdce449.css&#34; integrity=&#34;sha256-T9mguOyImfLKlSBI0lWlafQz9337P1L1vIfn1lzc5Ek=&#34; crossorigin=&#34;anonymous&#34;&gt;
+    &lt;div class=&#34;admonition note&#34;&gt;
+      &lt;div class=&#34;admonition-header&#34;&gt;&lt;svg xmlns=&#34;http://www.w3.org/2000/svg&#34; viewBox=&#34;0 0 576 512&#34;&gt;&lt;path d=&#34;M0 64C0 28.7 28.7 0 64 0L224 0l0 128c0 17.7 14.3 32 32 32l128 0 0 125.7-86.8 86.8c-10.3 10.3-17.5 23.1-21 37.2l-18.7 74.9c-2.3 9.2-1.8 18.8 1.3 27.5L64 512c-35.3 0-64-28.7-64-64L0 64zm384 64l-128 0L256 0 384 128zM549.8 235.7l14.4 14.4c15.6 15.6 15.6 40.9 0 56.6l-29.4 29.4-71-71 29.4-29.4c15.6-15.6 40.9-15.6 56.6 0zM311.9 417L441.1 287.8l71 71L382.9 487.9c-4.1 4.1-9.2 7-14.9 8.4l-60.1 15c-5.5 1.4-11.2-.2-15.2-4.2s-5.6-9.7-4.2-15.2l15-60.1c1.4-5.6 4.3-10.8 8.4-14.9z&#34;/&gt;&lt;/svg&gt;
+        &lt;span&gt;注意！&lt;/span&gt;
+      &lt;/div&gt;
+      &lt;div class=&#34;admonition-content&#34;&gt;
+        &lt;p&gt;以下代码需要支持 C++23 的编译器&lt;/p&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;&lt;p&gt;这里利用 &lt;code&gt;std::expected&lt;/code&gt; 和 &lt;code&gt;std::unexpected&lt;/code&gt; 进行模仿：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-cpp&#34; data-lang=&#34;cpp&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#099&#34;&gt;#include&lt;/span&gt; &lt;span style=&#34;color:#099&#34;&gt;&amp;lt;print&amp;gt;&lt;/span&gt;&lt;span style=&#34;color:#099&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#099&#34;&gt;#include&lt;/span&gt; &lt;span style=&#34;color:#099&#34;&gt;&amp;lt;string&amp;gt;&lt;/span&gt;&lt;span style=&#34;color:#099&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#099&#34;&gt;#include&lt;/span&gt; &lt;span style=&#34;color:#099&#34;&gt;&amp;lt;expected&amp;gt;&lt;/span&gt;&lt;span style=&#34;color:#099&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;template&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;&amp;lt;&lt;/span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;typename&lt;/span&gt; E &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; std&lt;span style=&#34;color:#555&#34;&gt;::&lt;/span&gt;string&lt;span style=&#34;color:#555&#34;&gt;&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;using&lt;/span&gt; Err &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; std&lt;span style=&#34;color:#555&#34;&gt;::&lt;/span&gt;unexpected&lt;span style=&#34;color:#555&#34;&gt;&amp;lt;&lt;/span&gt;E&lt;span style=&#34;color:#555&#34;&gt;&amp;gt;&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;template&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;&amp;lt;&lt;/span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;typename&lt;/span&gt; T, &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;typename&lt;/span&gt; E &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; std&lt;span style=&#34;color:#555&#34;&gt;::&lt;/span&gt;string&lt;span style=&#34;color:#555&#34;&gt;&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;using&lt;/span&gt; Result &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; std&lt;span style=&#34;color:#555&#34;&gt;::&lt;/span&gt;expected&lt;span style=&#34;color:#555&#34;&gt;&amp;lt;&lt;/span&gt;T, E&lt;span style=&#34;color:#555&#34;&gt;&amp;gt;&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;struct&lt;/span&gt; &lt;span style=&#34;color:#0a8;font-weight:bold&#34;&gt;Inner&lt;/span&gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#078;font-weight:bold&#34;&gt;int&lt;/span&gt; a, b;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;};
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;struct&lt;/span&gt; &lt;span style=&#34;color:#0a8;font-weight:bold&#34;&gt;X&lt;/span&gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    Inner&lt;span style=&#34;color:#555&#34;&gt;*&lt;/span&gt; i_;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    X(Inner&lt;span style=&#34;color:#555&#34;&gt;*&lt;/span&gt; i) {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        std&lt;span style=&#34;color:#555&#34;&gt;::&lt;/span&gt;println(&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;X()&amp;#34;&lt;/span&gt;);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        i_ &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; i;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    }
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#555&#34;&gt;~&lt;/span&gt;X() {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        std&lt;span style=&#34;color:#555&#34;&gt;::&lt;/span&gt;println(&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;~X() delete inner obj&amp;#34;&lt;/span&gt;);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;delete&lt;/span&gt; i_;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    }
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;};
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;auto&lt;/span&gt; &lt;span style=&#34;color:#c0f&#34;&gt;foo&lt;/span&gt;(&lt;span style=&#34;color:#078;font-weight:bold&#34;&gt;bool&lt;/span&gt; flag) &lt;span style=&#34;color:#555&#34;&gt;-&amp;gt;&lt;/span&gt; Result&lt;span style=&#34;color:#555&#34;&gt;&amp;lt;&lt;/span&gt;X&lt;span style=&#34;color:#555&#34;&gt;&amp;gt;&lt;/span&gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;if&lt;/span&gt; (&lt;span style=&#34;color:#555&#34;&gt;!&lt;/span&gt;flag) {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;return&lt;/span&gt; Err&lt;span style=&#34;color:#555&#34;&gt;&amp;lt;&amp;gt;&lt;/span&gt;(&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;Flag is false!&amp;#34;&lt;/span&gt;);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    }
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    Inner&lt;span style=&#34;color:#555&#34;&gt;*&lt;/span&gt; i &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;new&lt;/span&gt; Inner();
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    i&lt;span style=&#34;color:#555&#34;&gt;-&amp;gt;&lt;/span&gt;a &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#f60&#34;&gt;1&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    i&lt;span style=&#34;color:#555&#34;&gt;-&amp;gt;&lt;/span&gt;b &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#f60&#34;&gt;2&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;return&lt;/span&gt; Result&lt;span style=&#34;color:#555&#34;&gt;&amp;lt;&lt;/span&gt;X&lt;span style=&#34;color:#555&#34;&gt;&amp;gt;&lt;/span&gt;{i};
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#078;font-weight:bold&#34;&gt;int&lt;/span&gt; &lt;span style=&#34;color:#c0f&#34;&gt;main&lt;/span&gt;() {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    std&lt;span style=&#34;color:#555&#34;&gt;::&lt;/span&gt;println(&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;main--1&amp;#34;&lt;/span&gt;);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        std&lt;span style=&#34;color:#555&#34;&gt;::&lt;/span&gt;println(&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;main--2&amp;#34;&lt;/span&gt;);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;auto&lt;/span&gt; x &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; foo(&lt;span style=&#34;color:#366&#34;&gt;true&lt;/span&gt;);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        std&lt;span style=&#34;color:#555&#34;&gt;::&lt;/span&gt;println(&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;main--3&amp;#34;&lt;/span&gt;);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    }
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        std&lt;span style=&#34;color:#555&#34;&gt;::&lt;/span&gt;println(&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;main--4&amp;#34;&lt;/span&gt;);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;auto&lt;/span&gt; x &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; foo(&lt;span style=&#34;color:#366&#34;&gt;false&lt;/span&gt;);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        std&lt;span style=&#34;color:#555&#34;&gt;::&lt;/span&gt;println(&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;Error message is: {}&amp;#34;&lt;/span&gt;, x.error());
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        std&lt;span style=&#34;color:#555&#34;&gt;::&lt;/span&gt;println(&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;main--5&amp;#34;&lt;/span&gt;);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    }
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    std&lt;span style=&#34;color:#555&#34;&gt;::&lt;/span&gt;println(&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;main--6&amp;#34;&lt;/span&gt;);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;输出为：&lt;/p&gt;</description>
+    </item>
     <item>
       <title>【个性化】个人装机配置</title>
       <link>https://kerolt.github.io/posts/windows/%E4%B8%AA%E6%80%A7%E5%8C%96%E4%B8%AA%E4%BA%BA%E8%A3%85%E6%9C%BA%E9%85%8D%E7%BD%AE/</link>
@@ -1025,9 +1137,9 @@ JSON 格式，描述网络的类型、IPAM 配置、路由等。&lt;/p&gt;
     </item>
     <item>
       <title>Git中文件换行符都使用LF</title>
-      <link>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/git%E4%B8%AD%E6%96%87%E4%BB%B6%E6%8D%A2%E8%A1%8C%E7%AC%A6%E9%83%BD%E4%BD%BF%E7%94%A8lf/</link>
+      <link>https://kerolt.github.io/posts/git/git%E4%B8%AD%E6%96%87%E4%BB%B6%E6%8D%A2%E8%A1%8C%E7%AC%A6%E9%83%BD%E4%BD%BF%E7%94%A8lf/</link>
       <pubDate>Thu, 21 Aug 2025 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/git%E4%B8%AD%E6%96%87%E4%BB%B6%E6%8D%A2%E8%A1%8C%E7%AC%A6%E9%83%BD%E4%BD%BF%E7%94%A8lf/</guid>
+      <guid>https://kerolt.github.io/posts/git/git%E4%B8%AD%E6%96%87%E4%BB%B6%E6%8D%A2%E8%A1%8C%E7%AC%A6%E9%83%BD%E4%BD%BF%E7%94%A8lf/</guid>
       <description>&lt;p&gt;有时候我们会在多个平台上编辑文件、代码，此时我们希望所有文件，包括你在 Windows 上编辑的文件（Windows 采用的是 CRLF），都使用 LF 换行符，那么可以修改 &lt;code&gt;.gitattributes&lt;/code&gt; 文件来强制执行这个规则：&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-text&#34; data-lang=&#34;text&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;# 强制所有文件使用 LF 换行符
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;* text eol=lf
@@ -1550,9 +1662,9 @@ JSON 格式，描述网络的类型、IPAM 配置、路由等。&lt;/p&gt;
     </item>
     <item>
       <title>Git使用</title>
-      <link>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/git%E4%BD%BF%E7%94%A8/</link>
+      <link>https://kerolt.github.io/posts/git/git%E4%BD%BF%E7%94%A8/</link>
       <pubDate>Sun, 18 May 2025 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/git%E4%BD%BF%E7%94%A8/</guid>
+      <guid>https://kerolt.github.io/posts/git/git%E4%BD%BF%E7%94%A8/</guid>
       <description>&lt;h2 id=&#34;如何修改上次的-commit&#34;&gt;如何修改上次的 commit&lt;/h2&gt;
 &lt;p&gt;比如有的时候 commit 漏掉了文件、commit 信息写错了，可以这么做：&lt;/p&gt;
 &lt;p&gt;你要指定一个有效的编辑器作为 Git 的默认编辑器，可以使 Vim 或者 VSCode：&lt;/p&gt;

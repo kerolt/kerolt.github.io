@@ -9,15 +9,15 @@
       <url>https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</url>
       <link>https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</link>
     </image>
-    <generator>Hugo -- 0.154.2</generator>
+    <generator>Hugo -- 0.154.5</generator>
     <language>en</language>
     <lastBuildDate>Thu, 21 Aug 2025 00:00:00 +0000</lastBuildDate>
     <atom:link href="https://kerolt.github.io/tags/git/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Git中文件换行符都使用LF</title>
-      <link>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/git%E4%B8%AD%E6%96%87%E4%BB%B6%E6%8D%A2%E8%A1%8C%E7%AC%A6%E9%83%BD%E4%BD%BF%E7%94%A8lf/</link>
+      <link>https://kerolt.github.io/posts/git/git%E4%B8%AD%E6%96%87%E4%BB%B6%E6%8D%A2%E8%A1%8C%E7%AC%A6%E9%83%BD%E4%BD%BF%E7%94%A8lf/</link>
       <pubDate>Thu, 21 Aug 2025 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/git%E4%B8%AD%E6%96%87%E4%BB%B6%E6%8D%A2%E8%A1%8C%E7%AC%A6%E9%83%BD%E4%BD%BF%E7%94%A8lf/</guid>
+      <guid>https://kerolt.github.io/posts/git/git%E4%B8%AD%E6%96%87%E4%BB%B6%E6%8D%A2%E8%A1%8C%E7%AC%A6%E9%83%BD%E4%BD%BF%E7%94%A8lf/</guid>
       <description>&lt;p&gt;有时候我们会在多个平台上编辑文件、代码，此时我们希望所有文件，包括你在 Windows 上编辑的文件（Windows 采用的是 CRLF），都使用 LF 换行符，那么可以修改 &lt;code&gt;.gitattributes&lt;/code&gt; 文件来强制执行这个规则：&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-text&#34; data-lang=&#34;text&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;# 强制所有文件使用 LF 换行符
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;* text eol=lf
@@ -37,9 +37,9 @@
     </item>
     <item>
       <title>Git使用</title>
-      <link>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/git%E4%BD%BF%E7%94%A8/</link>
+      <link>https://kerolt.github.io/posts/git/git%E4%BD%BF%E7%94%A8/</link>
       <pubDate>Sun, 18 May 2025 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/git%E4%BD%BF%E7%94%A8/</guid>
+      <guid>https://kerolt.github.io/posts/git/git%E4%BD%BF%E7%94%A8/</guid>
       <description>&lt;h2 id=&#34;如何修改上次的-commit&#34;&gt;如何修改上次的 commit&lt;/h2&gt;
 &lt;p&gt;比如有的时候 commit 漏掉了文件、commit 信息写错了，可以这么做：&lt;/p&gt;
 &lt;p&gt;你要指定一个有效的编辑器作为 Git 的默认编辑器，可以使 Vim 或者 VSCode：&lt;/p&gt;

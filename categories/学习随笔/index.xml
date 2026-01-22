@@ -9,7 +9,7 @@
       <url>https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</url>
       <link>https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</link>
     </image>
-    <generator>Hugo -- 0.154.2</generator>
+    <generator>Hugo -- 0.154.5</generator>
     <language>en</language>
     <lastBuildDate>Mon, 05 Jan 2026 00:00:00 +0000</lastBuildDate>
     <atom:link href="https://kerolt.github.io/categories/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/index.xml" rel="self" type="application/rss+xml" />
@@ -156,28 +156,6 @@
 &lt;p&gt;在我们用脚本一键安装后，服务安装目录为：&lt;/p&gt;</description>
     </item>
     <item>
-      <title>Git中文件换行符都使用LF</title>
-      <link>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/git%E4%B8%AD%E6%96%87%E4%BB%B6%E6%8D%A2%E8%A1%8C%E7%AC%A6%E9%83%BD%E4%BD%BF%E7%94%A8lf/</link>
-      <pubDate>Thu, 21 Aug 2025 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/git%E4%B8%AD%E6%96%87%E4%BB%B6%E6%8D%A2%E8%A1%8C%E7%AC%A6%E9%83%BD%E4%BD%BF%E7%94%A8lf/</guid>
-      <description>&lt;p&gt;有时候我们会在多个平台上编辑文件、代码，此时我们希望所有文件，包括你在 Windows 上编辑的文件（Windows 采用的是 CRLF），都使用 LF 换行符，那么可以修改 &lt;code&gt;.gitattributes&lt;/code&gt; 文件来强制执行这个规则：&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-text&#34; data-lang=&#34;text&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;# 强制所有文件使用 LF 换行符
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;* text eol=lf
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;# 避免对二进制文件进行换行符转换
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;*.png binary
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;*.jpg binary
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;*.pdf binary
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;blockquote&gt;
-&lt;p&gt;在保存提交 &lt;code&gt;.gitattributes&lt;/code&gt; 后，可能因为之前在 Windows 上编辑的文件可能已经变成了 CRLF 换行符，这时需要需要将它们转换回 LF（这里可以使用 VSCode）。&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;p&gt;接着可以执行以下命令，让 Git 重新处理工作目录中的文件并按照新的规则来转换：&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-sh&#34; data-lang=&#34;sh&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;git rm --cached -r .
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;git reset --hard
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;code&gt;* text eol=lf&lt;/code&gt;：这条规则告诉 Git，将仓库中的所有文件都视为文本文件，并且强制它们使用 LF 作为行结束符。当你从仓库检出文件时，Git 会将其转换为 CRLF（在 Windows 上），但当你提交时，它会确保所有文件都以 LF 格式存储在仓库中。&lt;/p&gt;
-&lt;p&gt;&lt;code&gt;git rm --cached -r .&lt;/code&gt; 和 &lt;code&gt;git reset --hard&lt;/code&gt;：这些命令会强制 Git 重新将你的工作目录与仓库同步，并在此过程中应用 &lt;code&gt;.gitattributes&lt;/code&gt; 文件中设置的换行符规则，从而确保所有文件都符合 LF 规范。&lt;/p&gt;</description>
-    </item>
-    <item>
       <title>Curl使用</title>
       <link>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/curl%E4%BD%BF%E7%94%A8/</link>
       <pubDate>Tue, 01 Jul 2025 00:00:00 +0000</pubDate>
@@ -312,38 +290,6 @@
 &lt;li&gt;对于复杂的 API 调用，考虑将请求保存为文件并使用 &lt;code&gt;-K&lt;/code&gt; 选项&lt;/li&gt;
 &lt;li&gt;在 Windows 上，使用双引号 &lt;code&gt;&amp;quot;&lt;/code&gt; 而不是单引号 &lt;code&gt;&#39;&lt;/code&gt;&lt;/li&gt;
 &lt;/ol&gt;</description>
-    </item>
-    <item>
-      <title>Git使用</title>
-      <link>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/git%E4%BD%BF%E7%94%A8/</link>
-      <pubDate>Sun, 18 May 2025 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/git%E4%BD%BF%E7%94%A8/</guid>
-      <description>&lt;h2 id=&#34;如何修改上次的-commit&#34;&gt;如何修改上次的 commit&lt;/h2&gt;
-&lt;p&gt;比如有的时候 commit 漏掉了文件、commit 信息写错了，可以这么做：&lt;/p&gt;
-&lt;p&gt;你要指定一个有效的编辑器作为 Git 的默认编辑器，可以使 Vim 或者 VSCode：&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-sh&#34; data-lang=&#34;sh&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;git config --global core.editor &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;vim&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;# 使用 VSCode 的话就用 code&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;然后将上次忘记提交的修改先 &lt;code&gt;git add&lt;/code&gt; （如果有的话），接着：&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-sh&#34; data-lang=&#34;sh&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;git commit --amend
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;code&gt;--amend&lt;/code&gt; 会用新的内容替换上一次提交，而不是创建一个新的提交。如果上一次提交已经被推送到远程仓库，使用 &lt;code&gt;--amend&lt;/code&gt; 后需要强制推送：&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-sh&#34; data-lang=&#34;sh&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;git push --force
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;blockquote&gt;
-&lt;p&gt;这个方法我有时候用来同步一下两台电脑上的代码，因为有时候一台电脑上写了一部分代码但是还没有到一次提交的地步，这时如果要外出或者要用另一台电脑了，就可以用这个方法来同步一下。&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;p&gt;不过，使用 &lt;code&gt;git push --force&lt;/code&gt; 强制推送后，远程仓库的历史记录会被改写。这种操作可能会导致本地和远程分支的提交历史不一致。我自己通常这么解决：&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-sh&#34; data-lang=&#34;sh&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;git fetch origin
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;git reset --hard origin/&amp;lt;branch&amp;gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;这一般是不需要保留本地未推送的更改，可以直接将本地分支强制更新为远程分支的状态。&lt;/p&gt;
-&lt;h2 id=&#34;git-如何移除-submodule&#34;&gt;git 如何移除 submodule&lt;/h2&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-sh&#34; data-lang=&#34;sh&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;git submodule deinit -f path/to/submodule
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;git rm -f path/to/submodule
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;rm -rf path/to/submodule  &lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;# 如果要删除物理目录&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;git commit -m &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;Removed submodule path/to/submodule&amp;#34;&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;rm -rf .git/modules/path/to/submodule  &lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;# 可选清理&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h2 id=&#34;推送分支&#34;&gt;推送分支&lt;/h2&gt;
-&lt;h3 id=&#34;第一次推送远程分支可能还不存在&#34;&gt;第一次推送（远程分支可能还不存在）&lt;/h3&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;git push -u origin 分支名
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id=&#34;-推送到远程的另一个分支名&#34;&gt;## 推送到远程的另一个分支名&lt;/h3&gt;
-&lt;p&gt;如果想把本地分支 &lt;code&gt;dev&lt;/code&gt; 推送到远程的 &lt;code&gt;test&lt;/code&gt; 分支：&lt;/p&gt;</description>
     </item>
     <item>
       <title>【CMake】CMake使用笔记</title>

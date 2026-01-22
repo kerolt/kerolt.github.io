@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Cpp23 on Kerolt&#39;s Blog</title>
+    <link>https://kerolt.github.io/tags/cpp23/</link>
+    <description>Recent content in Cpp23 on Kerolt&#39;s Blog</description>
+    <image>
+      <title>Kerolt&#39;s Blog</title>
+      <url>https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</url>
+      <link>https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</link>
+    </image>
+    <generator>Hugo -- 0.154.5</generator>
+    <language>en</language>
+    <lastBuildDate>Thu, 22 Jan 2026 00:00:00 +0000</lastBuildDate>
+    <atom:link href="https://kerolt.github.io/tags/cpp23/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>C&#43;&#43;对Rust中Result的简单模仿</title>
+      <link>https://kerolt.github.io/posts/c&#43;&#43;/c&#43;&#43;%E5%AF%B9rust%E4%B8%ADresult%E7%9A%84%E7%AE%80%E5%8D%95%E6%A8%A1%E4%BB%BF/</link>
+      <pubDate>Tue, 20 Jan 2026 00:00:00 +0000</pubDate>
+      <guid>https://kerolt.github.io/posts/c&#43;&#43;/c&#43;&#43;%E5%AF%B9rust%E4%B8%ADresult%E7%9A%84%E7%AE%80%E5%8D%95%E6%A8%A1%E4%BB%BF/</guid>
+      <description>&lt;link rel=&#34;stylesheet&#34; href=&#34;https://kerolt.github.io/css/vendors/admonitions.4fd9a0b8ec8899f2ca952048d255a569f433f77dfb3f52f5bc87e7d65cdce449.css&#34; integrity=&#34;sha256-T9mguOyImfLKlSBI0lWlafQz9337P1L1vIfn1lzc5Ek=&#34; crossorigin=&#34;anonymous&#34;&gt;
+    &lt;div class=&#34;admonition note&#34;&gt;
+      &lt;div class=&#34;admonition-header&#34;&gt;&lt;svg xmlns=&#34;http://www.w3.org/2000/svg&#34; viewBox=&#34;0 0 576 512&#34;&gt;&lt;path d=&#34;M0 64C0 28.7 28.7 0 64 0L224 0l0 128c0 17.7 14.3 32 32 32l128 0 0 125.7-86.8 86.8c-10.3 10.3-17.5 23.1-21 37.2l-18.7 74.9c-2.3 9.2-1.8 18.8 1.3 27.5L64 512c-35.3 0-64-28.7-64-64L0 64zm384 64l-128 0L256 0 384 128zM549.8 235.7l14.4 14.4c15.6 15.6 15.6 40.9 0 56.6l-29.4 29.4-71-71 29.4-29.4c15.6-15.6 40.9-15.6 56.6 0zM311.9 417L441.1 287.8l71 71L382.9 487.9c-4.1 4.1-9.2 7-14.9 8.4l-60.1 15c-5.5 1.4-11.2-.2-15.2-4.2s-5.6-9.7-4.2-15.2l15-60.1c1.4-5.6 4.3-10.8 8.4-14.9z&#34;/&gt;&lt;/svg&gt;
+        &lt;span&gt;注意！&lt;/span&gt;
+      &lt;/div&gt;
+      &lt;div class=&#34;admonition-content&#34;&gt;
+        &lt;p&gt;以下代码需要支持 C++23 的编译器&lt;/p&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;&lt;p&gt;这里利用 &lt;code&gt;std::expected&lt;/code&gt; 和 &lt;code&gt;std::unexpected&lt;/code&gt; 进行模仿：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-cpp&#34; data-lang=&#34;cpp&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#099&#34;&gt;#include&lt;/span&gt; &lt;span style=&#34;color:#099&#34;&gt;&amp;lt;print&amp;gt;&lt;/span&gt;&lt;span style=&#34;color:#099&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#099&#34;&gt;#include&lt;/span&gt; &lt;span style=&#34;color:#099&#34;&gt;&amp;lt;string&amp;gt;&lt;/span&gt;&lt;span style=&#34;color:#099&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#099&#34;&gt;#include&lt;/span&gt; &lt;span style=&#34;color:#099&#34;&gt;&amp;lt;expected&amp;gt;&lt;/span&gt;&lt;span style=&#34;color:#099&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;template&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;&amp;lt;&lt;/span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;typename&lt;/span&gt; E &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; std&lt;span style=&#34;color:#555&#34;&gt;::&lt;/span&gt;string&lt;span style=&#34;color:#555&#34;&gt;&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;using&lt;/span&gt; Err &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; std&lt;span style=&#34;color:#555&#34;&gt;::&lt;/span&gt;unexpected&lt;span style=&#34;color:#555&#34;&gt;&amp;lt;&lt;/span&gt;E&lt;span style=&#34;color:#555&#34;&gt;&amp;gt;&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;template&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;&amp;lt;&lt;/span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;typename&lt;/span&gt; T, &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;typename&lt;/span&gt; E &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; std&lt;span style=&#34;color:#555&#34;&gt;::&lt;/span&gt;string&lt;span style=&#34;color:#555&#34;&gt;&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;using&lt;/span&gt; Result &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; std&lt;span style=&#34;color:#555&#34;&gt;::&lt;/span&gt;expected&lt;span style=&#34;color:#555&#34;&gt;&amp;lt;&lt;/span&gt;T, E&lt;span style=&#34;color:#555&#34;&gt;&amp;gt;&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;struct&lt;/span&gt; &lt;span style=&#34;color:#0a8;font-weight:bold&#34;&gt;Inner&lt;/span&gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#078;font-weight:bold&#34;&gt;int&lt;/span&gt; a, b;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;};
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;struct&lt;/span&gt; &lt;span style=&#34;color:#0a8;font-weight:bold&#34;&gt;X&lt;/span&gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    Inner&lt;span style=&#34;color:#555&#34;&gt;*&lt;/span&gt; i_;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    X(Inner&lt;span style=&#34;color:#555&#34;&gt;*&lt;/span&gt; i) {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        std&lt;span style=&#34;color:#555&#34;&gt;::&lt;/span&gt;println(&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;X()&amp;#34;&lt;/span&gt;);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        i_ &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; i;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    }
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#555&#34;&gt;~&lt;/span&gt;X() {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        std&lt;span style=&#34;color:#555&#34;&gt;::&lt;/span&gt;println(&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;~X() delete inner obj&amp;#34;&lt;/span&gt;);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;delete&lt;/span&gt; i_;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    }
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;};
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;auto&lt;/span&gt; &lt;span style=&#34;color:#c0f&#34;&gt;foo&lt;/span&gt;(&lt;span style=&#34;color:#078;font-weight:bold&#34;&gt;bool&lt;/span&gt; flag) &lt;span style=&#34;color:#555&#34;&gt;-&amp;gt;&lt;/span&gt; Result&lt;span style=&#34;color:#555&#34;&gt;&amp;lt;&lt;/span&gt;X&lt;span style=&#34;color:#555&#34;&gt;&amp;gt;&lt;/span&gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;if&lt;/span&gt; (&lt;span style=&#34;color:#555&#34;&gt;!&lt;/span&gt;flag) {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;return&lt;/span&gt; Err&lt;span style=&#34;color:#555&#34;&gt;&amp;lt;&amp;gt;&lt;/span&gt;(&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;Flag is false!&amp;#34;&lt;/span&gt;);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    }
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    Inner&lt;span style=&#34;color:#555&#34;&gt;*&lt;/span&gt; i &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;new&lt;/span&gt; Inner();
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    i&lt;span style=&#34;color:#555&#34;&gt;-&amp;gt;&lt;/span&gt;a &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#f60&#34;&gt;1&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    i&lt;span style=&#34;color:#555&#34;&gt;-&amp;gt;&lt;/span&gt;b &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#f60&#34;&gt;2&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;return&lt;/span&gt; Result&lt;span style=&#34;color:#555&#34;&gt;&amp;lt;&lt;/span&gt;X&lt;span style=&#34;color:#555&#34;&gt;&amp;gt;&lt;/span&gt;{i};
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#078;font-weight:bold&#34;&gt;int&lt;/span&gt; &lt;span style=&#34;color:#c0f&#34;&gt;main&lt;/span&gt;() {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    std&lt;span style=&#34;color:#555&#34;&gt;::&lt;/span&gt;println(&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;main--1&amp;#34;&lt;/span&gt;);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        std&lt;span style=&#34;color:#555&#34;&gt;::&lt;/span&gt;println(&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;main--2&amp;#34;&lt;/span&gt;);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;auto&lt;/span&gt; x &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; foo(&lt;span style=&#34;color:#366&#34;&gt;true&lt;/span&gt;);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        std&lt;span style=&#34;color:#555&#34;&gt;::&lt;/span&gt;println(&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;main--3&amp;#34;&lt;/span&gt;);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    }
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        std&lt;span style=&#34;color:#555&#34;&gt;::&lt;/span&gt;println(&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;main--4&amp;#34;&lt;/span&gt;);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;auto&lt;/span&gt; x &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; foo(&lt;span style=&#34;color:#366&#34;&gt;false&lt;/span&gt;);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        std&lt;span style=&#34;color:#555&#34;&gt;::&lt;/span&gt;println(&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;Error message is: {}&amp;#34;&lt;/span&gt;, x.error());
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        std&lt;span style=&#34;color:#555&#34;&gt;::&lt;/span&gt;println(&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;main--5&amp;#34;&lt;/span&gt;);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    }
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    std&lt;span style=&#34;color:#555&#34;&gt;::&lt;/span&gt;println(&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;main--6&amp;#34;&lt;/span&gt;);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;输出为：&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

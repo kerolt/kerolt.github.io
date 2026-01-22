@@ -9,10 +9,24 @@
       <url>https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</url>
       <link>https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</link>
     </image>
-    <generator>Hugo -- 0.154.2</generator>
+    <generator>Hugo -- 0.154.5</generator>
     <language>en</language>
-    <lastBuildDate>Tue, 06 Jan 2026 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Thu, 22 Jan 2026 00:00:00 +0000</lastBuildDate>
     <atom:link href="https://kerolt.github.io/categories/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>CMake</title>
+      <link>https://kerolt.github.io/categories/cmake/</link>
+      <pubDate>Thu, 22 Jan 2026 00:00:00 +0000</pubDate>
+      <guid>https://kerolt.github.io/categories/cmake/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>C&#43;&#43;</title>
+      <link>https://kerolt.github.io/categories/c&#43;&#43;/</link>
+      <pubDate>Tue, 20 Jan 2026 00:00:00 +0000</pubDate>
+      <guid>https://kerolt.github.io/categories/c&#43;&#43;/</guid>
+      <description></description>
+    </item>
     <item>
       <title>Windows</title>
       <link>https://kerolt.github.io/categories/windows/</link>
@@ -70,10 +84,10 @@
       <description></description>
     </item>
     <item>
-      <title>C&#43;&#43;</title>
-      <link>https://kerolt.github.io/categories/c&#43;&#43;/</link>
+      <title>Git</title>
+      <link>https://kerolt.github.io/categories/git/</link>
       <pubDate>Thu, 21 Aug 2025 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/categories/c&#43;&#43;/</guid>
+      <guid>https://kerolt.github.io/categories/git/</guid>
       <description></description>
     </item>
     <item>
