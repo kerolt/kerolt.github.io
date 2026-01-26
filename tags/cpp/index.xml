@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Cpp on Kerolt&#39;s Blog</title>
+    <link>https://kerolt.github.io/tags/cpp/</link>
+    <description>Recent content in Cpp on Kerolt&#39;s Blog</description>
+    <image>
+      <title>Kerolt&#39;s Blog</title>
+      <url>https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</url>
+      <link>https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</link>
+    </image>
+    <generator>Hugo -- 0.154.5</generator>
+    <language>en</language>
+    <lastBuildDate>Sat, 24 Jan 2026 00:00:00 +0000</lastBuildDate>
+    <atom:link href="https://kerolt.github.io/tags/cpp/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>利用eBPF与perf_event记录系统调用栈</title>
+      <link>https://kerolt.github.io/posts/ebpf/%E5%88%A9%E7%94%A8ebpf%E4%B8%8Eperf_event%E8%AE%B0%E5%BD%95%E7%B3%BB%E7%BB%9F%E8%B0%83%E7%94%A8%E6%A0%88/</link>
+      <pubDate>Fri, 23 Jan 2026 00:00:00 +0000</pubDate>
+      <guid>https://kerolt.github.io/posts/ebpf/%E5%88%A9%E7%94%A8ebpf%E4%B8%8Eperf_event%E8%AE%B0%E5%BD%95%E7%B3%BB%E7%BB%9F%E8%B0%83%E7%94%A8%E6%A0%88/</guid>
+      <description>&lt;h2 id=&#34;perf_event_open&#34;&gt;perf_event_open&lt;/h2&gt;
+&lt;p&gt;
+&lt;div class=&#34;post-img-view&#34;&gt;
+  &lt;a data-fancybox=&#34;gallery&#34; href=&#34;https://plantegg.github.io/images/951413iMgBlog/5edebc74-f8ac-483c-8bcd-24e09abfd06b.png&#34;&gt;
+    &lt;img src=&#34;https://plantegg.github.io/images/951413iMgBlog/5edebc74-f8ac-483c-8bcd-24e09abfd06b.png&#34; alt=&#34;&#34;  /&gt;
+  &lt;/a&gt;
+&lt;/div&gt;
+&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;perf 原理图：https://plantegg.github.io/2021/05/16/Perf_IPC%E4%BB%A5%E5%8F%8ACPU%E5%88%A9%E7%94%A8%E7%8E%87/&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;在用户态中触发 &lt;code&gt;sys_perf_event_open&lt;/code&gt; 系统调用，内核陷入中断以后会调用 &lt;code&gt;perf_event_open&lt;/code&gt; 来处理。在用户态，我们可以用如下的代码来使用：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-c&#34; data-lang=&#34;c&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#099&#34;&gt;#include&lt;/span&gt; &lt;span style=&#34;color:#099&#34;&gt;&amp;lt;linux/perf_event.h&amp;gt;&lt;/span&gt;&lt;span style=&#34;color:#099&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#099&#34;&gt;#include&lt;/span&gt; &lt;span style=&#34;color:#099&#34;&gt;&amp;lt;sys/syscall.h&amp;gt;&lt;/span&gt;&lt;span style=&#34;color:#099&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#099&#34;&gt;#include&lt;/span&gt; &lt;span style=&#34;color:#099&#34;&gt;&amp;lt;unistd.h&amp;gt;&lt;/span&gt;&lt;span style=&#34;color:#099&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#078;font-weight:bold&#34;&gt;int64_t&lt;/span&gt; &lt;span style=&#34;color:#c0f&#34;&gt;perf_event_open&lt;/span&gt;(&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;struct&lt;/span&gt; perf_event_attr&lt;span style=&#34;color:#555&#34;&gt;*&lt;/span&gt; hw_event, &lt;span style=&#34;color:#078;font-weight:bold&#34;&gt;pid_t&lt;/span&gt; pid, &lt;span style=&#34;color:#078;font-weight:bold&#34;&gt;int&lt;/span&gt; cpu,
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;                     &lt;span style=&#34;color:#078;font-weight:bold&#34;&gt;int&lt;/span&gt; group_fd, &lt;span style=&#34;color:#078;font-weight:bold&#34;&gt;unsigned&lt;/span&gt; &lt;span style=&#34;color:#078;font-weight:bold&#34;&gt;long&lt;/span&gt; flags) &lt;span style=&#34;color:#555&#34;&gt;-&amp;gt;&lt;/span&gt;  {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color:#c0f&#34;&gt;syscall&lt;/span&gt;(SYS_perf_event_open, hw_event, pid, cpu, group_fd, flags);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id=&#34;以文件描述符为中心的测量单元&#34;&gt;以文件描述符为中心的“测量单元”&lt;/h3&gt;
+&lt;p&gt;在 Linux 中，“一切皆文件”。当调用 &lt;code&gt;perf_event_open&lt;/code&gt; 时，内核创建了一个&lt;strong&gt;独立的测量实例&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;每个文件描述符代表一个监控任务（&lt;strong&gt;1 fd == 1 Event&lt;/strong&gt;，比如“监控 CPU 0 的指令执行数”）。&lt;/p&gt;
+&lt;p&gt;同时，可以把多个 fd 绑在一起，即为&lt;strong&gt;事件分组 (Group)&lt;/strong&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;例如你想计算“每条指令的缓存未命中率”，你需要同时测量“指令数”和“缓存未命中数”。将它们分组可以确保这两个事件在硬件上是&lt;strong&gt;同时开始、同时结束&lt;/strong&gt;的，从而保证比例的准确性。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;状态控制ioctl-与-prctl&#34;&gt;状态控制：ioctl 与 prctl&lt;/h3&gt;
+&lt;p&gt;事件创建后，并不一定立即开始工作，你可以像控制开关一样控制它。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;ioctl (Input/Output Control)&lt;/strong&gt;：这是最常用的方式，直接针对某个 &lt;strong&gt;fd&lt;/strong&gt; 进行操作。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;ioctl(fd, PERF_EVENT_IOC_ENABLE)&lt;/code&gt;：打开开关。&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;ioctl(fd, PERF_EVENT_IOC_DISABLE)&lt;/code&gt;：关闭开关。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;prctl (Process Control)&lt;/strong&gt;：这是针对&lt;strong&gt;当前进程及其所有事件&lt;/strong&gt;的操作。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;如果你有 10 个测量事件，不需要一个个 ioctl，可以用 &lt;code&gt;prctl&lt;/code&gt; 一次性全部启用或禁用。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;“保持存在”的意义&lt;/strong&gt;：禁用事件只是让计数器停止，它不会销毁数据。这允许你在程序运行的特定片段（比如只在某个核心算法执行期间）开启监控。&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

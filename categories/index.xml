@@ -11,8 +11,15 @@
     </image>
     <generator>Hugo -- 0.154.5</generator>
     <language>en</language>
-    <lastBuildDate>Thu, 22 Jan 2026 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Sat, 24 Jan 2026 00:00:00 +0000</lastBuildDate>
     <atom:link href="https://kerolt.github.io/categories/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>EBPF</title>
+      <link>https://kerolt.github.io/categories/ebpf/</link>
+      <pubDate>Fri, 23 Jan 2026 00:00:00 +0000</pubDate>
+      <guid>https://kerolt.github.io/categories/ebpf/</guid>
+      <description></description>
+    </item>
     <item>
       <title>CMake</title>
       <link>https://kerolt.github.io/categories/cmake/</link>
@@ -63,13 +70,6 @@
       <description></description>
     </item>
     <item>
-      <title>EBPF</title>
-      <link>https://kerolt.github.io/categories/ebpf/</link>
-      <pubDate>Thu, 23 Oct 2025 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/categories/ebpf/</guid>
-      <description></description>
-    </item>
-    <item>
       <title>前端</title>
       <link>https://kerolt.github.io/categories/%E5%89%8D%E7%AB%AF/</link>
       <pubDate>Thu, 16 Oct 2025 00:00:00 +0000</pubDate>
@@ -91,13 +91,6 @@
       <description></description>
     </item>
     <item>
-      <title>项目</title>
-      <link>https://kerolt.github.io/categories/%E9%A1%B9%E7%9B%AE/</link>
-      <pubDate>Sun, 25 May 2025 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/categories/%E9%A1%B9%E7%9B%AE/</guid>
-      <description></description>
-    </item>
-    <item>
       <title>数据库</title>
       <link>https://kerolt.github.io/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/</link>
       <pubDate>Tue, 06 May 2025 00:00:00 +0000</pubDate>
@@ -105,10 +98,17 @@
       <description></description>
     </item>
     <item>
-      <title>操作系统</title>
-      <link>https://kerolt.github.io/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/</link>
+      <title>MIT6.s081</title>
+      <link>https://kerolt.github.io/categories/mit6.s081/</link>
       <pubDate>Fri, 22 Nov 2024 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/</guid>
+      <guid>https://kerolt.github.io/categories/mit6.s081/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>项目</title>
+      <link>https://kerolt.github.io/categories/%E9%A1%B9%E7%9B%AE/</link>
+      <pubDate>Mon, 30 Sep 2024 00:00:00 +0000</pubDate>
+      <guid>https://kerolt.github.io/categories/%E9%A1%B9%E7%9B%AE/</guid>
       <description></description>
     </item>
   </channel>

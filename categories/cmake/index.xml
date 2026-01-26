@@ -11,7 +11,7 @@
     </image>
     <generator>Hugo -- 0.154.5</generator>
     <language>en</language>
-    <lastBuildDate>Thu, 22 Jan 2026 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Fri, 23 Jan 2026 00:00:00 +0000</lastBuildDate>
     <atom:link href="https://kerolt.github.io/categories/cmake/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>CMake与Conan协同工作理解</title>
@@ -19,7 +19,7 @@
       <pubDate>Thu, 22 Jan 2026 00:00:00 +0000</pubDate>
       <guid>https://kerolt.github.io/posts/cmake/cmake%E4%B8%8Econan%E5%8D%8F%E5%90%8C%E5%B7%A5%E4%BD%9C%E7%90%86%E8%A7%A3/</guid>
       <description>&lt;h2 id=&#34;背景&#34;&gt;背景&lt;/h2&gt;
-&lt;p&gt;最近根据 &lt;a href=&#34;https://eunomia.dev/zh/tutorials/12-profile/&#34;&gt;【eBPF 入门实践教程十二：使用 eBPF 程序 profile 进行性能分析】&lt;/a&gt; 这篇文章，写了一个性能分析的小工具。不过文章中的实现是 rust，但我还不怎么熟悉 rust，因而打算参考其代码使用 c++ 来实现相同的功能。&lt;/p&gt;
+&lt;p&gt;最近根据 &lt;a href=&#34;https://eunomia.dev/zh/tutorials/12-profile/&#34;&gt;【eBPF 入门实践教程十二：使用 eBPF 程序 profile 进行性能分析】&lt;/a&gt; 这篇文章，写了一个性能分析的小工具。不过文章中的实现是 rust，但我还不怎么熟悉 rust，因而打算参考其代码使用 c++ 来实现相同的功能。项目地址：&lt;a href=&#34;https://github.com/kerolt/profiler&#34;&gt;profiler&lt;/a&gt;。&lt;/p&gt;
 &lt;p&gt;rust 中使用 cargo 就能非常方便的管理依赖与构建项目，c++ 中我使用 CMake 来构建项目，Conan 来管理依赖。在使用期间，我对于这二者的协同工作原理感到好奇，因此有了这篇笔记。&lt;/p&gt;
 &lt;blockquote&gt;
 &lt;p&gt;文中的出现的“依赖”、“包”、“库”等名词都是指代同一个概念，只是不同的说法而已~&lt;/p&gt;
@@ -34,22 +34,42 @@
 &lt;/ul&gt;
 &lt;p&gt;CMake 有两种查找库的逻辑：&lt;/p&gt;
 &lt;ol&gt;
-&lt;li&gt;Module 模式 (查找 &lt;code&gt;Find&amp;lt;PackageName&amp;gt;.cmake&lt;/code&gt;)&lt;/li&gt;
-&lt;/ol&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Module 模式&lt;/strong&gt; (查找 &lt;code&gt;Find&amp;lt;PackageName&amp;gt;.cmake&lt;/code&gt;)&lt;/p&gt;
 &lt;p&gt;CMake 预置了一系列脚本（在 &lt;code&gt;/usr/share/cmake/Modules&lt;/code&gt; 下）。它会寻找名为 &lt;code&gt;FindGSL.cmake&lt;/code&gt; 这样的文件。&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;strong&gt;适用场景&lt;/strong&gt;: 较老或不直接支持 CMake 的库（如 &lt;code&gt;CURL&lt;/code&gt;, &lt;code&gt;ZLIB&lt;/code&gt;）。&lt;/li&gt;
 &lt;/ul&gt;
-&lt;ol start=&#34;2&#34;&gt;
-&lt;li&gt;Config 模式 (查找 &lt;code&gt;&amp;lt;PackageName&amp;gt;Config.cmake&lt;/code&gt;)&lt;/li&gt;
-&lt;/ol&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Config 模式&lt;/strong&gt; (查找 &lt;code&gt;&amp;lt;PackageName&amp;gt;Config.cmake&lt;/code&gt; 或 &lt;code&gt;&amp;lt;lower-case-pkg&amp;gt;-config.cmake&lt;/code&gt;)&lt;/p&gt;
 &lt;p&gt;这是现代库推荐的方式。库在安装时会自带一个配置文件。&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;strong&gt;适用场景&lt;/strong&gt;: &lt;code&gt;OpenCV&lt;/code&gt;, &lt;code&gt;Qt&lt;/code&gt;, &lt;code&gt;Protobuf&lt;/code&gt; 等现代库。&lt;/li&gt;
 &lt;li&gt;&lt;strong&gt;查找路径&lt;/strong&gt;: 库的安装路径、&lt;code&gt;CMAKE_PREFIX_PATH&lt;/code&gt; 或环境变量。&lt;/li&gt;
 &lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
 &lt;h3 id=&#34;cmake_prefix_path&#34;&gt;CMAKE_PREFIX_PATH&lt;/h3&gt;
 &lt;p&gt;当在 CMake 中使用 &lt;code&gt;find_package&lt;/code&gt;、&lt;code&gt;find_library&lt;/code&gt; 或 &lt;code&gt;find_path&lt;/code&gt; 等指令去寻找一个外部库时，CMake 并不知道这个库安装在哪里。&lt;code&gt;CMAKE_PREFIX_PATH&lt;/code&gt; 就是用来告诉 CMake 去这些目录下找找看。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>如何在CMake工程中使用Rust库blazesym</title>
+      <link>https://kerolt.github.io/posts/cmake/%E5%A6%82%E4%BD%95%E5%9C%A8cmake%E5%B7%A5%E7%A8%8B%E4%B8%AD%E4%BD%BF%E7%94%A8rust%E5%BA%93blazesym/</link>
+      <pubDate>Thu, 22 Jan 2026 00:00:00 +0000</pubDate>
+      <guid>https://kerolt.github.io/posts/cmake/%E5%A6%82%E4%BD%95%E5%9C%A8cmake%E5%B7%A5%E7%A8%8B%E4%B8%AD%E4%BD%BF%E7%94%A8rust%E5%BA%93blazesym/</guid>
+      <description>&lt;p&gt;在 &lt;a href=&#34;https://eunomia.dev/zh/tutorials/12-profile/&#34;&gt;【eBPF 入门实践教程十二：使用 eBPF 程序 profile 进行性能分析】&lt;/a&gt; 这篇文章中， profiler 工具的实现是使用了 rust 编写的 &lt;code&gt;blazesym&lt;/code&gt; 库，而我现在打算使用 C++ 实现，还好这个库提供了 C API，但是需要我们将这个 Rust 库的构建集成到 CMake 中。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Corrosion&lt;/strong&gt; 可将 Rust 集成到现有 CMake 项目中，它是一个 CMake 工具链，旨在让 CMake 像对待原生 C++ 子项目一样对待 Rust 的 &lt;code&gt;Cargo&lt;/code&gt; 项目。Corrosion 将手动调用 &lt;code&gt;cargo build&lt;/code&gt;，处理复杂的跨平台路径、构建配置（Debug/Release）以及繁琐的链接参数这些过程完全自动化了。&lt;/p&gt;
+&lt;h2 id=&#34;corrosion-的核心功能&#34;&gt;Corrosion 的核心功能&lt;/h2&gt;
+&lt;p&gt;Corrosion 的工作原理是在 CMake 层面为 Cargo 包装了一层“外壳”，其主要功能包括：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;自动处理构建类型&lt;/strong&gt;：CMake 的 &lt;code&gt;Release&lt;/code&gt; 或 &lt;code&gt;Debug&lt;/code&gt; 模式会自动映射到 Cargo 的 &lt;code&gt;--release&lt;/code&gt; 或默认模式。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;目标导入&lt;/strong&gt;：将 Rust 的 &lt;code&gt;staticlib&lt;/code&gt; 或 &lt;code&gt;cdylib&lt;/code&gt; 导入为标准的 CMake 目标（Targets），你可以直接对它们使用 &lt;code&gt;target_link_libraries&lt;/code&gt;。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;跨平台交叉编译&lt;/strong&gt;：它能自动将 CMake 的交叉编译设置（如 Android, iOS, 嵌入式等）传递给 Rust 的目标三元组（Target Triple）。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;多包支持&lt;/strong&gt;：支持 Cargo 工作区（Workspaces）和单个 Crate。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;项目结构&#34;&gt;项目结构&lt;/h2&gt;
+&lt;p&gt;在我的项目 &lt;a href=&#34;https://github.com/kerolt/profiler&#34;&gt;profiler&lt;/a&gt; 中使用 Corrosion 时，项目布局如下：&lt;/p&gt;</description>
     </item>
   </channel>
 </rss>

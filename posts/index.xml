@@ -11,15 +11,66 @@
     </image>
     <generator>Hugo -- 0.154.5</generator>
     <language>en</language>
-    <lastBuildDate>Thu, 22 Jan 2026 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Sat, 24 Jan 2026 00:00:00 +0000</lastBuildDate>
     <atom:link href="https://kerolt.github.io/posts/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>利用eBPF与perf_event记录系统调用栈</title>
+      <link>https://kerolt.github.io/posts/ebpf/%E5%88%A9%E7%94%A8ebpf%E4%B8%8Eperf_event%E8%AE%B0%E5%BD%95%E7%B3%BB%E7%BB%9F%E8%B0%83%E7%94%A8%E6%A0%88/</link>
+      <pubDate>Fri, 23 Jan 2026 00:00:00 +0000</pubDate>
+      <guid>https://kerolt.github.io/posts/ebpf/%E5%88%A9%E7%94%A8ebpf%E4%B8%8Eperf_event%E8%AE%B0%E5%BD%95%E7%B3%BB%E7%BB%9F%E8%B0%83%E7%94%A8%E6%A0%88/</guid>
+      <description>&lt;h2 id=&#34;perf_event_open&#34;&gt;perf_event_open&lt;/h2&gt;
+&lt;p&gt;
+&lt;div class=&#34;post-img-view&#34;&gt;
+  &lt;a data-fancybox=&#34;gallery&#34; href=&#34;https://plantegg.github.io/images/951413iMgBlog/5edebc74-f8ac-483c-8bcd-24e09abfd06b.png&#34;&gt;
+    &lt;img src=&#34;https://plantegg.github.io/images/951413iMgBlog/5edebc74-f8ac-483c-8bcd-24e09abfd06b.png&#34; alt=&#34;&#34;  /&gt;
+  &lt;/a&gt;
+&lt;/div&gt;
+&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;perf 原理图：https://plantegg.github.io/2021/05/16/Perf_IPC%E4%BB%A5%E5%8F%8ACPU%E5%88%A9%E7%94%A8%E7%8E%87/&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;在用户态中触发 &lt;code&gt;sys_perf_event_open&lt;/code&gt; 系统调用，内核陷入中断以后会调用 &lt;code&gt;perf_event_open&lt;/code&gt; 来处理。在用户态，我们可以用如下的代码来使用：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-c&#34; data-lang=&#34;c&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#099&#34;&gt;#include&lt;/span&gt; &lt;span style=&#34;color:#099&#34;&gt;&amp;lt;linux/perf_event.h&amp;gt;&lt;/span&gt;&lt;span style=&#34;color:#099&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#099&#34;&gt;#include&lt;/span&gt; &lt;span style=&#34;color:#099&#34;&gt;&amp;lt;sys/syscall.h&amp;gt;&lt;/span&gt;&lt;span style=&#34;color:#099&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#099&#34;&gt;#include&lt;/span&gt; &lt;span style=&#34;color:#099&#34;&gt;&amp;lt;unistd.h&amp;gt;&lt;/span&gt;&lt;span style=&#34;color:#099&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#078;font-weight:bold&#34;&gt;int64_t&lt;/span&gt; &lt;span style=&#34;color:#c0f&#34;&gt;perf_event_open&lt;/span&gt;(&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;struct&lt;/span&gt; perf_event_attr&lt;span style=&#34;color:#555&#34;&gt;*&lt;/span&gt; hw_event, &lt;span style=&#34;color:#078;font-weight:bold&#34;&gt;pid_t&lt;/span&gt; pid, &lt;span style=&#34;color:#078;font-weight:bold&#34;&gt;int&lt;/span&gt; cpu,
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;                     &lt;span style=&#34;color:#078;font-weight:bold&#34;&gt;int&lt;/span&gt; group_fd, &lt;span style=&#34;color:#078;font-weight:bold&#34;&gt;unsigned&lt;/span&gt; &lt;span style=&#34;color:#078;font-weight:bold&#34;&gt;long&lt;/span&gt; flags) &lt;span style=&#34;color:#555&#34;&gt;-&amp;gt;&lt;/span&gt;  {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color:#c0f&#34;&gt;syscall&lt;/span&gt;(SYS_perf_event_open, hw_event, pid, cpu, group_fd, flags);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id=&#34;以文件描述符为中心的测量单元&#34;&gt;以文件描述符为中心的“测量单元”&lt;/h3&gt;
+&lt;p&gt;在 Linux 中，“一切皆文件”。当调用 &lt;code&gt;perf_event_open&lt;/code&gt; 时，内核创建了一个&lt;strong&gt;独立的测量实例&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;每个文件描述符代表一个监控任务（&lt;strong&gt;1 fd == 1 Event&lt;/strong&gt;，比如“监控 CPU 0 的指令执行数”）。&lt;/p&gt;
+&lt;p&gt;同时，可以把多个 fd 绑在一起，即为&lt;strong&gt;事件分组 (Group)&lt;/strong&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;例如你想计算“每条指令的缓存未命中率”，你需要同时测量“指令数”和“缓存未命中数”。将它们分组可以确保这两个事件在硬件上是&lt;strong&gt;同时开始、同时结束&lt;/strong&gt;的，从而保证比例的准确性。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;状态控制ioctl-与-prctl&#34;&gt;状态控制：ioctl 与 prctl&lt;/h3&gt;
+&lt;p&gt;事件创建后，并不一定立即开始工作，你可以像控制开关一样控制它。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;ioctl (Input/Output Control)&lt;/strong&gt;：这是最常用的方式，直接针对某个 &lt;strong&gt;fd&lt;/strong&gt; 进行操作。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;ioctl(fd, PERF_EVENT_IOC_ENABLE)&lt;/code&gt;：打开开关。&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;ioctl(fd, PERF_EVENT_IOC_DISABLE)&lt;/code&gt;：关闭开关。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;prctl (Process Control)&lt;/strong&gt;：这是针对&lt;strong&gt;当前进程及其所有事件&lt;/strong&gt;的操作。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;如果你有 10 个测量事件，不需要一个个 ioctl，可以用 &lt;code&gt;prctl&lt;/code&gt; 一次性全部启用或禁用。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;“保持存在”的意义&lt;/strong&gt;：禁用事件只是让计数器停止，它不会销毁数据。这允许你在程序运行的特定片段（比如只在某个核心算法执行期间）开启监控。&lt;/p&gt;</description>
+    </item>
     <item>
       <title>CMake与Conan协同工作理解</title>
       <link>https://kerolt.github.io/posts/cmake/cmake%E4%B8%8Econan%E5%8D%8F%E5%90%8C%E5%B7%A5%E4%BD%9C%E7%90%86%E8%A7%A3/</link>
       <pubDate>Thu, 22 Jan 2026 00:00:00 +0000</pubDate>
       <guid>https://kerolt.github.io/posts/cmake/cmake%E4%B8%8Econan%E5%8D%8F%E5%90%8C%E5%B7%A5%E4%BD%9C%E7%90%86%E8%A7%A3/</guid>
       <description>&lt;h2 id=&#34;背景&#34;&gt;背景&lt;/h2&gt;
-&lt;p&gt;最近根据 &lt;a href=&#34;https://eunomia.dev/zh/tutorials/12-profile/&#34;&gt;【eBPF 入门实践教程十二：使用 eBPF 程序 profile 进行性能分析】&lt;/a&gt; 这篇文章，写了一个性能分析的小工具。不过文章中的实现是 rust，但我还不怎么熟悉 rust，因而打算参考其代码使用 c++ 来实现相同的功能。&lt;/p&gt;
+&lt;p&gt;最近根据 &lt;a href=&#34;https://eunomia.dev/zh/tutorials/12-profile/&#34;&gt;【eBPF 入门实践教程十二：使用 eBPF 程序 profile 进行性能分析】&lt;/a&gt; 这篇文章，写了一个性能分析的小工具。不过文章中的实现是 rust，但我还不怎么熟悉 rust，因而打算参考其代码使用 c++ 来实现相同的功能。项目地址：&lt;a href=&#34;https://github.com/kerolt/profiler&#34;&gt;profiler&lt;/a&gt;。&lt;/p&gt;
 &lt;p&gt;rust 中使用 cargo 就能非常方便的管理依赖与构建项目，c++ 中我使用 CMake 来构建项目，Conan 来管理依赖。在使用期间，我对于这二者的协同工作原理感到好奇，因此有了这篇笔记。&lt;/p&gt;
 &lt;blockquote&gt;
 &lt;p&gt;文中的出现的“依赖”、“包”、“库”等名词都是指代同一个概念，只是不同的说法而已~&lt;/p&gt;
@@ -34,22 +85,42 @@
 &lt;/ul&gt;
 &lt;p&gt;CMake 有两种查找库的逻辑：&lt;/p&gt;
 &lt;ol&gt;
-&lt;li&gt;Module 模式 (查找 &lt;code&gt;Find&amp;lt;PackageName&amp;gt;.cmake&lt;/code&gt;)&lt;/li&gt;
-&lt;/ol&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Module 模式&lt;/strong&gt; (查找 &lt;code&gt;Find&amp;lt;PackageName&amp;gt;.cmake&lt;/code&gt;)&lt;/p&gt;
 &lt;p&gt;CMake 预置了一系列脚本（在 &lt;code&gt;/usr/share/cmake/Modules&lt;/code&gt; 下）。它会寻找名为 &lt;code&gt;FindGSL.cmake&lt;/code&gt; 这样的文件。&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;strong&gt;适用场景&lt;/strong&gt;: 较老或不直接支持 CMake 的库（如 &lt;code&gt;CURL&lt;/code&gt;, &lt;code&gt;ZLIB&lt;/code&gt;）。&lt;/li&gt;
 &lt;/ul&gt;
-&lt;ol start=&#34;2&#34;&gt;
-&lt;li&gt;Config 模式 (查找 &lt;code&gt;&amp;lt;PackageName&amp;gt;Config.cmake&lt;/code&gt;)&lt;/li&gt;
-&lt;/ol&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Config 模式&lt;/strong&gt; (查找 &lt;code&gt;&amp;lt;PackageName&amp;gt;Config.cmake&lt;/code&gt; 或 &lt;code&gt;&amp;lt;lower-case-pkg&amp;gt;-config.cmake&lt;/code&gt;)&lt;/p&gt;
 &lt;p&gt;这是现代库推荐的方式。库在安装时会自带一个配置文件。&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;strong&gt;适用场景&lt;/strong&gt;: &lt;code&gt;OpenCV&lt;/code&gt;, &lt;code&gt;Qt&lt;/code&gt;, &lt;code&gt;Protobuf&lt;/code&gt; 等现代库。&lt;/li&gt;
 &lt;li&gt;&lt;strong&gt;查找路径&lt;/strong&gt;: 库的安装路径、&lt;code&gt;CMAKE_PREFIX_PATH&lt;/code&gt; 或环境变量。&lt;/li&gt;
 &lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
 &lt;h3 id=&#34;cmake_prefix_path&#34;&gt;CMAKE_PREFIX_PATH&lt;/h3&gt;
 &lt;p&gt;当在 CMake 中使用 &lt;code&gt;find_package&lt;/code&gt;、&lt;code&gt;find_library&lt;/code&gt; 或 &lt;code&gt;find_path&lt;/code&gt; 等指令去寻找一个外部库时，CMake 并不知道这个库安装在哪里。&lt;code&gt;CMAKE_PREFIX_PATH&lt;/code&gt; 就是用来告诉 CMake 去这些目录下找找看。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>如何在CMake工程中使用Rust库blazesym</title>
+      <link>https://kerolt.github.io/posts/cmake/%E5%A6%82%E4%BD%95%E5%9C%A8cmake%E5%B7%A5%E7%A8%8B%E4%B8%AD%E4%BD%BF%E7%94%A8rust%E5%BA%93blazesym/</link>
+      <pubDate>Thu, 22 Jan 2026 00:00:00 +0000</pubDate>
+      <guid>https://kerolt.github.io/posts/cmake/%E5%A6%82%E4%BD%95%E5%9C%A8cmake%E5%B7%A5%E7%A8%8B%E4%B8%AD%E4%BD%BF%E7%94%A8rust%E5%BA%93blazesym/</guid>
+      <description>&lt;p&gt;在 &lt;a href=&#34;https://eunomia.dev/zh/tutorials/12-profile/&#34;&gt;【eBPF 入门实践教程十二：使用 eBPF 程序 profile 进行性能分析】&lt;/a&gt; 这篇文章中， profiler 工具的实现是使用了 rust 编写的 &lt;code&gt;blazesym&lt;/code&gt; 库，而我现在打算使用 C++ 实现，还好这个库提供了 C API，但是需要我们将这个 Rust 库的构建集成到 CMake 中。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Corrosion&lt;/strong&gt; 可将 Rust 集成到现有 CMake 项目中，它是一个 CMake 工具链，旨在让 CMake 像对待原生 C++ 子项目一样对待 Rust 的 &lt;code&gt;Cargo&lt;/code&gt; 项目。Corrosion 将手动调用 &lt;code&gt;cargo build&lt;/code&gt;，处理复杂的跨平台路径、构建配置（Debug/Release）以及繁琐的链接参数这些过程完全自动化了。&lt;/p&gt;
+&lt;h2 id=&#34;corrosion-的核心功能&#34;&gt;Corrosion 的核心功能&lt;/h2&gt;
+&lt;p&gt;Corrosion 的工作原理是在 CMake 层面为 Cargo 包装了一层“外壳”，其主要功能包括：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;自动处理构建类型&lt;/strong&gt;：CMake 的 &lt;code&gt;Release&lt;/code&gt; 或 &lt;code&gt;Debug&lt;/code&gt; 模式会自动映射到 Cargo 的 &lt;code&gt;--release&lt;/code&gt; 或默认模式。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;目标导入&lt;/strong&gt;：将 Rust 的 &lt;code&gt;staticlib&lt;/code&gt; 或 &lt;code&gt;cdylib&lt;/code&gt; 导入为标准的 CMake 目标（Targets），你可以直接对它们使用 &lt;code&gt;target_link_libraries&lt;/code&gt;。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;跨平台交叉编译&lt;/strong&gt;：它能自动将 CMake 的交叉编译设置（如 Android, iOS, 嵌入式等）传递给 Rust 的目标三元组（Target Triple）。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;多包支持&lt;/strong&gt;：支持 Cargo 工作区（Workspaces）和单个 Crate。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;项目结构&#34;&gt;项目结构&lt;/h2&gt;
+&lt;p&gt;在我的项目 &lt;a href=&#34;https://github.com/kerolt/profiler&#34;&gt;profiler&lt;/a&gt; 中使用 Corrosion 时，项目布局如下：&lt;/p&gt;</description>
     </item>
     <item>
       <title>C&#43;&#43;对Rust中Result的简单模仿</title>
@@ -182,9 +253,9 @@
     </item>
     <item>
       <title>【Nginx】location与proxy_pass配置中的斜杠差异</title>
-      <link>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/nginxlocation%E4%B8%8Eproxy_pass%E9%85%8D%E7%BD%AE%E4%B8%AD%E7%9A%84%E6%96%9C%E6%9D%A0%E5%B7%AE%E5%BC%82/</link>
+      <link>https://kerolt.github.io/posts/dev-null/nginxlocation%E4%B8%8Eproxy_pass%E9%85%8D%E7%BD%AE%E4%B8%AD%E7%9A%84%E6%96%9C%E6%9D%A0%E5%B7%AE%E5%BC%82/</link>
       <pubDate>Mon, 05 Jan 2026 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/nginxlocation%E4%B8%8Eproxy_pass%E9%85%8D%E7%BD%AE%E4%B8%AD%E7%9A%84%E6%96%9C%E6%9D%A0%E5%B7%AE%E5%BC%82/</guid>
+      <guid>https://kerolt.github.io/posts/dev-null/nginxlocation%E4%B8%8Eproxy_pass%E9%85%8D%E7%BD%AE%E4%B8%AD%E7%9A%84%E6%96%9C%E6%9D%A0%E5%B7%AE%E5%BC%82/</guid>
       <description>&lt;p&gt;Nginx 作为反向代理服务器，需要精确匹配客户端请求路径，并将请求转发到后端服务。在这个过程中：&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;strong&gt;&lt;code&gt;location&lt;/code&gt; 指令&lt;/strong&gt;：决定哪些请求会被当前配置块处理&lt;/li&gt;
@@ -237,9 +308,9 @@
     </item>
     <item>
       <title>uv包安装网络超时解决</title>
-      <link>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/uv%E5%8C%85%E5%AE%89%E8%A3%85%E7%BD%91%E7%BB%9C%E8%B6%85%E6%97%B6%E8%A7%A3%E5%86%B3/</link>
+      <link>https://kerolt.github.io/posts/dev-null/uv%E5%8C%85%E5%AE%89%E8%A3%85%E7%BD%91%E7%BB%9C%E8%B6%85%E6%97%B6%E8%A7%A3%E5%86%B3/</link>
       <pubDate>Fri, 12 Dec 2025 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/uv%E5%8C%85%E5%AE%89%E8%A3%85%E7%BD%91%E7%BB%9C%E8%B6%85%E6%97%B6%E8%A7%A3%E5%86%B3/</guid>
+      <guid>https://kerolt.github.io/posts/dev-null/uv%E5%8C%85%E5%AE%89%E8%A3%85%E7%BD%91%E7%BB%9C%E8%B6%85%E6%97%B6%E8%A7%A3%E5%86%B3/</guid>
       <description>&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;$ uv add numpy pandas torch scikit-learn matplotlib
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Resolved &lt;span style=&#34;color:#f60&#34;&gt;45&lt;/span&gt; packages in 21ms
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  × Failed to download &lt;span style=&#34;color:#c30&#34;&gt;`&lt;/span&gt;nvidia-cufft-cu12&lt;span style=&#34;color:#555&#34;&gt;==&lt;/span&gt;11.3.3.83&lt;span style=&#34;color:#c30&#34;&gt;`&lt;/span&gt;
@@ -679,9 +750,9 @@ JSON 格式，描述网络的类型、IPAM 配置、路由等。&lt;/p&gt;
     </item>
     <item>
       <title>国内安装Docker CE</title>
-      <link>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/%E5%9B%BD%E5%86%85%E5%AE%89%E8%A3%85docker-ce/</link>
+      <link>https://kerolt.github.io/posts/dev-null/%E5%9B%BD%E5%86%85%E5%AE%89%E8%A3%85docker-ce/</link>
       <pubDate>Mon, 13 Oct 2025 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/%E5%9B%BD%E5%86%85%E5%AE%89%E8%A3%85docker-ce/</guid>
+      <guid>https://kerolt.github.io/posts/dev-null/%E5%9B%BD%E5%86%85%E5%AE%89%E8%A3%85docker-ce/</guid>
       <description>&lt;blockquote&gt;
 &lt;p&gt;以下操作基于 Debian12&lt;/p&gt;
 &lt;/blockquote&gt;
@@ -1036,9 +1107,9 @@ JSON 格式，描述网络的类型、IPAM 配置、路由等。&lt;/p&gt;
     </item>
     <item>
       <title>Rustdesk自建服务器</title>
-      <link>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/rustdesk%E8%87%AA%E5%BB%BA%E6%9C%8D%E5%8A%A1%E5%99%A8/</link>
+      <link>https://kerolt.github.io/posts/dev-null/rustdesk%E8%87%AA%E5%BB%BA%E6%9C%8D%E5%8A%A1%E5%99%A8/</link>
       <pubDate>Mon, 25 Aug 2025 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/rustdesk%E8%87%AA%E5%BB%BA%E6%9C%8D%E5%8A%A1%E5%99%A8/</guid>
+      <guid>https://kerolt.github.io/posts/dev-null/rustdesk%E8%87%AA%E5%BB%BA%E6%9C%8D%E5%8A%A1%E5%99%A8/</guid>
       <description>&lt;p&gt;对于现在常见的远程控制软件，例如 ToDesk、向日葵，其免费版本总有诸多限制（帧率低、分辨率低、控制时间有限制），而 RustDesk 的公共服务器现在在国内也不可用，因此我就想到了 RustDesk 的自建服务器。现在我们实验室有几台空闲的电脑，并且这些电脑都有 &lt;strong&gt;IPv6&lt;/strong&gt;，这就省去了我购买云服务器的花费，可以实现零成本搭建远程服务😁&lt;/p&gt;
 &lt;h2 id=&#34;安装-rustdesk-server&#34;&gt;安装 RustDesk Server&lt;/h2&gt;
 &lt;p&gt;我使用 &lt;a href=&#34;https://github.com/sshpc/rustdesktool&#34;&gt;https://github.com/sshpc/rustdesktool&lt;/a&gt; 这里的脚本来一键安装，安装完后，RustDesk Server 的默认安装目录为：&lt;/p&gt;
@@ -1300,9 +1371,9 @@ JSON 格式，描述网络的类型、IPAM 配置、路由等。&lt;/p&gt;
     </item>
     <item>
       <title>Curl使用</title>
-      <link>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/curl%E4%BD%BF%E7%94%A8/</link>
+      <link>https://kerolt.github.io/posts/dev-null/curl%E4%BD%BF%E7%94%A8/</link>
       <pubDate>Tue, 01 Jul 2025 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/curl%E4%BD%BF%E7%94%A8/</guid>
+      <guid>https://kerolt.github.io/posts/dev-null/curl%E4%BD%BF%E7%94%A8/</guid>
       <description>&lt;p&gt;curl 是一个强大的命令行工具，用于传输数据，支持多种协议（HTTP、HTTPS、FTP 等）。以下是 curl 的基本使用方法和常见示例。&lt;/p&gt;
 &lt;h2 id=&#34;基本语法&#34;&gt;基本语法&lt;/h2&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;curl [options] [URL...]
@@ -1575,92 +1646,6 @@ JSON 格式，描述网络的类型、IPAM 配置、路由等。&lt;/p&gt;
 &lt;p&gt;为 &lt;code&gt;do_unlinkat&lt;/code&gt; 函数同时设置入口探针和返回探针：&lt;/p&gt;</description>
     </item>
     <item>
-      <title>分布式缓存</title>
-      <link>https://kerolt.github.io/posts/%E5%8A%A8%E6%89%8B%E5%AE%9E%E7%8E%B0x/%E5%88%86%E5%B8%83%E5%BC%8F%E7%BC%93%E5%AD%98/</link>
-      <pubDate>Sun, 25 May 2025 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E5%8A%A8%E6%89%8B%E5%AE%9E%E7%8E%B0x/%E5%88%86%E5%B8%83%E5%BC%8F%E7%BC%93%E5%AD%98/</guid>
-      <description>&lt;h2 id=&#34;原分布式缓存项目的问题&#34;&gt;原分布式缓存项目的问题&lt;/h2&gt;
-&lt;p&gt;KamaCache-Go 是在 Groupcache 的基础上修改的，引入了 set、delete 操作和 etcd 服务发现，但是这样就改变了 groupcache 的架构和本意，并且带来了一些问题。&lt;/p&gt;
-&lt;p&gt;groupcache 的本意是一个在&lt;strong&gt;读多写少&lt;/strong&gt;的环境下为了应用自身的服务设计的&lt;strong&gt;内嵌式&lt;/strong&gt;缓存系统。节点既是 app 又是 cache，并且&lt;/p&gt;
-&lt;blockquote&gt;
-&lt;p&gt;项目地址：https://github.com/kerolt/kcache&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;p&gt;KCache 是一个分布式缓存系统，支持一致性哈希和 LRU 缓存淘汰策略。该项目使用 conan 作为包管理工具，使用 CMake 作为项目的构建工具。&lt;/p&gt;
-&lt;h2 id=&#34;数据流程&#34;&gt;数据流程&lt;/h2&gt;
-&lt;p&gt;当有客户端请求 kcache node 中的数据时：&lt;/p&gt;
-&lt;ol&gt;
-&lt;li&gt;kcache node 首先检查本地缓存&lt;/li&gt;
-&lt;li&gt;如果本地缓存未命中，使用 PeerPicker 选择负责该键的节点&lt;/li&gt;
-&lt;li&gt;如果键属于远程节点，通过 gRPC 向远程节点请求数据&lt;/li&gt;
-&lt;li&gt;如果远程节点也没有数据，回退到原始数据源加载（例如数据源是 MySQL、SQLite 等数据库）&lt;/li&gt;
-&lt;li&gt;将加载的数据添加到本地缓存&lt;/li&gt;
-&lt;/ol&gt;
-&lt;p&gt;示意架构图如下：&lt;/p&gt;
-&lt;p&gt;
-&lt;div class=&#34;post-img-view&#34;&gt;
-  &lt;a data-fancybox=&#34;gallery&#34; href=&#34;https://obsidian-image-oss.oss-cn-shanghai.aliyuncs.com/undefined20250606-144135.png&#34;&gt;
-    &lt;img src=&#34;https://obsidian-image-oss.oss-cn-shanghai.aliyuncs.com/undefined20250606-144135.png&#34; alt=&#34;&#34;  /&gt;
-  &lt;/a&gt;
-&lt;/div&gt;
-&lt;/p&gt;
-&lt;h2 id=&#34;致谢&#34;&gt;致谢&lt;/h2&gt;
-&lt;ol&gt;
-&lt;li&gt;本项目参考了 &lt;a href=&#34;https://github.com/geektutu/7days-golang&#34;&gt;geektutu/7days-golang&lt;/a&gt; 项目，感谢其作者提供的 &lt;a href=&#34;https://geektutu.com/post/geecache.html&#34;&gt;教程&lt;/a&gt; 和代码示例。&lt;/li&gt;
-&lt;li&gt;项目第二版参考了 &lt;a href=&#34;https://github.com/youngyangyang04/KamaCache-Go&#34;&gt;【代码随想录知识星球】项目分享-缓存系统（Go）&lt;/a&gt;&lt;/li&gt;
-&lt;/ol&gt;
-&lt;h2 id=&#34;项目结构&#34;&gt;项目结构&lt;/h2&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;.
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;|-- .vscode
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;|   &lt;span style=&#34;color:#c30&#34;&gt;`&lt;/span&gt;-- launch.json
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;|-- example
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;|   |-- CMakeLists.txt
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;|   &lt;span style=&#34;color:#c30&#34;&gt;`&lt;/span&gt;-- example.cpp
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;|-- src
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;|   |-- cache
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;|   |   &lt;span style=&#34;color:#c30&#34;&gt;`&lt;/span&gt;-- lru.cpp
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;|   |-- consistent_hash
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;|   |   &lt;span style=&#34;color:#c30&#34;&gt;`&lt;/span&gt;-- consistent_hash.cpp
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;|   |-- group
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;|   |   &lt;span style=&#34;color:#c30&#34;&gt;`&lt;/span&gt;-- group.cpp
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;|   |-- include
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;|   |   &lt;span style=&#34;color:#c30&#34;&gt;`&lt;/span&gt;-- kcache
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;|   |       |-- cache.h
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;|   |       |-- consistent_hash.h
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;|   |       |-- group.h
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;|   |       |-- grpc_server.h
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;|   |       |-- peer.h
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;|   |       |-- registry.h
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;|   |       &lt;span style=&#34;color:#c30&#34;&gt;`&lt;/span&gt;-- singleflight.h
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;|   |-- peer
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;|   |   |-- peer.cpp
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;|   |   &lt;span style=&#34;color:#c30&#34;&gt;`&lt;/span&gt;-- peer_picker.cpp
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;|   |-- proto
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;|   |   |-- kcache.grpc.pb.cc
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;|   |   |-- kcache.grpc.pb.h
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;|   |   |-- kcache.pb.cc
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;|   |   |-- kcache.pb.h
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;|   |   &lt;span style=&#34;color:#c30&#34;&gt;`&lt;/span&gt;-- kcache.proto
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;|   |-- registry
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;|   |   &lt;span style=&#34;color:#c30&#34;&gt;`&lt;/span&gt;-- registry.cpp
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;|   |-- server
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;|   |   &lt;span style=&#34;color:#c30&#34;&gt;`&lt;/span&gt;-- grpc_server.cpp
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;|   &lt;span style=&#34;color:#c30&#34;&gt;`&lt;/span&gt;-- CMakeLists.txt
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;|-- &lt;span style=&#34;color:#366&#34;&gt;test&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;|   |-- CMakeLists.txt
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;|   |-- test_consistent_hash.cpp
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;|   |-- test_group.cpp
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;|   &lt;span style=&#34;color:#c30&#34;&gt;`&lt;/span&gt;-- test_lru.cpp
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;|-- .clang-format
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;|-- .gitignore
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;|-- CMakeLists.txt
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;|-- CMakePresets.json
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;|-- conanfile.txt
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;|-- LICENSE
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#c30&#34;&gt;`&lt;/span&gt;-- README.md
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h2 id=&#34;依赖&#34;&gt;依赖&lt;/h2&gt;
-&lt;p&gt;项目依赖如下：&lt;/p&gt;</description>
-    </item>
-    <item>
       <title>Git使用</title>
       <link>https://kerolt.github.io/posts/git/git%E4%BD%BF%E7%94%A8/</link>
       <pubDate>Sun, 18 May 2025 00:00:00 +0000</pubDate>
@@ -1691,14 +1676,6 @@ JSON 格式，描述网络的类型、IPAM 配置、路由等。&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;git push -u origin 分支名
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id=&#34;-推送到远程的另一个分支名&#34;&gt;## 推送到远程的另一个分支名&lt;/h3&gt;
 &lt;p&gt;如果想把本地分支 &lt;code&gt;dev&lt;/code&gt; 推送到远程的 &lt;code&gt;test&lt;/code&gt; 分支：&lt;/p&gt;</description>
-    </item>
-    <item>
-      <title>【CMake】CMake使用笔记</title>
-      <link>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/cmakecmake%E4%BD%BF%E7%94%A8%E7%AC%94%E8%AE%B0/</link>
-      <pubDate>Wed, 14 May 2025 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/cmakecmake%E4%BD%BF%E7%94%A8%E7%AC%94%E8%AE%B0/</guid>
-      <description>&lt;p&gt;记录学习 CMake 中碰到的一些问题和笔记&lt;/p&gt;
-&lt;p&gt;ps：CMake 相比 xmake 来说确实太繁琐，但还是得学习🍭&lt;/p&gt;</description>
     </item>
     <item>
       <title>875. 爱吃香蕉的珂珂</title>
@@ -2120,9 +2097,9 @@ JSON 格式，描述网络的类型、IPAM 配置、路由等。&lt;/p&gt;
     </item>
     <item>
       <title>在VSCode中配置LLDB</title>
-      <link>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/%E5%9C%A8vscode%E4%B8%AD%E9%85%8D%E7%BD%AElldb/</link>
+      <link>https://kerolt.github.io/posts/dev-null/%E5%9C%A8vscode%E4%B8%AD%E9%85%8D%E7%BD%AElldb/</link>
       <pubDate>Tue, 31 Dec 2024 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/%E5%9C%A8vscode%E4%B8%AD%E9%85%8D%E7%BD%AElldb/</guid>
+      <guid>https://kerolt.github.io/posts/dev-null/%E5%9C%A8vscode%E4%B8%AD%E9%85%8D%E7%BD%AElldb/</guid>
       <description>&lt;p&gt;为了 &lt;code&gt;CMake Tool&lt;/code&gt; 能调试代码，先装好 &lt;code&gt;codelldb&lt;/code&gt; 插件，然后还需要一个 &lt;code&gt;launch.json&lt;/code&gt; 文件，以下内容可以一键配置好调试：&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-json&#34; data-lang=&#34;json&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;{
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;&amp;#34;version&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;0.2.0&amp;#34;&lt;/span&gt;,
@@ -2141,51 +2118,42 @@ JSON 格式，描述网络的类型、IPAM 配置、路由等。&lt;/p&gt;
     </item>
     <item>
       <title>【MIT6.S081】Lab10 mmap</title>
-      <link>https://kerolt.github.io/posts/%E5%8A%A8%E6%89%8B%E5%AE%9E%E7%8E%B0x/mit6.s081/mit6.s081lab10-mmap/</link>
+      <link>https://kerolt.github.io/posts/mit6.s081/mit6.s081lab10-mmap/</link>
       <pubDate>Fri, 22 Nov 2024 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E5%8A%A8%E6%89%8B%E5%AE%9E%E7%8E%B0x/mit6.s081/mit6.s081lab10-mmap/</guid>
+      <guid>https://kerolt.github.io/posts/mit6.s081/mit6.s081lab10-mmap/</guid>
       <description>&lt;h2 id=&#34;什么是mmap&#34;&gt;什么是mmap？&lt;/h2&gt;
 &lt;p&gt;&lt;code&gt;mmap&lt;/code&gt; 是一种用于将文件或设备与进程的地址空间关联起来的内存映射技术。通过 &lt;code&gt;mmap&lt;/code&gt;，可以将文件的内容直接映射到进程的虚拟内存地址空间，使得文件的内容可以像操作普通内存一样进行读取和写入。&lt;/p&gt;</description>
     </item>
     <item>
       <title>【MIT6.S081】Lab9 file system</title>
-      <link>https://kerolt.github.io/posts/%E5%8A%A8%E6%89%8B%E5%AE%9E%E7%8E%B0x/mit6.s081/mit6.s081lab9-file-system/</link>
+      <link>https://kerolt.github.io/posts/mit6.s081/mit6.s081lab9-file-system/</link>
       <pubDate>Tue, 19 Nov 2024 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E5%8A%A8%E6%89%8B%E5%AE%9E%E7%8E%B0x/mit6.s081/mit6.s081lab9-file-system/</guid>
+      <guid>https://kerolt.github.io/posts/mit6.s081/mit6.s081lab9-file-system/</guid>
       <description>&lt;h2 id=&#34;intro&#34;&gt;Intro&lt;/h2&gt;
 &lt;p&gt;在这个实验中，我们需要让xv6支持更大的文件和软链接。实验总体不是特别难，不过需要我们理解好文件系统是如何工作的。&lt;code&gt;Lab8 lock&lt;/code&gt;中的Buffer Cache也是文件系统的一部分，不过它位于文件系统的下层，这里我们需要处理的更多在上层，偏应用层。&lt;/p&gt;</description>
     </item>
     <item>
       <title>【MIT6.S081】Lab8 lock</title>
-      <link>https://kerolt.github.io/posts/%E5%8A%A8%E6%89%8B%E5%AE%9E%E7%8E%B0x/mit6.s081/mit6.s081lab8-lock/</link>
+      <link>https://kerolt.github.io/posts/mit6.s081/mit6.s081lab8-lock/</link>
       <pubDate>Sun, 17 Nov 2024 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E5%8A%A8%E6%89%8B%E5%AE%9E%E7%8E%B0x/mit6.s081/mit6.s081lab8-lock/</guid>
+      <guid>https://kerolt.github.io/posts/mit6.s081/mit6.s081lab8-lock/</guid>
       <description>&lt;h2 id=&#34;intro&#34;&gt;Intro&lt;/h2&gt;
 &lt;p&gt;这个实验个人感觉挺难的，需要我们重新设计数据结构，还要考虑在并发（并行）情况下对于锁的操作，以减少多核情况下对于锁的竞争。其中主要涉及内存分配和IO缓冲块分配，在这个lab之前，xv6对于这两个分配都是使用的全局对象，并只有一把全局锁进行操作，这样的话在并行情况下锁的竞争是很激烈的，我们的任务就是重新设计这两个分配器，它们的重构思路并不完全一致，需要具体问题具体分析。&lt;/p&gt;</description>
     </item>
     <item>
       <title>【MIT6.S081】xv6进程调度分析</title>
-      <link>https://kerolt.github.io/posts/%E5%8A%A8%E6%89%8B%E5%AE%9E%E7%8E%B0x/mit6.s081/mit6.s081xv6%E8%BF%9B%E7%A8%8B%E8%B0%83%E5%BA%A6%E5%88%86%E6%9E%90/</link>
+      <link>https://kerolt.github.io/posts/mit6.s081/mit6.s081xv6%E8%BF%9B%E7%A8%8B%E8%B0%83%E5%BA%A6%E5%88%86%E6%9E%90/</link>
       <pubDate>Sat, 16 Nov 2024 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E5%8A%A8%E6%89%8B%E5%AE%9E%E7%8E%B0x/mit6.s081/mit6.s081xv6%E8%BF%9B%E7%A8%8B%E8%B0%83%E5%BA%A6%E5%88%86%E6%9E%90/</guid>
+      <guid>https://kerolt.github.io/posts/mit6.s081/mit6.s081xv6%E8%BF%9B%E7%A8%8B%E8%B0%83%E5%BA%A6%E5%88%86%E6%9E%90/</guid>
       <description>&lt;p&gt;在做thread lab的时候，阅读xv6的源码后对于进程调度的实现有了大致的了解，但是其中锁的获取与释放顺序让我困惑了好久：在yield函数中，不是先获取了进程p的锁吗，那么之后在调度器中又获取p的锁，那不是会死锁吗？在调度器内使用swtch发生进程切换后，又会跳转到哪里？&lt;/p&gt;
 &lt;p&gt;而在我观摩大佬的一些博客和视频后，发现我之前的想法有很大的问题，归根结底是没有弄明白xv6何时发生了切换，切换后应该从哪里开始运行。这篇笔记就是对于分析xv6进程调度的总结。&lt;/p&gt;</description>
     </item>
     <item>
       <title>【MIT6.S081】Lab6 multithreading</title>
-      <link>https://kerolt.github.io/posts/%E5%8A%A8%E6%89%8B%E5%AE%9E%E7%8E%B0x/mit6.s081/mit6.s081lab6-multithreading/</link>
+      <link>https://kerolt.github.io/posts/mit6.s081/mit6.s081lab6-multithreading/</link>
       <pubDate>Fri, 15 Nov 2024 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E5%8A%A8%E6%89%8B%E5%AE%9E%E7%8E%B0x/mit6.s081/mit6.s081lab6-multithreading/</guid>
+      <guid>https://kerolt.github.io/posts/mit6.s081/mit6.s081lab6-multithreading/</guid>
       <description>&lt;p&gt;本次的实验总体都不是很难，第一个练习让我们在用户态模拟了线程的切换，这里重要的就是进程/线程上下文的保存与恢复；第二三个练习则是让我们跳出了xv6，去熟悉pthread库和线程的同步互斥。&lt;/p&gt;</description>
-    </item>
-    <item>
-      <title>CMake中使用find_pakage来使用MySQL</title>
-      <link>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/cmake%E4%B8%AD%E4%BD%BF%E7%94%A8find_pakage%E6%9D%A5%E4%BD%BF%E7%94%A8mysql/</link>
-      <pubDate>Fri, 15 Nov 2024 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/cmake%E4%B8%AD%E4%BD%BF%E7%94%A8find_pakage%E6%9D%A5%E4%BD%BF%E7%94%A8mysql/</guid>
-      <description>&lt;p&gt;一般来说，如果我们在 C++ 程序中要使用 mysql 的库，最简单的就是&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-sh&#34; data-lang=&#34;sh&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;g++ server.cpp -o server -lmysqlclient
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;但要是在大一点的项目中，在数不清的源文件下使用 g++ 命令来完成，怕是不太现实。&lt;/p&gt;</description>
     </item>
     <item>
       <title>【CMU15-445 Fall2023】Project2 Extendible Hash Index 小结</title>
@@ -2251,9 +2219,9 @@ JSON 格式，描述网络的类型、IPAM 配置、路由等。&lt;/p&gt;
     </item>
     <item>
       <title>【MIT6.S081】Lab5 copy-on-write fork</title>
-      <link>https://kerolt.github.io/posts/%E5%8A%A8%E6%89%8B%E5%AE%9E%E7%8E%B0x/mit6.s081/mit6.s081lab5-copy-on-write-fork/</link>
+      <link>https://kerolt.github.io/posts/mit6.s081/mit6.s081lab5-copy-on-write-fork/</link>
       <pubDate>Tue, 12 Nov 2024 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E5%8A%A8%E6%89%8B%E5%AE%9E%E7%8E%B0x/mit6.s081/mit6.s081lab5-copy-on-write-fork/</guid>
+      <guid>https://kerolt.github.io/posts/mit6.s081/mit6.s081lab5-copy-on-write-fork/</guid>
       <description>&lt;h2 id=&#34;为什么我们需要copy-on-write&#34;&gt;为什么我们需要copy on write&lt;/h2&gt;
 &lt;p&gt;通过xv6的实验指导书，我们可以知道：&lt;/p&gt;
 &lt;p&gt;xv6中的&lt;code&gt;fork()&lt;/code&gt;系统调用将父进程的所有用户空间内存复制到子进程中。如果父进程所使用的页数很大，复制可能需要很长时间，而这样的复制操作经常是没有用的：&lt;code&gt;fork()&lt;/code&gt;之后通常是子进程中的&lt;code&gt;exec()&lt;/code&gt;，这会丢弃复制的内存而不是使用它们。&lt;/p&gt;
@@ -2264,9 +2232,9 @@ JSON 格式，描述网络的类型、IPAM 配置、路由等。&lt;/p&gt;
     </item>
     <item>
       <title>【MIT6.S081】Lab4 trap backtrace</title>
-      <link>https://kerolt.github.io/posts/%E5%8A%A8%E6%89%8B%E5%AE%9E%E7%8E%B0x/mit6.s081/mit6.s081lab4-trap-backtrace/</link>
+      <link>https://kerolt.github.io/posts/mit6.s081/mit6.s081lab4-trap-backtrace/</link>
       <pubDate>Sun, 10 Nov 2024 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E5%8A%A8%E6%89%8B%E5%AE%9E%E7%8E%B0x/mit6.s081/mit6.s081lab4-trap-backtrace/</guid>
+      <guid>https://kerolt.github.io/posts/mit6.s081/mit6.s081lab4-trap-backtrace/</guid>
       <description>&lt;p&gt;backtrace这个lab非常有意思，虽然实现的代码量不多，但是能让我们更好地理解栈、栈帧、指针、gdb的一些知识。&lt;/p&gt;
 &lt;blockquote&gt;
 &lt;p&gt;该实验的代码实现见：&lt;a href=&#34;https://github.com/kerolt/xv6-labs-2023/commit/d1dba8ae4a1a71604e8bb6df5238f8cac1771683&#34;&gt;仓库commit&lt;/a&gt;&lt;/p&gt;
@@ -2274,9 +2242,9 @@ JSON 格式，描述网络的类型、IPAM 配置、路由等。&lt;/p&gt;
     </item>
     <item>
       <title>【MIT6.S081】Lab4 trap alarm</title>
-      <link>https://kerolt.github.io/posts/%E5%8A%A8%E6%89%8B%E5%AE%9E%E7%8E%B0x/mit6.s081/mit6.s081lab4-trap-alarm/</link>
+      <link>https://kerolt.github.io/posts/mit6.s081/mit6.s081lab4-trap-alarm/</link>
       <pubDate>Thu, 07 Nov 2024 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E5%8A%A8%E6%89%8B%E5%AE%9E%E7%8E%B0x/mit6.s081/mit6.s081lab4-trap-alarm/</guid>
+      <guid>https://kerolt.github.io/posts/mit6.s081/mit6.s081lab4-trap-alarm/</guid>
       <description>&lt;p&gt;Alarm综合了该lab中前几个练习的知识点：系统调用、中断、寄存器等，我们需要对trap机制有比较好的认识才能理解。Alarm的任务是需要我们完成一个定时器的实现：&lt;code&gt;sigalarm(interval, handler)&lt;/code&gt;，当调用&lt;code&gt;sigalarm(n, fn)&lt;/code&gt;时，内核会每n个时间间隔（tick）执行fn函数。&lt;/p&gt;
 &lt;blockquote&gt;
 &lt;p&gt;该实验的代码实现见：&lt;a href=&#34;https://github.com/kerolt/xv6-labs-2023/commit/0f70ef7d68ab1273262b8d43a2deaf7345a87698&#34;&gt;仓库commit&lt;/a&gt;&lt;/p&gt;
@@ -2284,17 +2252,17 @@ JSON 格式，描述网络的类型、IPAM 配置、路由等。&lt;/p&gt;
     </item>
     <item>
       <title>【MIT6.S081】Lab3 page tables（上）</title>
-      <link>https://kerolt.github.io/posts/%E5%8A%A8%E6%89%8B%E5%AE%9E%E7%8E%B0x/mit6.s081/mit6.s081lab3-page-tables%E4%B8%8A/</link>
+      <link>https://kerolt.github.io/posts/mit6.s081/mit6.s081lab3-page-tables%E4%B8%8A/</link>
       <pubDate>Tue, 05 Nov 2024 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E5%8A%A8%E6%89%8B%E5%AE%9E%E7%8E%B0x/mit6.s081/mit6.s081lab3-page-tables%E4%B8%8A/</guid>
+      <guid>https://kerolt.github.io/posts/mit6.s081/mit6.s081lab3-page-tables%E4%B8%8A/</guid>
       <description>&lt;h2 id=&#34;前言&#34;&gt;前言&lt;/h2&gt;
 &lt;p&gt;页表是最常用的机制，操作系统通过它为每个进程提供自己的私有地址空间和内存。页表决定了内存地址的含义，以及可以访问物理内存的哪些部分。在本文中，记录了&lt;code&gt;Lab: page tables&lt;/code&gt;的前两个实验：加速系统调用和打印页表。&lt;/p&gt;</description>
     </item>
     <item>
       <title>【MIT6.S081】Lab3 page tables（下）</title>
-      <link>https://kerolt.github.io/posts/%E5%8A%A8%E6%89%8B%E5%AE%9E%E7%8E%B0x/mit6.s081/mit6.s081lab3-page-tables%E4%B8%8B/</link>
+      <link>https://kerolt.github.io/posts/mit6.s081/mit6.s081lab3-page-tables%E4%B8%8B/</link>
       <pubDate>Tue, 05 Nov 2024 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E5%8A%A8%E6%89%8B%E5%AE%9E%E7%8E%B0x/mit6.s081/mit6.s081lab3-page-tables%E4%B8%8B/</guid>
+      <guid>https://kerolt.github.io/posts/mit6.s081/mit6.s081lab3-page-tables%E4%B8%8B/</guid>
       <description>&lt;p&gt;本关的任务为“Detect which pages have been accessed”，需要实现一个新的系统调用&lt;code&gt;pgaccess&lt;/code&gt;，它指出访问了哪些页面被访问了（读、写等）。系统调用需要三个参数：&lt;/p&gt;
 &lt;ol&gt;
 &lt;li&gt;第一个用户页面的起始虚拟地址&lt;/li&gt;
@@ -2307,17 +2275,17 @@ JSON 格式，描述网络的类型、IPAM 配置、路由等。&lt;/p&gt;
     </item>
     <item>
       <title>【MIT6.S081】Lab2 system calls</title>
-      <link>https://kerolt.github.io/posts/%E5%8A%A8%E6%89%8B%E5%AE%9E%E7%8E%B0x/mit6.s081/mit6.s081lab2-system-calls/</link>
+      <link>https://kerolt.github.io/posts/mit6.s081/mit6.s081lab2-system-calls/</link>
       <pubDate>Mon, 28 Oct 2024 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E5%8A%A8%E6%89%8B%E5%AE%9E%E7%8E%B0x/mit6.s081/mit6.s081lab2-system-calls/</guid>
+      <guid>https://kerolt.github.io/posts/mit6.s081/mit6.s081lab2-system-calls/</guid>
       <description>&lt;h2 id=&#34;前言&#34;&gt;前言&lt;/h2&gt;
 &lt;p&gt;这个lab开始我们就正式进入了xv6的世界了，这一次我们可以了解到内核中系统调用的注册和运行原理，这可以说是之后lab的一个基石。&lt;/p&gt;</description>
     </item>
     <item>
       <title>【MIT6.S081】Lab1 utilities</title>
-      <link>https://kerolt.github.io/posts/%E5%8A%A8%E6%89%8B%E5%AE%9E%E7%8E%B0x/mit6.s081/mit6.s081lab1-utilities/</link>
+      <link>https://kerolt.github.io/posts/mit6.s081/mit6.s081lab1-utilities/</link>
       <pubDate>Sun, 27 Oct 2024 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E5%8A%A8%E6%89%8B%E5%AE%9E%E7%8E%B0x/mit6.s081/mit6.s081lab1-utilities/</guid>
+      <guid>https://kerolt.github.io/posts/mit6.s081/mit6.s081lab1-utilities/</guid>
       <description>&lt;h2 id=&#34;前言&#34;&gt;前言&lt;/h2&gt;
 &lt;p&gt;该Lab通过实现几个命令来熟悉 xv6 及其系统调用&lt;/p&gt;
 &lt;ul&gt;
@@ -2352,9 +2320,9 @@ JSON 格式，描述网络的类型、IPAM 配置、路由等。&lt;/p&gt;
     </item>
     <item>
       <title>【动手写协程库 5】常用IO函数的HOOK功能</title>
-      <link>https://kerolt.github.io/posts/%E5%8A%A8%E6%89%8B%E5%AE%9E%E7%8E%B0x/%E5%8A%A8%E6%89%8B%E5%86%99%E5%8D%8F%E7%A8%8B%E5%BA%93-5%E5%B8%B8%E7%94%A8io%E5%87%BD%E6%95%B0%E7%9A%84hook%E5%8A%9F%E8%83%BD/</link>
+      <link>https://kerolt.github.io/posts/dev-null/%E5%8A%A8%E6%89%8B%E5%86%99%E5%8D%8F%E7%A8%8B%E5%BA%93-5%E5%B8%B8%E7%94%A8io%E5%87%BD%E6%95%B0%E7%9A%84hook%E5%8A%9F%E8%83%BD/</link>
       <pubDate>Mon, 30 Sep 2024 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E5%8A%A8%E6%89%8B%E5%AE%9E%E7%8E%B0x/%E5%8A%A8%E6%89%8B%E5%86%99%E5%8D%8F%E7%A8%8B%E5%BA%93-5%E5%B8%B8%E7%94%A8io%E5%87%BD%E6%95%B0%E7%9A%84hook%E5%8A%9F%E8%83%BD/</guid>
+      <guid>https://kerolt.github.io/posts/dev-null/%E5%8A%A8%E6%89%8B%E5%86%99%E5%8D%8F%E7%A8%8B%E5%BA%93-5%E5%B8%B8%E7%94%A8io%E5%87%BD%E6%95%B0%E7%9A%84hook%E5%8A%9F%E8%83%BD/</guid>
       <description>&lt;blockquote&gt;
 &lt;p&gt;【动手写协程库】系列笔记是学习sylar的协程库时的记录，参考了&lt;a href=&#34;https://www.midlane.top/wiki/pages/viewpage.action?pageId=10060952&#34;&gt;从零开始重写sylar C++高性能分布式服务器框架&lt;/a&gt;和代码随想录中的&lt;a href=&#34;https://www.programmercarl.com/other/project_coroutine.html#%E4%B8%8B%E8%BD%BD%E6%96%B9%E5%BC%8F&#34;&gt;文档&lt;/a&gt;。文章并不是对所有代码的详细解释，而是为了自己理解一些片段所做的笔记。&lt;/p&gt;
 &lt;p&gt;hook函数的具体定义实现可以在这里查看：&lt;a href=&#34;https://github.com/kerolt/coroutine-lib/blob/master/src/hook.cpp&#34;&gt;Github: src/hook.cpp&lt;/a&gt;&lt;/p&gt;
@@ -2364,9 +2332,9 @@ JSON 格式，描述网络的类型、IPAM 配置、路由等。&lt;/p&gt;
     </item>
     <item>
       <title>【动手写协程库 4】IO协程调度器</title>
-      <link>https://kerolt.github.io/posts/%E5%8A%A8%E6%89%8B%E5%AE%9E%E7%8E%B0x/%E5%8A%A8%E6%89%8B%E5%86%99%E5%8D%8F%E7%A8%8B%E5%BA%93-4io%E5%8D%8F%E7%A8%8B%E8%B0%83%E5%BA%A6%E5%99%A8/</link>
+      <link>https://kerolt.github.io/posts/dev-null/%E5%8A%A8%E6%89%8B%E5%86%99%E5%8D%8F%E7%A8%8B%E5%BA%93-4io%E5%8D%8F%E7%A8%8B%E8%B0%83%E5%BA%A6%E5%99%A8/</link>
       <pubDate>Sun, 29 Sep 2024 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E5%8A%A8%E6%89%8B%E5%AE%9E%E7%8E%B0x/%E5%8A%A8%E6%89%8B%E5%86%99%E5%8D%8F%E7%A8%8B%E5%BA%93-4io%E5%8D%8F%E7%A8%8B%E8%B0%83%E5%BA%A6%E5%99%A8/</guid>
+      <guid>https://kerolt.github.io/posts/dev-null/%E5%8A%A8%E6%89%8B%E5%86%99%E5%8D%8F%E7%A8%8B%E5%BA%93-4io%E5%8D%8F%E7%A8%8B%E8%B0%83%E5%BA%A6%E5%99%A8/</guid>
       <description>&lt;blockquote&gt;
 &lt;p&gt;【动手写协程库】系列笔记是学习sylar的协程库时的记录，参考了&lt;a href=&#34;https://www.midlane.top/wiki/pages/viewpage.action?pageId=10060952&#34;&gt;从零开始重写sylar C++高性能分布式服务器框架&lt;/a&gt;和代码随想录中的&lt;a href=&#34;https://www.programmercarl.com/other/project_coroutine.html#%E4%B8%8B%E8%BD%BD%E6%96%B9%E5%BC%8F&#34;&gt;文档&lt;/a&gt;。文章并不是对所有代码的详细解释，而是为了自己理解一些片段所做的笔记。&lt;/p&gt;
 &lt;p&gt;&lt;code&gt;IOManager&lt;/code&gt;类中具体定义实现可以在这里查看：&lt;a href=&#34;https://github.com/kerolt/coroutine-lib/blob/master/src/iomanager.cpp&#34;&gt;Github: src/iomanager.cpp&lt;/a&gt;&lt;/p&gt;
@@ -2376,9 +2344,9 @@ JSON 格式，描述网络的类型、IPAM 配置、路由等。&lt;/p&gt;
     </item>
     <item>
       <title>【动手写协程库 3】定时器</title>
-      <link>https://kerolt.github.io/posts/%E5%8A%A8%E6%89%8B%E5%AE%9E%E7%8E%B0x/%E5%8A%A8%E6%89%8B%E5%86%99%E5%8D%8F%E7%A8%8B%E5%BA%93-3%E5%AE%9A%E6%97%B6%E5%99%A8/</link>
+      <link>https://kerolt.github.io/posts/dev-null/%E5%8A%A8%E6%89%8B%E5%86%99%E5%8D%8F%E7%A8%8B%E5%BA%93-3%E5%AE%9A%E6%97%B6%E5%99%A8/</link>
       <pubDate>Sat, 28 Sep 2024 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E5%8A%A8%E6%89%8B%E5%AE%9E%E7%8E%B0x/%E5%8A%A8%E6%89%8B%E5%86%99%E5%8D%8F%E7%A8%8B%E5%BA%93-3%E5%AE%9A%E6%97%B6%E5%99%A8/</guid>
+      <guid>https://kerolt.github.io/posts/dev-null/%E5%8A%A8%E6%89%8B%E5%86%99%E5%8D%8F%E7%A8%8B%E5%BA%93-3%E5%AE%9A%E6%97%B6%E5%99%A8/</guid>
       <description>&lt;blockquote&gt;
 &lt;p&gt;【动手写协程库】系列笔记是学习sylar的协程库时的记录，参考了&lt;a href=&#34;https://www.midlane.top/wiki/pages/viewpage.action?pageId=10060952&#34;&gt;从零开始重写sylar C++高性能分布式服务器框架&lt;/a&gt;和代码随想录中的&lt;a href=&#34;https://www.programmercarl.com/other/project_coroutine.html#%E4%B8%8B%E8%BD%BD%E6%96%B9%E5%BC%8F&#34;&gt;文档&lt;/a&gt;。文章并不是对所有代码的详细解释，而是为了自己理解一些片段所做的笔记。&lt;/p&gt;
 &lt;p&gt;&lt;code&gt;TimerManager&lt;/code&gt;类中具体定义实现可以在这里查看：&lt;a href=&#34;https://github.com/kerolt/coroutine-lib/blob/master/src/timer.cpp&#34;&gt;Github: src/timer.cpp&lt;/a&gt;&lt;/p&gt;
@@ -2401,9 +2369,9 @@ JSON 格式，描述网络的类型、IPAM 配置、路由等。&lt;/p&gt;
     </item>
     <item>
       <title>【动手写协程库 2】协程调度器</title>
-      <link>https://kerolt.github.io/posts/%E5%8A%A8%E6%89%8B%E5%AE%9E%E7%8E%B0x/%E5%8A%A8%E6%89%8B%E5%86%99%E5%8D%8F%E7%A8%8B%E5%BA%93-2%E5%8D%8F%E7%A8%8B%E8%B0%83%E5%BA%A6%E5%99%A8/</link>
+      <link>https://kerolt.github.io/posts/dev-null/%E5%8A%A8%E6%89%8B%E5%86%99%E5%8D%8F%E7%A8%8B%E5%BA%93-2%E5%8D%8F%E7%A8%8B%E8%B0%83%E5%BA%A6%E5%99%A8/</link>
       <pubDate>Wed, 11 Sep 2024 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E5%8A%A8%E6%89%8B%E5%AE%9E%E7%8E%B0x/%E5%8A%A8%E6%89%8B%E5%86%99%E5%8D%8F%E7%A8%8B%E5%BA%93-2%E5%8D%8F%E7%A8%8B%E8%B0%83%E5%BA%A6%E5%99%A8/</guid>
+      <guid>https://kerolt.github.io/posts/dev-null/%E5%8A%A8%E6%89%8B%E5%86%99%E5%8D%8F%E7%A8%8B%E5%BA%93-2%E5%8D%8F%E7%A8%8B%E8%B0%83%E5%BA%A6%E5%99%A8/</guid>
       <description>&lt;blockquote&gt;
 &lt;p&gt;【动手写协程库】系列笔记是学习sylar的协程库时的记录，参考了&lt;a href=&#34;https://www.midlane.top/wiki/pages/viewpage.action?pageId=10060952&#34;&gt;从零开始重写sylar C++高性能分布式服务器框架&lt;/a&gt;和代码随想录中的&lt;a href=&#34;https://www.programmercarl.com/other/project_coroutine.html#%E4%B8%8B%E8%BD%BD%E6%96%B9%E5%BC%8F&#34;&gt;文档&lt;/a&gt;。文章并不是对所有代码的详细解释，而是为了自己理解一些片段所做的笔记。&lt;/p&gt;
 &lt;p&gt;&lt;code&gt;Scheduler&lt;/code&gt;类中其他函数的定义可以在这里查看：&lt;a href=&#34;https://github.com/kerolt/coroutine-lib/blob/master/src/scheduler.cpp&#34;&gt;Github: src/scheduler.cpp&lt;/a&gt;&lt;/p&gt;
@@ -2413,9 +2381,9 @@ JSON 格式，描述网络的类型、IPAM 配置、路由等。&lt;/p&gt;
     </item>
     <item>
       <title>【动手写协程库 1】协程定义</title>
-      <link>https://kerolt.github.io/posts/%E5%8A%A8%E6%89%8B%E5%AE%9E%E7%8E%B0x/%E5%8A%A8%E6%89%8B%E5%86%99%E5%8D%8F%E7%A8%8B%E5%BA%93-1%E5%8D%8F%E7%A8%8B%E5%AE%9A%E4%B9%89/</link>
+      <link>https://kerolt.github.io/posts/dev-null/%E5%8A%A8%E6%89%8B%E5%86%99%E5%8D%8F%E7%A8%8B%E5%BA%93-1%E5%8D%8F%E7%A8%8B%E5%AE%9A%E4%B9%89/</link>
       <pubDate>Tue, 10 Sep 2024 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E5%8A%A8%E6%89%8B%E5%AE%9E%E7%8E%B0x/%E5%8A%A8%E6%89%8B%E5%86%99%E5%8D%8F%E7%A8%8B%E5%BA%93-1%E5%8D%8F%E7%A8%8B%E5%AE%9A%E4%B9%89/</guid>
+      <guid>https://kerolt.github.io/posts/dev-null/%E5%8A%A8%E6%89%8B%E5%86%99%E5%8D%8F%E7%A8%8B%E5%BA%93-1%E5%8D%8F%E7%A8%8B%E5%AE%9A%E4%B9%89/</guid>
       <description>&lt;blockquote&gt;
 &lt;p&gt;【动手写协程库】系列笔记是学习sylar的协程库时的记录，参考了&lt;a href=&#34;https://www.midlane.top/wiki/pages/viewpage.action?pageId=10060952&#34;&gt;从零开始重写sylar C++高性能分布式服务器框架&lt;/a&gt;和代码随想录中的&lt;a href=&#34;https://www.programmercarl.com/other/project_coroutine.html#%E4%B8%8B%E8%BD%BD%E6%96%B9%E5%BC%8F&#34;&gt;文档&lt;/a&gt;。文章并不是对所有代码的详细解释，而是为了自己理解一些片段所做的笔记。&lt;/p&gt;
 &lt;p&gt;&lt;code&gt;Coroutine&lt;/code&gt;类中其他函数的定义可以在这里查看：&lt;a href=&#34;https://github.com/kerolt/coroutine-lib/blob/master/src/coroutine.cpp&#34;&gt;Github: src/coroutine.cpp&lt;/a&gt;&lt;/p&gt;
@@ -2425,9 +2393,9 @@ JSON 格式，描述网络的类型、IPAM 配置、路由等。&lt;/p&gt;
     </item>
     <item>
       <title>解决X11下窗口拖动撕裂的一个方法</title>
-      <link>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/%E8%A7%A3%E5%86%B3x11%E4%B8%8B%E7%AA%97%E5%8F%A3%E6%8B%96%E5%8A%A8%E6%92%95%E8%A3%82%E7%9A%84%E4%B8%80%E4%B8%AA%E6%96%B9%E6%B3%95/</link>
+      <link>https://kerolt.github.io/posts/dev-null/%E8%A7%A3%E5%86%B3x11%E4%B8%8B%E7%AA%97%E5%8F%A3%E6%8B%96%E5%8A%A8%E6%92%95%E8%A3%82%E7%9A%84%E4%B8%80%E4%B8%AA%E6%96%B9%E6%B3%95/</link>
       <pubDate>Tue, 03 Sep 2024 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/%E8%A7%A3%E5%86%B3x11%E4%B8%8B%E7%AA%97%E5%8F%A3%E6%8B%96%E5%8A%A8%E6%92%95%E8%A3%82%E7%9A%84%E4%B8%80%E4%B8%AA%E6%96%B9%E6%B3%95/</guid>
+      <guid>https://kerolt.github.io/posts/dev-null/%E8%A7%A3%E5%86%B3x11%E4%B8%8B%E7%AA%97%E5%8F%A3%E6%8B%96%E5%8A%A8%E6%92%95%E8%A3%82%E7%9A%84%E4%B8%80%E4%B8%AA%E6%96%B9%E6%B3%95/</guid>
       <description>&lt;blockquote&gt;
 &lt;p&gt;Debian 系 Linux 安装 N 卡驱动参考这篇 &lt;a href=&#34;https://www.if-not-true-then-false.com/2021/debian-ubuntu-linux-mint-nvidia-guide/&#34;&gt;博客&lt;/a&gt;&lt;/p&gt;
 &lt;/blockquote&gt;
@@ -2521,9 +2489,9 @@ JSON 格式，描述网络的类型、IPAM 配置、路由等。&lt;/p&gt;
     </item>
     <item>
       <title>VMware17.5.2启动踩坑</title>
-      <link>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/vmware17.5.2%E5%90%AF%E5%8A%A8%E8%B8%A9%E5%9D%91/</link>
+      <link>https://kerolt.github.io/posts/dev-null/vmware17.5.2%E5%90%AF%E5%8A%A8%E8%B8%A9%E5%9D%91/</link>
       <pubDate>Mon, 27 May 2024 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/vmware17.5.2%E5%90%AF%E5%8A%A8%E8%B8%A9%E5%9D%91/</guid>
+      <guid>https://kerolt.github.io/posts/dev-null/vmware17.5.2%E5%90%AF%E5%8A%A8%E8%B8%A9%E5%9D%91/</guid>
       <description>&lt;p&gt;最近听说 VMware17.5.2 个人版可以免费使用了，故在 Linux 下安装用用，顺便记录一下踩的坑。&lt;/p&gt;</description>
     </item>
     <item>

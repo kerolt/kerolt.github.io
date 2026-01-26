@@ -15,9 +15,9 @@
     <atom:link href="https://kerolt.github.io/tags/nginx/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>【Nginx】location与proxy_pass配置中的斜杠差异</title>
-      <link>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/nginxlocation%E4%B8%8Eproxy_pass%E9%85%8D%E7%BD%AE%E4%B8%AD%E7%9A%84%E6%96%9C%E6%9D%A0%E5%B7%AE%E5%BC%82/</link>
+      <link>https://kerolt.github.io/posts/dev-null/nginxlocation%E4%B8%8Eproxy_pass%E9%85%8D%E7%BD%AE%E4%B8%AD%E7%9A%84%E6%96%9C%E6%9D%A0%E5%B7%AE%E5%BC%82/</link>
       <pubDate>Mon, 05 Jan 2026 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E5%AD%A6%E4%B9%A0%E9%9A%8F%E7%AC%94/nginxlocation%E4%B8%8Eproxy_pass%E9%85%8D%E7%BD%AE%E4%B8%AD%E7%9A%84%E6%96%9C%E6%9D%A0%E5%B7%AE%E5%BC%82/</guid>
+      <guid>https://kerolt.github.io/posts/dev-null/nginxlocation%E4%B8%8Eproxy_pass%E9%85%8D%E7%BD%AE%E4%B8%AD%E7%9A%84%E6%96%9C%E6%9D%A0%E5%B7%AE%E5%BC%82/</guid>
       <description>&lt;p&gt;Nginx 作为反向代理服务器，需要精确匹配客户端请求路径，并将请求转发到后端服务。在这个过程中：&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;strong&gt;&lt;code&gt;location&lt;/code&gt; 指令&lt;/strong&gt;：决定哪些请求会被当前配置块处理&lt;/li&gt;
