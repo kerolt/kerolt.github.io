@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>性能分析 on Kerolt&#39;s Blog</title>
+    <link>https://kerolt.github.io/tags/%E6%80%A7%E8%83%BD%E5%88%86%E6%9E%90/</link>
+    <description>Recent content in 性能分析 on Kerolt&#39;s Blog</description>
+    <image>
+      <title>Kerolt&#39;s Blog</title>
+      <url>https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</url>
+      <link>https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</link>
+    </image>
+    <generator>Hugo -- 0.155.0</generator>
+    <language>en</language>
+    <lastBuildDate>Thu, 29 Jan 2026 00:00:00 +0000</lastBuildDate>
+    <atom:link href="https://kerolt.github.io/tags/%E6%80%A7%E8%83%BD%E5%88%86%E6%9E%90/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>利用eBPF与perf_event构建一个profiling工具</title>
+      <link>https://kerolt.github.io/posts/ebpf/%E5%88%A9%E7%94%A8ebpf%E4%B8%8Eperf_event%E6%9E%84%E5%BB%BA%E4%B8%80%E4%B8%AAprofiling%E5%B7%A5%E5%85%B7/</link>
+      <pubDate>Thu, 29 Jan 2026 00:00:00 +0000</pubDate>
+      <guid>https://kerolt.github.io/posts/ebpf/%E5%88%A9%E7%94%A8ebpf%E4%B8%8Eperf_event%E6%9E%84%E5%BB%BA%E4%B8%80%E4%B8%AAprofiling%E5%B7%A5%E5%85%B7/</guid>
+      <description>&lt;h2 id=&#34;引言&#34;&gt;引言&lt;/h2&gt;
+&lt;p&gt;在性能分析和系统调优中，了解应用程序在运行时的调用栈信息至关重要。在 &lt;a href=&#34;https://eunomia.dev/zh/tutorials/12-profile/&#34;&gt;【eBPF 入门实践教程十二：使用 eBPF 程序 profile 进行性能分析】&lt;/a&gt; 这篇文章中，其利用 Rust + eBPF 构建了一个 profiler 工具，抱着学习的目的，我使用 C++ 实现了相同的功能，并将所学知识总结成本文。&lt;/p&gt;
+&lt;h2 id=&#34;perf_event_open-机制解析&#34;&gt;perf_event_open 机制解析&lt;/h2&gt;
+&lt;p&gt;
+&lt;div class=&#34;post-img-view&#34;&gt;
+  &lt;a data-fancybox=&#34;gallery&#34; href=&#34;https://plantegg.github.io/images/951413iMgBlog/5edebc74-f8ac-483c-8bcd-24e09abfd06b.png&#34;&gt;
+    &lt;img src=&#34;https://plantegg.github.io/images/951413iMgBlog/5edebc74-f8ac-483c-8bcd-24e09abfd06b.png&#34; alt=&#34;&#34;  /&gt;
+  &lt;/a&gt;
+&lt;/div&gt;
+&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;perf 原理图：https://plantegg.github.io/2021/05/16/Perf_IPC%E4%BB%A5%E5%8F%8ACPU%E5%88%A9%E7%94%A8%E7%8E%87/&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;code&gt;perf_event_open&lt;/code&gt; 是 Linux 内核提供的性能监控接口，允许用户空间程序创建性能事件计数器。当用户态程序调用 &lt;code&gt;sys_perf_event_open&lt;/code&gt; 系统调用时，内核会创建相应的性能监控实例。以下是基本的使用方式：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-c&#34; data-lang=&#34;c&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#099&#34;&gt;#include&lt;/span&gt; &lt;span style=&#34;color:#099&#34;&gt;&amp;lt;linux/perf_event.h&amp;gt;&lt;/span&gt;&lt;span style=&#34;color:#099&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#099&#34;&gt;#include&lt;/span&gt; &lt;span style=&#34;color:#099&#34;&gt;&amp;lt;sys/syscall.h&amp;gt;&lt;/span&gt;&lt;span style=&#34;color:#099&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#099&#34;&gt;#include&lt;/span&gt; &lt;span style=&#34;color:#099&#34;&gt;&amp;lt;unistd.h&amp;gt;&lt;/span&gt;&lt;span style=&#34;color:#099&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#078;font-weight:bold&#34;&gt;int64_t&lt;/span&gt; &lt;span style=&#34;color:#c0f&#34;&gt;perf_event_open&lt;/span&gt;(&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;struct&lt;/span&gt; perf_event_attr&lt;span style=&#34;color:#555&#34;&gt;*&lt;/span&gt; hw_event, &lt;span style=&#34;color:#078;font-weight:bold&#34;&gt;pid_t&lt;/span&gt; pid, &lt;span style=&#34;color:#078;font-weight:bold&#34;&gt;int&lt;/span&gt; cpu,
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;                     &lt;span style=&#34;color:#078;font-weight:bold&#34;&gt;int&lt;/span&gt; group_fd, &lt;span style=&#34;color:#078;font-weight:bold&#34;&gt;unsigned&lt;/span&gt; &lt;span style=&#34;color:#078;font-weight:bold&#34;&gt;long&lt;/span&gt; flags) {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color:#c0f&#34;&gt;syscall&lt;/span&gt;(SYS_perf_event_open, hw_event, pid, cpu, group_fd, flags);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id=&#34;以文件描述符为中心的监控单元&#34;&gt;以文件描述符为中心的监控单元&lt;/h3&gt;
+&lt;p&gt;Linux 遵循 &amp;quot; 一切皆文件 &amp;quot; 的设计哲学，&lt;code&gt;perf_event_open&lt;/code&gt; 也不例外。每次调用该函数，内核都会创建一个独立的性能监控实例，并返回一个文件描述符。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;核心概念&lt;/strong&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;1 fd = 1 Event&lt;/strong&gt;：每个文件描述符对应一个具体的监控任务，例如 &amp;quot; 监控 CPU 0 的指令执行数 &amp;quot;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;事件分组 (Group)&lt;/strong&gt;：多个文件描述符可以绑定在一起形成事件组&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;分组的重要性&lt;/strong&gt;：
+假设需要计算 &amp;quot; 每条指令的缓存未命中率 &amp;ldquo;，需要同时监控 &amp;quot; 指令数 &amp;quot; 和 &amp;quot; 缓存未命中数 &amp;ldquo;。将它们放入同一事件组可以确保：&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

@@ -9,7 +9,7 @@
       <url>https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</url>
       <link>https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</link>
     </image>
-    <generator>Hugo -- 0.154.5</generator>
+    <generator>Hugo -- 0.155.0</generator>
     <language>en</language>
     <lastBuildDate>Sun, 22 Jun 2025 00:00:00 +0000</lastBuildDate>
     <atom:link href="https://kerolt.github.io/tags/cilium/index.xml" rel="self" type="application/rss+xml" />
@@ -64,7 +64,7 @@
 &lt;p&gt;这种机制为我们提供了​&lt;strong&gt;​零侵入式​&lt;/strong&gt;​的内核行为洞察能力，特别适用于​&lt;strong&gt;​实时监控​&lt;/strong&gt;​、​&lt;strong&gt;​性能分析​&lt;/strong&gt;​和​&lt;strong&gt;​故障排查​&lt;/strong&gt;​等场景。&lt;/p&gt;
 &lt;h2 id=&#34;do_unlinkat-的作用&#34;&gt;do_unlinkat 的作用&lt;/h2&gt;
 &lt;p&gt;&lt;code&gt;do_unlinkat&lt;/code&gt; 是 Linux 内核中的一个内部函数，它的作用是&lt;strong&gt;执行文件或目录的删除操作&lt;/strong&gt;。其在内核源码中的定义如下：&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-c&#34; data-lang=&#34;c&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;static&lt;/span&gt; &lt;span style=&#34;color:#078;font-weight:bold&#34;&gt;int&lt;/span&gt; &lt;span style=&#34;color:#c0f&#34;&gt;do_unlinkat&lt;/span&gt;(&lt;span style=&#34;color:#078;font-weight:bold&#34;&gt;int&lt;/span&gt; dfd, &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;struct&lt;/span&gt; filename &lt;span style=&#34;color:#555&#34;&gt;*&lt;/span&gt;name) {
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-c&#34; data-lang=&#34;c&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;static&lt;/span&gt; &lt;span style=&#34;color:#078;font-weight:bold&#34;&gt;int&lt;/span&gt; &lt;span style=&#34;color:#c0f&#34;&gt;do_unlinkat&lt;/span&gt;(&lt;span style=&#34;color:#078;font-weight:bold&#34;&gt;int&lt;/span&gt; dfd, &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;struct&lt;/span&gt; filename &lt;span style=&#34;color:#555&#34;&gt;*&lt;/span&gt;name) {
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	...
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;}
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;ul&gt;
@@ -80,7 +80,7 @@
 &lt;li&gt;维护困难：需要针对​&lt;strong&gt;​每个内核版本​&lt;/strong&gt;​进行适配&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;&lt;code&gt;vmlinux.h&lt;/code&gt; 利用内核的​&lt;strong&gt;​BTF（BPF Type Format）​&lt;/strong&gt;​ 信息生成与当前运行内核完全匹配的类型定义：&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-sh&#34; data-lang=&#34;sh&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;bpftool btf dump file /sys/kernel/btf/vmlinux format c &amp;gt; vmlinux.h
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-sh&#34; data-lang=&#34;sh&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;bpftool btf dump file /sys/kernel/btf/vmlinux format c &amp;gt; vmlinux.h
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h2 id=&#34;内核态程序-kprobe_unlinkbpfc&#34;&gt;内核态程序 kprobe_unlink.bpf.c&lt;/h2&gt;
 &lt;p&gt;为 &lt;code&gt;do_unlinkat&lt;/code&gt; 函数同时设置入口探针和返回探针：&lt;/p&gt;</description>
     </item>

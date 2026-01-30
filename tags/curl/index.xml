@@ -9,7 +9,7 @@
       <url>https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</url>
       <link>https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</link>
     </image>
-    <generator>Hugo -- 0.154.5</generator>
+    <generator>Hugo -- 0.155.0</generator>
     <language>en</language>
     <lastBuildDate>Tue, 01 Jul 2025 00:00:00 +0000</lastBuildDate>
     <atom:link href="https://kerolt.github.io/tags/curl/index.xml" rel="self" type="application/rss+xml" />
@@ -20,8 +20,8 @@
       <guid>https://kerolt.github.io/posts/dev-null/curl%E4%BD%BF%E7%94%A8/</guid>
       <description>&lt;p&gt;curl 是一个强大的命令行工具，用于传输数据，支持多种协议（HTTP、HTTPS、FTP 等）。以下是 curl 的基本使用方法和常见示例。&lt;/p&gt;
 &lt;h2 id=&#34;基本语法&#34;&gt;基本语法&lt;/h2&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;curl [options] [URL...]
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h2 id=&#34;常用选项&#34;&gt;常用选项&lt;/h2&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;curl [options] [URL...]
+&lt;/code&gt;&lt;/pre&gt;&lt;h2 id=&#34;常用选项&#34;&gt;常用选项&lt;/h2&gt;
 &lt;table&gt;
   &lt;thead&gt;
       &lt;tr&gt;
@@ -94,54 +94,54 @@
 &lt;/table&gt;
 &lt;h2 id=&#34;常见用法示例&#34;&gt;常见用法示例&lt;/h2&gt;
 &lt;h3 id=&#34;1-发送-get-请求&#34;&gt;1. 发送 GET 请求&lt;/h3&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;curl https://example.com
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id=&#34;2-发送-post-请求&#34;&gt;2. 发送 POST 请求&lt;/h3&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;curl -X POST https://example.com/api -d &amp;#39;name=value&amp;#39;
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id=&#34;3-发送-json-数据&#34;&gt;3. 发送 JSON 数据&lt;/h3&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;curl -X POST https://example.com/api \
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  -H &amp;#34;Content-Type: application/json&amp;#34; \
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  -d &amp;#39;{&amp;#34;key1&amp;#34;:&amp;#34;value1&amp;#34;, &amp;#34;key2&amp;#34;:&amp;#34;value2&amp;#34;}&amp;#39;
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id=&#34;4-发送表单数据&#34;&gt;4. 发送表单数据&lt;/h3&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;curl -X POST https://example.com/form \
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  -d &amp;#39;username=admin&amp;#39; \
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  -d &amp;#39;password=123456&amp;#39;
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id=&#34;5-上传文件&#34;&gt;5. 上传文件&lt;/h3&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-gdscript3&#34; data-lang=&#34;gdscript3&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;curl &lt;span style=&#34;color:#555&#34;&gt;-&lt;/span&gt;X POST https:&lt;span style=&#34;color:#555&#34;&gt;//&lt;/span&gt;example&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;com&lt;span style=&#34;color:#555&#34;&gt;/&lt;/span&gt;upload \
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#555&#34;&gt;-&lt;/span&gt;F &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;file=@/path/to/file.txt&amp;#34;&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id=&#34;6-设置请求头&#34;&gt;6. 设置请求头&lt;/h3&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;curl -H &amp;#34;Authorization: Bearer token&amp;#34; \
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  -H &amp;#34;Content-Type: application/json&amp;#34; \
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  https://example.com/api
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id=&#34;7-下载文件&#34;&gt;7. 下载文件&lt;/h3&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;curl -O https://example.com/file.zip
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id=&#34;8-跟随重定向&#34;&gt;8. 跟随重定向&lt;/h3&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;curl -L https://example.com/redirect
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id=&#34;9-使用基本认证&#34;&gt;9. 使用基本认证&lt;/h3&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;curl -u username:password https://example.com
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id=&#34;10-保存-cookie-并发送&#34;&gt;10. 保存 cookie 并发送&lt;/h3&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;# 保存 cookie
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;curl -c cookies.txt https://example.com/login -d &amp;#34;user=name&amp;amp;pass=123&amp;#34;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;# 使用 cookie
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;curl -b cookies.txt https://example.com/dashboard
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id=&#34;11-测试-api-响应时间&#34;&gt;11. 测试 API 响应时间&lt;/h3&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;curl -o /dev/null -s -w &amp;#39;Total: %{time_total}s\n&amp;#39; https://example.com
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id=&#34;12-限制下载速度&#34;&gt;12. 限制下载速度&lt;/h3&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;curl --limit-rate 100K -O https://example.com/largefile.zip
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h2 id=&#34;高级用法&#34;&gt;高级用法&lt;/h2&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;curl https://example.com
+&lt;/code&gt;&lt;/pre&gt;&lt;h3 id=&#34;2-发送-post-请求&#34;&gt;2. 发送 POST 请求&lt;/h3&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;curl -X POST https://example.com/api -d &amp;#39;name=value&amp;#39;
+&lt;/code&gt;&lt;/pre&gt;&lt;h3 id=&#34;3-发送-json-数据&#34;&gt;3. 发送 JSON 数据&lt;/h3&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;curl -X POST https://example.com/api \
+  -H &amp;#34;Content-Type: application/json&amp;#34; \
+  -d &amp;#39;{&amp;#34;key1&amp;#34;:&amp;#34;value1&amp;#34;, &amp;#34;key2&amp;#34;:&amp;#34;value2&amp;#34;}&amp;#39;
+&lt;/code&gt;&lt;/pre&gt;&lt;h3 id=&#34;4-发送表单数据&#34;&gt;4. 发送表单数据&lt;/h3&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;curl -X POST https://example.com/form \
+  -d &amp;#39;username=admin&amp;#39; \
+  -d &amp;#39;password=123456&amp;#39;
+&lt;/code&gt;&lt;/pre&gt;&lt;h3 id=&#34;5-上传文件&#34;&gt;5. 上传文件&lt;/h3&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;curl -X POST https://example.com/upload \
+  -F &amp;#34;file=@/path/to/file.txt&amp;#34;
+&lt;/code&gt;&lt;/pre&gt;&lt;h3 id=&#34;6-设置请求头&#34;&gt;6. 设置请求头&lt;/h3&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;curl -H &amp;#34;Authorization: Bearer token&amp;#34; \
+  -H &amp;#34;Content-Type: application/json&amp;#34; \
+  https://example.com/api
+&lt;/code&gt;&lt;/pre&gt;&lt;h3 id=&#34;7-下载文件&#34;&gt;7. 下载文件&lt;/h3&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;curl -O https://example.com/file.zip
+&lt;/code&gt;&lt;/pre&gt;&lt;h3 id=&#34;8-跟随重定向&#34;&gt;8. 跟随重定向&lt;/h3&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;curl -L https://example.com/redirect
+&lt;/code&gt;&lt;/pre&gt;&lt;h3 id=&#34;9-使用基本认证&#34;&gt;9. 使用基本认证&lt;/h3&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;curl -u username:password https://example.com
+&lt;/code&gt;&lt;/pre&gt;&lt;h3 id=&#34;10-保存-cookie-并发送&#34;&gt;10. 保存 cookie 并发送&lt;/h3&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;# 保存 cookie
+curl -c cookies.txt https://example.com/login -d &amp;#34;user=name&amp;amp;pass=123&amp;#34;
+
+# 使用 cookie
+curl -b cookies.txt https://example.com/dashboard
+&lt;/code&gt;&lt;/pre&gt;&lt;h3 id=&#34;11-测试-api-响应时间&#34;&gt;11. 测试 API 响应时间&lt;/h3&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;curl -o /dev/null -s -w &amp;#39;Total: %{time_total}s\n&amp;#39; https://example.com
+&lt;/code&gt;&lt;/pre&gt;&lt;h3 id=&#34;12-限制下载速度&#34;&gt;12. 限制下载速度&lt;/h3&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;curl --limit-rate 100K -O https://example.com/largefile.zip
+&lt;/code&gt;&lt;/pre&gt;&lt;h2 id=&#34;高级用法&#34;&gt;高级用法&lt;/h2&gt;
 &lt;h3 id=&#34;发送多部分请求&#34;&gt;发送多部分请求&lt;/h3&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-gdscript3&#34; data-lang=&#34;gdscript3&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;curl &lt;span style=&#34;color:#555&#34;&gt;-&lt;/span&gt;X POST https:&lt;span style=&#34;color:#555&#34;&gt;//&lt;/span&gt;example&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;com&lt;span style=&#34;color:#555&#34;&gt;/&lt;/span&gt;upload \
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#555&#34;&gt;-&lt;/span&gt;F &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;file=@image.jpg&amp;#34;&lt;/span&gt; \
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#555&#34;&gt;-&lt;/span&gt;F &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;description=My image&amp;#34;&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id=&#34;使用代理&#34;&gt;使用代理&lt;/h3&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;curl -x http://proxy.example.com:8080 https://example.com
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id=&#34;调试请求&#34;&gt;调试请求&lt;/h3&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;curl -v https://example.com
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id=&#34;只获取响应头&#34;&gt;只获取响应头&lt;/h3&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;curl -I https://example.com
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id=&#34;使用自定义-user-agent&#34;&gt;使用自定义 User-Agent&lt;/h3&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;curl -A &amp;#34;Mozilla/5.0 (Windows NT 10.0; Win64; x64)&amp;#34; https://example.com
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h2 id=&#34;注意事项&#34;&gt;注意事项&lt;/h2&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;curl -X POST https://example.com/upload \
+  -F &amp;#34;file=@image.jpg&amp;#34; \
+  -F &amp;#34;description=My image&amp;#34;
+&lt;/code&gt;&lt;/pre&gt;&lt;h3 id=&#34;使用代理&#34;&gt;使用代理&lt;/h3&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;curl -x http://proxy.example.com:8080 https://example.com
+&lt;/code&gt;&lt;/pre&gt;&lt;h3 id=&#34;调试请求&#34;&gt;调试请求&lt;/h3&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;curl -v https://example.com
+&lt;/code&gt;&lt;/pre&gt;&lt;h3 id=&#34;只获取响应头&#34;&gt;只获取响应头&lt;/h3&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;curl -I https://example.com
+&lt;/code&gt;&lt;/pre&gt;&lt;h3 id=&#34;使用自定义-user-agent&#34;&gt;使用自定义 User-Agent&lt;/h3&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;curl -A &amp;#34;Mozilla/5.0 (Windows NT 10.0; Win64; x64)&amp;#34; https://example.com
+&lt;/code&gt;&lt;/pre&gt;&lt;h2 id=&#34;注意事项&#34;&gt;注意事项&lt;/h2&gt;
 &lt;ol&gt;
 &lt;li&gt;在脚本中使用 curl 时，考虑添加 &lt;code&gt;-s&lt;/code&gt; 或 &lt;code&gt;-sS&lt;/code&gt; 选项（-S 显示错误）&lt;/li&gt;
 &lt;li&gt;处理 JSON 数据时，可以使用 &lt;code&gt;jq&lt;/code&gt; 工具进行格式化&lt;/li&gt;

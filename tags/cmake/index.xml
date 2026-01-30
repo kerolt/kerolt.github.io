@@ -9,7 +9,7 @@
       <url>https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</url>
       <link>https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</link>
     </image>
-    <generator>Hugo -- 0.154.5</generator>
+    <generator>Hugo -- 0.155.0</generator>
     <language>en</language>
     <lastBuildDate>Fri, 23 Jan 2026 00:00:00 +0000</lastBuildDate>
     <atom:link href="https://kerolt.github.io/tags/cmake/index.xml" rel="self" type="application/rss+xml" />
@@ -26,7 +26,7 @@
 &lt;/blockquote&gt;
 &lt;h2 id=&#34;cmake-查找依赖&#34;&gt;CMake 查找依赖&lt;/h2&gt;
 &lt;p&gt;在 CMake 中查找和管理项目依赖，主要是通过内置的 &lt;code&gt;find_package&lt;/code&gt; 命令完成，其会在系统中寻找指定的库。&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;find_package&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;&amp;lt;PackageName&amp;gt; &lt;span style=&#34;color:#555&#34;&gt;[&lt;/span&gt;version&lt;span style=&#34;color:#555&#34;&gt;]&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;[&lt;/span&gt;REQUIRED&lt;span style=&#34;color:#555&#34;&gt;]&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;[&lt;/span&gt;COMPONENTS components...&lt;span style=&#34;color:#555&#34;&gt;])&lt;/span&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;find_package&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;&amp;lt;PackageName&amp;gt; &lt;span style=&#34;color:#555&#34;&gt;[&lt;/span&gt;version&lt;span style=&#34;color:#555&#34;&gt;]&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;[&lt;/span&gt;REQUIRED&lt;span style=&#34;color:#555&#34;&gt;]&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;[&lt;/span&gt;COMPONENTS components...&lt;span style=&#34;color:#555&#34;&gt;])&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;ul&gt;
 &lt;li&gt;&lt;strong&gt;PackageName&lt;/strong&gt;: 库的名称（区分大小写，如 &lt;code&gt;OpenCV&lt;/code&gt;、&lt;code&gt;Qt5&lt;/code&gt;）。&lt;/li&gt;
 &lt;li&gt;&lt;strong&gt;REQUIRED&lt;/strong&gt;: 如果找不到该库，CMake 会直接报错并停止配置。&lt;/li&gt;

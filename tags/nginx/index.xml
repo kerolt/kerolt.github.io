@@ -9,7 +9,7 @@
       <url>https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</url>
       <link>https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</link>
     </image>
-    <generator>Hugo -- 0.154.5</generator>
+    <generator>Hugo -- 0.155.0</generator>
     <language>en</language>
     <lastBuildDate>Mon, 05 Jan 2026 00:00:00 +0000</lastBuildDate>
     <atom:link href="https://kerolt.github.io/tags/nginx/index.xml" rel="self" type="application/rss+xml" />
@@ -55,7 +55,7 @@
 &lt;p&gt;&lt;strong&gt;&lt;code&gt;/api&lt;/code&gt;&lt;/strong&gt;：表示一个 &amp;quot; 前缀字符串 &amp;ldquo;，匹配所有以 &lt;code&gt;/api&lt;/code&gt; 开头的请求，包括 &lt;code&gt;/api&lt;/code&gt; 本身、&lt;code&gt;/api/xxx&lt;/code&gt; 以及 &lt;code&gt;/api-anything&lt;/code&gt;。这种配置更宽泛，可能产生误匹配。&lt;/p&gt;
 &lt;h3 id=&#34;13-实际场景分析&#34;&gt;1.3 实际场景分析&lt;/h3&gt;
 &lt;p&gt;&lt;strong&gt;场景 1：API 接口路由（推荐使用 &lt;code&gt;/api/&lt;/code&gt;）&lt;/strong&gt;&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;# 推荐配置：精确匹配API目录&lt;/span&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;# 推荐配置：精确匹配API目录&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;location /api/ &lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    proxy_pass http://backend;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;# 只处理/api/下的所有请求，不会误匹配/api-test&lt;/span&gt;
@@ -74,7 +74,7 @@
       <pubDate>Tue, 21 Oct 2025 00:00:00 +0000</pubDate>
       <guid>https://kerolt.github.io/posts/ebpf/ebpf%E5%A2%9E%E5%BC%BAnginx%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1/</guid>
       <description>&lt;h2 id=&#34;nginx-负载均衡基准测试&#34;&gt;Nginx 负载均衡基准测试&lt;/h2&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-sh&#34; data-lang=&#34;sh&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;/ &lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;# wrk -c100 &amp;#34;http://172.17.0.5&amp;#34;&lt;/span&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-sh&#34; data-lang=&#34;sh&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;/ &lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;# wrk -c100 &amp;#34;http://172.17.0.5&amp;#34;&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Running 10s &lt;span style=&#34;color:#366&#34;&gt;test&lt;/span&gt; @ http://172.17.0.5
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#f60&#34;&gt;2&lt;/span&gt; threads and &lt;span style=&#34;color:#f60&#34;&gt;100&lt;/span&gt; connections
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  Thread Stats   Avg      Stdev     Max   +/- Stdev
