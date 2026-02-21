@@ -9,10 +9,213 @@
       <url>https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</url>
       <link>https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</link>
     </image>
-    <generator>Hugo -- 0.155.0</generator>
+    <generator>Hugo -- 0.156.0</generator>
     <language>en</language>
-    <lastBuildDate>Thu, 29 Jan 2026 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Sat, 21 Feb 2026 00:00:00 +0000</lastBuildDate>
     <atom:link href="https://kerolt.github.io/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>【面试题解析】字节跳动 飞书 C&#43;&#43;</title>
+      <link>https://kerolt.github.io/posts/c&#43;&#43;/%E9%9D%A2%E8%AF%95%E9%A2%98%E8%A7%A3%E6%9E%90%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8-%E9%A3%9E%E4%B9%A6-c&#43;&#43;/</link>
+      <pubDate>Fri, 20 Feb 2026 00:00:00 +0000</pubDate>
+      <guid>https://kerolt.github.io/posts/c&#43;&#43;/%E9%9D%A2%E8%AF%95%E9%A2%98%E8%A7%A3%E6%9E%90%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8-%E9%A3%9E%E4%B9%A6-c&#43;&#43;/</guid>
+      <description>&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-markdown&#34; data-lang=&#34;markdown&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;1.new 和 malloc 的区别是什么？ 
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;2.new 底层是用什么实现的？ 
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;3.new 实现需要类型转换吗？ 
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;4.进程和线程的同步方法及效率，哪一种效率最高，为什么？ 
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;5.数组的 TOPK，给一个数组，求数组的前 K 个小的数字并返回 
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;6.构造函数能被声明为虚函数吗，为什么？ 
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;7.析构函数需要被声明为虚函数吗，为什么？
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h2 id=&#34;一内存管理的艺术new-vs-malloc&#34;&gt;一、内存管理的艺术：&lt;code&gt;new&lt;/code&gt; vs &lt;code&gt;malloc&lt;/code&gt;&lt;/h2&gt;
+&lt;h3 id=&#34;1-new-和-malloc-的本质区别&#34;&gt;1. &lt;code&gt;new&lt;/code&gt; 和 &lt;code&gt;malloc&lt;/code&gt; 的本质区别&lt;/h3&gt;
+&lt;p&gt;很多初学者认为它们只是语法糖的区别，但在资深工程师眼中，这是 &lt;strong&gt;语言层（Language Level）&lt;/strong&gt; 与 &lt;strong&gt;系统层（System Level）&lt;/strong&gt; 的分野。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;语义层面&lt;/strong&gt;：&lt;code&gt;malloc&lt;/code&gt;/&lt;code&gt;free&lt;/code&gt; 是 C 标准库函数，仅负责从 Heap 中申请或释放一块原始字节流（raw memory）。它完全不知道这块内存将要存放什么类型的数据。而 &lt;code&gt;new&lt;/code&gt;/&lt;code&gt;delete&lt;/code&gt; 是 C++ 的运算符（Operator），它不仅分配内存，还承担了 &lt;strong&gt;对象生命周期管理&lt;/strong&gt; 的重任——即在分配内存后自动调用构造函数（Constructor），在释放前自动调用析构函数（Destructor）。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;类型安全&lt;/strong&gt;：&lt;code&gt;malloc&lt;/code&gt; 返回 &lt;code&gt;void*&lt;/code&gt;，需要显式类型转换，存在类型不安全风险；&lt;code&gt;new&lt;/code&gt; 返回具体类型的指针，天然类型安全。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;失败处理&lt;/strong&gt;：当内存不足时，&lt;code&gt;malloc&lt;/code&gt; 返回 &lt;code&gt;NULL&lt;/code&gt;，需要手动检查；而原生 &lt;code&gt;new&lt;/code&gt; 会抛出 &lt;code&gt;std::bad_alloc&lt;/code&gt; 异常（除非使用 &lt;code&gt;nothrow&lt;/code&gt; 版本），这符合 C++ 的异常处理机制（Exception Handling）。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;重载能力&lt;/strong&gt;：&lt;code&gt;new&lt;/code&gt; 可以被重载（Overload），允许我们自定义内存分配策略（例如实现 Memory Pool），而 &lt;code&gt;malloc&lt;/code&gt; 是固定实现的库函数。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;2-new-的底层实现原理&#34;&gt;2. &lt;code&gt;new&lt;/code&gt; 的底层实现原理&lt;/h3&gt;
+&lt;p&gt;当你写下 &lt;code&gt;T* p = new T(args);&lt;/code&gt; 时，编译器实际上将其分解为两个步骤：&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>更适合eBPF程序宝宝体质的clangd配置</title>
+      <link>https://kerolt.github.io/posts/ebpf/%E6%9B%B4%E9%80%82%E5%90%88ebpf%E7%A8%8B%E5%BA%8F%E5%AE%9D%E5%AE%9D%E4%BD%93%E8%B4%A8%E7%9A%84clangd%E9%85%8D%E7%BD%AE/</link>
+      <pubDate>Sun, 15 Feb 2026 00:00:00 +0000</pubDate>
+      <guid>https://kerolt.github.io/posts/ebpf/%E6%9B%B4%E9%80%82%E5%90%88ebpf%E7%A8%8B%E5%BA%8F%E5%AE%9D%E5%AE%9D%E4%BD%93%E8%B4%A8%E7%9A%84clangd%E9%85%8D%E7%BD%AE/</guid>
+      <description>&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-yaml&#34; data-lang=&#34;yaml&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#0cf;font-weight:bold&#34;&gt;---&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;# 1. 扩大匹配范围，确保头文件也能享受 BPF 配置&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;If&lt;/span&gt;:&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;  &lt;/span&gt;&lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;PathMatch&lt;/span&gt;:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;[.*\.bpf\.c, .*/bpf/.*\.c, .*\.h]&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;# 增加对 .h 的支持&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;CompileFlags&lt;/span&gt;:&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;  &lt;/span&gt;&lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;Add&lt;/span&gt;:&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;    &lt;/span&gt;- &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;-target&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;    &lt;/span&gt;- &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;bpf&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;    &lt;/span&gt;- &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;-x&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;    &lt;/span&gt;- &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;c&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;    &lt;/span&gt;- &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;-std=gnu11&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;    &lt;/span&gt;- &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;-D__BPF_TRACING__&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;    &lt;/span&gt;- &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;-D__TARGET_ARCH_x86&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;      &lt;/span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;# 必须指定架构，否则 vmlinux.h 内部的部分条件编译会失效&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;    &lt;/span&gt;- &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;-I.&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;                      &lt;/span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;# 确保当前目录的头文件优先级最高&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;    &lt;/span&gt;- &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;-I/usr/include/bpf&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;       &lt;/span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;# 指向 libbpf 头文件路径&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;    &lt;/span&gt;- &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;-Wno-unknown-attributes&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;  &lt;/span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;# 忽略不认识的属性&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;    &lt;/span&gt;- &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;-ferror-limit=0&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;          &lt;/span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;# 即使错误再多也不要停止解析，这对补全很重要&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;  &lt;/span&gt;&lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;Remove&lt;/span&gt;:&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;    &lt;/span&gt;- &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;-std=c++*&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;    &lt;/span&gt;- &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;-fexceptions&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;Diagnostics&lt;/span&gt;:&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;  &lt;/span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;# 2. 针对 vmlinux.h 的重定义问题进行精准打击&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;  &lt;/span&gt;&lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;Suppress&lt;/span&gt;:&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;    &lt;/span&gt;- &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;redefinition&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;              &lt;/span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;# 抑制所有的符号重定义&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;    &lt;/span&gt;- &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;typedef_redefinition&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;      &lt;/span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;# 特别针对 typedef 的冲突&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;    &lt;/span&gt;- &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;too_many_errors&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;           &lt;/span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;# 彻底关掉那个烦人的警告&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;    &lt;/span&gt;- &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;err_expected_identifer&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;    &lt;/span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;# 针对 vmlinux 内部属性解析失败的补救&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#0cf;font-weight:bold&#34;&gt;---&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;# 3. 针对特定的 vmlinux.h 文件彻底关闭检查&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;If&lt;/span&gt;:&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;  &lt;/span&gt;&lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;PathMatch&lt;/span&gt;:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;.*vmlinux\.h&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;Diagnostics&lt;/span&gt;:&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;  &lt;/span&gt;&lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;Suppress&lt;/span&gt;:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;[&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;*&amp;#34;&lt;/span&gt;]&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;</description>
+    </item>
+    <item>
+      <title>使用nmcli连接Wi-Fi</title>
+      <link>https://kerolt.github.io/posts/linux/%E4%BD%BF%E7%94%A8nmcli%E8%BF%9E%E6%8E%A5wi-fi/</link>
+      <pubDate>Thu, 12 Feb 2026 00:00:00 +0000</pubDate>
+      <guid>https://kerolt.github.io/posts/linux/%E4%BD%BF%E7%94%A8nmcli%E8%BF%9E%E6%8E%A5wi-fi/</guid>
+      <description>&lt;p&gt;现在个人的环境是 Fedora43，使用&lt;strong&gt;NetworkManager&lt;/strong&gt;管理网络，因而基于 &lt;code&gt;nmcli&lt;/code&gt;（NetworkManager Command Line Interface）来高效、可靠地配置 WiFi&lt;/p&gt;
+&lt;h2 id=&#34;第一步确认-networkmanager-已接管无线接口&#34;&gt;第一步：确认 NetworkManager 已接管无线接口&lt;/h2&gt;
+&lt;p&gt;首先确保你的无线网卡（如 &lt;code&gt;wlan0&lt;/code&gt;）处于 NetworkManager 的管理之下：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;nmcli device status
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;输出应类似：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;DEVICE   TYPE      STATE         CONNECTION 
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;wlan0    wifi      disconnected  --         
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;eth0     ethernet  connected     Wired connection &lt;span style=&#34;color:#f60&#34;&gt;1&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;blockquote&gt;
+&lt;p&gt;🔍 注意：如果 &lt;code&gt;STATE&lt;/code&gt; 显示为 &lt;code&gt;unmanaged&lt;/code&gt;，说明该设备被排除在 NM 管理之外。检查 &lt;code&gt;/etc/NetworkManager/NetworkManager.conf&lt;/code&gt; 是否有 &lt;code&gt;unmanaged-devices&lt;/code&gt; 规则，或运行：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;sudo nmcli device &lt;span style=&#34;color:#366&#34;&gt;set&lt;/span&gt; wlan0 managed yes
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/blockquote&gt;
+&lt;h2 id=&#34;第二步扫描并连接-wifi支持-wpa2wpa3&#34;&gt;第二步：扫描并连接 WiFi（支持 WPA2/WPA3）&lt;/h2&gt;
+&lt;h3 id=&#34;1扫描可用网络可选用于确认-ssid-拼写&#34;&gt;（1）扫描可用网络（可选，用于确认 SSID 拼写）&lt;/h3&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;nmcli device wifi list
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id=&#34;2连接目标-wifi自动保存连接配置&#34;&gt;（2）连接目标 WiFi（自动保存连接配置）&lt;/h3&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;sudo nmcli device wifi connect &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;Your_SSID&amp;#34;&lt;/span&gt; password &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;Your_Password&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;成功时你会看到：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Device &lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;wlan0&amp;#39;&lt;/span&gt; successfully activated with &lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX&amp;#39;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;blockquote&gt;
+&lt;p&gt;💡 &lt;strong&gt;底层机制&lt;/strong&gt;：
+此命令会：&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>更改Go的默认安装位置</title>
+      <link>https://kerolt.github.io/posts/go/%E6%9B%B4%E6%94%B9go%E7%9A%84%E9%BB%98%E8%AE%A4%E5%AE%89%E8%A3%85%E4%BD%8D%E7%BD%AE/</link>
+      <pubDate>Wed, 11 Feb 2026 00:00:00 +0000</pubDate>
+      <guid>https://kerolt.github.io/posts/go/%E6%9B%B4%E6%94%B9go%E7%9A%84%E9%BB%98%E8%AE%A4%E5%AE%89%E8%A3%85%E4%BD%8D%E7%BD%AE/</guid>
+      <description>&lt;blockquote&gt;
+&lt;p&gt;将 Go 的默认工作 Go 目录从 &lt;code&gt;$HOME/go&lt;/code&gt; 改为 &lt;code&gt;$HOME/.go&lt;/code&gt; ，这个行为由环境变量 &lt;code&gt;GOPATH&lt;/code&gt; 控制&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id=&#34;核心原理gopath-与现代-go-的关系&#34;&gt;核心原理：&lt;code&gt;GOPATH&lt;/code&gt; 与现代 Go 的关系&lt;/h2&gt;
+&lt;p&gt;自 Go 1.11 引入 &lt;strong&gt;Go Modules&lt;/strong&gt; 后，项目源码不再强制依赖 &lt;code&gt;GOPATH/src&lt;/code&gt;，但以下内容仍受 &lt;code&gt;GOPATH&lt;/code&gt; 影响：&lt;/p&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;路径&lt;/th&gt;
+          &lt;th&gt;用途&lt;/th&gt;
+          &lt;th&gt;是否受 &lt;code&gt;GOPATH&lt;/code&gt; 影响&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;code&gt;$GOPATH/bin&lt;/code&gt;&lt;/td&gt;
+          &lt;td&gt;&lt;code&gt;go install&lt;/code&gt; 安装的可执行文件&lt;/td&gt;
+          &lt;td&gt;✅ 是&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;code&gt;$GOPATH/pkg/mod&lt;/code&gt;&lt;/td&gt;
+          &lt;td&gt;Module 缓存（Go 1.16+ 由 &lt;code&gt;GOMODCACHE&lt;/code&gt; 控制）&lt;/td&gt;
+          &lt;td&gt;⚠️ 部分&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;code&gt;$GOPATH/src&lt;/code&gt;&lt;/td&gt;
+          &lt;td&gt;传统 GOPATH 模式源码&lt;/td&gt;
+          &lt;td&gt;❌ Modules 模式下基本不用&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;因此，修改 &lt;code&gt;GOPATH&lt;/code&gt; 主要影响二进制安装路径和部分缓存位置，&lt;strong&gt;不影响已启用 modules 的项目构建&lt;/strong&gt;。&lt;/p&gt;
+&lt;h2 id=&#34;迁移步骤fedora-环境&#34;&gt;迁移步骤（Fedora 环境）&lt;/h2&gt;
+&lt;h3 id=&#34;1-设置环境变量&#34;&gt;1. 设置环境变量&lt;/h3&gt;
+&lt;p&gt;在 &lt;code&gt;~/.bashrc&lt;/code&gt; 或 &lt;code&gt;~/.zshrc&lt;/code&gt; 中添加：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;# Go workspace 配置&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#366&#34;&gt;export&lt;/span&gt; &lt;span style=&#34;color:#033&#34;&gt;GOPATH&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#033&#34;&gt;$HOME&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;/.go&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#366&#34;&gt;export&lt;/span&gt; &lt;span style=&#34;color:#033&#34;&gt;GOBIN&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#033&#34;&gt;$GOPATH&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;/bin&amp;#34;&lt;/span&gt;          &lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;# 显式指定二进制安装目录&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#366&#34;&gt;export&lt;/span&gt; &lt;span style=&#34;color:#033&#34;&gt;GOMODCACHE&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#033&#34;&gt;$GOPATH&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;/pkg/mod&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;# 可选：统一 module 缓存位置&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#366&#34;&gt;export&lt;/span&gt; &lt;span style=&#34;color:#033&#34;&gt;PATH&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#033&#34;&gt;$GOBIN&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;:&lt;/span&gt;&lt;span style=&#34;color:#033&#34;&gt;$PATH&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;&lt;/span&gt;          &lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;# 确保安装的工具可直接执行&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;blockquote&gt;
+&lt;p&gt;💡 提示：Fedora 默认使用 Bash，建议修改 &lt;code&gt;~/.bashrc&lt;/code&gt;；若使用 Zsh 则改 &lt;code&gt;~/.zshrc&lt;/code&gt;。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Linux SSH免密登陆</title>
+      <link>https://kerolt.github.io/posts/linux/linux-ssh%E5%85%8D%E5%AF%86%E7%99%BB%E9%99%86/</link>
+      <pubDate>Tue, 10 Feb 2026 00:00:00 +0000</pubDate>
+      <guid>https://kerolt.github.io/posts/linux/linux-ssh%E5%85%8D%E5%AF%86%E7%99%BB%E9%99%86/</guid>
+      <description>&lt;h2 id=&#34;一生成-ssh-密钥对在本地机器上&#34;&gt;一、生成 SSH 密钥对（在本地机器上）&lt;/h2&gt;
+&lt;ol&gt;
+&lt;li&gt;打开终端（Linux/macOS）或使用 PowerShell/WSL（Windows）。&lt;/li&gt;
+&lt;li&gt;执行以下命令生成密钥对：&lt;/li&gt;
+&lt;/ol&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;ssh-keygen -t rsa -b &lt;span style=&#34;color:#f60&#34;&gt;4096&lt;/span&gt; -C &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;your_email@example.com&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;-t rsa&lt;/code&gt;：指定密钥类型为 RSA（也可以使用 &lt;code&gt;-t ed25519&lt;/code&gt; 更安全）。&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;-b 4096&lt;/code&gt;：密钥长度（RSA 推荐 4096 位）。&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;-C&lt;/code&gt;：添加注释（通常是邮箱，可选）。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;ol start=&#34;3&#34;&gt;
+&lt;li&gt;按提示操作：
+&lt;ul&gt;
+&lt;li&gt;保存路径：直接回车使用默认路径 &lt;code&gt;~/.ssh/id_rsa&lt;/code&gt;。&lt;/li&gt;
+&lt;li&gt;设置密码（passphrase）：可选，增强安全性。如果希望完全免密，直接回车留空。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;生成后会在 &lt;code&gt;~/.ssh/&lt;/code&gt; 目录下创建两个文件：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;id_rsa&lt;/code&gt;：私钥（&lt;strong&gt;不要泄露&lt;/strong&gt;）&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;id_rsa.pub&lt;/code&gt;：公钥（用于上传到服务器）&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;二将公钥上传到远程服务器&#34;&gt;二、将公钥上传到远程服务器&lt;/h2&gt;
+&lt;h3 id=&#34;方法一使用-ssh-copy-id&#34;&gt;方法一：使用 &lt;code&gt;ssh-copy-id&lt;/code&gt;&lt;/h3&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;ssh-copy-id username@server_ip
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;例如：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;ssh-copy-id user@192.168.1.100
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;系统会提示你输入远程用户的密码，验证通过后，公钥会被自动追加到服务器的 &lt;code&gt;~/.ssh/authorized_keys&lt;/code&gt; 文件中。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;⚠️ 如果提示 &lt;code&gt;command not found&lt;/code&gt;，说明 &lt;code&gt;ssh-copy-id&lt;/code&gt; 不存在（常见于 macOS 或某些 Linux 发行版），请使用方法二。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id=&#34;方法二手动复制公钥&#34;&gt;方法二：手动复制公钥&lt;/h3&gt;
+&lt;ol&gt;
+&lt;li&gt;查看本地公钥内容：&lt;/li&gt;
+&lt;/ol&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;cat ~/.ssh/id_rsa.pub
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;复制输出的整段内容（以 &lt;code&gt;ssh-rsa AAAAB3...&lt;/code&gt; 开头）。&lt;/p&gt;
+&lt;ol start=&#34;2&#34;&gt;
+&lt;li&gt;登录远程服务器：&lt;/li&gt;
+&lt;/ol&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;ssh username@server_ip
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;ol start=&#34;3&#34;&gt;
+&lt;li&gt;在服务器上创建 &lt;code&gt;.ssh&lt;/code&gt; 目录（如果不存在）：&lt;/li&gt;
+&lt;/ol&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;mkdir -p ~/.ssh
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;ol start=&#34;4&#34;&gt;
+&lt;li&gt;将公钥内容写入 &lt;code&gt;authorized_keys&lt;/code&gt; 文件：&lt;/li&gt;
+&lt;/ol&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#366&#34;&gt;echo&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;你复制的公钥内容&amp;#34;&lt;/span&gt; &amp;gt;&amp;gt; ~/.ssh/authorized_keys
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;blockquote&gt;
+&lt;p&gt;注意替换“你复制的公钥内容”为实际内容。&lt;/p&gt;</description>
+    </item>
     <item>
       <title>为Hugo PaperMod添加mermaid渲染</title>
       <link>https://kerolt.github.io/posts/dev-null/%E4%B8%BAhugo-papermod%E6%B7%BB%E5%8A%A0mermaid%E6%B8%B2%E6%9F%93/</link>

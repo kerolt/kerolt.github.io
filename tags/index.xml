@@ -9,10 +9,52 @@
       <url>https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</url>
       <link>https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</link>
     </image>
-    <generator>Hugo -- 0.155.0</generator>
+    <generator>Hugo -- 0.156.0</generator>
     <language>en</language>
-    <lastBuildDate>Thu, 29 Jan 2026 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Sat, 21 Feb 2026 00:00:00 +0000</lastBuildDate>
     <atom:link href="https://kerolt.github.io/tags/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>面试题</title>
+      <link>https://kerolt.github.io/tags/%E9%9D%A2%E8%AF%95%E9%A2%98/</link>
+      <pubDate>Fri, 20 Feb 2026 00:00:00 +0000</pubDate>
+      <guid>https://kerolt.github.io/tags/%E9%9D%A2%E8%AF%95%E9%A2%98/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Clangd</title>
+      <link>https://kerolt.github.io/tags/clangd/</link>
+      <pubDate>Sun, 15 Feb 2026 00:00:00 +0000</pubDate>
+      <guid>https://kerolt.github.io/tags/clangd/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>NetworkManager</title>
+      <link>https://kerolt.github.io/tags/networkmanager/</link>
+      <pubDate>Thu, 12 Feb 2026 00:00:00 +0000</pubDate>
+      <guid>https://kerolt.github.io/tags/networkmanager/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Wi-Fi</title>
+      <link>https://kerolt.github.io/tags/wi-fi/</link>
+      <pubDate>Thu, 12 Feb 2026 00:00:00 +0000</pubDate>
+      <guid>https://kerolt.github.io/tags/wi-fi/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Go</title>
+      <link>https://kerolt.github.io/tags/go/</link>
+      <pubDate>Wed, 11 Feb 2026 00:00:00 +0000</pubDate>
+      <guid>https://kerolt.github.io/tags/go/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>SSH</title>
+      <link>https://kerolt.github.io/tags/ssh/</link>
+      <pubDate>Tue, 10 Feb 2026 00:00:00 +0000</pubDate>
+      <guid>https://kerolt.github.io/tags/ssh/</guid>
+      <description></description>
+    </item>
     <item>
       <title>Cpp</title>
       <link>https://kerolt.github.io/tags/cpp/</link>
@@ -214,13 +256,6 @@
       <link>https://kerolt.github.io/tags/ddns/</link>
       <pubDate>Fri, 29 Aug 2025 00:00:00 +0000</pubDate>
       <guid>https://kerolt.github.io/tags/ddns/</guid>
-      <description></description>
-    </item>
-    <item>
-      <title>SSH</title>
-      <link>https://kerolt.github.io/tags/ssh/</link>
-      <pubDate>Fri, 29 Aug 2025 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/tags/ssh/</guid>
       <description></description>
     </item>
     <item>

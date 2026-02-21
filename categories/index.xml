@@ -9,22 +9,43 @@
       <url>https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</url>
       <link>https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</link>
     </image>
-    <generator>Hugo -- 0.155.0</generator>
+    <generator>Hugo -- 0.156.0</generator>
     <language>en</language>
-    <lastBuildDate>Thu, 29 Jan 2026 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Sat, 21 Feb 2026 00:00:00 +0000</lastBuildDate>
     <atom:link href="https://kerolt.github.io/categories/index.xml" rel="self" type="application/rss+xml" />
     <item>
-      <title>Dev-Null</title>
-      <link>https://kerolt.github.io/categories/dev-null/</link>
-      <pubDate>Thu, 29 Jan 2026 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/categories/dev-null/</guid>
+      <title>C&#43;&#43;</title>
+      <link>https://kerolt.github.io/categories/c&#43;&#43;/</link>
+      <pubDate>Fri, 20 Feb 2026 00:00:00 +0000</pubDate>
+      <guid>https://kerolt.github.io/categories/c&#43;&#43;/</guid>
       <description></description>
     </item>
     <item>
       <title>EBPF</title>
       <link>https://kerolt.github.io/categories/ebpf/</link>
-      <pubDate>Thu, 29 Jan 2026 00:00:00 +0000</pubDate>
+      <pubDate>Sun, 15 Feb 2026 00:00:00 +0000</pubDate>
       <guid>https://kerolt.github.io/categories/ebpf/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Linux</title>
+      <link>https://kerolt.github.io/categories/linux/</link>
+      <pubDate>Thu, 12 Feb 2026 00:00:00 +0000</pubDate>
+      <guid>https://kerolt.github.io/categories/linux/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Go</title>
+      <link>https://kerolt.github.io/categories/go/</link>
+      <pubDate>Wed, 11 Feb 2026 00:00:00 +0000</pubDate>
+      <guid>https://kerolt.github.io/categories/go/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Dev-Null</title>
+      <link>https://kerolt.github.io/categories/dev-null/</link>
+      <pubDate>Thu, 29 Jan 2026 00:00:00 +0000</pubDate>
+      <guid>https://kerolt.github.io/categories/dev-null/</guid>
       <description></description>
     </item>
     <item>
@@ -39,13 +60,6 @@
       <link>https://kerolt.github.io/categories/cmake/</link>
       <pubDate>Thu, 22 Jan 2026 00:00:00 +0000</pubDate>
       <guid>https://kerolt.github.io/categories/cmake/</guid>
-      <description></description>
-    </item>
-    <item>
-      <title>C&#43;&#43;</title>
-      <link>https://kerolt.github.io/categories/c&#43;&#43;/</link>
-      <pubDate>Tue, 20 Jan 2026 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/categories/c&#43;&#43;/</guid>
       <description></description>
     </item>
     <item>
@@ -67,13 +81,6 @@
       <link>https://kerolt.github.io/categories/net/</link>
       <pubDate>Sun, 09 Nov 2025 00:00:00 +0000</pubDate>
       <guid>https://kerolt.github.io/categories/net/</guid>
-      <description></description>
-    </item>
-    <item>
-      <title>Linux</title>
-      <link>https://kerolt.github.io/categories/linux/</link>
-      <pubDate>Fri, 07 Nov 2025 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/categories/linux/</guid>
       <description></description>
     </item>
     <item>

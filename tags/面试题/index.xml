@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>面试题 on Kerolt&#39;s Blog</title>
+    <link>https://kerolt.github.io/tags/%E9%9D%A2%E8%AF%95%E9%A2%98/</link>
+    <description>Recent content in 面试题 on Kerolt&#39;s Blog</description>
+    <image>
+      <title>Kerolt&#39;s Blog</title>
+      <url>https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</url>
+      <link>https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</link>
+    </image>
+    <generator>Hugo -- 0.156.0</generator>
+    <language>en</language>
+    <lastBuildDate>Fri, 20 Feb 2026 00:00:00 +0000</lastBuildDate>
+    <atom:link href="https://kerolt.github.io/tags/%E9%9D%A2%E8%AF%95%E9%A2%98/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>【面试题解析】字节跳动 飞书 C&#43;&#43;</title>
+      <link>https://kerolt.github.io/posts/c&#43;&#43;/%E9%9D%A2%E8%AF%95%E9%A2%98%E8%A7%A3%E6%9E%90%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8-%E9%A3%9E%E4%B9%A6-c&#43;&#43;/</link>
+      <pubDate>Fri, 20 Feb 2026 00:00:00 +0000</pubDate>
+      <guid>https://kerolt.github.io/posts/c&#43;&#43;/%E9%9D%A2%E8%AF%95%E9%A2%98%E8%A7%A3%E6%9E%90%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8-%E9%A3%9E%E4%B9%A6-c&#43;&#43;/</guid>
+      <description>&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-markdown&#34; data-lang=&#34;markdown&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;1.new 和 malloc 的区别是什么？ 
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;2.new 底层是用什么实现的？ 
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;3.new 实现需要类型转换吗？ 
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;4.进程和线程的同步方法及效率，哪一种效率最高，为什么？ 
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;5.数组的 TOPK，给一个数组，求数组的前 K 个小的数字并返回 
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;6.构造函数能被声明为虚函数吗，为什么？ 
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;7.析构函数需要被声明为虚函数吗，为什么？
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h2 id=&#34;一内存管理的艺术new-vs-malloc&#34;&gt;一、内存管理的艺术：&lt;code&gt;new&lt;/code&gt; vs &lt;code&gt;malloc&lt;/code&gt;&lt;/h2&gt;
+&lt;h3 id=&#34;1-new-和-malloc-的本质区别&#34;&gt;1. &lt;code&gt;new&lt;/code&gt; 和 &lt;code&gt;malloc&lt;/code&gt; 的本质区别&lt;/h3&gt;
+&lt;p&gt;很多初学者认为它们只是语法糖的区别，但在资深工程师眼中，这是 &lt;strong&gt;语言层（Language Level）&lt;/strong&gt; 与 &lt;strong&gt;系统层（System Level）&lt;/strong&gt; 的分野。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;语义层面&lt;/strong&gt;：&lt;code&gt;malloc&lt;/code&gt;/&lt;code&gt;free&lt;/code&gt; 是 C 标准库函数，仅负责从 Heap 中申请或释放一块原始字节流（raw memory）。它完全不知道这块内存将要存放什么类型的数据。而 &lt;code&gt;new&lt;/code&gt;/&lt;code&gt;delete&lt;/code&gt; 是 C++ 的运算符（Operator），它不仅分配内存，还承担了 &lt;strong&gt;对象生命周期管理&lt;/strong&gt; 的重任——即在分配内存后自动调用构造函数（Constructor），在释放前自动调用析构函数（Destructor）。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;类型安全&lt;/strong&gt;：&lt;code&gt;malloc&lt;/code&gt; 返回 &lt;code&gt;void*&lt;/code&gt;，需要显式类型转换，存在类型不安全风险；&lt;code&gt;new&lt;/code&gt; 返回具体类型的指针，天然类型安全。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;失败处理&lt;/strong&gt;：当内存不足时，&lt;code&gt;malloc&lt;/code&gt; 返回 &lt;code&gt;NULL&lt;/code&gt;，需要手动检查；而原生 &lt;code&gt;new&lt;/code&gt; 会抛出 &lt;code&gt;std::bad_alloc&lt;/code&gt; 异常（除非使用 &lt;code&gt;nothrow&lt;/code&gt; 版本），这符合 C++ 的异常处理机制（Exception Handling）。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;重载能力&lt;/strong&gt;：&lt;code&gt;new&lt;/code&gt; 可以被重载（Overload），允许我们自定义内存分配策略（例如实现 Memory Pool），而 &lt;code&gt;malloc&lt;/code&gt; 是固定实现的库函数。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;2-new-的底层实现原理&#34;&gt;2. &lt;code&gt;new&lt;/code&gt; 的底层实现原理&lt;/h3&gt;
+&lt;p&gt;当你写下 &lt;code&gt;T* p = new T(args);&lt;/code&gt; 时，编译器实际上将其分解为两个步骤：&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

@@ -1,0 +1,135 @@
+<!doctype html><html lang=en dir=auto><head><meta charset=utf-8><meta http-equiv=X-UA-Compatible content="IE=edge"><meta name=viewport content="width=device-width,initial-scale=1,shrink-to-fit=no"><meta name=robots content="index, follow"><title>Linux SSH免密登陆 | Kerolt's Blog</title><meta name=keywords content="SSH"><meta name=description content='一、生成 SSH 密钥对（在本地机器上）
+
+打开终端（Linux/macOS）或使用 PowerShell/WSL（Windows）。
+执行以下命令生成密钥对：
+
+ssh-keygen -t rsa -b 4096 -C "your_email@example.com"
+
+-t rsa：指定密钥类型为 RSA（也可以使用 -t ed25519 更安全）。
+-b 4096：密钥长度（RSA 推荐 4096 位）。
+-C：添加注释（通常是邮箱，可选）。
+
+
+按提示操作：
+
+保存路径：直接回车使用默认路径 ~/.ssh/id_rsa。
+设置密码（passphrase）：可选，增强安全性。如果希望完全免密，直接回车留空。
+
+
+
+生成后会在 ~/.ssh/ 目录下创建两个文件：
+
+id_rsa：私钥（不要泄露）
+id_rsa.pub：公钥（用于上传到服务器）
+
+二、将公钥上传到远程服务器
+方法一：使用 ssh-copy-id
+ssh-copy-id username@server_ip
+例如：
+ssh-copy-id user@192.168.1.100
+系统会提示你输入远程用户的密码，验证通过后，公钥会被自动追加到服务器的 ~/.ssh/authorized_keys 文件中。
+
+⚠️ 如果提示 command not found，说明 ssh-copy-id 不存在（常见于 macOS 或某些 Linux 发行版），请使用方法二。
+
+方法二：手动复制公钥
+
+查看本地公钥内容：
+
+cat ~/.ssh/id_rsa.pub
+复制输出的整段内容（以 ssh-rsa AAAAB3... 开头）。
+
+登录远程服务器：
+
+ssh username@server_ip
+
+在服务器上创建 .ssh 目录（如果不存在）：
+
+mkdir -p ~/.ssh
+
+将公钥内容写入 authorized_keys 文件：
+
+echo "你复制的公钥内容" >> ~/.ssh/authorized_keys
+
+注意替换“你复制的公钥内容”为实际内容。'><meta name=author content="Kerolt"><link rel=canonical href=https://kerolt.github.io/posts/linux/linux-ssh%E5%85%8D%E5%AF%86%E7%99%BB%E9%99%86/><meta name=google-site-verification content="NpIO0KEIJS0CPRzTzQCbYQdSRIyb0Lspx"><meta name=yandex-verification content="XYZabc"><meta name=msvalidate.01 content="2300A23B82DB579A2DEA6261191AD771"><link crossorigin=anonymous href=/assets/css/stylesheet.0802d94e6eef300965ab76e566006dff491a694c6b49e04aa88a46277ee1da90.css integrity="sha256-CALZTm7vMAllq3blZgBt/0kaaUxrSeBKqIpGJ37h2pA=" rel="preload stylesheet" as=style><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/cn-fontsource-source-han-serif-sc-vf@1.0.9/font.min.css><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/lxgw-wenkai-screen-web/style.css><link rel=icon href=https://kerolt.github.io/images/avatar/favicon.png><link rel=icon type=image/png sizes=16x16 href=https://kerolt.github.io/%3Clink%20/%20abs%20url%3E><link rel=icon type=image/png sizes=32x32 href=https://kerolt.github.io/%3Clink%20/%20abs%20url%3E><link rel=apple-touch-icon href=https://kerolt.github.io/%3Clink%20/%20abs%20url%3E><link rel=mask-icon href=https://kerolt.github.io/%3Clink%20/%20abs%20url%3E><meta name=theme-color content="#2e2e33"><meta name=msapplication-TileColor content="#2e2e33"><link rel=alternate hreflang=en href=https://kerolt.github.io/posts/linux/linux-ssh%E5%85%8D%E5%AF%86%E7%99%BB%E9%99%86/><script src=https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js></script><link rel=stylesheet href=https://cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css><script src=https://cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js></script><noscript><style>#theme-toggle,.top-link{display:none}</style><style>@media(prefers-color-scheme:dark){:root{--theme:rgb(29, 30, 32);--entry:rgb(46, 46, 51);--primary:rgb(218, 218, 219);--secondary:rgb(155, 156, 157);--tertiary:rgb(65, 66, 68);--content:rgb(196, 196, 197);--code-block-bg:rgb(46, 46, 51);--code-bg:rgb(55, 56, 62);--border:rgb(51, 51, 51)}.list{background:var(--theme)}.list:not(.dark)::-webkit-scrollbar-track{background:0 0}.list:not(.dark)::-webkit-scrollbar-thumb{border-color:var(--theme)}}</style></noscript><meta property="og:url" content="https://kerolt.github.io/posts/linux/linux-ssh%E5%85%8D%E5%AF%86%E7%99%BB%E9%99%86/"><meta property="og:site_name" content="Kerolt's Blog"><meta property="og:title" content="Linux SSH免密登陆"><meta property="og:description" content='一、生成 SSH 密钥对（在本地机器上） 打开终端（Linux/macOS）或使用 PowerShell/WSL（Windows）。 执行以下命令生成密钥对： ssh-keygen -t rsa -b 4096 -C "your_email@example.com" -t rsa：指定密钥类型为 RSA（也可以使用 -t ed25519 更安全）。 -b 4096：密钥长度（RSA 推荐 4096 位）。 -C：添加注释（通常是邮箱，可选）。 按提示操作： 保存路径：直接回车使用默认路径 ~/.ssh/id_rsa。 设置密码（passphrase）：可选，增强安全性。如果希望完全免密，直接回车留空。 生成后会在 ~/.ssh/ 目录下创建两个文件：
+id_rsa：私钥（不要泄露） id_rsa.pub：公钥（用于上传到服务器） 二、将公钥上传到远程服务器 方法一：使用 ssh-copy-id ssh-copy-id username@server_ip 例如：
+ssh-copy-id user@192.168.1.100 系统会提示你输入远程用户的密码，验证通过后，公钥会被自动追加到服务器的 ~/.ssh/authorized_keys 文件中。
+⚠️ 如果提示 command not found，说明 ssh-copy-id 不存在（常见于 macOS 或某些 Linux 发行版），请使用方法二。
+方法二：手动复制公钥 查看本地公钥内容： cat ~/.ssh/id_rsa.pub 复制输出的整段内容（以 ssh-rsa AAAAB3... 开头）。
+登录远程服务器： ssh username@server_ip 在服务器上创建 .ssh 目录（如果不存在）： mkdir -p ~/.ssh 将公钥内容写入 authorized_keys 文件： echo "你复制的公钥内容" >> ~/.ssh/authorized_keys 注意替换“你复制的公钥内容”为实际内容。'><meta property="og:locale" content="en"><meta property="og:type" content="article"><meta property="article:section" content="posts"><meta property="article:published_time" content="2026-02-10T00:00:00+00:00"><meta property="article:modified_time" content="2026-02-10T00:00:00+00:00"><meta property="article:tag" content="SSH"><meta property="og:image" content="https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E"><meta name=twitter:card content="summary_large_image"><meta name=twitter:image content="https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E"><meta name=twitter:title content="Linux SSH免密登陆"><meta name=twitter:description content='一、生成 SSH 密钥对（在本地机器上）
+
+打开终端（Linux/macOS）或使用 PowerShell/WSL（Windows）。
+执行以下命令生成密钥对：
+
+ssh-keygen -t rsa -b 4096 -C "your_email@example.com"
+
+-t rsa：指定密钥类型为 RSA（也可以使用 -t ed25519 更安全）。
+-b 4096：密钥长度（RSA 推荐 4096 位）。
+-C：添加注释（通常是邮箱，可选）。
+
+
+按提示操作：
+
+保存路径：直接回车使用默认路径 ~/.ssh/id_rsa。
+设置密码（passphrase）：可选，增强安全性。如果希望完全免密，直接回车留空。
+
+
+
+生成后会在 ~/.ssh/ 目录下创建两个文件：
+
+id_rsa：私钥（不要泄露）
+id_rsa.pub：公钥（用于上传到服务器）
+
+二、将公钥上传到远程服务器
+方法一：使用 ssh-copy-id
+ssh-copy-id username@server_ip
+例如：
+ssh-copy-id user@192.168.1.100
+系统会提示你输入远程用户的密码，验证通过后，公钥会被自动追加到服务器的 ~/.ssh/authorized_keys 文件中。
+
+⚠️ 如果提示 command not found，说明 ssh-copy-id 不存在（常见于 macOS 或某些 Linux 发行版），请使用方法二。
+
+方法二：手动复制公钥
+
+查看本地公钥内容：
+
+cat ~/.ssh/id_rsa.pub
+复制输出的整段内容（以 ssh-rsa AAAAB3... 开头）。
+
+登录远程服务器：
+
+ssh username@server_ip
+
+在服务器上创建 .ssh 目录（如果不存在）：
+
+mkdir -p ~/.ssh
+
+将公钥内容写入 authorized_keys 文件：
+
+echo "你复制的公钥内容" >> ~/.ssh/authorized_keys
+
+注意替换“你复制的公钥内容”为实际内容。'><script type=application/ld+json>{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Posts","item":"https://kerolt.github.io/posts/"},{"@type":"ListItem","position":2,"name":"Linux SSH免密登陆","item":"https://kerolt.github.io/posts/linux/linux-ssh%E5%85%8D%E5%AF%86%E7%99%BB%E9%99%86/"}]}</script><script type=application/ld+json>{"@context":"https://schema.org","@type":"BlogPosting","headline":"Linux SSH免密登陆","name":"Linux SSH免密登陆","description":"一、生成 SSH 密钥对（在本地机器上） 打开终端（Linux/macOS）或使用 PowerShell/WSL（Windows）。 执行以下命令生成密钥对： ssh-keygen -t rsa -b 4096 -C \u0026#34;your_email@example.com\u0026#34; -t rsa：指定密钥类型为 RSA（也可以使用 -t ed25519 更安全）。 -b 4096：密钥长度（RSA 推荐 4096 位）。 -C：添加注释（通常是邮箱，可选）。 按提示操作： 保存路径：直接回车使用默认路径 ~/.ssh/id_rsa。 设置密码（passphrase）：可选，增强安全性。如果希望完全免密，直接回车留空。 生成后会在 ~/.ssh/ 目录下创建两个文件：\nid_rsa：私钥（不要泄露） id_rsa.pub：公钥（用于上传到服务器） 二、将公钥上传到远程服务器 方法一：使用 ssh-copy-id ssh-copy-id username@server_ip 例如：\nssh-copy-id user@192.168.1.100 系统会提示你输入远程用户的密码，验证通过后，公钥会被自动追加到服务器的 ~/.ssh/authorized_keys 文件中。\n⚠️ 如果提示 command not found，说明 ssh-copy-id 不存在（常见于 macOS 或某些 Linux 发行版），请使用方法二。\n方法二：手动复制公钥 查看本地公钥内容： cat ~/.ssh/id_rsa.pub 复制输出的整段内容（以 ssh-rsa AAAAB3... 开头）。\n登录远程服务器： ssh username@server_ip 在服务器上创建 .ssh 目录（如果不存在）： mkdir -p ~/.ssh 将公钥内容写入 authorized_keys 文件： echo \u0026#34;你复制的公钥内容\u0026#34; \u0026gt;\u0026gt; ~/.ssh/authorized_keys 注意替换“你复制的公钥内容”为实际内容。\n","keywords":["SSH"],"articleBody":"一、生成 SSH 密钥对（在本地机器上） 打开终端（Linux/macOS）或使用 PowerShell/WSL（Windows）。 执行以下命令生成密钥对： ssh-keygen -t rsa -b 4096 -C \"your_email@example.com\" -t rsa：指定密钥类型为 RSA（也可以使用 -t ed25519 更安全）。 -b 4096：密钥长度（RSA 推荐 4096 位）。 -C：添加注释（通常是邮箱，可选）。 按提示操作： 保存路径：直接回车使用默认路径 ~/.ssh/id_rsa。 设置密码（passphrase）：可选，增强安全性。如果希望完全免密，直接回车留空。 生成后会在 ~/.ssh/ 目录下创建两个文件：\nid_rsa：私钥（不要泄露） id_rsa.pub：公钥（用于上传到服务器） 二、将公钥上传到远程服务器 方法一：使用 ssh-copy-id ssh-copy-id username@server_ip 例如：\nssh-copy-id user@192.168.1.100 系统会提示你输入远程用户的密码，验证通过后，公钥会被自动追加到服务器的 ~/.ssh/authorized_keys 文件中。\n⚠️ 如果提示 command not found，说明 ssh-copy-id 不存在（常见于 macOS 或某些 Linux 发行版），请使用方法二。\n方法二：手动复制公钥 查看本地公钥内容： cat ~/.ssh/id_rsa.pub 复制输出的整段内容（以 ssh-rsa AAAAB3... 开头）。\n登录远程服务器： ssh username@server_ip 在服务器上创建 .ssh 目录（如果不存在）： mkdir -p ~/.ssh 将公钥内容写入 authorized_keys 文件： echo \"你复制的公钥内容\" \u003e\u003e ~/.ssh/authorized_keys 注意替换“你复制的公钥内容”为实际内容。\n设置正确的权限（非常重要！SSH 要求严格权限）： chmod 700 ~/.ssh chmod 600 ~/.ssh/authorized_keys chown $USER:$USER ~/.ssh -R 三、配置别名 配置别名：编辑 ~/.ssh/config，简化连接命令： Host myserver HostName 192.168.1.100 User myuser IdentityFile ~/.ssh/id_rsa 之后只需运行：\nssh myserver ","wordCount":"107","inLanguage":"en","image":"https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E","datePublished":"2026-02-10T00:00:00Z","dateModified":"2026-02-10T00:00:00Z","author":{"@type":"Person","name":"Kerolt"},"mainEntityOfPage":{"@type":"WebPage","@id":"https://kerolt.github.io/posts/linux/linux-ssh%E5%85%8D%E5%AF%86%E7%99%BB%E9%99%86/"},"publisher":{"@type":"Organization","name":"Kerolt's Blog","logo":{"@type":"ImageObject","url":"https://kerolt.github.io/images/avatar/favicon.png"}}}</script></head><body id=top><script>localStorage.getItem("pref-theme")==="dark"?document.body.classList.add("dark"):localStorage.getItem("pref-theme")==="light"?document.body.classList.remove("dark"):window.matchMedia("(prefers-color-scheme: dark)").matches&&document.body.classList.add("dark")</script><header class=header><nav class=nav><div class=logo><a href=https://kerolt.github.io/ accesskey=h title="Kerolt's Blog (Alt + H)">Kerolt's Blog</a><div class=logo-switches><button id=theme-toggle accesskey=t title="(Alt + T)" aria-label="Toggle theme">
+<svg id="moon" width="24" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+<svg id="sun" width="24" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></button></div></div><ul id=menu><li><a href=https://kerolt.github.io/posts/ title=文章><span>文章</span></a></li><li><a href=https://kerolt.github.io/categories/ title=分类><span>分类</span></a></li><li><a href=https://kerolt.github.io/tags/ title=标签><span>标签</span></a></li><li><a href=https://kerolt.github.io/archives/ title=归档><span>归档</span></a></li><li><a href=https://kerolt.github.io/about/ title=关于我><span>关于我</span></a></li><li><a href=https://kerolt.github.io/search/ title="🔍 (Alt + /)" accesskey=/><span>🔍</span></a></li></ul></nav></header><main class=main><article class=post-single><header class=post-header><div class=breadcrumbs><a href=https://kerolt.github.io/>Home</a>&nbsp;»&nbsp;<a href=https://kerolt.github.io/posts/>Posts</a></div><h1 class="post-title entry-hint-parent">Linux SSH免密登陆</h1><div class=post-meta><span title='2026-02-10 00:00:00 +0000 UTC'>发布于2026-02-10</span>&nbsp;&nbsp;·&nbsp;&nbsp;Kerolt</div><ul class=post-tags><li><a href=https://kerolt.github.io/tags/ssh/>SSH</a></li></ul></header><aside id=toc-container class="toc-container wide"><div class=toc><details open><summary accesskey=c title="(Alt + C)"><span class=details>Table of Contents</span></summary><div class=inner><ul><li><a href=#%e4%b8%80%e7%94%9f%e6%88%90-ssh-%e5%af%86%e9%92%a5%e5%af%b9%e5%9c%a8%e6%9c%ac%e5%9c%b0%e6%9c%ba%e5%99%a8%e4%b8%8a aria-label="一、生成 SSH 密钥对（在本地机器上）">一、生成 SSH 密钥对（在本地机器上）</a></li><li><a href=#%e4%ba%8c%e5%b0%86%e5%85%ac%e9%92%a5%e4%b8%8a%e4%bc%a0%e5%88%b0%e8%bf%9c%e7%a8%8b%e6%9c%8d%e5%8a%a1%e5%99%a8 aria-label=二、将公钥上传到远程服务器>二、将公钥上传到远程服务器</a><ul><li><a href=#%e6%96%b9%e6%b3%95%e4%b8%80%e4%bd%bf%e7%94%a8-ssh-copy-id aria-label="方法一：使用 ssh-copy-id">方法一：使用 <code>ssh-copy-id</code></a></li><li><a href=#%e6%96%b9%e6%b3%95%e4%ba%8c%e6%89%8b%e5%8a%a8%e5%a4%8d%e5%88%b6%e5%85%ac%e9%92%a5 aria-label=方法二：手动复制公钥>方法二：手动复制公钥</a></li></ul></li><li><a href=#%e4%b8%89%e9%85%8d%e7%bd%ae%e5%88%ab%e5%90%8d aria-label=三、配置别名>三、配置别名</a></li></ul></div></details></div></aside><script>let activeElement,elements;window.addEventListener("DOMContentLoaded",function(){checkTocPosition(),elements=document.querySelectorAll("h1[id],h2[id],h3[id],h4[id],h5[id],h6[id]"),activeElement=elements[0];const t=encodeURI(activeElement.getAttribute("id")).toLowerCase();document.querySelector(`.inner ul li a[href="#${t}"]`).classList.add("active")},!1),window.addEventListener("resize",function(){checkTocPosition()},!1),window.addEventListener("scroll",()=>{activeElement=Array.from(elements).find(e=>{if(getOffsetTop(e)-window.pageYOffset>0&&getOffsetTop(e)-window.pageYOffset<window.innerHeight/2)return e})||activeElement,elements.forEach(e=>{const t=encodeURI(e.getAttribute("id")).toLowerCase();e===activeElement?document.querySelector(`.inner ul li a[href="#${t}"]`).classList.add("active"):document.querySelector(`.inner ul li a[href="#${t}"]`).classList.remove("active")})},!1);const main=parseInt(getComputedStyle(document.body).getPropertyValue("--article-width"),10),toc=parseInt(getComputedStyle(document.body).getPropertyValue("--toc-width"),10),gap=parseInt(getComputedStyle(document.body).getPropertyValue("--gap"),10);function checkTocPosition(){const e=document.body.scrollWidth;e-main-toc*2-gap*4>0?document.getElementById("toc-container").classList.add("wide"):document.getElementById("toc-container").classList.remove("wide")}function getOffsetTop(e){if(!e.getClientRects().length)return 0;let t=e.getBoundingClientRect(),n=e.ownerDocument.defaultView;return t.top+n.pageYOffset}</script><div class=post-content><h2 id=一生成-ssh-密钥对在本地机器上>一、生成 SSH 密钥对（在本地机器上）<a hidden class=anchor aria-hidden=true href=#一生成-ssh-密钥对在本地机器上>#</a></h2><ol><li>打开终端（Linux/macOS）或使用 PowerShell/WSL（Windows）。</li><li>执行以下命令生成密钥对：</li></ol><div class=highlight><pre tabindex=0 style=background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span>ssh-keygen -t rsa -b <span style=color:#f60>4096</span> -C <span style=color:#c30>&#34;your_email@example.com&#34;</span>
+</span></span></code></pre></div><ul><li><code>-t rsa</code>：指定密钥类型为 RSA（也可以使用 <code>-t ed25519</code> 更安全）。</li><li><code>-b 4096</code>：密钥长度（RSA 推荐 4096 位）。</li><li><code>-C</code>：添加注释（通常是邮箱，可选）。</li></ul><ol start=3><li>按提示操作：<ul><li>保存路径：直接回车使用默认路径 <code>~/.ssh/id_rsa</code>。</li><li>设置密码（passphrase）：可选，增强安全性。如果希望完全免密，直接回车留空。</li></ul></li></ol><p>生成后会在 <code>~/.ssh/</code> 目录下创建两个文件：</p><ul><li><code>id_rsa</code>：私钥（<strong>不要泄露</strong>）</li><li><code>id_rsa.pub</code>：公钥（用于上传到服务器）</li></ul><h2 id=二将公钥上传到远程服务器>二、将公钥上传到远程服务器<a hidden class=anchor aria-hidden=true href=#二将公钥上传到远程服务器>#</a></h2><h3 id=方法一使用-ssh-copy-id>方法一：使用 <code>ssh-copy-id</code><a hidden class=anchor aria-hidden=true href=#方法一使用-ssh-copy-id>#</a></h3><div class=highlight><pre tabindex=0 style=background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span>ssh-copy-id username@server_ip
+</span></span></code></pre></div><p>例如：</p><div class=highlight><pre tabindex=0 style=background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span>ssh-copy-id user@192.168.1.100
+</span></span></code></pre></div><p>系统会提示你输入远程用户的密码，验证通过后，公钥会被自动追加到服务器的 <code>~/.ssh/authorized_keys</code> 文件中。</p><blockquote><p>⚠️ 如果提示 <code>command not found</code>，说明 <code>ssh-copy-id</code> 不存在（常见于 macOS 或某些 Linux 发行版），请使用方法二。</p></blockquote><h3 id=方法二手动复制公钥>方法二：手动复制公钥<a hidden class=anchor aria-hidden=true href=#方法二手动复制公钥>#</a></h3><ol><li>查看本地公钥内容：</li></ol><div class=highlight><pre tabindex=0 style=background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span>cat ~/.ssh/id_rsa.pub
+</span></span></code></pre></div><p>复制输出的整段内容（以 <code>ssh-rsa AAAAB3...</code> 开头）。</p><ol start=2><li>登录远程服务器：</li></ol><div class=highlight><pre tabindex=0 style=background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span>ssh username@server_ip
+</span></span></code></pre></div><ol start=3><li>在服务器上创建 <code>.ssh</code> 目录（如果不存在）：</li></ol><div class=highlight><pre tabindex=0 style=background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span>mkdir -p ~/.ssh
+</span></span></code></pre></div><ol start=4><li>将公钥内容写入 <code>authorized_keys</code> 文件：</li></ol><div class=highlight><pre tabindex=0 style=background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span><span style=color:#366>echo</span> <span style=color:#c30>&#34;你复制的公钥内容&#34;</span> &gt;&gt; ~/.ssh/authorized_keys
+</span></span></code></pre></div><blockquote><p>注意替换“你复制的公钥内容”为实际内容。</p></blockquote><ol start=5><li>设置正确的权限（非常重要！SSH 要求严格权限）：</li></ol><div class=highlight><pre tabindex=0 style=background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span>chmod <span style=color:#f60>700</span> ~/.ssh
+</span></span><span style=display:flex><span>chmod <span style=color:#f60>600</span> ~/.ssh/authorized_keys
+</span></span><span style=display:flex><span>chown <span style=color:#033>$USER</span>:<span style=color:#033>$USER</span> ~/.ssh -R
+</span></span></code></pre></div><h2 id=三配置别名>三、配置别名<a hidden class=anchor aria-hidden=true href=#三配置别名>#</a></h2><ul><li><strong>配置别名</strong>：编辑 <code>~/.ssh/config</code>，简化连接命令：</li></ul><pre tabindex=0><code class=language-config data-lang=config>Host myserver
+    HostName 192.168.1.100
+    User myuser
+    IdentityFile ~/.ssh/id_rsa
+</code></pre><p>之后只需运行：</p><div class=highlight><pre tabindex=0 style=background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span>ssh myserver
+</span></span></code></pre></div></div><footer class=post-footer><nav class=paginav><a class=prev href=https://kerolt.github.io/posts/go/%E6%9B%B4%E6%94%B9go%E7%9A%84%E9%BB%98%E8%AE%A4%E5%AE%89%E8%A3%85%E4%BD%8D%E7%BD%AE/><span class=title>« Prev</span><br><span>更改Go的默认安装位置</span>
+</a><a class=next href=https://kerolt.github.io/posts/dev-null/%E4%B8%BAhugo-papermod%E6%B7%BB%E5%8A%A0mermaid%E6%B8%B2%E6%9F%93/><span class=title>Next »</span><br><span>为Hugo PaperMod添加mermaid渲染</span></a></nav></footer></article><script type=module>  
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs'; 
+    mermaid.initialize({ startOnLoad: true });  
+</script><script>Array.from(document.getElementsByClassName("language-mermaid")).forEach(e=>{e.parentElement.outerHTML=`<div class="mermaid">${e.innerHTML}</div>`})</script><style>.mermaid svg{display:block;margin:auto}</style></main><footer class=footer><span>&copy; 2026 <a href=https://kerolt.github.io/>Kerolt's Blog</a></span> ·
+<span>Powered by
+<a href=https://gohugo.io/ rel="noopener noreferrer" target=_blank>Hugo</a> &
+<a href=https://github.com/adityatelange/hugo-PaperMod/ rel=noopener target=_blank>PaperMod</a></span></footer><a href=#top aria-label="go to top" title="Go to Top (Alt + G)" class=top-link id=top-link accesskey=g><svg viewBox="0 0 12 6" fill="currentColor"><path d="M12 6H0l6-6z"/></svg>
+</a><script>let menu=document.getElementById("menu");menu&&(menu.scrollLeft=localStorage.getItem("menu-scroll-position"),menu.onscroll=function(){localStorage.setItem("menu-scroll-position",menu.scrollLeft)}),document.querySelectorAll('a[href^="#"]').forEach(e=>{e.addEventListener("click",function(e){e.preventDefault();var t=this.getAttribute("href").substr(1);window.matchMedia("(prefers-reduced-motion: reduce)").matches?document.querySelector(`[id='${decodeURIComponent(t)}']`).scrollIntoView():document.querySelector(`[id='${decodeURIComponent(t)}']`).scrollIntoView({behavior:"smooth"}),t==="top"?history.replaceState(null,null," "):history.pushState(null,null,`#${t}`)})})</script><script>var mybutton=document.getElementById("top-link");window.onscroll=function(){document.body.scrollTop>800||document.documentElement.scrollTop>800?(mybutton.style.visibility="visible",mybutton.style.opacity="1"):(mybutton.style.visibility="hidden",mybutton.style.opacity="0")}</script><script>document.getElementById("theme-toggle").addEventListener("click",()=>{document.body.className.includes("dark")?(document.body.classList.remove("dark"),localStorage.setItem("pref-theme","light")):(document.body.classList.add("dark"),localStorage.setItem("pref-theme","dark"))})</script><script>document.querySelectorAll("pre > code").forEach(e=>{const n=e.parentNode.parentNode,t=document.createElement("button");t.classList.add("copy-code"),t.innerHTML="copy";function s(){t.innerHTML="copied!",setTimeout(()=>{t.innerHTML="copy"},2e3)}t.addEventListener("click",t=>{if("clipboard"in navigator){navigator.clipboard.writeText(e.textContent),s();return}const n=document.createRange();n.selectNodeContents(e);const o=window.getSelection();o.removeAllRanges(),o.addRange(n);try{document.execCommand("copy"),s()}catch{}o.removeRange(n)}),n.classList.contains("highlight")?n.appendChild(t):n.parentNode.firstChild==n||(e.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName=="TABLE"?e.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(t):e.parentNode.appendChild(t))})</script></body></html>

@@ -9,9 +9,9 @@
       <url>https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</url>
       <link>https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</link>
     </image>
-    <generator>Hugo -- 0.155.0</generator>
+    <generator>Hugo -- 0.156.0</generator>
     <language>en</language>
-    <lastBuildDate>Wed, 28 Jan 2026 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Sat, 21 Feb 2026 00:00:00 +0000</lastBuildDate>
     <atom:link href="https://kerolt.github.io/categories/docker/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>在 Docker Compose 中为项目启用 IPv6 并可通过 IPv6 可访问</title>

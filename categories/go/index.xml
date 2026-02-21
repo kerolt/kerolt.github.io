@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Go on Kerolt&#39;s Blog</title>
+    <link>https://kerolt.github.io/categories/go/</link>
+    <description>Recent content in Go on Kerolt&#39;s Blog</description>
+    <image>
+      <title>Kerolt&#39;s Blog</title>
+      <url>https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</url>
+      <link>https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</link>
+    </image>
+    <generator>Hugo -- 0.156.0</generator>
+    <language>en</language>
+    <lastBuildDate>Fri, 13 Feb 2026 00:00:00 +0000</lastBuildDate>
+    <atom:link href="https://kerolt.github.io/categories/go/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>更改Go的默认安装位置</title>
+      <link>https://kerolt.github.io/posts/go/%E6%9B%B4%E6%94%B9go%E7%9A%84%E9%BB%98%E8%AE%A4%E5%AE%89%E8%A3%85%E4%BD%8D%E7%BD%AE/</link>
+      <pubDate>Wed, 11 Feb 2026 00:00:00 +0000</pubDate>
+      <guid>https://kerolt.github.io/posts/go/%E6%9B%B4%E6%94%B9go%E7%9A%84%E9%BB%98%E8%AE%A4%E5%AE%89%E8%A3%85%E4%BD%8D%E7%BD%AE/</guid>
+      <description>&lt;blockquote&gt;
+&lt;p&gt;将 Go 的默认工作 Go 目录从 &lt;code&gt;$HOME/go&lt;/code&gt; 改为 &lt;code&gt;$HOME/.go&lt;/code&gt; ，这个行为由环境变量 &lt;code&gt;GOPATH&lt;/code&gt; 控制&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id=&#34;核心原理gopath-与现代-go-的关系&#34;&gt;核心原理：&lt;code&gt;GOPATH&lt;/code&gt; 与现代 Go 的关系&lt;/h2&gt;
+&lt;p&gt;自 Go 1.11 引入 &lt;strong&gt;Go Modules&lt;/strong&gt; 后，项目源码不再强制依赖 &lt;code&gt;GOPATH/src&lt;/code&gt;，但以下内容仍受 &lt;code&gt;GOPATH&lt;/code&gt; 影响：&lt;/p&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;路径&lt;/th&gt;
+          &lt;th&gt;用途&lt;/th&gt;
+          &lt;th&gt;是否受 &lt;code&gt;GOPATH&lt;/code&gt; 影响&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;code&gt;$GOPATH/bin&lt;/code&gt;&lt;/td&gt;
+          &lt;td&gt;&lt;code&gt;go install&lt;/code&gt; 安装的可执行文件&lt;/td&gt;
+          &lt;td&gt;✅ 是&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;code&gt;$GOPATH/pkg/mod&lt;/code&gt;&lt;/td&gt;
+          &lt;td&gt;Module 缓存（Go 1.16+ 由 &lt;code&gt;GOMODCACHE&lt;/code&gt; 控制）&lt;/td&gt;
+          &lt;td&gt;⚠️ 部分&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;code&gt;$GOPATH/src&lt;/code&gt;&lt;/td&gt;
+          &lt;td&gt;传统 GOPATH 模式源码&lt;/td&gt;
+          &lt;td&gt;❌ Modules 模式下基本不用&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;因此，修改 &lt;code&gt;GOPATH&lt;/code&gt; 主要影响二进制安装路径和部分缓存位置，&lt;strong&gt;不影响已启用 modules 的项目构建&lt;/strong&gt;。&lt;/p&gt;
+&lt;h2 id=&#34;迁移步骤fedora-环境&#34;&gt;迁移步骤（Fedora 环境）&lt;/h2&gt;
+&lt;h3 id=&#34;1-设置环境变量&#34;&gt;1. 设置环境变量&lt;/h3&gt;
+&lt;p&gt;在 &lt;code&gt;~/.bashrc&lt;/code&gt; 或 &lt;code&gt;~/.zshrc&lt;/code&gt; 中添加：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;# Go workspace 配置&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#366&#34;&gt;export&lt;/span&gt; &lt;span style=&#34;color:#033&#34;&gt;GOPATH&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#033&#34;&gt;$HOME&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;/.go&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#366&#34;&gt;export&lt;/span&gt; &lt;span style=&#34;color:#033&#34;&gt;GOBIN&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#033&#34;&gt;$GOPATH&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;/bin&amp;#34;&lt;/span&gt;          &lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;# 显式指定二进制安装目录&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#366&#34;&gt;export&lt;/span&gt; &lt;span style=&#34;color:#033&#34;&gt;GOMODCACHE&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#033&#34;&gt;$GOPATH&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;/pkg/mod&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;# 可选：统一 module 缓存位置&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#366&#34;&gt;export&lt;/span&gt; &lt;span style=&#34;color:#033&#34;&gt;PATH&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#033&#34;&gt;$GOBIN&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;:&lt;/span&gt;&lt;span style=&#34;color:#033&#34;&gt;$PATH&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;&lt;/span&gt;          &lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;# 确保安装的工具可直接执行&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;blockquote&gt;
+&lt;p&gt;💡 提示：Fedora 默认使用 Bash，建议修改 &lt;code&gt;~/.bashrc&lt;/code&gt;；若使用 Zsh 则改 &lt;code&gt;~/.zshrc&lt;/code&gt;。&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>NetworkManager on Kerolt&#39;s Blog</title>
+    <link>https://kerolt.github.io/tags/networkmanager/</link>
+    <description>Recent content in NetworkManager on Kerolt&#39;s Blog</description>
+    <image>
+      <title>Kerolt&#39;s Blog</title>
+      <url>https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</url>
+      <link>https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</link>
+    </image>
+    <generator>Hugo -- 0.156.0</generator>
+    <language>en</language>
+    <lastBuildDate>Thu, 12 Feb 2026 00:00:00 +0000</lastBuildDate>
+    <atom:link href="https://kerolt.github.io/tags/networkmanager/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>使用nmcli连接Wi-Fi</title>
+      <link>https://kerolt.github.io/posts/linux/%E4%BD%BF%E7%94%A8nmcli%E8%BF%9E%E6%8E%A5wi-fi/</link>
+      <pubDate>Thu, 12 Feb 2026 00:00:00 +0000</pubDate>
+      <guid>https://kerolt.github.io/posts/linux/%E4%BD%BF%E7%94%A8nmcli%E8%BF%9E%E6%8E%A5wi-fi/</guid>
+      <description>&lt;p&gt;现在个人的环境是 Fedora43，使用&lt;strong&gt;NetworkManager&lt;/strong&gt;管理网络，因而基于 &lt;code&gt;nmcli&lt;/code&gt;（NetworkManager Command Line Interface）来高效、可靠地配置 WiFi&lt;/p&gt;
+&lt;h2 id=&#34;第一步确认-networkmanager-已接管无线接口&#34;&gt;第一步：确认 NetworkManager 已接管无线接口&lt;/h2&gt;
+&lt;p&gt;首先确保你的无线网卡（如 &lt;code&gt;wlan0&lt;/code&gt;）处于 NetworkManager 的管理之下：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;nmcli device status
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;输出应类似：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;DEVICE   TYPE      STATE         CONNECTION 
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;wlan0    wifi      disconnected  --         
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;eth0     ethernet  connected     Wired connection &lt;span style=&#34;color:#f60&#34;&gt;1&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;blockquote&gt;
+&lt;p&gt;🔍 注意：如果 &lt;code&gt;STATE&lt;/code&gt; 显示为 &lt;code&gt;unmanaged&lt;/code&gt;，说明该设备被排除在 NM 管理之外。检查 &lt;code&gt;/etc/NetworkManager/NetworkManager.conf&lt;/code&gt; 是否有 &lt;code&gt;unmanaged-devices&lt;/code&gt; 规则，或运行：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;sudo nmcli device &lt;span style=&#34;color:#366&#34;&gt;set&lt;/span&gt; wlan0 managed yes
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/blockquote&gt;
+&lt;h2 id=&#34;第二步扫描并连接-wifi支持-wpa2wpa3&#34;&gt;第二步：扫描并连接 WiFi（支持 WPA2/WPA3）&lt;/h2&gt;
+&lt;h3 id=&#34;1扫描可用网络可选用于确认-ssid-拼写&#34;&gt;（1）扫描可用网络（可选，用于确认 SSID 拼写）&lt;/h3&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;nmcli device wifi list
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id=&#34;2连接目标-wifi自动保存连接配置&#34;&gt;（2）连接目标 WiFi（自动保存连接配置）&lt;/h3&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;sudo nmcli device wifi connect &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;Your_SSID&amp;#34;&lt;/span&gt; password &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;Your_Password&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;成功时你会看到：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Device &lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;wlan0&amp;#39;&lt;/span&gt; successfully activated with &lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX&amp;#39;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;blockquote&gt;
+&lt;p&gt;💡 &lt;strong&gt;底层机制&lt;/strong&gt;：
+此命令会：&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>
