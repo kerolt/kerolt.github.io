@@ -9,10 +9,190 @@
       <url>https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</url>
       <link>https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</link>
     </image>
-    <generator>Hugo -- 0.156.0</generator>
+    <generator>Hugo -- 0.157.0</generator>
     <language>en</language>
-    <lastBuildDate>Tue, 04 Nov 2025 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Thu, 05 Mar 2026 00:00:00 +0000</lastBuildDate>
     <atom:link href="https://kerolt.github.io/categories/k8s/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Kind配置代理</title>
+      <link>https://kerolt.github.io/posts/k8s/kind%E9%85%8D%E7%BD%AE%E4%BB%A3%E7%90%86/</link>
+      <pubDate>Thu, 05 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://kerolt.github.io/posts/k8s/kind%E9%85%8D%E7%BD%AE%E4%BB%A3%E7%90%86/</guid>
+      <description>&lt;h2 id=&#34;what&#34;&gt;What&lt;/h2&gt;
+&lt;p&gt;使用 kind 在本地运行集群时，拉取镜像总是有这样的报错：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-sh&#34; data-lang=&#34;sh&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;spec.containers&lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;nginx&lt;span style=&#34;color:#555&#34;&gt;}&lt;/span&gt;: Failed to pull image &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;nginx:alpine&amp;#34;&lt;/span&gt;: failed to pull and unpack image &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;docker.io/library/nginx:alpine&amp;#34;&lt;/span&gt;: failed to resolve reference &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;docker.io/library/nginx:alpine&amp;#34;&lt;/span&gt;: failed to &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;do&lt;/span&gt; request: Head &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;https://registry-1.docker.io/v2/library/nginx/manifests/alpine &amp;#34;&lt;/span&gt;: proxyconnect tcp: dial tcp 127.0.0.1:7890: connect: connection refused
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h2 id=&#34;why&#34;&gt;Why&lt;/h2&gt;
+&lt;p&gt;问题的根源在于 &lt;strong&gt;网络隔离层级&lt;/strong&gt; 搞错了。&lt;/p&gt;
+&lt;p&gt;在 kind 的架构中，K8s 的“节点”其实是运行在宿主机上的 &lt;strong&gt;Docker 容器&lt;/strong&gt;。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;宿主机的视角&lt;/strong&gt;：&lt;code&gt;127.0.0.1:7890&lt;/code&gt; 指向宿主机上运行的代理软件。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;kind 节点的视角&lt;/strong&gt;：当容器（Node）尝试访问 &lt;code&gt;127.0.0.1:7890&lt;/code&gt; 时，它访问的是 &lt;strong&gt;容器内部的 Loopback 接口&lt;/strong&gt;。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;结果&lt;/strong&gt;：容器内部根本没有监听 7890 端口的服务，所以报 &lt;code&gt;connection refused&lt;/code&gt;。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;how&#34;&gt;How&lt;/h2&gt;
+&lt;p&gt;因此不能在配置里写 &lt;code&gt;127.0.0.1&lt;/code&gt;，必须让 kind 节点访问宿主机的 IP。&lt;/p&gt;
+&lt;p&gt;在 Linux 宿主机上，Docker 默认网桥的网关通常是 &lt;code&gt;172.17.0.1&lt;/code&gt;。&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;修改 &lt;code&gt;/etc/systemd/system/docker.service.d/http-proxy.conf&lt;/code&gt;：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-toml&#34; data-lang=&#34;toml&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;[Service]
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Environment=&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;HTTP_PROXY=http://172.17.0.1:7890&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Environment=&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;HTTPS_PROXY=http://172.17.0.1:7890&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Environment=&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;NO_PROXY=localhost,127.0.0.1,10.0.0.0/8,172.0.0.0/8,192.168.0.0/16,.svc,.cluster.local&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;代理软件（如 Clash）必须开启 &lt;strong&gt;&amp;ldquo;Allow LAN&amp;rdquo; (允许局域网连接)&lt;/strong&gt;，否则它会拒绝来自 &lt;code&gt;172.17.x.x&lt;/code&gt; 这种非本地流量。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Service与Endpoint</title>
+      <link>https://kerolt.github.io/posts/k8s/service%E4%B8%8Eendpoint/</link>
+      <pubDate>Sun, 01 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://kerolt.github.io/posts/k8s/service%E4%B8%8Eendpoint/</guid>
+      <description>&lt;p&gt;在 Kubernetes 中，&lt;strong&gt;Service&lt;/strong&gt;、&lt;strong&gt;Endpoint&lt;/strong&gt;（或 &lt;strong&gt;EndpointSlice&lt;/strong&gt;）和 &lt;strong&gt;kube-proxy&lt;/strong&gt; 是协同实现服务发现与负载均衡的核心组件。它们的关系可以简单理解为：&lt;strong&gt;Service 定义了访问规则，Endpoint 维护了实际后端 Pod 的地址列表，而 kube-proxy 负责将规则落地到每个节点，实现流量转发&lt;/strong&gt;。下面从概念到实例逐一说明。&lt;/p&gt;
+&lt;h3 id=&#34;1-核心概念&#34;&gt;1. 核心概念&lt;/h3&gt;
+&lt;h4 id=&#34;service&#34;&gt;Service&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;作用&lt;/strong&gt;：为一组功能相同的 Pod 提供稳定的网络访问入口（IP 和 DNS），屏蔽后端 Pod 的动态变化（如扩缩容、故障迁移）。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;类型&lt;/strong&gt;：ClusterIP（集群内访问）、NodePort（通过节点端口访问）、LoadBalancer（云负载均衡器）等。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;关键属性&lt;/strong&gt;：标签选择器（selector）决定了哪些 Pod 属于该 Service。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id=&#34;endpoint及-endpointslice&#34;&gt;Endpoint（及 EndpointSlice）&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;作用&lt;/strong&gt;：记录 Service 背后实际 Pod 的 IP 地址和端口列表。每个 Service 通常对应一个同名的 Endpoint 对象（旧版）或一组 EndpointSlice（新版，用于大规模集群）。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;自动维护&lt;/strong&gt;：当 Service 的标签选择器匹配到 Pod 时，Kubernetes 控制平面会自动创建并更新 Endpoint/EndpointSlice，将匹配的 Pod IP:Port 加入列表；若 Pod 变化，Endpoint 也随之更新。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id=&#34;kube-proxy&#34;&gt;kube-proxy&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;作用&lt;/strong&gt;：运行在每个工作节点上的代理组件，负责将访问 Service 的流量转发到后端的 Pod。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;工作模式&lt;/strong&gt;：常见的有 iptables（默认）、IPVS（高性能）、userspace（旧版）。kube-proxy 通过监听 API Server 中 Service 和 Endpoint 的变化，动态更新节点上的网络规则（如 iptables 规则），实现流量的负载均衡。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;2-三者的关系与协同流程&#34;&gt;2. 三者的关系与协同流程&lt;/h3&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;用户/客户端 -&amp;gt; Service（ClusterIP）-&amp;gt; kube-proxy 设置的规则 -&amp;gt; 后端 Pod（通过 Endpoint 获取地址）
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;控制平面&lt;/strong&gt;：
+&lt;ul&gt;
+&lt;li&gt;用户创建 Service，指定 &lt;code&gt;selector: app=web&lt;/code&gt;。&lt;/li&gt;
+&lt;li&gt;Kubernetes 自动创建同名的 Endpoint 对象，并持续监控所有带 &lt;code&gt;app=web&lt;/code&gt; 标签的 Pod，将其 IP:Port 写入 Endpoint 列表。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;数据平面（每个节点）&lt;/strong&gt;：
+&lt;ul&gt;
+&lt;li&gt;kube-proxy 监听 Service 和 Endpoint 的变化。&lt;/li&gt;
+&lt;li&gt;有更新时，kube-proxy 在节点上配置相应的转发规则（例如 iptables 规则）：
+&lt;ul&gt;
+&lt;li&gt;所有目标为 Service ClusterIP 的流量，随机或轮询转发到 Endpoint 列表中的某个 Pod IP。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;ul&gt;
+&lt;li&gt;当客户端通过 Service IP 访问时，请求到达节点，被节点上的 iptables 规则拦截，直接转发给某个后端 Pod。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;流量路径示例&lt;/strong&gt;：
+&lt;code&gt;Pod A（客户端） -&amp;gt; Service 10.96.0.1:80 -&amp;gt; 节点 iptables 规则 -&amp;gt; Pod B（后端）10.244.1.2:8080&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;3-举例说明&#34;&gt;3. 举例说明&lt;/h3&gt;
+&lt;p&gt;假设我们有一个简单的 Web 应用，由两个 Pod 组成，它们都带有标签 &lt;code&gt;app=web&lt;/code&gt;，容器端口为 80。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>k8s中的Informer</title>
+      <link>https://kerolt.github.io/posts/k8s/k8s%E4%B8%AD%E7%9A%84informer/</link>
+      <pubDate>Sun, 22 Feb 2026 00:00:00 +0000</pubDate>
+      <guid>https://kerolt.github.io/posts/k8s/k8s%E4%B8%AD%E7%9A%84informer/</guid>
+      <description>&lt;blockquote&gt;
+&lt;p&gt;本篇文章由 AI 辅助完成&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;strong&gt;Informer 就是一个带“自动更新”功能的本地缓存（Local Cache）。&lt;/strong&gt;&lt;/p&gt;
+&lt;h2 id=&#34;直观理解订阅模式-vs-轮询模式&#34;&gt;直观理解：订阅模式 vs. 轮询模式&lt;/h2&gt;
+&lt;p&gt;想象你要==&lt;strong&gt;监控集群里的 Pod 状态&lt;/strong&gt;==：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;笨办法（直接调用 Client）&lt;/strong&gt;：
+你每隔 5 秒问一次 API Server：“现在的 Pod 列表是什么？”&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;后果&lt;/strong&gt;：集群里有 1 万个 Pod，你每秒问一次，API Server 的 &lt;strong&gt;QPS&lt;/strong&gt; 瞬间爆炸，你会被限流（Rate Limit）。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;术语&lt;/strong&gt;：这叫 &lt;strong&gt;Polling&lt;/strong&gt;（轮询），效率低，延迟高。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;聪明办法（使用 Informer）&lt;/strong&gt;：
+你告诉 API Server：“我要订阅 Pod 的变化”。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;过程&lt;/strong&gt;：
+&lt;ol&gt;
+&lt;li&gt;先全量拿一次列表（List），存到你本地内存里。&lt;/li&gt;
+&lt;li&gt;建立长连接（Watch），只要有变化，API Server 主动推给你。&lt;/li&gt;
+&lt;li&gt;你更新本地内存，并触发你的回调函数（Callback）。&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;后果&lt;/strong&gt;：大部分查询直接读本地内存，零网络开销。只有变化时才通信。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;术语&lt;/strong&gt;：这叫 &lt;strong&gt;Watch&lt;/strong&gt; 机制 + &lt;strong&gt;Client-side Caching&lt;/strong&gt;。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h2 id=&#34;代码极简版&#34;&gt;代码极简版&lt;/h2&gt;
+&lt;p&gt;核心就三步：&lt;strong&gt;创建 -&amp;gt; 注册回调 -&amp;gt; 启动&lt;/strong&gt;。&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-go&#34; data-lang=&#34;go&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;package&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;main&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;import&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;(&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;    &lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;context&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;    &lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;time&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;    &lt;/span&gt;corev1&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;k8s.io/api/core/v1&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;    &lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;k8s.io/client-go/informers&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;    &lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;k8s.io/client-go/kubernetes&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;    &lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;k8s.io/client-go/tools/cache&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;    &lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;k8s.io/klog/v2&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;)&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;func&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#c0f&#34;&gt;main&lt;/span&gt;()&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;{&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;    &lt;/span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;// 假设 clientset 已经初始化好&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;    &lt;/span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;var&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;clientset&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;*&lt;/span&gt;kubernetes.Clientset&lt;span style=&#34;color:#bbb&#34;&gt; 
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;    &lt;/span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;// 1. 创建 Informer：监听所有 Namespace 的 Pod&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;    &lt;/span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;// 参数 30*time.Minute 是 Resync 周期，意思是即使没变化，每隔这么久也重新同步一次（防丢失）&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;    &lt;/span&gt;factory&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;:=&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;informers.&lt;span style=&#34;color:#c0f&#34;&gt;NewSharedInformerFactory&lt;/span&gt;(clientset,&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#f60&#34;&gt;30&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;*&lt;/span&gt;time.Minute)&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;    &lt;/span&gt;podInformer&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;:=&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;factory.&lt;span style=&#34;color:#c0f&#34;&gt;Core&lt;/span&gt;().&lt;span style=&#34;color:#c0f&#34;&gt;V1&lt;/span&gt;().&lt;span style=&#34;color:#c0f&#34;&gt;Pods&lt;/span&gt;().&lt;span style=&#34;color:#c0f&#34;&gt;Informer&lt;/span&gt;()&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;    &lt;/span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;// 2. 注册回调：告诉 Informer 有事了叫我&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;    &lt;/span&gt;podInformer.&lt;span style=&#34;color:#c0f&#34;&gt;AddEventHandler&lt;/span&gt;(cache.ResourceEventHandlerFuncs{&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;        &lt;/span&gt;AddFunc:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;func&lt;/span&gt;(obj&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;interface&lt;/span&gt;{})&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;{&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;            &lt;/span&gt;pod&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;:=&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;obj.(&lt;span style=&#34;color:#555&#34;&gt;*&lt;/span&gt;corev1.Pod)&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;            &lt;/span&gt;klog.&lt;span style=&#34;color:#c0f&#34;&gt;Infof&lt;/span&gt;(&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;捕获新增 Pod: %s&amp;#34;&lt;/span&gt;,&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;pod.Name)&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;            &lt;/span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;// 这里写你的业务逻辑，比如加入工作队列&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;        &lt;/span&gt;},&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;        &lt;/span&gt;UpdateFunc:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;func&lt;/span&gt;(oldObj,&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;newObj&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;interface&lt;/span&gt;{})&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;{&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;            &lt;/span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;// 只有真正变化了才处理，避免噪音&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;            &lt;/span&gt;oldPod&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;:=&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;oldObj.(&lt;span style=&#34;color:#555&#34;&gt;*&lt;/span&gt;corev1.Pod)&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;            &lt;/span&gt;newPod&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;:=&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;newObj.(&lt;span style=&#34;color:#555&#34;&gt;*&lt;/span&gt;corev1.Pod)&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;            &lt;/span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;if&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;oldPod.ResourceVersion&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;==&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;newPod.ResourceVersion&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;{&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;                &lt;/span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;return&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; 
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;            &lt;/span&gt;}&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;            &lt;/span&gt;klog.&lt;span style=&#34;color:#c0f&#34;&gt;Infof&lt;/span&gt;(&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;捕获更新 Pod: %s&amp;#34;&lt;/span&gt;,&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;newPod.Name)&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;        &lt;/span&gt;},&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;        &lt;/span&gt;DeleteFunc:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;func&lt;/span&gt;(obj&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;interface&lt;/span&gt;{})&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;{&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;            &lt;/span&gt;klog.&lt;span style=&#34;color:#c0f&#34;&gt;Infof&lt;/span&gt;(&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;捕获删除 Pod&amp;#34;&lt;/span&gt;)&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;        &lt;/span&gt;},&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;    &lt;/span&gt;})&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;    &lt;/span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;// 3. 启动&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;    &lt;/span&gt;ctx,&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;cancel&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;:=&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;context.&lt;span style=&#34;color:#c0f&#34;&gt;WithCancel&lt;/span&gt;(context.&lt;span style=&#34;color:#c0f&#34;&gt;Background&lt;/span&gt;())&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;    &lt;/span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;defer&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#c0f&#34;&gt;cancel&lt;/span&gt;()&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;    
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;    &lt;/span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;// 异步启动 Informer&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;    &lt;/span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;go&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;factory.&lt;span style=&#34;color:#c0f&#34;&gt;Start&lt;/span&gt;(ctx.&lt;span style=&#34;color:#c0f&#34;&gt;Done&lt;/span&gt;())&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;    &lt;/span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;// 等待缓存同步完成（这步很重要，否则查不到数据）&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;    &lt;/span&gt;factory.&lt;span style=&#34;color:#c0f&#34;&gt;WaitForCacheSync&lt;/span&gt;(ctx.&lt;span style=&#34;color:#c0f&#34;&gt;Done&lt;/span&gt;())&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;    &lt;/span&gt;klog.&lt;span style=&#34;color:#c0f&#34;&gt;Info&lt;/span&gt;(&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;Informer 已就绪，正在监听...&amp;#34;&lt;/span&gt;)&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;    
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;    &lt;/span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;// 阻塞主线程&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;    &lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;&amp;lt;-&lt;/span&gt;ctx.&lt;span style=&#34;color:#c0f&#34;&gt;Done&lt;/span&gt;()&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;}&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h2 id=&#34;为什么要用-informer&#34;&gt;为什么要用 Informer？&lt;/h2&gt;
+&lt;p&gt;如果你只是写个脚本一次性查个数据，用 &lt;code&gt;clientset.CoreV1().Pods().Get()&lt;/code&gt; 没问题。&lt;/p&gt;</description>
+    </item>
     <item>
       <title>在开发一个CNI插件时需要定义的几个配置文件</title>
       <link>https://kerolt.github.io/posts/k8s/%E5%9C%A8%E5%BC%80%E5%8F%91%E4%B8%80%E4%B8%AAcni%E6%8F%92%E4%BB%B6%E6%97%B6%E9%9C%80%E8%A6%81%E5%AE%9A%E4%B9%89%E7%9A%84%E5%87%A0%E4%B8%AA%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6/</link>

@@ -9,10 +9,39 @@
       <url>https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</url>
       <link>https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</link>
     </image>
-    <generator>Hugo -- 0.156.0</generator>
+    <generator>Hugo -- 0.157.0</generator>
     <language>en</language>
-    <lastBuildDate>Thu, 01 Jan 2026 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Fri, 06 Mar 2026 00:00:00 +0000</lastBuildDate>
     <atom:link href="https://kerolt.github.io/categories/net/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Headless Server如何进行 Portal 认证</title>
+      <link>https://kerolt.github.io/posts/net/headless-server%E5%A6%82%E4%BD%95%E8%BF%9B%E8%A1%8C-portal-%E8%AE%A4%E8%AF%81/</link>
+      <pubDate>Fri, 06 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://kerolt.github.io/posts/net/headless-server%E5%A6%82%E4%BD%95%E8%BF%9B%E8%A1%8C-portal-%E8%AE%A4%E8%AF%81/</guid>
+      <description>&lt;p&gt;在局域网中对于一台没有安装图形化界面的服务器（无头 Headless 服务器），如果需要使用校园网来进行上网连接，通常需要通过弹出网页登陆的形式验证，即 Portal 认证。最简单的方法就是通过==&lt;strong&gt;SSH Tunnel + 本地浏览器&lt;/strong&gt;==来解决。&lt;/p&gt;
+&lt;p&gt;其原理为建立一个 &lt;strong&gt;Dynamic Port Forwarding&lt;/strong&gt;。让本地浏览器通过 SSH 隧道，以目标服务器的身份去访问网络。&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;在你的&lt;strong&gt;本地笔记本&lt;/strong&gt;终端运行： &lt;code&gt;ssh -D 123456 user@ip&lt;/code&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;保持这个终端别关。打开笔记本的浏览器，设置 &lt;strong&gt;SOCKS5 代理&lt;/strong&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;地址：&lt;code&gt;127.0.0.1&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;端口：&lt;code&gt;123456&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;在浏览器输入任一网址（如 &lt;code&gt;http://xxx.com&lt;/code&gt;），它会自动跳转到校园网认证页面。此时你输入的账号密码，在服务端看来就是 Mini 主机发出的请求。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;登录成功后，关闭代理即可。&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;blockquote&gt;
+&lt;p&gt;参考：&lt;a href=&#34;https://cshihong.github.io/2019/05/30/Portal%E8%AE%A4%E8%AF%81%E5%8E%9F%E7%90%86/&#34;&gt;Portal认证原理&lt;/a&gt;&lt;/p&gt;
+&lt;/blockquote&gt;</description>
+    </item>
     <item>
       <title>Linux修改IP</title>
       <link>https://kerolt.github.io/posts/net/linux%E4%BF%AE%E6%94%B9ip/</link>

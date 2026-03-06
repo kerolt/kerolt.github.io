@@ -9,10 +9,40 @@
       <url>https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</url>
       <link>https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</link>
     </image>
-    <generator>Hugo -- 0.156.0</generator>
+    <generator>Hugo -- 0.157.0</generator>
     <language>en</language>
-    <lastBuildDate>Sun, 15 Feb 2026 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Wed, 25 Feb 2026 00:00:00 +0000</lastBuildDate>
     <atom:link href="https://kerolt.github.io/categories/ebpf/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>RingBuffer与PerfBuffer</title>
+      <link>https://kerolt.github.io/posts/ebpf/ringbuffer%E4%B8%8Eperfbuffer/</link>
+      <pubDate>Wed, 25 Feb 2026 00:00:00 +0000</pubDate>
+      <guid>https://kerolt.github.io/posts/ebpf/ringbuffer%E4%B8%8Eperfbuffer/</guid>
+      <description>&lt;blockquote&gt;
+&lt;p&gt;本篇文章由 AI 辅助完成&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;在 eBPF（extended Berkeley Packet Filter）生态中，&lt;strong&gt;Ring Buffer&lt;/strong&gt; 和 &lt;strong&gt;Perf Buffer&lt;/strong&gt; 都是用于将内核态采集的数据高效传递到用户态的机制。但从 Linux 5.8 开始引入的 &lt;strong&gt;Ring Buffer&lt;/strong&gt; 被认为在多数场景下优于传统的 &lt;strong&gt;Perf Buffer&lt;/strong&gt;，主要原因包括以下几点：&lt;/p&gt;
+&lt;h2 id=&#34;1-内存模型与数据一致性memory-model--data-consistency&#34;&gt;1. 内存模型与数据一致性（Memory Model &amp;amp; Data Consistency）&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Perf Buffer&lt;/strong&gt;：
+&lt;ul&gt;
+&lt;li&gt;基于 per-CPU 的 ring buffer（每个 CPU 一个独立 buffer）。&lt;/li&gt;
+&lt;li&gt;用户态需轮询所有 CPU 的 buffer，增加了复杂度。&lt;/li&gt;
+&lt;li&gt;写入时若跨页（跨越单个 perf event buffer 的页面边界），会丢弃整个样本（sample loss）。&lt;/li&gt;
+&lt;li&gt;不保证写入原子性：如果事件大于 buffer 剩余空间，会被截断或丢弃。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Ring Buffer&lt;/strong&gt;：
+&lt;ul&gt;
+&lt;li&gt;单一共享 buffer（可选 per-CPU 模式，但默认是全局的）。&lt;/li&gt;
+&lt;li&gt;支持 &lt;strong&gt;原子 reserve-commit 语义&lt;/strong&gt;：先 &lt;code&gt;bpf_ringbuf_reserve()&lt;/code&gt; 预留空间，填充后再 &lt;code&gt;bpf_ringbuf_submit()&lt;/code&gt; 提交。这确保了即使事件较大，也不会因 buffer 空间不足而被静默丢弃。&lt;/li&gt;
+&lt;li&gt;若空间不足，&lt;code&gt;reserve&lt;/code&gt; 直接失败，用户程序可感知并处理（如降级、计数等），避免 silent data loss。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;blockquote&gt;
+&lt;p&gt;💡 &lt;strong&gt;底层原理&lt;/strong&gt;：Ring Buffer 使用 memory-mapped shared memory + consumer/producer index（类似 DPDK 或 Linux kernel 的 &lt;code&gt;kfifo&lt;/code&gt;），通过 memory barrier 保证 SMP 下的一致性。&lt;/p&gt;</description>
+    </item>
     <item>
       <title>更适合eBPF程序宝宝体质的clangd配置</title>
       <link>https://kerolt.github.io/posts/ebpf/%E6%9B%B4%E9%80%82%E5%90%88ebpf%E7%A8%8B%E5%BA%8F%E5%AE%9D%E5%AE%9D%E4%BD%93%E8%B4%A8%E7%9A%84clangd%E9%85%8D%E7%BD%AE/</link>
