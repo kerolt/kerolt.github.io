@@ -11,8 +11,32 @@
     </image>
     <generator>Hugo -- 0.157.0</generator>
     <language>en</language>
-    <lastBuildDate>Thu, 05 Mar 2026 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Mon, 09 Mar 2026 00:00:00 +0000</lastBuildDate>
     <atom:link href="https://kerolt.github.io/categories/k8s/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Kind与MiniKube配置代理</title>
+      <link>https://kerolt.github.io/posts/k8s/kind%E4%B8%8Eminikube%E9%85%8D%E7%BD%AE%E4%BB%A3%E7%90%86/</link>
+      <pubDate>Thu, 05 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://kerolt.github.io/posts/k8s/kind%E4%B8%8Eminikube%E9%85%8D%E7%BD%AE%E4%BB%A3%E7%90%86/</guid>
+      <description>&lt;h2 id=&#34;what&#34;&gt;What&lt;/h2&gt;
+&lt;p&gt;使用 kind 在本地运行集群时，拉取镜像总是有这样的报错：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-sh&#34; data-lang=&#34;sh&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;spec.containers&lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;nginx&lt;span style=&#34;color:#555&#34;&gt;}&lt;/span&gt;: Failed to pull image &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;nginx:alpine&amp;#34;&lt;/span&gt;: failed to pull and unpack image &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;docker.io/library/nginx:alpine&amp;#34;&lt;/span&gt;: failed to resolve reference &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;docker.io/library/nginx:alpine&amp;#34;&lt;/span&gt;: failed to &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;do&lt;/span&gt; request: Head &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;https://registry-1.docker.io/v2/library/nginx/manifests/alpine &amp;#34;&lt;/span&gt;: proxyconnect tcp: dial tcp 127.0.0.1:7890: connect: connection refused
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h2 id=&#34;why&#34;&gt;Why&lt;/h2&gt;
+&lt;p&gt;问题的根源在于 &lt;strong&gt;网络隔离层级&lt;/strong&gt; 搞错了。&lt;/p&gt;
+&lt;p&gt;在 kind 的架构中，K8s 的“节点”其实是运行在宿主机上的 &lt;strong&gt;Docker 容器&lt;/strong&gt;。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;宿主机的视角&lt;/strong&gt;：&lt;code&gt;127.0.0.1:7890&lt;/code&gt; 指向宿主机上运行的代理软件。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;kind 节点的视角&lt;/strong&gt;：当容器（Node）尝试访问 &lt;code&gt;127.0.0.1:7890&lt;/code&gt; 时，它访问的是 &lt;strong&gt;容器内部的 Loopback 接口&lt;/strong&gt;。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;结果&lt;/strong&gt;：容器内部根本没有监听 7890 端口的服务，所以报 &lt;code&gt;connection refused&lt;/code&gt;。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;how&#34;&gt;How&lt;/h2&gt;
+&lt;h3 id=&#34;对于-kind&#34;&gt;对于 Kind&lt;/h3&gt;
+&lt;p&gt;因此不能在配置里写 &lt;code&gt;127.0.0.1&lt;/code&gt;，必须让 kind 节点访问宿主机的 IP。&lt;/p&gt;
+&lt;p&gt;在 Linux 宿主机上，Docker 默认网桥的网关通常是 &lt;code&gt;172.17.0.1&lt;/code&gt;。&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;修改 &lt;code&gt;/etc/systemd/system/docker.service.d/http-proxy.conf&lt;/code&gt;：&lt;/p&gt;</description>
+    </item>
     <item>
       <title>Kind配置代理</title>
       <link>https://kerolt.github.io/posts/k8s/kind%E9%85%8D%E7%BD%AE%E4%BB%A3%E7%90%86/</link>

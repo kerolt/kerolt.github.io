@@ -59,7 +59,7 @@ Environment="NO_PROXY=localhost,127.0.0.1,10.0.0.0/8,172.0.0.0/8,192.168.0.0/16,
 </span></span><span style=display:flex><span>Environment=<span style=color:#c30>&#34;NO_PROXY=localhost,127.0.0.1,10.0.0.0/8,172.0.0.0/8,192.168.0.0/16,.svc,.cluster.local&#34;</span>
 </span></span></code></pre></div></li><li><p>代理软件（如 Clash）必须开启 <strong>&ldquo;Allow LAN&rdquo; (允许局域网连接)</strong>，否则它会拒绝来自 <code>172.17.x.x</code> 这种非本地流量。</p></li><li><p>重启 Docker：</p><div class=highlight><pre tabindex=0 style=background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-shell data-lang=shell><span style=display:flex><span>sudo systemctl daemon-reload
 </span></span><span style=display:flex><span>sudo systemctl restart docker
-</span></span></code></pre></div></li></ol></div><footer class=post-footer><nav class=paginav><a class=prev href=https://kerolt.github.io/posts/net/headless-server%E5%A6%82%E4%BD%95%E8%BF%9B%E8%A1%8C-portal-%E8%AE%A4%E8%AF%81/><span class=title>« Prev</span><br><span>Headless Server如何进行 Portal 认证</span>
+</span></span></code></pre></div></li></ol></div><footer class=post-footer><nav class=paginav><a class=prev href=https://kerolt.github.io/posts/k8s/kind%E4%B8%8Eminikube%E9%85%8D%E7%BD%AE%E4%BB%A3%E7%90%86/><span class=title>« Prev</span><br><span>Kind与MiniKube配置代理</span>
 </a><a class=next href=https://kerolt.github.io/posts/k8s/service%E4%B8%8Eendpoint/><span class=title>Next »</span><br><span>Service与Endpoint</span></a></nav></footer></article><script type=module>  
     import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs'; 
     mermaid.initialize({ startOnLoad: true });  

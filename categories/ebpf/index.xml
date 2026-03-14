@@ -11,8 +11,40 @@
     </image>
     <generator>Hugo -- 0.157.0</generator>
     <language>en</language>
-    <lastBuildDate>Wed, 25 Feb 2026 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Tue, 10 Mar 2026 00:00:00 +0000</lastBuildDate>
     <atom:link href="https://kerolt.github.io/categories/ebpf/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>如何理解sys-fs-bpf</title>
+      <link>https://kerolt.github.io/posts/ebpf/%E5%A6%82%E4%BD%95%E7%90%86%E8%A7%A3sys-fs-bpf/</link>
+      <pubDate>Tue, 10 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://kerolt.github.io/posts/ebpf/%E5%A6%82%E4%BD%95%E7%90%86%E8%A7%A3sys-fs-bpf/</guid>
+      <description>&lt;p&gt;&lt;code&gt;/sys/fs/bpf&lt;/code&gt; 是 Linux 内核中 &lt;strong&gt;BPF 文件系统&lt;/strong&gt; 的挂载点。简单来说，它是 &lt;strong&gt;BPF 对象（如 Maps 和 Programs）在用户空间文件系统中的“家”&lt;/strong&gt;。&lt;/p&gt;
+&lt;h2 id=&#34;持久化与命名空间化&#34;&gt;持久化与命名空间化&lt;/h2&gt;
+&lt;p&gt;在 BPF 文件系统出现之前，BPF 程序和 Map 的生命周期完全依赖于持有其文件描述符的进程。如果创建 BPF Map 的进程退出了，Map 也就随之销毁了。&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;/sys/fs/bpf&lt;/code&gt; 解决了这个问题，它提供了两个核心能力：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;持久化：&lt;/strong&gt;
+当将一个 BPF Map 或 BPF 程序 pin 到这个文件系统中时，即使创建它的进程结束，只要内核还在，这个对象就会一直存在。其他进程可以随后通过读取该文件来获取对象的句柄，从而实现数据的共享和程序的复用。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;命名空间隔离：&lt;/strong&gt;
+它遵循文件系统的权限模型和命名空间规则。不同的容器或用户可以在各自的目录下管理 BPF 对象，避免了冲突，也增加了安全性。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;pin&#34;&gt;Pin&lt;/h2&gt;
+&lt;p&gt;当用户空间程序加载一个 BPF 程序或创建一个 Map 时，内核会在内存中创建相应的数据结构，并返回一个文件描述符给用户空间。&lt;/p&gt;
+&lt;p&gt;默认情况下，当 fd 关闭（进程退出）时，内核引用计数归零，对象被销毁。&lt;/p&gt;
+&lt;p&gt;用户空间程序可以调用 &lt;code&gt;bpf_obj_pin()&lt;/code&gt; 系统调用，将这个 fd 与 &lt;code&gt;/sys/fs/bpf/&lt;/code&gt; 下的一个路径绑定：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;这会在该路径下创建一个文件（这就是你看到的那些文件）。&lt;/li&gt;
+&lt;li&gt;内核会增加该对象的引用计数。&lt;/li&gt;
+&lt;li&gt;只要该文件存在，对象就不会被内核销毁。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;目录下的文件是什么&#34;&gt;目录下的文件是什么？&lt;/h2&gt;
+&lt;p&gt;在 &lt;code&gt;/sys/fs/bpf&lt;/code&gt; 下执行 &lt;code&gt;ls -l&lt;/code&gt; 时，看到的文件实际上是 &lt;strong&gt;内核 BPF 对象的句柄&lt;/strong&gt;。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Map 文件：&lt;/strong&gt; 代表一个 Key-Value 存储结构。多个 BPF 程序可以共享同一个 Map 文件来交换数据（例如：一个程序统计流量，另一个程序读取统计数据）。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Program 文件：&lt;/strong&gt; 代表编译好的 BPF 字节码。可以被附加到 Hook 点（如 XDP, Tracepoint, TC 等）上执行。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;它们不存储文本或二进制数据流，无法用 &lt;code&gt;cat&lt;/code&gt; 读取 Map 里的内容（虽然可以用 &lt;code&gt;bpftool&lt;/code&gt; 命令操作）。&lt;/p&gt;</description>
+    </item>
     <item>
       <title>RingBuffer与PerfBuffer</title>
       <link>https://kerolt.github.io/posts/ebpf/ringbuffer%E4%B8%8Eperfbuffer/</link>
