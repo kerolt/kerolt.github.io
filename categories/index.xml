@@ -11,8 +11,15 @@
     </image>
     <generator>Hugo -- 0.158.0</generator>
     <language>en</language>
-    <lastBuildDate>Tue, 10 Mar 2026 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Wed, 18 Mar 2026 00:00:00 +0000</lastBuildDate>
     <atom:link href="https://kerolt.github.io/categories/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Dev-Null</title>
+      <link>https://kerolt.github.io/categories/dev-null/</link>
+      <pubDate>Wed, 18 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://kerolt.github.io/categories/dev-null/</guid>
+      <description></description>
+    </item>
     <item>
       <title>EBPF</title>
       <link>https://kerolt.github.io/categories/ebpf/</link>
@@ -46,13 +53,6 @@
       <link>https://kerolt.github.io/categories/go/</link>
       <pubDate>Wed, 11 Feb 2026 00:00:00 +0000</pubDate>
       <guid>https://kerolt.github.io/categories/go/</guid>
-      <description></description>
-    </item>
-    <item>
-      <title>Dev-Null</title>
-      <link>https://kerolt.github.io/categories/dev-null/</link>
-      <pubDate>Thu, 29 Jan 2026 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/categories/dev-null/</guid>
       <description></description>
     </item>
     <item>
@@ -126,10 +126,10 @@
       <description></description>
     </item>
     <item>
-      <title>项目</title>
-      <link>https://kerolt.github.io/categories/%E9%A1%B9%E7%9B%AE/</link>
+      <title>协程库</title>
+      <link>https://kerolt.github.io/categories/%E5%8D%8F%E7%A8%8B%E5%BA%93/</link>
       <pubDate>Mon, 30 Sep 2024 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/categories/%E9%A1%B9%E7%9B%AE/</guid>
+      <guid>https://kerolt.github.io/categories/%E5%8D%8F%E7%A8%8B%E5%BA%93/</guid>
       <description></description>
     </item>
   </channel>

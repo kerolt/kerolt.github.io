@@ -11,8 +11,43 @@
     </image>
     <generator>Hugo -- 0.158.0</generator>
     <language>en</language>
-    <lastBuildDate>Tue, 10 Mar 2026 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Wed, 18 Mar 2026 00:00:00 +0000</lastBuildDate>
     <atom:link href="https://kerolt.github.io/posts/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>tmux长时间运行命令</title>
+      <link>https://kerolt.github.io/posts/dev-null/tmux%E9%95%BF%E6%97%B6%E9%97%B4%E8%BF%90%E8%A1%8C%E5%91%BD%E4%BB%A4/</link>
+      <pubDate>Wed, 18 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://kerolt.github.io/posts/dev-null/tmux%E9%95%BF%E6%97%B6%E9%97%B4%E8%BF%90%E8%A1%8C%E5%91%BD%E4%BB%A4/</guid>
+      <description>&lt;p&gt;现在我有一个这样的使用场景：在远程服务器通过 VSCode 来编辑代码，然后需要长时间训练/数据处理。为了确保退出 VSCode 后这个处理进程能继续，通常需要使用 &lt;code&gt;tmux&lt;/code&gt; 来管理。这里总结一下常用命令。&lt;/p&gt;
+&lt;h2 id=&#34;创建会话&#34;&gt;创建会话&lt;/h2&gt;
+&lt;p&gt;创建一个新会话（建议命名）：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;tmux new -s msmetrics
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;在里面直接运行你的任务：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;uv run data/prepare_msmetrics_dataset.py ... | tee run.log
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;退出但不终止任务（detach）：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Ctrl + B，然后按 D
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;重新连接：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;tmux attach -t msmetrics
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;结束会话（任务结束后）：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#366&#34;&gt;exit&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;hr&gt;
+&lt;h2 id=&#34;会话管理多实验并行的关键&#34;&gt;会话管理（多实验并行的关键）&lt;/h2&gt;
+&lt;p&gt;查看所有 session：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;tmux ls
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;输出类似：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-text&#34; data-lang=&#34;text&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;msmetrics: 1 windows
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;dafpred: 1 windows
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;informer: 1 windows
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;连接某个 session：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;tmux attach -t dafpred
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;强制接管（比如之前断线没正常 detach）：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;tmux attach -d -t dafpred
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;删除某个 session：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;tmux kill-session -t dafpred
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;hr&gt;
+&lt;h2 id=&#34;窗口window管理一个-session-多任务&#34;&gt;窗口（window）管理（一个 session 多任务）&lt;/h2&gt;
+&lt;p&gt;一个 session 可以开多个“&lt;strong&gt;窗口&lt;/strong&gt;”（类似 tab）。&lt;/p&gt;</description>
+    </item>
     <item>
       <title>如何理解sys-fs-bpf</title>
       <link>https://kerolt.github.io/posts/ebpf/%E5%A6%82%E4%BD%95%E7%90%86%E8%A7%A3sys-fs-bpf/</link>
@@ -351,34 +386,6 @@
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;Diagnostics&lt;/span&gt;:&lt;span style=&#34;color:#bbb&#34;&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;  &lt;/span&gt;&lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;Suppress&lt;/span&gt;:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;[&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;*&amp;#34;&lt;/span&gt;]&lt;span style=&#34;color:#bbb&#34;&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;</description>
-    </item>
-    <item>
-      <title>使用nmcli连接Wi-Fi</title>
-      <link>https://kerolt.github.io/posts/linux/%E4%BD%BF%E7%94%A8nmcli%E8%BF%9E%E6%8E%A5wi-fi/</link>
-      <pubDate>Thu, 12 Feb 2026 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/linux/%E4%BD%BF%E7%94%A8nmcli%E8%BF%9E%E6%8E%A5wi-fi/</guid>
-      <description>&lt;p&gt;现在个人的环境是 Fedora43，使用&lt;strong&gt;NetworkManager&lt;/strong&gt;管理网络，因而基于 &lt;code&gt;nmcli&lt;/code&gt;（NetworkManager Command Line Interface）来高效、可靠地配置 WiFi&lt;/p&gt;
-&lt;h2 id=&#34;第一步确认-networkmanager-已接管无线接口&#34;&gt;第一步：确认 NetworkManager 已接管无线接口&lt;/h2&gt;
-&lt;p&gt;首先确保你的无线网卡（如 &lt;code&gt;wlan0&lt;/code&gt;）处于 NetworkManager 的管理之下：&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;nmcli device status
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;输出应类似：&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;DEVICE   TYPE      STATE         CONNECTION 
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;wlan0    wifi      disconnected  --         
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;eth0     ethernet  connected     Wired connection &lt;span style=&#34;color:#f60&#34;&gt;1&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;blockquote&gt;
-&lt;p&gt;🔍 注意：如果 &lt;code&gt;STATE&lt;/code&gt; 显示为 &lt;code&gt;unmanaged&lt;/code&gt;，说明该设备被排除在 NM 管理之外。检查 &lt;code&gt;/etc/NetworkManager/NetworkManager.conf&lt;/code&gt; 是否有 &lt;code&gt;unmanaged-devices&lt;/code&gt; 规则，或运行：&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;sudo nmcli device &lt;span style=&#34;color:#366&#34;&gt;set&lt;/span&gt; wlan0 managed yes
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/blockquote&gt;
-&lt;h2 id=&#34;第二步扫描并连接-wifi支持-wpa2wpa3&#34;&gt;第二步：扫描并连接 WiFi（支持 WPA2/WPA3）&lt;/h2&gt;
-&lt;h3 id=&#34;1扫描可用网络可选用于确认-ssid-拼写&#34;&gt;（1）扫描可用网络（可选，用于确认 SSID 拼写）&lt;/h3&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;nmcli device wifi list
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id=&#34;2连接目标-wifi自动保存连接配置&#34;&gt;（2）连接目标 WiFi（自动保存连接配置）&lt;/h3&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;sudo nmcli device wifi connect &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;Your_SSID&amp;#34;&lt;/span&gt; password &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;Your_Password&amp;#34;&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;成功时你会看到：&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Device &lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;wlan0&amp;#39;&lt;/span&gt; successfully activated with &lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX&amp;#39;&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;blockquote&gt;
-&lt;p&gt;💡 &lt;strong&gt;底层机制&lt;/strong&gt;：
-此命令会：&lt;/p&gt;</description>
     </item>
     <item>
       <title>使用nmcli连接Wi-Fi</title>
@@ -2747,38 +2754,38 @@ curl -b cookies.txt https://example.com/dashboard
     </item>
     <item>
       <title>【动手写协程库 5】常用IO函数的HOOK功能</title>
-      <link>https://kerolt.github.io/posts/dev-null/%E5%8A%A8%E6%89%8B%E5%86%99%E5%8D%8F%E7%A8%8B%E5%BA%93-5%E5%B8%B8%E7%94%A8io%E5%87%BD%E6%95%B0%E7%9A%84hook%E5%8A%9F%E8%83%BD/</link>
+      <link>https://kerolt.github.io/posts/%E5%8D%8F%E7%A8%8B%E5%BA%93/%E5%8A%A8%E6%89%8B%E5%86%99%E5%8D%8F%E7%A8%8B%E5%BA%93-5%E5%B8%B8%E7%94%A8io%E5%87%BD%E6%95%B0%E7%9A%84hook%E5%8A%9F%E8%83%BD/</link>
       <pubDate>Mon, 30 Sep 2024 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/dev-null/%E5%8A%A8%E6%89%8B%E5%86%99%E5%8D%8F%E7%A8%8B%E5%BA%93-5%E5%B8%B8%E7%94%A8io%E5%87%BD%E6%95%B0%E7%9A%84hook%E5%8A%9F%E8%83%BD/</guid>
+      <guid>https://kerolt.github.io/posts/%E5%8D%8F%E7%A8%8B%E5%BA%93/%E5%8A%A8%E6%89%8B%E5%86%99%E5%8D%8F%E7%A8%8B%E5%BA%93-5%E5%B8%B8%E7%94%A8io%E5%87%BD%E6%95%B0%E7%9A%84hook%E5%8A%9F%E8%83%BD/</guid>
       <description>&lt;blockquote&gt;
-&lt;p&gt;【动手写协程库】系列笔记是学习sylar的协程库时的记录，参考了&lt;a href=&#34;https://www.midlane.top/wiki/pages/viewpage.action?pageId=10060952&#34;&gt;从零开始重写sylar C++高性能分布式服务器框架&lt;/a&gt;和代码随想录中的&lt;a href=&#34;https://www.programmercarl.com/other/project_coroutine.html#%E4%B8%8B%E8%BD%BD%E6%96%B9%E5%BC%8F&#34;&gt;文档&lt;/a&gt;。文章并不是对所有代码的详细解释，而是为了自己理解一些片段所做的笔记。&lt;/p&gt;
-&lt;p&gt;hook函数的具体定义实现可以在这里查看：&lt;a href=&#34;https://github.com/kerolt/coroutine-lib/blob/master/src/hook.cpp&#34;&gt;Github: src/hook.cpp&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;【动手写协程库】系列笔记是学习 sylar 的协程库时的记录，参考了 &lt;a href=&#34;https://www.midlane.top/wiki/pages/viewpage.action?pageId=10060952&#34;&gt;从零开始重写sylar C++高性能分布式服务器框架&lt;/a&gt; 和代码随想录中的 &lt;a href=&#34;https://www.programmercarl.com/other/project_coroutine.html#%E4%B8%8B%E8%BD%BD%E6%96%B9%E5%BC%8F&#34;&gt;文档&lt;/a&gt;。文章并不是对所有代码的详细解释，而是为了自己理解一些片段所做的笔记。&lt;/p&gt;
+&lt;p&gt;hook 函数的具体定义实现可以在这里查看：&lt;a href=&#34;https://github.com/kerolt/coroutine-lib/blob/master/src/hook.cpp&#34;&gt;Github: src/hook.cpp&lt;/a&gt;&lt;/p&gt;
 &lt;/blockquote&gt;
-&lt;p&gt;该协程库框架的目标并不是做成类似goroutine那样，而是希望能够通过协程来提高IO处理的效率。因此，对于每个文件描述符fd，我们都希望它有一个读写IO的超时时间。&lt;/p&gt;
-&lt;p&gt;hook的目的是在不重新编写代码的情况下，把老代码中的socket IO相关的API都&lt;strong&gt;转成异步&lt;/strong&gt;，以提高性能。&lt;/p&gt;</description>
+&lt;p&gt;该协程库框架的目标并不是做成类似 goroutine 那样，而是希望能够通过协程来提高 IO 处理的效率。因此，对于每个文件描述符 fd，我们都希望它有一个读写 IO 的超时时间。&lt;/p&gt;
+&lt;p&gt;hook 的目的是在不重新编写代码的情况下，把老代码中的 socket IO 相关的 API 都&lt;strong&gt;转成异步&lt;/strong&gt;，以提高性能。&lt;/p&gt;</description>
     </item>
     <item>
       <title>【动手写协程库 4】IO协程调度器</title>
-      <link>https://kerolt.github.io/posts/dev-null/%E5%8A%A8%E6%89%8B%E5%86%99%E5%8D%8F%E7%A8%8B%E5%BA%93-4io%E5%8D%8F%E7%A8%8B%E8%B0%83%E5%BA%A6%E5%99%A8/</link>
+      <link>https://kerolt.github.io/posts/%E5%8D%8F%E7%A8%8B%E5%BA%93/%E5%8A%A8%E6%89%8B%E5%86%99%E5%8D%8F%E7%A8%8B%E5%BA%93-4io%E5%8D%8F%E7%A8%8B%E8%B0%83%E5%BA%A6%E5%99%A8/</link>
       <pubDate>Sun, 29 Sep 2024 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/dev-null/%E5%8A%A8%E6%89%8B%E5%86%99%E5%8D%8F%E7%A8%8B%E5%BA%93-4io%E5%8D%8F%E7%A8%8B%E8%B0%83%E5%BA%A6%E5%99%A8/</guid>
+      <guid>https://kerolt.github.io/posts/%E5%8D%8F%E7%A8%8B%E5%BA%93/%E5%8A%A8%E6%89%8B%E5%86%99%E5%8D%8F%E7%A8%8B%E5%BA%93-4io%E5%8D%8F%E7%A8%8B%E8%B0%83%E5%BA%A6%E5%99%A8/</guid>
       <description>&lt;blockquote&gt;
-&lt;p&gt;【动手写协程库】系列笔记是学习sylar的协程库时的记录，参考了&lt;a href=&#34;https://www.midlane.top/wiki/pages/viewpage.action?pageId=10060952&#34;&gt;从零开始重写sylar C++高性能分布式服务器框架&lt;/a&gt;和代码随想录中的&lt;a href=&#34;https://www.programmercarl.com/other/project_coroutine.html#%E4%B8%8B%E8%BD%BD%E6%96%B9%E5%BC%8F&#34;&gt;文档&lt;/a&gt;。文章并不是对所有代码的详细解释，而是为了自己理解一些片段所做的笔记。&lt;/p&gt;
-&lt;p&gt;&lt;code&gt;IOManager&lt;/code&gt;类中具体定义实现可以在这里查看：&lt;a href=&#34;https://github.com/kerolt/coroutine-lib/blob/master/src/iomanager.cpp&#34;&gt;Github: src/iomanager.cpp&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;【动手写协程库】系列笔记是学习 sylar 的协程库时的记录，参考了 &lt;a href=&#34;https://www.midlane.top/wiki/pages/viewpage.action?pageId=10060952&#34;&gt;从零开始重写sylar C++高性能分布式服务器框架&lt;/a&gt; 和代码随想录中的 &lt;a href=&#34;https://www.programmercarl.com/other/project_coroutine.html#%E4%B8%8B%E8%BD%BD%E6%96%B9%E5%BC%8F&#34;&gt;文档&lt;/a&gt;。文章并不是对所有代码的详细解释，而是为了自己理解一些片段所做的笔记。&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;IOManager&lt;/code&gt; 类中具体定义实现可以在这里查看：&lt;a href=&#34;https://github.com/kerolt/coroutine-lib/blob/master/src/iomanager.cpp&#34;&gt;Github: src/iomanager.cpp&lt;/a&gt;&lt;/p&gt;
 &lt;/blockquote&gt;
-&lt;p&gt;之前实现的协程调度器的功能其实非常简单，当添加任务后调度器只是单纯的从任务队列中取出任务交给协程去执行。sylar的协程库的关注对象是网络IO，如果采用这么简单的调度就根本没有用到协程的精髓。&lt;/p&gt;
-&lt;p&gt;sylar的IO协程调度解决了之前调度器在idle状态下忙等待导致CPU占用率高的问题。IO协程调度器使用一对管道fd来tickle调度协程，当调度器空闲时，idle协程通过epoll_wait阻塞在管道的读描述符上，等管道的可读事件。添加新任务时，tickle方法写管道，idle协程检测到管道可读后退出，调度器执行调度。&lt;/p&gt;</description>
+&lt;p&gt;之前实现的协程调度器的功能其实非常简单，当添加任务后调度器只是单纯的从任务队列中取出任务交给协程去执行。sylar 的协程库的关注对象是网络 IO，如果采用这么简单的调度就根本没有用到协程的精髓。&lt;/p&gt;
+&lt;p&gt;sylar 的 IO 协程调度解决了之前调度器在 idle 状态下忙等待导致 CPU 占用率高的问题。IO 协程调度器使用一对管道 fd 来 tickle 调度协程，当调度器空闲时，idle 协程通过 epoll_wait 阻塞在管道的读描述符上，等管道的可读事件。添加新任务时，tickle 方法写管道，idle 协程检测到管道可读后退出，调度器执行调度。&lt;/p&gt;</description>
     </item>
     <item>
       <title>【动手写协程库 3】定时器</title>
-      <link>https://kerolt.github.io/posts/dev-null/%E5%8A%A8%E6%89%8B%E5%86%99%E5%8D%8F%E7%A8%8B%E5%BA%93-3%E5%AE%9A%E6%97%B6%E5%99%A8/</link>
+      <link>https://kerolt.github.io/posts/%E5%8D%8F%E7%A8%8B%E5%BA%93/%E5%8A%A8%E6%89%8B%E5%86%99%E5%8D%8F%E7%A8%8B%E5%BA%93-3%E5%AE%9A%E6%97%B6%E5%99%A8/</link>
       <pubDate>Sat, 28 Sep 2024 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/dev-null/%E5%8A%A8%E6%89%8B%E5%86%99%E5%8D%8F%E7%A8%8B%E5%BA%93-3%E5%AE%9A%E6%97%B6%E5%99%A8/</guid>
+      <guid>https://kerolt.github.io/posts/%E5%8D%8F%E7%A8%8B%E5%BA%93/%E5%8A%A8%E6%89%8B%E5%86%99%E5%8D%8F%E7%A8%8B%E5%BA%93-3%E5%AE%9A%E6%97%B6%E5%99%A8/</guid>
       <description>&lt;blockquote&gt;
-&lt;p&gt;【动手写协程库】系列笔记是学习sylar的协程库时的记录，参考了&lt;a href=&#34;https://www.midlane.top/wiki/pages/viewpage.action?pageId=10060952&#34;&gt;从零开始重写sylar C++高性能分布式服务器框架&lt;/a&gt;和代码随想录中的&lt;a href=&#34;https://www.programmercarl.com/other/project_coroutine.html#%E4%B8%8B%E8%BD%BD%E6%96%B9%E5%BC%8F&#34;&gt;文档&lt;/a&gt;。文章并不是对所有代码的详细解释，而是为了自己理解一些片段所做的笔记。&lt;/p&gt;
-&lt;p&gt;&lt;code&gt;TimerManager&lt;/code&gt;类中具体定义实现可以在这里查看：&lt;a href=&#34;https://github.com/kerolt/coroutine-lib/blob/master/src/timer.cpp&#34;&gt;Github: src/timer.cpp&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;【动手写协程库】系列笔记是学习 sylar 的协程库时的记录，参考了 &lt;a href=&#34;https://www.midlane.top/wiki/pages/viewpage.action?pageId=10060952&#34;&gt;从零开始重写sylar C++高性能分布式服务器框架&lt;/a&gt; 和代码随想录中的 &lt;a href=&#34;https://www.programmercarl.com/other/project_coroutine.html#%E4%B8%8B%E8%BD%BD%E6%96%B9%E5%BC%8F&#34;&gt;文档&lt;/a&gt;。文章并不是对所有代码的详细解释，而是为了自己理解一些片段所做的笔记。&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;TimerManager&lt;/code&gt; 类中具体定义实现可以在这里查看：&lt;a href=&#34;https://github.com/kerolt/coroutine-lib/blob/master/src/timer.cpp&#34;&gt;Github: src/timer.cpp&lt;/a&gt;&lt;/p&gt;
 &lt;/blockquote&gt;
-&lt;p&gt;通过定时器，我们可以实现给服务器注册定时事件。sylar的定时器采用最小堆设计，所有定时器根据绝对的超时时间点（也就是超时到期的具体时间戳）进行排序，每次取出离当前时间&lt;strong&gt;最近的一个超时时间点&lt;/strong&gt;，计算出超时需要等待的时间，然后等待超时。超时时间到后，获取当前的绝对时间点，然后&lt;strong&gt;把最小堆里超时时间点小于这个时间点的定时器都收集起来&lt;/strong&gt;，执行它们的回调函数。&lt;/p&gt;</description>
+&lt;p&gt;通过定时器，我们可以实现给服务器注册定时事件。sylar 的定时器采用最小堆设计，所有定时器根据绝对的超时时间点（也就是超时到期的具体时间戳）进行排序，每次取出离当前时间&lt;strong&gt;最近的一个超时时间点&lt;/strong&gt;，计算出超时需要等待的时间，然后等待超时。超时时间到后，获取当前的绝对时间点，然后&lt;strong&gt;把最小堆里超时时间点小于这个时间点的定时器都收集起来&lt;/strong&gt;，执行它们的回调函数。&lt;/p&gt;</description>
     </item>
     <item>
       <title>函数防抖</title>
@@ -2796,27 +2803,27 @@ curl -b cookies.txt https://example.com/dashboard
     </item>
     <item>
       <title>【动手写协程库 2】协程调度器</title>
-      <link>https://kerolt.github.io/posts/dev-null/%E5%8A%A8%E6%89%8B%E5%86%99%E5%8D%8F%E7%A8%8B%E5%BA%93-2%E5%8D%8F%E7%A8%8B%E8%B0%83%E5%BA%A6%E5%99%A8/</link>
+      <link>https://kerolt.github.io/posts/%E5%8D%8F%E7%A8%8B%E5%BA%93/%E5%8A%A8%E6%89%8B%E5%86%99%E5%8D%8F%E7%A8%8B%E5%BA%93-2%E5%8D%8F%E7%A8%8B%E8%B0%83%E5%BA%A6%E5%99%A8/</link>
       <pubDate>Wed, 11 Sep 2024 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/dev-null/%E5%8A%A8%E6%89%8B%E5%86%99%E5%8D%8F%E7%A8%8B%E5%BA%93-2%E5%8D%8F%E7%A8%8B%E8%B0%83%E5%BA%A6%E5%99%A8/</guid>
+      <guid>https://kerolt.github.io/posts/%E5%8D%8F%E7%A8%8B%E5%BA%93/%E5%8A%A8%E6%89%8B%E5%86%99%E5%8D%8F%E7%A8%8B%E5%BA%93-2%E5%8D%8F%E7%A8%8B%E8%B0%83%E5%BA%A6%E5%99%A8/</guid>
       <description>&lt;blockquote&gt;
-&lt;p&gt;【动手写协程库】系列笔记是学习sylar的协程库时的记录，参考了&lt;a href=&#34;https://www.midlane.top/wiki/pages/viewpage.action?pageId=10060952&#34;&gt;从零开始重写sylar C++高性能分布式服务器框架&lt;/a&gt;和代码随想录中的&lt;a href=&#34;https://www.programmercarl.com/other/project_coroutine.html#%E4%B8%8B%E8%BD%BD%E6%96%B9%E5%BC%8F&#34;&gt;文档&lt;/a&gt;。文章并不是对所有代码的详细解释，而是为了自己理解一些片段所做的笔记。&lt;/p&gt;
-&lt;p&gt;&lt;code&gt;Scheduler&lt;/code&gt;类中其他函数的定义可以在这里查看：&lt;a href=&#34;https://github.com/kerolt/coroutine-lib/blob/master/src/scheduler.cpp&#34;&gt;Github: src/scheduler.cpp&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;【动手写协程库】系列笔记是学习 sylar 的协程库时的记录，参考了 &lt;a href=&#34;https://www.midlane.top/wiki/pages/viewpage.action?pageId=10060952&#34;&gt;从零开始重写sylar C++高性能分布式服务器框架&lt;/a&gt; 和代码随想录中的 &lt;a href=&#34;https://www.programmercarl.com/other/project_coroutine.html#%E4%B8%8B%E8%BD%BD%E6%96%B9%E5%BC%8F&#34;&gt;文档&lt;/a&gt;。文章并不是对所有代码的详细解释，而是为了自己理解一些片段所做的笔记。&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;Scheduler&lt;/code&gt; 类中其他函数的定义可以在这里查看：&lt;a href=&#34;https://github.com/kerolt/coroutine-lib/blob/master/src/scheduler.cpp&#34;&gt;Github: src/scheduler.cpp&lt;/a&gt;&lt;/p&gt;
 &lt;/blockquote&gt;
-&lt;p&gt;Sylar的协程调度器是一个N-M模型，意味着N个线程可以运行M个协程，协程能够在线程之间进行切换，也可以被绑定到特定的线程上执行。&lt;/p&gt;
-&lt;p&gt;调度器可以由应用程序中的任何线程创建，但创建它的线程（称为caller线程）可以选择是否参与协程的调度。如果caller线程参与调度，那么调度器的线程数会相应减少一个，因为caller线程本身也会作为一个调度线程。&lt;/p&gt;</description>
+&lt;p&gt;Sylar 的协程调度器是一个 N-M 模型，意味着 N 个线程可以运行 M 个协程，协程能够在线程之间进行切换，也可以被绑定到特定的线程上执行。&lt;/p&gt;
+&lt;p&gt;调度器可以由应用程序中的任何线程创建，但创建它的线程（称为 caller 线程）可以选择是否参与协程的调度。如果 caller 线程参与调度，那么调度器的线程数会相应减少一个，因为 caller 线程本身也会作为一个调度线程。&lt;/p&gt;</description>
     </item>
     <item>
       <title>【动手写协程库 1】协程定义</title>
-      <link>https://kerolt.github.io/posts/dev-null/%E5%8A%A8%E6%89%8B%E5%86%99%E5%8D%8F%E7%A8%8B%E5%BA%93-1%E5%8D%8F%E7%A8%8B%E5%AE%9A%E4%B9%89/</link>
+      <link>https://kerolt.github.io/posts/%E5%8D%8F%E7%A8%8B%E5%BA%93/%E5%8A%A8%E6%89%8B%E5%86%99%E5%8D%8F%E7%A8%8B%E5%BA%93-1%E5%8D%8F%E7%A8%8B%E5%AE%9A%E4%B9%89/</link>
       <pubDate>Tue, 10 Sep 2024 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/dev-null/%E5%8A%A8%E6%89%8B%E5%86%99%E5%8D%8F%E7%A8%8B%E5%BA%93-1%E5%8D%8F%E7%A8%8B%E5%AE%9A%E4%B9%89/</guid>
+      <guid>https://kerolt.github.io/posts/%E5%8D%8F%E7%A8%8B%E5%BA%93/%E5%8A%A8%E6%89%8B%E5%86%99%E5%8D%8F%E7%A8%8B%E5%BA%93-1%E5%8D%8F%E7%A8%8B%E5%AE%9A%E4%B9%89/</guid>
       <description>&lt;blockquote&gt;
-&lt;p&gt;【动手写协程库】系列笔记是学习sylar的协程库时的记录，参考了&lt;a href=&#34;https://www.midlane.top/wiki/pages/viewpage.action?pageId=10060952&#34;&gt;从零开始重写sylar C++高性能分布式服务器框架&lt;/a&gt;和代码随想录中的&lt;a href=&#34;https://www.programmercarl.com/other/project_coroutine.html#%E4%B8%8B%E8%BD%BD%E6%96%B9%E5%BC%8F&#34;&gt;文档&lt;/a&gt;。文章并不是对所有代码的详细解释，而是为了自己理解一些片段所做的笔记。&lt;/p&gt;
-&lt;p&gt;&lt;code&gt;Coroutine&lt;/code&gt;类中其他函数的定义可以在这里查看：&lt;a href=&#34;https://github.com/kerolt/coroutine-lib/blob/master/src/coroutine.cpp&#34;&gt;Github: src/coroutine.cpp&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;【动手写协程库】系列笔记是学习 sylar 的协程库时的记录，参考了 &lt;a href=&#34;https://www.midlane.top/wiki/pages/viewpage.action?pageId=10060952&#34;&gt;从零开始重写sylar C++高性能分布式服务器框架&lt;/a&gt; 和代码随想录中的 &lt;a href=&#34;https://www.programmercarl.com/other/project_coroutine.html#%E4%B8%8B%E8%BD%BD%E6%96%B9%E5%BC%8F&#34;&gt;文档&lt;/a&gt;。文章并不是对所有代码的详细解释，而是为了自己理解一些片段所做的笔记。&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;Coroutine&lt;/code&gt; 类中其他函数的定义可以在这里查看：&lt;a href=&#34;https://github.com/kerolt/coroutine-lib/blob/master/src/coroutine.cpp&#34;&gt;Github: src/coroutine.cpp&lt;/a&gt;&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;p&gt;对于什么是协程，为什么要使用协程，可以看看之前的笔记：&lt;a href=&#34;https://kerolt.github.io/posts/f663291a/&#34;&gt;【协程】C++20协程初体验&lt;/a&gt;。&lt;/p&gt;
-&lt;p&gt;对于我们自己来实现协程，其实在之前Xv6的Lab中就有做过：&lt;a href=&#34;https://kerolt.github.io/posts/cb4e63bc/#Uthread-switching-between-threads&#34;&gt;【MIT6.S081】Lab6 multithreading&lt;/a&gt;，当初做这个lab的时候没有意识到这就是协程。协程的切换最重要的就是要保存和恢复上下文，在这个lab中，我们通过保存每个协程在切换之前的寄存器的值，以此可用来恢复原来的执行流。&lt;/p&gt;</description>
+&lt;p&gt;对于我们自己来实现协程，其实在之前 Xv6 的 Lab 中就有做过：&lt;a href=&#34;https://kerolt.github.io/posts/cb4e63bc/#Uthread-switching-between-threads&#34;&gt;【MIT6.S081】Lab6 multithreading&lt;/a&gt;，当初做这个 lab 的时候没有意识到这就是协程。协程的切换最重要的就是要保存和恢复上下文，在这个 lab 中，我们通过保存每个协程在切换之前的寄存器的值，以此可用来恢复原来的执行流。&lt;/p&gt;</description>
     </item>
     <item>
       <title>解决X11下窗口拖动撕裂的一个方法</title>
