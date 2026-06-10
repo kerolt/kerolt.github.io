@@ -1,0 +1,266 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>TrafficManager on Kerolt's Note</title><link>https://kerolt.github.io/categories/trafficmanager/</link><description>Recent content in TrafficManager on Kerolt's Note</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><lastBuildDate>Fri, 17 Apr 2026 00:00:00 +0000</lastBuildDate><atom:link href="https://kerolt.github.io/categories/trafficmanager/index.xml" rel="self" type="application/rss+xml"/><item><title>为什么通过eBPF可以提高性能</title><link>https://kerolt.github.io/p/%E4%B8%BA%E4%BB%80%E4%B9%88%E9%80%9A%E8%BF%87ebpf%E5%8F%AF%E4%BB%A5%E6%8F%90%E9%AB%98%E6%80%A7%E8%83%BD/</link><pubDate>Fri, 17 Apr 2026 00:00:00 +0000</pubDate><guid>https://kerolt.github.io/p/%E4%B8%BA%E4%BB%80%E4%B9%88%E9%80%9A%E8%BF%87ebpf%E5%8F%AF%E4%BB%A5%E6%8F%90%E9%AB%98%E6%80%A7%E8%83%BD/</guid><description>&lt;h2 id="压平规则"&gt;压平规则
+&lt;/h2&gt;&lt;p&gt;这里的核心原理是：&lt;strong&gt;kube-proxy 的 iptables 模式把 Service 转发规则编译成一串 netfilter 规则链，而 Traffic Manager 把 Service 查找变成一次 eBPF Map 查询&lt;/strong&gt;。当 Service 数量变大时，这两种查找路径的增长方式不一样。&lt;/p&gt;
+&lt;p&gt;在 kube-proxy 的 iptables 模式下，每个 Service、每个端口、每个 Endpoint 都会生成对应的 iptables 规则。客户端访问一个 ClusterIP 时，数据包会进入内核网络协议栈，然后经过 netfilter 的 PREROUTING/OUTPUT 等链，沿着一组规则逐条匹配：这个目标 IP 是不是某个 Service？端口是不是匹配？协议是不是匹配？命中了以后再跳到对应的 Service chain，然后根据概率规则选择某个 Endpoint，最后做 DNAT。&lt;/p&gt;
+&lt;p&gt;问题在于，iptables 的匹配本质上更接近“规则链顺序扫描”。集群里的 Service 越多，规则越多，包在找到目标 Service 前可能要经过更多匹配判断。即使每条规则判断很快，数量上来以后，累计成本会变明显。尤其是短连接场景，每个新连接都要重新走这段路径，所以开销会被放大。&lt;/p&gt;
+&lt;p&gt;Traffic Manager 的做法不一样。它在 socket 层的 &lt;code&gt;connect4&lt;/code&gt; hook 拦截应用的 &lt;code&gt;connect()&lt;/code&gt; 调用，拿到目标地址，也就是 Service 的 ClusterIP 和端口，然后直接用这个 &lt;code&gt;(VIP, Port, Proto)&lt;/code&gt; 作为 key 去 eBPF Hash Map 里查 Service 元信息。查到之后，再根据后端数量和调度策略选择一个 backend，把 socket 目标地址直接改成 Pod IP 和 Pod Port。&lt;/p&gt;
+&lt;p&gt;所以它绕过了两部分成本：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;绕过 iptables/netfilter 规则链匹配&lt;/strong&gt;
+&lt;ol&gt;
+&lt;li&gt;不再让连接请求在大量 Service 规则里逐条判断，而是直接用 key 查 Map。&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;更早地改写目标地址&lt;/strong&gt;
+&lt;ol&gt;
+&lt;li&gt;它在应用发起 &lt;code&gt;connect()&lt;/code&gt; 的时候就把目标 VIP 改成真实 Pod IP，后续包天然就是发往后端 Pod，不需要每个包都依赖复杂的 DNAT 路径。&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;简单说，iptables 像是在一本很长的规则表里从头往后找“这个 Service 是谁”；eBPF Map 像是拿着 Service IP 和端口直接查哈希表。Service 少的时候，两者差距可能不大；Service 多的时候，规则链扫描成本增长，而 Hash Map 查找成本基本稳定，所以 eBPF 的相对优势就会变大。&lt;/p&gt;
+&lt;p&gt;这也是为什么脚本里有 &lt;code&gt;--rule-bloat&lt;/code&gt; 这个测试：它会创建很多 dummy Service，人为把 kube-proxy 的规则数量撑大。这样做不是为了“作弊”，而是在模拟真实大集群里 Service 数量很多时 kube-proxy iptables 规则膨胀的情况。这个场景越明显，Traffic Manager 的设计优势越容易体现出来。&lt;/p&gt;
+&lt;p&gt;还有一个关键点是这个项目测的是 &lt;strong&gt;短连接压测&lt;/strong&gt;。短连接里大量请求都会反复触发连接建立路径，&lt;code&gt;connect()&lt;/code&gt; 和首次路由/NAT 的成本占比更高。Traffic Manager 正好把 Service 选择前移到 &lt;code&gt;connect()&lt;/code&gt; 阶段，并且用 eBPF Map 直接完成后端选择，所以在 Siege 这种大量短连接的 benchmark 里提升会比较明显。&lt;/p&gt;
+&lt;p&gt;当然，这里也要诚实地说，性能更高不是无条件成立。它取决于场景：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;如果 Service 数量很少，iptables 规则不多，收益可能有限。&lt;/li&gt;
+&lt;li&gt;如果业务是长连接，连接建立成本被摊薄，QPS 提升可能没短连接明显。&lt;/li&gt;
+&lt;li&gt;如果 eBPF 里加了很复杂的权重计算、状态维护或 Map 查询过多，也会吃掉一部分收益。&lt;/li&gt;
+&lt;li&gt;如果 kube-proxy 使用 IPVS 或 nftables，和 iptables 模式相比差距也会变化。&lt;/li&gt;
+&lt;li&gt;如果瓶颈在应用本身、Pod 网络、CPU 或后端服务，而不是 Service 转发路径，那么绕过 iptables 也不会带来很大提升。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;所以我会把这个结论表述得更准确一点：&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;在 kube-proxy iptables 模式、Service 数量较多、短连接较多的场景下，把 Service 规则链匹配替换成 eBPF Hash Map 查找，可以减少连接建立路径上的匹配和 NAT 开销，因此性能更高，而且 Service 规模越大，相对收益越明显。&lt;/strong&gt;&lt;/p&gt;
+&lt;h2 id="为什么能跳过-kube-proxy-的-service-dnat-规则"&gt;为什么能跳过 kube-proxy 的 Service DNAT 规则
+&lt;/h2&gt;&lt;p&gt;&lt;strong&gt;这个项目把 eBPF 程序挂到了 socket &lt;code&gt;connect4&lt;/code&gt; 钩子上，在应用真正发包、进入 kube-proxy/iptables 转发路径之前，就把目标地址从 Service VIP 改成了 Pod IP，所以后续流量看起来根本不是访问 Service，自然也就不会命中 kube-proxy 的 Service DNAT 规则。&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;正常 kube-proxy iptables 模式大概是这样：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt; 1
+&lt;/span&gt;&lt;span class="lnt"&gt; 2
+&lt;/span&gt;&lt;span class="lnt"&gt; 3
+&lt;/span&gt;&lt;span class="lnt"&gt; 4
+&lt;/span&gt;&lt;span class="lnt"&gt; 5
+&lt;/span&gt;&lt;span class="lnt"&gt; 6
+&lt;/span&gt;&lt;span class="lnt"&gt; 7
+&lt;/span&gt;&lt;span class="lnt"&gt; 8
+&lt;/span&gt;&lt;span class="lnt"&gt; 9
+&lt;/span&gt;&lt;span class="lnt"&gt;10
+&lt;/span&gt;&lt;span class="lnt"&gt;11
+&lt;/span&gt;&lt;span class="lnt"&gt;12
+&lt;/span&gt;&lt;span class="lnt"&gt;13
+&lt;/span&gt;&lt;span class="lnt"&gt;14
+&lt;/span&gt;&lt;span class="lnt"&gt;15
+&lt;/span&gt;&lt;span class="lnt"&gt;16
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-text" data-lang="text"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;应用 connect(Service ClusterIP:80)
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; |
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; v
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;内核网络栈
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; |
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; v
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;netfilter / iptables 规则
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; |
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; v
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;kube-proxy 维护的 Service 规则命中
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; |
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; v
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;DNAT: Service VIP:80 -&amp;gt; PodIP:PodPort
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; |
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; v
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;发往真实 Pod
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;也就是说，kube-proxy 本身不直接转发每个包，它主要负责把 Kubernetes Service/Endpoint 信息同步成 iptables/IPVS/nftables 规则。真正转发时，包经过内核网络栈，由这些规则做 DNAT。&lt;/p&gt;
+&lt;p&gt;而这个项目的路径是：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt; 1
+&lt;/span&gt;&lt;span class="lnt"&gt; 2
+&lt;/span&gt;&lt;span class="lnt"&gt; 3
+&lt;/span&gt;&lt;span class="lnt"&gt; 4
+&lt;/span&gt;&lt;span class="lnt"&gt; 5
+&lt;/span&gt;&lt;span class="lnt"&gt; 6
+&lt;/span&gt;&lt;span class="lnt"&gt; 7
+&lt;/span&gt;&lt;span class="lnt"&gt; 8
+&lt;/span&gt;&lt;span class="lnt"&gt; 9
+&lt;/span&gt;&lt;span class="lnt"&gt;10
+&lt;/span&gt;&lt;span class="lnt"&gt;11
+&lt;/span&gt;&lt;span class="lnt"&gt;12
+&lt;/span&gt;&lt;span class="lnt"&gt;13
+&lt;/span&gt;&lt;span class="lnt"&gt;14
+&lt;/span&gt;&lt;span class="lnt"&gt;15
+&lt;/span&gt;&lt;span class="lnt"&gt;16
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-text" data-lang="text"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;应用 connect(Service ClusterIP:80)
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; |
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; v
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;eBPF cgroup/connect4 hook
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; |
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; v
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;查 eBPF Map: Service VIP:80 -&amp;gt; backend PodIP:PodPort
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; |
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; v
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;直接改写 socket 目标地址
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; |
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; v
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;应用这次连接实际变成 connect(PodIP:PodPort)
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; |
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; v
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;发往真实 Pod
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;关键点在于 &lt;strong&gt;hook 的位置更早&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;cgroup/connect4&lt;/code&gt; 这个 eBPF hook 发生在进程调用 &lt;code&gt;connect()&lt;/code&gt; 的时候。你的 eBPF 程序能通过 &lt;code&gt;bpf_sock_addr&lt;/code&gt; 看到原始目标地址，也就是应用想连的 &lt;code&gt;ClusterIP:Port&lt;/code&gt;。如果它发现这个地址是一个 Kubernetes Service，就直接调用类似逻辑把 &lt;code&gt;ctx-&amp;gt;user_ip4&lt;/code&gt;、&lt;code&gt;ctx-&amp;gt;user_port&lt;/code&gt; 改成后端 Pod 的 IP 和端口。&lt;/p&gt;
+&lt;p&gt;项目里的 eBPF 程序就是在这里做的：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-c" data-lang="c"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nf"&gt;ctx_set_dst_ip&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;ctx&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;backend&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;address&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nf"&gt;ctx_set_dst_port&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;ctx&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;backend&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;port&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;所以原本应用以为自己连的是：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-text" data-lang="text"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;10.96.x.x:80 // Service ClusterIP
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;但经过 eBPF hook 后，内核后续处理的目标已经变成：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-text" data-lang="text"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;10.244.x.x:8080 // 某个后端 Pod
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;这时候 kube-proxy 的规则通常是匹配 Service ClusterIP 的，比如：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-text" data-lang="text"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;-d 10.96.x.x --dport 80
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;但目标地址已经不是 &lt;code&gt;10.96.x.x:80&lt;/code&gt; 了，所以这些 Service 规则就不会命中。换句话说，&lt;strong&gt;不是 eBPF 把 kube-proxy 禁用了，而是它把流量提前改道了，让流量不再走 kube-proxy 管的那条 Service VIP 路径。&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;这也是为什么这个项目需要自己维护 eBPF Map。因为跳过 kube-proxy 后，谁来知道 Service 后面有哪些 Pod？答案就是 Traffic Manager 的 Go 控制器：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt; 1
+&lt;/span&gt;&lt;span class="lnt"&gt; 2
+&lt;/span&gt;&lt;span class="lnt"&gt; 3
+&lt;/span&gt;&lt;span class="lnt"&gt; 4
+&lt;/span&gt;&lt;span class="lnt"&gt; 5
+&lt;/span&gt;&lt;span class="lnt"&gt; 6
+&lt;/span&gt;&lt;span class="lnt"&gt; 7
+&lt;/span&gt;&lt;span class="lnt"&gt; 8
+&lt;/span&gt;&lt;span class="lnt"&gt; 9
+&lt;/span&gt;&lt;span class="lnt"&gt;10
+&lt;/span&gt;&lt;span class="lnt"&gt;11
+&lt;/span&gt;&lt;span class="lnt"&gt;12
+&lt;/span&gt;&lt;span class="lnt"&gt;13
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-text" data-lang="text"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;Kubernetes Service / EndpointSlice
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; |
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; v
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;Informer 监听变化
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; |
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; v
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;Controller 计算后端列表
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; |
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; v
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;写入 eBPF Map
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; |
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; v
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;connect4 程序查 Map 并改写目标地址
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;所以它本质上是在做一个 kube-proxy 的替代数据面：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;kube-proxy：监听 Service/Endpoint，然后写 iptables/IPVS 规则。&lt;/li&gt;
+&lt;li&gt;Traffic Manager：监听 Service/EndpointSlice，然后写 eBPF Map。&lt;/li&gt;
+&lt;li&gt;eBPF 程序：在 socket 层查 Map，直接改写目标地址。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;但这里也要注意几个边界：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;只能跳过被这个 eBPF 程序处理到的流量&lt;/strong&gt;
+你的项目挂的是 &lt;code&gt;connect4&lt;/code&gt;，主要处理本机进程发起的 IPv4 TCP connect 路径。没有经过这个 hook 的流量，不会被它改写。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;kube-proxy 仍然可以存在&lt;/strong&gt;
+它没有被卸载，也没有失效。只是这部分流量提前被改成 PodIP，所以不再命中 Service VIP 规则。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;如果 eBPF Map 里没有这个 Service，还是会走原路径&lt;/strong&gt;
+你的代码里如果查不到 Service，就返回 miss，不做改写。那目标仍然是 ClusterIP，后面还是可能由 kube-proxy 处理。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;这不是通用意义上跳过所有 Kubernetes 网络路径&lt;/strong&gt;
+它跳过的是 Service VIP 到后端 Pod 的 kube-proxy 负载均衡/DNAT 逻辑。后续 Pod 网络、CNI 路由、veth、bridge/overlay 等路径还是要走。&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;一句话总结就是：&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;因为 eBPF 挂在 &lt;code&gt;connect4&lt;/code&gt; 这个比 kube-proxy Service DNAT 更早的位置，提前把 &lt;code&gt;Service ClusterIP&lt;/code&gt; 改成了真实 &lt;code&gt;Pod IP&lt;/code&gt;。后续内核看到的目的地址已经不是 Service VIP，所以 kube-proxy 的 Service 规则没有机会命中，于是这条流量就绕过了 kube-proxy。&lt;/strong&gt;&lt;/p&gt;</description></item><item><title>项目Benchmark</title><link>https://kerolt.github.io/p/%E9%A1%B9%E7%9B%AEbenchmark/</link><pubDate>Fri, 17 Apr 2026 00:00:00 +0000</pubDate><guid>https://kerolt.github.io/p/%E9%A1%B9%E7%9B%AEbenchmark/</guid><description>&lt;h2 id="minikube-端到端测试"&gt;Minikube 端到端测试
+&lt;/h2&gt;&lt;p&gt;通过 &lt;code&gt;scripts/benchmark-minikube.py&lt;/code&gt; 脚本，让它自动完成一套验证流程：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;检查 Minikube 是否运行。&lt;/li&gt;
+&lt;li&gt;编译 Linux 版本的 traffic-manager。&lt;/li&gt;
+&lt;li&gt;拷贝二进制到 Minikube 节点。&lt;/li&gt;
+&lt;li&gt;部署测试用的后端 Deployment 和 Siege 压测 Pod。&lt;/li&gt;
+&lt;li&gt;先不启动 Traffic Manager，跑一次 kube-proxy baseline。&lt;/li&gt;
+&lt;li&gt;启动 Traffic Manager，把 eBPF 程序挂到 cgroup 上。&lt;/li&gt;
+&lt;li&gt;等待 BPF Map pin 成功，并检查目标 Service 已经同步进 Map。&lt;/li&gt;
+&lt;li&gt;再跑一次 eBPF 路径下的压测。&lt;/li&gt;
+&lt;li&gt;输出 QPS 对比。&lt;/li&gt;
+&lt;li&gt;最后清理远端进程、BPF Map 和 dummy service。&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;我这么做是因为 eBPF 项目高度依赖运行环境：内核版本、cgroup v2、BPF filesystem、权限、Kubernetes 网络环境都会影响结果。单纯在本机跑 go test，只能证明控制逻辑大概没错，不能证明真正的 socket connect hook 生效了。所以我选择用 Minikube 搭一个尽量接近真实 Kubernetes 的小环境，把控制面和数据面一起拉起来测。&lt;/p&gt;
+&lt;h3 id="性能对照测试"&gt;性能对照测试
+&lt;/h3&gt;&lt;p&gt;性能测试里我做了两个关键对照：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;正常 Service 数量下的对照&lt;/strong&gt;：同一个后端服务、同一个 Siege 客户端、同样的并发数和压测时长，先测 kube-proxy，再测 Traffic Manager。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;rule bloat 场景&lt;/strong&gt;：额外创建几百到上千个 dummy Service，让 kube-proxy 的 iptables 规则膨胀，再对比 eBPF Map 查找路径的表现。&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;这么测的原因是这个项目的核心卖点就是绕过 kube-proxy/iptables 规则链。iptables 规则数量多的时候，匹配路径会变长；而 eBPF 这里是通过 Hash Map 查 Service，再选 backend，理论上查找复杂度更稳定。所以只测小规模场景不够，必须人为制造 Service 数量膨胀的场景，才能验证这个设计在大规模集群下的优势是否真的存在。&lt;/p&gt;
+&lt;h3 id="生命周期和清理测试"&gt;生命周期和清理测试。
+&lt;/h3&gt;&lt;p&gt;这个项目需要 root 权限加载 eBPF 程序，也会 pin BPF Map。如果退出时不清理，后续测试可能会受到旧 Map、旧进程、旧 cgroup attach 的影响。所以脚本里会做：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;停止 Minikube 里的旧 traffic-manager 进程。&lt;/li&gt;
+&lt;li&gt;删除旧的 BPF Map pin 路径。&lt;/li&gt;
+&lt;li&gt;rule bloat 测试后删除 dummy services。&lt;/li&gt;
+&lt;li&gt;Siege 超时时杀掉残留 siege 进程。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="测试方面的不足"&gt;测试方面的不足
+&lt;/h2&gt;&lt;h3 id="性能测试还不够严谨"&gt;性能测试还不够严谨
+&lt;/h3&gt;&lt;p&gt;现在 Siege 测的是短连接 QPS，对比方向是对的，但还不够完整：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;只测了 QPS，没有系统性记录 p50/p95/p99 延迟。&lt;/li&gt;
+&lt;li&gt;单次结果波动可能比较大，应该多轮运行取均值、标准差。&lt;/li&gt;
+&lt;li&gt;Minikube 单节点环境和真实多节点集群还有差距。&lt;/li&gt;
+&lt;li&gt;没有区分 TCP 长连接、短连接、UDP 流量等不同模式。&lt;/li&gt;
+&lt;li&gt;没有统计 CPU 使用率、内核态开销、上下文切换、BPF Map 命中率等指标。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;后续我会把压测结果结构化输出成 JSON/CSV，然后多轮跑，配合 Prometheus 或 perf/bpftool 去观察资源消耗，而不是只看一个最终 QPS。&lt;/p&gt;
+&lt;h3 id="故障场景覆盖不够"&gt;故障场景覆盖不够
+&lt;/h3&gt;&lt;p&gt;真实环境里会遇到很多动态变化，比如：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;后端 Pod 滚动更新。&lt;/li&gt;
+&lt;li&gt;Pod 被 kill。&lt;/li&gt;
+&lt;li&gt;EndpointSlice 快速变化。&lt;/li&gt;
+&lt;li&gt;Service 被删除又重建。&lt;/li&gt;
+&lt;li&gt;Prometheus 暂时不可用。&lt;/li&gt;
+&lt;li&gt;BPF Map 写入失败。&lt;/li&gt;
+&lt;li&gt;权重数据异常，比如全部为 0。&lt;/li&gt;
+&lt;li&gt;controller 重启后需要重新同步已有 Service。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;这些目前没有形成自动化 case。后续我会补一组 chaos/e2e 测试，比如在压测过程中持续扩缩容 Deployment，看连接成功率和错误率；或者故意让 Prometheus 不可用，看是否能降级到普通负载均衡。&lt;/p&gt;</description></item></channel></rss>

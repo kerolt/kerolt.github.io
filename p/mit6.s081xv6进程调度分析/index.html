@@ -1,0 +1,267 @@
+<!doctype html><html lang=zh-cn dir=ltr><head><meta charset=utf-8><meta name=viewport content='width=device-width,initial-scale=1'><meta name=description content="在做thread lab的时候，阅读xv6的源码后对于进程调度的实现有了大致的了解，但是其中锁的获取与释放顺序让我困惑了好久：在yield函数中，不是先获取了进程p的锁吗，那么之后在调度器中又获取p的锁，那不是会死锁吗？在调度器内使用swtch发生进程切换后，又会跳转到哪里？\n而在我观摩大佬的一些博客和视频后，发现我之前的想法有很大的问题，归根结底是没有弄明白xv6何时发生了切换，切换后应该从哪里开始运行。这篇笔记就是对于分析xv6进程调度的总结。\n"><title>【MIT6.S081】xv6进程调度分析</title><link rel=canonical href=https://kerolt.github.io/p/mit6.s081xv6%E8%BF%9B%E7%A8%8B%E8%B0%83%E5%BA%A6%E5%88%86%E6%9E%90/><link rel=preconnect href=https://fonts.googleapis.com><link rel=preconnect href=https://fonts.gstatic.com crossorigin><link rel=preload as=style href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap"><link rel=stylesheet href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap"><link rel=stylesheet href=/scss/style.min.e62e09c60ba428a627e03568fa3df938f6a8224f815b5846f00816c17d4a0be4.css><meta property='og:title' content="【MIT6.S081】xv6进程调度分析"><meta property='og:description' content="在做thread lab的时候，阅读xv6的源码后对于进程调度的实现有了大致的了解，但是其中锁的获取与释放顺序让我困惑了好久：在yield函数中，不是先获取了进程p的锁吗，那么之后在调度器中又获取p的锁，那不是会死锁吗？在调度器内使用swtch发生进程切换后，又会跳转到哪里？\n而在我观摩大佬的一些博客和视频后，发现我之前的想法有很大的问题，归根结底是没有弄明白xv6何时发生了切换，切换后应该从哪里开始运行。这篇笔记就是对于分析xv6进程调度的总结。\n"><meta property='og:url' content='https://kerolt.github.io/p/mit6.s081xv6%E8%BF%9B%E7%A8%8B%E8%B0%83%E5%BA%A6%E5%88%86%E6%9E%90/'><meta property='og:site_name' content="Kerolt's Note"><meta property='og:type' content='article'><meta property='article:section' content='Post'><meta property='article:tag' content='MIT6-S081'><meta property='article:tag' content='xv6'><meta property='article:tag' content='OS'><meta property='article:published_time' content='2024-11-16T00:00:00+00:00'><meta property='article:modified_time' content='2024-11-16T00:00:00+00:00'><meta name=twitter:title content="【MIT6.S081】xv6进程调度分析"><meta name=twitter:description content="在做thread lab的时候，阅读xv6的源码后对于进程调度的实现有了大致的了解，但是其中锁的获取与释放顺序让我困惑了好久：在yield函数中，不是先获取了进程p的锁吗，那么之后在调度器中又获取p的锁，那不是会死锁吗？在调度器内使用swtch发生进程切换后，又会跳转到哪里？\n而在我观摩大佬的一些博客和视频后，发现我之前的想法有很大的问题，归根结底是没有弄明白xv6何时发生了切换，切换后应该从哪里开始运行。这篇笔记就是对于分析xv6进程调度的总结。\n"><link rel="shortcut icon" href=/images/favicon.png></head><body class=article-page><script>(function(){const e="StackColorScheme";localStorage.getItem(e)||localStorage.setItem(e,"auto")})()</script><script>(function(){const t="StackColorScheme",e=localStorage.getItem(t),n=window.matchMedia("(prefers-color-scheme: dark)").matches===!0;e=="dark"||e==="auto"&&n?document.documentElement.dataset.scheme="dark":document.documentElement.dataset.scheme="light"})()</script><div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky"><button class="hamburger hamburger--spin" type=button id=toggle-menu aria-label=切换菜单>
+<span class=hamburger-box><span class=hamburger-inner></span></span></button><header><figure class=site-avatar><a href=/><img src=/images/avatar.jpg width=200 height=200 class=site-logo loading=lazy alt=Avatar>
+</a><span class=emoji>🏸</span></figure><div class=site-meta><h1 class=site-name><a href=/>Kerolt's Note</a></h1><h2 class=site-description>宇宙是秩序的，也是混乱的。</h2></div></header><ol class=menu-social><li><a href=https://github.com/kerolt title=GitHub rel=me><svg class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 19c-4.3 1.4-4.3-2.5-6-3m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6.0 00-1.3-3.2 4.2 4.2.0 00-.1-3.2s-1.1-.3-3.5 1.3a12.3 12.3.0 00-6.2.0C6.5 2.8 5.4 3.1 5.4 3.1a4.2 4.2.0 00-.1 3.2A4.6 4.6.0 004 9.5c0 4.6 2.7 5.7 5.5 6-.6.6-.6 1.2-.5 2V21"/></svg></a></li></ol><ol class=menu id=main-menu><li><a href=/><svg class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><polyline points="5 12 3 12 12 3 21 12 19 12"/><path d="M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"/><path d="M9 21v-6a2 2 0 012-2h2a2 2 0 012 2v6"/></svg>
+<span>首页</span></a></li><li><a href=/archives/><svg class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><rect x="3" y="4" width="18" height="4" rx="2"/><path d="M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
+<span>归档</span></a></li><li><a href=/categories/><svg class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><line x1="5" y1="9" x2="19" y2="9"/><line x1="5" y1="15" x2="19" y2="15"/><line x1="11" y1="4" x2="7" y2="20"/><line x1="17" y1="4" x2="13" y2="20"/></svg>
+<span>分类</span></a></li><li><a href=/tags/><svg class="icon icon-tabler icon-tabler-tag" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><path d="M11 3l9 9a1.5 1.5.0 010 2l-6 6a1.5 1.5.0 01-2 0L3 11V7a4 4 0 014-4h4"/><circle cx="9" cy="9" r="2"/></svg>
+<span>标签</span></a></li><li><a href=/about/><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-info-circle"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 12a9 9 0 1018 0A9 9 0 003 12"/><path d="M12 9h.01"/><path d="M11 12h1v4h1"/></svg>
+<span>关于我</span></a></li><li><a href=/search/><svg class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="10" cy="10" r="7"/><line x1="21" y1="21" x2="15" y2="15"/></svg>
+<span>搜索</span></a></li><li class=menu-bottom-section><ol class=menu><li id=dark-mode-toggle><svg class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="8" cy="12" r="2"/><rect x="2" y="6" width="20" height="12" rx="6"/></svg>
+<svg class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="16" cy="12" r="2"/><rect x="2" y="6" width="20" height="12" rx="6"/></svg>
+<span>暗色模式</span></li></ol></li></ol></aside><main class="main full-width"><article class=main-article><header class=article-header><div class=article-details><header class=article-category><a href=/categories/mit6.s081/ style=background-color:#beefec;color:#0f3d3b>MIT6.s081</a></header><div class=article-title-wrapper><h2 class=article-title><a href=/p/mit6.s081xv6%E8%BF%9B%E7%A8%8B%E8%B0%83%E5%BA%A6%E5%88%86%E6%9E%90/>【MIT6.S081】xv6进程调度分析</a></h2></div><footer class=article-meta><div class=inline-meta><svg class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><path d="M11.795 21H5a2 2 0 01-2-2V7a2 2 0 012-2h12a2 2 0 012 2v4"/><circle cx="18" cy="18" r="4"/><path d="M15 3v4"/><path d="M7 3v4"/><path d="M3 11h16"/><path d="M18 16.496V18l1 1"/></svg>
+<time class=article-time--published datetime=2024-11-16T00:00:00Z>2024年11月16日星期六</time>
+<svg class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg>
+<time class=article-time--reading>阅读时长: 4 分钟</time></div></footer></div></header><section class=article-content><p>在做thread lab的时候，阅读xv6的源码后对于进程调度的实现有了大致的了解，但是其中锁的获取与释放顺序让我困惑了好久：在yield函数中，不是先获取了进程p的锁吗，那么之后在调度器中又获取p的锁，那不是会死锁吗？在调度器内使用swtch发生进程切换后，又会跳转到哪里？</p><p>而在我观摩大佬的一些博客和视频后，发现我之前的想法有很大的问题，归根结底是没有弄明白xv6何时发生了切换，切换后应该从哪里开始运行。这篇笔记就是对于分析xv6进程调度的总结。</p><p>在使用allocproc创建进程时，会为创建的proc设置ra的值，初始会设置为forkret函数的地址。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-c data-lang=c><span class=line><span class=cl><span class=k>static</span> <span class=k>struct</span> <span class=n>proc</span><span class=o>*</span>
+</span></span><span class=line><span class=cl><span class=nf>allocproc</span><span class=p>(</span><span class=kt>void</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>  <span class=p>...</span>
+</span></span><span class=line><span class=cl>  <span class=nf>memset</span><span class=p>(</span><span class=o>&amp;</span><span class=n>p</span><span class=o>-&gt;</span><span class=n>context</span><span class=p>,</span> <span class=mi>0</span><span class=p>,</span> <span class=k>sizeof</span><span class=p>(</span><span class=n>p</span><span class=o>-&gt;</span><span class=n>context</span><span class=p>));</span>
+</span></span><span class=line><span class=cl>  <span class=n>p</span><span class=o>-&gt;</span><span class=n>context</span><span class=p>.</span><span class=n>ra</span> <span class=o>=</span> <span class=p>(</span><span class=n>uint64</span><span class=p>)</span><span class=n>forkret</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=n>p</span><span class=o>-&gt;</span><span class=n>context</span><span class=p>.</span><span class=n>sp</span> <span class=o>=</span> <span class=n>p</span><span class=o>-&gt;</span><span class=n>kstack</span> <span class=o>+</span> <span class=n>PGSIZE</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>  <span class=k>return</span> <span class=n>p</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p>在调度器scheduler开始运行后，遍历进程表，先对遍历到的当前进程p上锁，如果这个进程是可运行的（RUNNABLE），则执行swtch函数切换上下文，保存当前cpu的上下文，同时加载p的上下文到寄存器中。</p><p>执行完swtch后会跳转到ra寄存器所保存的地址，也就是这个进程初始设置的forkret的位置，这个函数中会释放在scheduler中对进程p上的锁。如果这个函数是第一次执行，那么会初始化文件系统。之后执行usertrapret函数。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-c data-lang=c><span class=line><span class=cl><span class=c1>// A fork child&#39;s very first scheduling by scheduler()
+</span></span></span><span class=line><span class=cl><span class=c1>// will swtch to forkret.
+</span></span></span><span class=line><span class=cl><span class=kt>void</span>
+</span></span><span class=line><span class=cl><span class=nf>forkret</span><span class=p>(</span><span class=kt>void</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>  <span class=k>static</span> <span class=kt>int</span> <span class=n>first</span> <span class=o>=</span> <span class=mi>1</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>  <span class=c1>// Still holding p-&gt;lock from scheduler.
+</span></span></span><span class=line><span class=cl>  <span class=nf>release</span><span class=p>(</span><span class=o>&amp;</span><span class=nf>myproc</span><span class=p>()</span><span class=o>-&gt;</span><span class=n>lock</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>  <span class=k>if</span> <span class=p>(</span><span class=n>first</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=c1>// File system initialization must be run in the context of a
+</span></span></span><span class=line><span class=cl>    <span class=c1>// regular process (e.g., because it calls sleep), and thus cannot
+</span></span></span><span class=line><span class=cl>    <span class=c1>// be run from main().
+</span></span></span><span class=line><span class=cl>    <span class=nf>fsinit</span><span class=p>(</span><span class=n>ROOTDEV</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=n>first</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=c1>// ensure other cores see first=0.
+</span></span></span><span class=line><span class=cl>    <span class=nf>__sync_synchronize</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>  <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>  <span class=nf>usertrapret</span><span class=p>();</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p>usertrapret中，将会关闭中断，最后这会让当前进程从内核态返回到用户态（回到用户空间），切换用户页表并恢复用户态寄存器。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-c data-lang=c><span class=line><span class=cl><span class=c1>//
+</span></span></span><span class=line><span class=cl><span class=c1>// return to user space
+</span></span></span><span class=line><span class=cl><span class=c1>//
+</span></span></span><span class=line><span class=cl><span class=kt>void</span>
+</span></span><span class=line><span class=cl><span class=nf>usertrapret</span><span class=p>(</span><span class=kt>void</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>  <span class=p>...</span>
+</span></span><span class=line><span class=cl>  <span class=c1>// we&#39;re about to switch the destination of traps from
+</span></span></span><span class=line><span class=cl>  <span class=c1>// kerneltrap() to usertrap(), so turn off interrupts until
+</span></span></span><span class=line><span class=cl>  <span class=c1>// we&#39;re back in user space, where usertrap() is correct.
+</span></span></span><span class=line><span class=cl>  <span class=nf>intr_off</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>  <span class=p>...</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>  <span class=c1>// jump to userret in trampoline.S at the top of memory, which 
+</span></span></span><span class=line><span class=cl>  <span class=c1>// switches to the user page table, restores user registers,
+</span></span></span><span class=line><span class=cl>  <span class=c1>// and switches to user mode with sret.
+</span></span></span><span class=line><span class=cl>  <span class=n>uint64</span> <span class=n>trampoline_userret</span> <span class=o>=</span> <span class=n>TRAMPOLINE</span> <span class=o>+</span> <span class=p>(</span><span class=n>userret</span> <span class=o>-</span> <span class=n>trampoline</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>  <span class=p>((</span><span class=kt>void</span> <span class=p>(</span><span class=o>*</span><span class=p>)(</span><span class=n>uint64</span><span class=p>))</span><span class=n>trampoline_userret</span><span class=p>)(</span><span class=n>satp</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p>在之后如果该进程会触发中断（例如时间片轮转调度中执行时间到了后触发时钟中断）或者使用了系统调用，将会执行usertrap函数（也即处理陷入），在其中会执行yield函数来让该进程让出cpu，并进行进程切换。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-c data-lang=c><span class=line><span class=cl><span class=c1>//
+</span></span></span><span class=line><span class=cl><span class=c1>// handle an interrupt, exception, or system call from user space.
+</span></span></span><span class=line><span class=cl><span class=c1>// called from trampoline.S
+</span></span></span><span class=line><span class=cl><span class=c1>//
+</span></span></span><span class=line><span class=cl><span class=kt>void</span>
+</span></span><span class=line><span class=cl><span class=nf>usertrap</span><span class=p>(</span><span class=kt>void</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>  <span class=p>...</span>
+</span></span><span class=line><span class=cl>  
+</span></span><span class=line><span class=cl>  <span class=k>if</span><span class=p>(</span><span class=nf>r_scause</span><span class=p>()</span> <span class=o>==</span> <span class=mi>8</span><span class=p>){</span>
+</span></span><span class=line><span class=cl>    <span class=c1>// system call
+</span></span></span><span class=line><span class=cl>    <span class=p>...</span>
+</span></span><span class=line><span class=cl>  <span class=p>}</span> <span class=k>else</span> <span class=k>if</span><span class=p>((</span><span class=n>which_dev</span> <span class=o>=</span> <span class=nf>devintr</span><span class=p>())</span> <span class=o>!=</span> <span class=mi>0</span><span class=p>){</span>
+</span></span><span class=line><span class=cl>    <span class=c1>// ok
+</span></span></span><span class=line><span class=cl>  <span class=p>}</span> <span class=k>else</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=nf>printf</span><span class=p>(</span><span class=s>&#34;usertrap(): unexpected scause %p pid=%d</span><span class=se>\n</span><span class=s>&#34;</span><span class=p>,</span> <span class=nf>r_scause</span><span class=p>(),</span> <span class=n>p</span><span class=o>-&gt;</span><span class=n>pid</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=nf>printf</span><span class=p>(</span><span class=s>&#34;            sepc=%p stval=%p</span><span class=se>\n</span><span class=s>&#34;</span><span class=p>,</span> <span class=nf>r_sepc</span><span class=p>(),</span> <span class=nf>r_stval</span><span class=p>());</span>
+</span></span><span class=line><span class=cl>    <span class=nf>setkilled</span><span class=p>(</span><span class=n>p</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>  <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>  <span class=k>if</span><span class=p>(</span><span class=nf>killed</span><span class=p>(</span><span class=n>p</span><span class=p>))</span>
+</span></span><span class=line><span class=cl>    <span class=nf>exit</span><span class=p>(</span><span class=o>-</span><span class=mi>1</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>  <span class=c1>// give up the CPU if this is a timer interrupt.
+</span></span></span><span class=line><span class=cl>  <span class=k>if</span><span class=p>(</span><span class=n>which_dev</span> <span class=o>==</span> <span class=mi>2</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=nf>yield</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>  <span class=nf>usertrapret</span><span class=p>();</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p>yield函数会先对当前进程p上锁，然后执行shed函数，shed函数会先进行一些检查，然后调用swtch函数进行上下文切换，其保存p的上下文，并加载之前cpu的上下文。这样，ra寄存器中的值就变成了scheduler中的swtch所在地址的后一条指令的地址。在schduler中，重置当前cpu所运行的进程后，释放进程p的锁，之后开启新一轮调度（遍历进程表找到下一个可运行的进程）。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-c data-lang=c><span class=line><span class=cl><span class=kt>void</span>
+</span></span><span class=line><span class=cl><span class=nf>sched</span><span class=p>(</span><span class=kt>void</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>  <span class=kt>int</span> <span class=n>intena</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=k>struct</span> <span class=n>proc</span> <span class=o>*</span><span class=n>p</span> <span class=o>=</span> <span class=nf>myproc</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>  <span class=k>if</span><span class=p>(</span><span class=o>!</span><span class=nf>holding</span><span class=p>(</span><span class=o>&amp;</span><span class=n>p</span><span class=o>-&gt;</span><span class=n>lock</span><span class=p>))</span>
+</span></span><span class=line><span class=cl>    <span class=nf>panic</span><span class=p>(</span><span class=s>&#34;sched p-&gt;lock&#34;</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>  <span class=k>if</span><span class=p>(</span><span class=nf>mycpu</span><span class=p>()</span><span class=o>-&gt;</span><span class=n>noff</span> <span class=o>!=</span> <span class=mi>1</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=nf>panic</span><span class=p>(</span><span class=s>&#34;sched locks&#34;</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>  <span class=k>if</span><span class=p>(</span><span class=n>p</span><span class=o>-&gt;</span><span class=n>state</span> <span class=o>==</span> <span class=n>RUNNING</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=nf>panic</span><span class=p>(</span><span class=s>&#34;sched running&#34;</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>  <span class=k>if</span><span class=p>(</span><span class=nf>intr_get</span><span class=p>())</span>
+</span></span><span class=line><span class=cl>    <span class=nf>panic</span><span class=p>(</span><span class=s>&#34;sched interruptible&#34;</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>  <span class=n>intena</span> <span class=o>=</span> <span class=nf>mycpu</span><span class=p>()</span><span class=o>-&gt;</span><span class=n>intena</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=nf>swtch</span><span class=p>(</span><span class=o>&amp;</span><span class=n>p</span><span class=o>-&gt;</span><span class=n>context</span><span class=p>,</span> <span class=o>&amp;</span><span class=nf>mycpu</span><span class=p>()</span><span class=o>-&gt;</span><span class=n>context</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>  <span class=nf>mycpu</span><span class=p>()</span><span class=o>-&gt;</span><span class=n>intena</span> <span class=o>=</span> <span class=n>intena</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1>// Give up the CPU for one scheduling round.
+</span></span></span><span class=line><span class=cl><span class=kt>void</span>
+</span></span><span class=line><span class=cl><span class=nf>yield</span><span class=p>(</span><span class=kt>void</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>  <span class=k>struct</span> <span class=n>proc</span> <span class=o>*</span><span class=n>p</span> <span class=o>=</span> <span class=nf>myproc</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>  <span class=nf>acquire</span><span class=p>(</span><span class=o>&amp;</span><span class=n>p</span><span class=o>-&gt;</span><span class=n>lock</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>  <span class=n>p</span><span class=o>-&gt;</span><span class=n>state</span> <span class=o>=</span> <span class=n>RUNNABLE</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=nf>sched</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>  <span class=nf>release</span><span class=p>(</span><span class=o>&amp;</span><span class=n>p</span><span class=o>-&gt;</span><span class=n>lock</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p>这里yield中使用了acquire和release函数来进行锁的操作，但是这个锁的获取与释放时机并不是如同代码中的这样是一个“顺序”的过程。</p><ul><li>当执行顺序为从调度器选择可调度进程（RUNNABLE）后进行进程切换：</li></ul><p><img class=gallery-image data-flex-basis=478px data-flex-grow=199 height=1262 loading=lazy sizes="(max-width: 767px) calc(100vw - 30px), (max-width: 1023px) 700px, (max-width: 1279px) 950px, 1232px" src=https://gitee.com/kerolt/picture/raw/main/20241215-134904.png srcset="/'20241215-134904_13676004664408373585_hu_53b0fe44e718f1e6.png 800w, /'20241215-134904_13676004664408373585_hu_a00c0ad2d7ad3a65.png 1600w, /'20241215-134904_13676004664408373585_hu_ee90806faa8c2c63.png 2400w, https://gitee.com/kerolt/picture/raw/main/20241215-134904.png 2516w" width=2516></p><ul><li>当执行顺序为进程触发中断等陷入时，放弃cpu资源，需要执行进程调度时：</li></ul><p><img class=gallery-image data-flex-basis=325px data-flex-grow=135 height=1574 loading=lazy sizes="(max-width: 767px) calc(100vw - 30px), (max-width: 1023px) 700px, (max-width: 1279px) 950px, 1232px" src=https://gitee.com/kerolt/picture/raw/main/20241215-134904-1.png srcset="/'20241215-134904-1_12200221774095490040_hu_3e8f27947f9ff154.png 800w, /'20241215-134904-1_12200221774095490040_hu_e7a8928a1f020fb0.png 1600w, https://gitee.com/kerolt/picture/raw/main/20241215-134904-1.png 2136w" width=2136></p><p>可以看到，在yield函数中，进程p的锁的使用顺序并不是<code>acquire() 获取锁-> 执行shed()函数 -> release()释放锁</code>这样线性的，在其中会发生进程切换因此锁的“获取、释放”逻辑并不发生在一个函数中。</p></section><footer class="article-meta article-footer"><section class=article-tags><a href=/tags/mit6-s081/>MIT6-S081</a>
+<a href=/tags/xv6/>Xv6</a>
+<a href=/tags/os/>OS</a></section><section class="article-copyright inline-meta"><svg class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><path d="M14.5 9a3.5 4 0 100 6"/></svg>
+<span>Licensed under CC BY-NC-SA 4.0</span></section></footer></article><footer class=site-footer><section class=copyright>&copy;
+2025 -
+2026 Kerolt's Note</section><section class=powerby>使用 <a href=https://gohugo.io/ target=_blank rel=noopener>Hugo</a> 构建<br>主题 <b><a href=https://github.com/CaiJimmy/hugo-theme-stack target=_blank rel=noopener data-version=4.0.3>Stack</a></b> 由 <a href=https://jimmycai.com target=_blank rel=noopener>Jimmy</a> 设计</section></footer><script type=module>
+    import gallery from '\/ts\/gallery.js';
+
+    const articleContent = document.querySelector('.article-content');
+    const shouldLoad = articleContent && (articleContent.querySelectorAll('figure').length > 0 || articleContent.querySelectorAll('img.gallery-image').length > 0);
+    
+    if (shouldLoad) {
+        gallery(articleContent);
+
+        const PhotoSwipeLightbox = (await import("https:\/\/cdn.jsdelivr.net\/npm\/photoswipe@5.4.4\/dist\/photoswipe-lightbox.esm.min.js")).default;
+        const styleHref = "https:\/\/cdn.jsdelivr.net\/npm\/photoswipe@5.4.4\/dist\/photoswipe.css";
+
+        const styleTag = document.createElement('link');
+        styleTag.rel = 'stylesheet';
+        styleTag.href = styleHref;
+        document.head.appendChild(styleTag);
+
+        const lightbox = new PhotoSwipeLightbox({
+            gallerySelector: '.article-content',
+            childSelector: 'figure a.image-link',
+            pswpModule: () => import("https:\/\/cdn.jsdelivr.net\/npm\/photoswipe@5.4.4\/dist\/photoswipe.esm.min.js")
+        });
+        lightbox.init();
+    }
+</script></main></div><script type=text/javascript src=/ts/main.f856840516f7c2ad1769a8f5937e3d08d6cb386e2cd2dd025ae696e0ff207958.js defer></script></body></html>

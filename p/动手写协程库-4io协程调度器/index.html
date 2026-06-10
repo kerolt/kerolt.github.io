@@ -1,0 +1,656 @@
+<!doctype html><html lang=zh-cn dir=ltr><head><meta charset=utf-8><meta name=viewport content='width=device-width,initial-scale=1'><meta name=description content=" 【动手写协程库】系列笔记是学习 sylar 的协程库时的记录，参考了 从零开始重写sylar C++高性能分布式服务器框架 和代码随想录中的 文档。文章并不是对所有代码的详细解释，而是为了自己理解一些片段所做的笔记。\nIOManager 类中具体定义实现可以在这里查看：Github: src/iomanager.cpp\n之前实现的协程调度器的功能其实非常简单，当添加任务后调度器只是单纯的从任务队列中取出任务交给协程去执行。sylar 的协程库的关注对象是网络 IO，如果采用这么简单的调度就根本没有用到协程的精髓。\nsylar 的 IO 协程调度解决了之前调度器在 idle 状态下忙等待导致 CPU 占用率高的问题。IO 协程调度器使用一对管道 fd 来 tickle 调度协程，当调度器空闲时，idle 协程通过 epoll_wait 阻塞在管道的读描述符上，等管道的可读事件。添加新任务时，tickle 方法写管道，idle 协程检测到管道可读后退出，调度器执行调度。\n"><title>【动手写协程库 4】IO协程调度器</title><link rel=canonical href=https://kerolt.github.io/p/%E5%8A%A8%E6%89%8B%E5%86%99%E5%8D%8F%E7%A8%8B%E5%BA%93-4io%E5%8D%8F%E7%A8%8B%E8%B0%83%E5%BA%A6%E5%99%A8/><link rel=preconnect href=https://fonts.googleapis.com><link rel=preconnect href=https://fonts.gstatic.com crossorigin><link rel=preload as=style href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap"><link rel=stylesheet href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap"><link rel=stylesheet href=/scss/style.min.e62e09c60ba428a627e03568fa3df938f6a8224f815b5846f00816c17d4a0be4.css><meta property='og:title' content="【动手写协程库 4】IO协程调度器"><meta property='og:description' content=" 【动手写协程库】系列笔记是学习 sylar 的协程库时的记录，参考了 从零开始重写sylar C++高性能分布式服务器框架 和代码随想录中的 文档。文章并不是对所有代码的详细解释，而是为了自己理解一些片段所做的笔记。\nIOManager 类中具体定义实现可以在这里查看：Github: src/iomanager.cpp\n之前实现的协程调度器的功能其实非常简单，当添加任务后调度器只是单纯的从任务队列中取出任务交给协程去执行。sylar 的协程库的关注对象是网络 IO，如果采用这么简单的调度就根本没有用到协程的精髓。\nsylar 的 IO 协程调度解决了之前调度器在 idle 状态下忙等待导致 CPU 占用率高的问题。IO 协程调度器使用一对管道 fd 来 tickle 调度协程，当调度器空闲时，idle 协程通过 epoll_wait 阻塞在管道的读描述符上，等管道的可读事件。添加新任务时，tickle 方法写管道，idle 协程检测到管道可读后退出，调度器执行调度。\n"><meta property='og:url' content='https://kerolt.github.io/p/%E5%8A%A8%E6%89%8B%E5%86%99%E5%8D%8F%E7%A8%8B%E5%BA%93-4io%E5%8D%8F%E7%A8%8B%E8%B0%83%E5%BA%A6%E5%99%A8/'><meta property='og:site_name' content="Kerolt's Note"><meta property='og:type' content='article'><meta property='article:section' content='Post'><meta property='article:tag' content='Coroutine'><meta property='article:tag' content='CPlusPlus'><meta property='article:published_time' content='2024-09-29T00:00:00+00:00'><meta property='article:modified_time' content='2026-03-18T00:00:00+00:00'><meta name=twitter:title content="【动手写协程库 4】IO协程调度器"><meta name=twitter:description content=" 【动手写协程库】系列笔记是学习 sylar 的协程库时的记录，参考了 从零开始重写sylar C++高性能分布式服务器框架 和代码随想录中的 文档。文章并不是对所有代码的详细解释，而是为了自己理解一些片段所做的笔记。\nIOManager 类中具体定义实现可以在这里查看：Github: src/iomanager.cpp\n之前实现的协程调度器的功能其实非常简单，当添加任务后调度器只是单纯的从任务队列中取出任务交给协程去执行。sylar 的协程库的关注对象是网络 IO，如果采用这么简单的调度就根本没有用到协程的精髓。\nsylar 的 IO 协程调度解决了之前调度器在 idle 状态下忙等待导致 CPU 占用率高的问题。IO 协程调度器使用一对管道 fd 来 tickle 调度协程，当调度器空闲时，idle 协程通过 epoll_wait 阻塞在管道的读描述符上，等管道的可读事件。添加新任务时，tickle 方法写管道，idle 协程检测到管道可读后退出，调度器执行调度。\n"><link rel="shortcut icon" href=/images/favicon.png></head><body class=article-page><script>(function(){const e="StackColorScheme";localStorage.getItem(e)||localStorage.setItem(e,"auto")})()</script><script>(function(){const t="StackColorScheme",e=localStorage.getItem(t),n=window.matchMedia("(prefers-color-scheme: dark)").matches===!0;e=="dark"||e==="auto"&&n?document.documentElement.dataset.scheme="dark":document.documentElement.dataset.scheme="light"})()</script><div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky"><button class="hamburger hamburger--spin" type=button id=toggle-menu aria-label=切换菜单>
+<span class=hamburger-box><span class=hamburger-inner></span></span></button><header><figure class=site-avatar><a href=/><img src=/images/avatar.jpg width=200 height=200 class=site-logo loading=lazy alt=Avatar>
+</a><span class=emoji>🏸</span></figure><div class=site-meta><h1 class=site-name><a href=/>Kerolt's Note</a></h1><h2 class=site-description>宇宙是秩序的，也是混乱的。</h2></div></header><ol class=menu-social><li><a href=https://github.com/kerolt title=GitHub rel=me><svg class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 19c-4.3 1.4-4.3-2.5-6-3m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6.0 00-1.3-3.2 4.2 4.2.0 00-.1-3.2s-1.1-.3-3.5 1.3a12.3 12.3.0 00-6.2.0C6.5 2.8 5.4 3.1 5.4 3.1a4.2 4.2.0 00-.1 3.2A4.6 4.6.0 004 9.5c0 4.6 2.7 5.7 5.5 6-.6.6-.6 1.2-.5 2V21"/></svg></a></li></ol><ol class=menu id=main-menu><li><a href=/><svg class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><polyline points="5 12 3 12 12 3 21 12 19 12"/><path d="M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"/><path d="M9 21v-6a2 2 0 012-2h2a2 2 0 012 2v6"/></svg>
+<span>首页</span></a></li><li><a href=/archives/><svg class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><rect x="3" y="4" width="18" height="4" rx="2"/><path d="M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
+<span>归档</span></a></li><li><a href=/categories/><svg class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><line x1="5" y1="9" x2="19" y2="9"/><line x1="5" y1="15" x2="19" y2="15"/><line x1="11" y1="4" x2="7" y2="20"/><line x1="17" y1="4" x2="13" y2="20"/></svg>
+<span>分类</span></a></li><li><a href=/tags/><svg class="icon icon-tabler icon-tabler-tag" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><path d="M11 3l9 9a1.5 1.5.0 010 2l-6 6a1.5 1.5.0 01-2 0L3 11V7a4 4 0 014-4h4"/><circle cx="9" cy="9" r="2"/></svg>
+<span>标签</span></a></li><li><a href=/about/><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-info-circle"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 12a9 9 0 1018 0A9 9 0 003 12"/><path d="M12 9h.01"/><path d="M11 12h1v4h1"/></svg>
+<span>关于我</span></a></li><li><a href=/search/><svg class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="10" cy="10" r="7"/><line x1="21" y1="21" x2="15" y2="15"/></svg>
+<span>搜索</span></a></li><li class=menu-bottom-section><ol class=menu><li id=dark-mode-toggle><svg class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="8" cy="12" r="2"/><rect x="2" y="6" width="20" height="12" rx="6"/></svg>
+<svg class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="16" cy="12" r="2"/><rect x="2" y="6" width="20" height="12" rx="6"/></svg>
+<span>暗色模式</span></li></ol></li></ol></aside><aside class="sidebar right-sidebar sticky"><section class="widget archives"><div class=widget-icon><svg class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><line x1="5" y1="9" x2="19" y2="9"/><line x1="5" y1="15" x2="19" y2="15"/><line x1="11" y1="4" x2="7" y2="20"/><line x1="17" y1="4" x2="13" y2="20"/></svg></div><h2 class="widget-title section-title">目录</h2><div class=widget--toc><nav class=toc-nav id=TableOfContents><ol><li><a href=#iomanager-api>IOManager API</a></li><li><a href=#schedulerrun>Scheduler::Run()</a></li><li><a href=#重写-idle-函数>重写 Idle 函数</a></li><li><a href=#添加事件>添加事件</a></li></ol></nav></div></section></aside><main class="main full-width"><article class=main-article><header class=article-header><div class=article-details><header class=article-category><a href=/categories/%E5%8D%8F%E7%A8%8B%E5%BA%93/ style=background-color:#d8beef;color:#280f3d>协程库</a></header><div class=article-title-wrapper><h2 class=article-title><a href=/p/%E5%8A%A8%E6%89%8B%E5%86%99%E5%8D%8F%E7%A8%8B%E5%BA%93-4io%E5%8D%8F%E7%A8%8B%E8%B0%83%E5%BA%A6%E5%99%A8/>【动手写协程库 4】IO协程调度器</a></h2></div><footer class=article-meta><div class=inline-meta><svg class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><path d="M11.795 21H5a2 2 0 01-2-2V7a2 2 0 012-2h12a2 2 0 012 2v4"/><circle cx="18" cy="18" r="4"/><path d="M15 3v4"/><path d="M7 3v4"/><path d="M3 11h16"/><path d="M18 16.496V18l1 1"/></svg>
+<time class=article-time--published datetime=2024-09-29T00:00:00Z>2024年9月29日星期日</time>
+<svg class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg>
+<time class=article-time--reading>阅读时长: 6 分钟</time></div></footer></div></header><aside class=article-toc><details><summary><div class=article-toc-title><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-chevron-right"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 6l6 6-6 6"/></svg>
+<span>目录</span></div></summary><nav class=toc-nav><ol><li><a href=#iomanager-api>IOManager API</a></li><li><a href=#schedulerrun>Scheduler::Run()</a></li><li><a href=#重写-idle-函数>重写 Idle 函数</a></li><li><a href=#添加事件>添加事件</a></li></ol></nav></details></aside><section class=article-content><blockquote><p>【动手写协程库】系列笔记是学习 sylar 的协程库时的记录，参考了 <a class=link href="https://www.midlane.top/wiki/pages/viewpage.action?pageId=10060952" target=_blank rel=noopener>从零开始重写sylar C++高性能分布式服务器框架</a> 和代码随想录中的 <a class=link href=https://www.programmercarl.com/other/project_coroutine.html#%E4%B8%8B%E8%BD%BD%E6%96%B9%E5%BC%8F target=_blank rel=noopener>文档</a>。文章并不是对所有代码的详细解释，而是为了自己理解一些片段所做的笔记。</p><p><code>IOManager</code> 类中具体定义实现可以在这里查看：<a class=link href=https://github.com/kerolt/coroutine-lib/blob/master/src/iomanager.cpp target=_blank rel=noopener>Github: src/iomanager.cpp</a></p></blockquote><p>之前实现的协程调度器的功能其实非常简单，当添加任务后调度器只是单纯的从任务队列中取出任务交给协程去执行。sylar 的协程库的关注对象是网络 IO，如果采用这么简单的调度就根本没有用到协程的精髓。</p><p>sylar 的 IO 协程调度解决了之前调度器在 idle 状态下忙等待导致 CPU 占用率高的问题。IO 协程调度器使用一对管道 fd 来 tickle 调度协程，当调度器空闲时，idle 协程通过 epoll_wait 阻塞在管道的读描述符上，等管道的可读事件。添加新任务时，tickle 方法写管道，idle 协程检测到管道可读后退出，调度器执行调度。</p><h2 id=iomanager-api>IOManager API</h2><p><code>IOManager</code> 的 API 如下：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span><span class=lnt>34
+</span><span class=lnt>35
+</span><span class=lnt>36
+</span><span class=lnt>37
+</span><span class=lnt>38
+</span><span class=lnt>39
+</span><span class=lnt>40
+</span><span class=lnt>41
+</span><span class=lnt>42
+</span><span class=lnt>43
+</span><span class=lnt>44
+</span><span class=lnt>45
+</span><span class=lnt>46
+</span><span class=lnt>47
+</span><span class=lnt>48
+</span><span class=lnt>49
+</span><span class=lnt>50
+</span><span class=lnt>51
+</span><span class=lnt>52
+</span><span class=lnt>53
+</span><span class=lnt>54
+</span><span class=lnt>55
+</span><span class=lnt>56
+</span><span class=lnt>57
+</span><span class=lnt>58
+</span><span class=lnt>59
+</span><span class=lnt>60
+</span><span class=lnt>61
+</span><span class=lnt>62
+</span><span class=lnt>63
+</span><span class=lnt>64
+</span><span class=lnt>65
+</span><span class=lnt>66
+</span><span class=lnt>67
+</span><span class=lnt>68
+</span><span class=lnt>69
+</span><span class=lnt>70
+</span><span class=lnt>71
+</span><span class=lnt>72
+</span><span class=lnt>73
+</span><span class=lnt>74
+</span><span class=lnt>75
+</span><span class=lnt>76
+</span><span class=lnt>77
+</span><span class=lnt>78
+</span><span class=lnt>79
+</span><span class=lnt>80
+</span><span class=lnt>81
+</span><span class=lnt>82
+</span><span class=lnt>83
+</span><span class=lnt>84
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=cl><span class=cp>#ifndef IOMANAGER_H_
+</span></span></span><span class=line><span class=cl><span class=cp>#define IOMANAGER_H_
+</span></span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=cp>#include</span> <span class=cpf>&lt;cstddef&gt;</span><span class=cp>
+</span></span></span><span class=line><span class=cl><span class=cp>#include</span> <span class=cpf>&lt;sys/epoll.h&gt;</span><span class=cp>
+</span></span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=cp>#include</span> <span class=cpf>&lt;atomic&gt;</span><span class=cp>
+</span></span></span><span class=line><span class=cl><span class=cp>#include</span> <span class=cpf>&lt;functional&gt;</span><span class=cp>
+</span></span></span><span class=line><span class=cl><span class=cp>#include</span> <span class=cpf>&lt;mutex&gt;</span><span class=cp>
+</span></span></span><span class=line><span class=cl><span class=cp>#include</span> <span class=cpf>&lt;shared_mutex&gt;</span><span class=cp>
+</span></span></span><span class=line><span class=cl><span class=cp>#include</span> <span class=cpf>&lt;vector&gt;</span><span class=cp>
+</span></span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=cp>#include</span> <span class=cpf>&#34;coroutine.h&#34;</span><span class=cp>
+</span></span></span><span class=line><span class=cl><span class=cp>#include</span> <span class=cpf>&#34;scheduler.h&#34;</span><span class=cp>
+</span></span></span><span class=line><span class=cl><span class=cp>#include</span> <span class=cpf>&#34;timer.h&#34;</span><span class=cp>
+</span></span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1>// 事件：无、读、写
+</span></span></span><span class=line><span class=cl><span class=k>enum</span> <span class=nc>Event</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=n>NONE</span> <span class=o>=</span> <span class=mh>0x0</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>    <span class=n>READ</span> <span class=o>=</span> <span class=n>EPOLLIN</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>    <span class=n>WRITE</span> <span class=o>=</span> <span class=n>EPOLLOUT</span><span class=p>,</span>
+</span></span><span class=line><span class=cl><span class=p>};</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1>// IO协程调度
+</span></span></span><span class=line><span class=cl><span class=k>class</span> <span class=nc>IOManager</span> <span class=o>:</span> <span class=k>public</span> <span class=n>Scheduler</span><span class=p>,</span> <span class=k>public</span> <span class=n>TimerManager</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl><span class=k>public</span><span class=o>:</span>
+</span></span><span class=line><span class=cl>    <span class=n>IOManager</span><span class=p>(</span><span class=n>size_t</span> <span class=n>threads</span> <span class=o>=</span> <span class=mi>1</span><span class=p>,</span> <span class=kt>bool</span> <span class=n>use_caller</span> <span class=o>=</span> <span class=nb>true</span><span class=p>,</span> <span class=k>const</span> <span class=n>std</span><span class=o>::</span><span class=n>string</span><span class=o>&amp;</span> <span class=n>name</span> <span class=o>=</span> <span class=s>&#34;IOManager&#34;</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=o>~</span><span class=n>IOManager</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=kt>bool</span> <span class=nf>AddEvent</span><span class=p>(</span><span class=kt>int</span> <span class=n>fd</span><span class=p>,</span> <span class=n>Event</span> <span class=n>event</span><span class=p>,</span> <span class=n>std</span><span class=o>::</span><span class=n>function</span><span class=o>&lt;</span><span class=kt>void</span><span class=p>()</span><span class=o>&gt;</span> <span class=n>cb</span> <span class=o>=</span> <span class=k>nullptr</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=kt>bool</span> <span class=nf>DelEvent</span><span class=p>(</span><span class=kt>int</span> <span class=n>fd</span><span class=p>,</span> <span class=n>Event</span> <span class=n>event</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=kt>bool</span> <span class=nf>CancelEvent</span><span class=p>(</span><span class=kt>int</span> <span class=n>fd</span><span class=p>,</span> <span class=n>Event</span> <span class=n>event</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=kt>bool</span> <span class=nf>CancelAllEvent</span><span class=p>(</span><span class=kt>int</span> <span class=n>fd</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>static</span> <span class=n>IOManager</span><span class=o>*</span> <span class=nf>GetIOManager</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>protected</span><span class=o>:</span>
+</span></span><span class=line><span class=cl>    <span class=kt>void</span> <span class=n>Idle</span><span class=p>()</span> <span class=k>override</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=kt>void</span> <span class=nf>Tickle</span><span class=p>()</span> <span class=k>override</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=kt>void</span> <span class=nf>OnTimerInsertAtFront</span><span class=p>()</span> <span class=k>override</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=kt>bool</span> <span class=nf>IsStop</span><span class=p>()</span> <span class=k>override</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=kt>void</span> <span class=nf>ResizeContexts</span><span class=p>(</span><span class=n>size_t</span> <span class=n>size</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>private</span><span class=o>:</span>
+</span></span><span class=line><span class=cl>    <span class=c1>// socket fd 上下文
+</span></span></span><span class=line><span class=cl>    <span class=k>struct</span> <span class=nc>FdContext</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=k>struct</span> <span class=nc>EventContext</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>            <span class=n>Scheduler</span><span class=o>*</span> <span class=n>scheduler</span> <span class=o>=</span> <span class=k>nullptr</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>            <span class=n>Coroutine</span><span class=o>::</span><span class=n>Ptr</span> <span class=n>coroutine</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>            <span class=n>std</span><span class=o>::</span><span class=n>function</span><span class=o>&lt;</span><span class=kt>void</span><span class=p>()</span><span class=o>&gt;</span> <span class=n>callback</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=p>};</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=c1>// 根据类型获取对应的上下文
+</span></span></span><span class=line><span class=cl>        <span class=n>EventContext</span><span class=o>&amp;</span> <span class=n>GetEventContext</span><span class=p>(</span><span class=n>Event</span><span class=o>&amp;</span> <span class=n>e</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=kt>void</span> <span class=nf>ResetEventContext</span><span class=p>(</span><span class=n>EventContext</span><span class=o>&amp;</span> <span class=n>ectx</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=kt>void</span> <span class=nf>TriggerEvent</span><span class=p>(</span><span class=n>Event</span> <span class=n>e</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=n>EventContext</span> <span class=n>read_ctx</span><span class=p>,</span> <span class=n>write_ctx</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=kt>int</span> <span class=n>fd</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=n>Event</span> <span class=n>events</span> <span class=o>=</span> <span class=n>Event</span><span class=o>::</span><span class=n>NONE</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=n>std</span><span class=o>::</span><span class=n>mutex</span> <span class=n>mutex</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=p>};</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>private</span><span class=o>:</span>
+</span></span><span class=line><span class=cl>    <span class=kt>int</span> <span class=n>epfd_</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=kt>int</span> <span class=n>tickle_fd_</span><span class=p>[</span><span class=mi>2</span><span class=p>];</span>
+</span></span><span class=line><span class=cl>    <span class=n>std</span><span class=o>::</span><span class=n>atomic_size_t</span> <span class=n>pending_evt_cnt_</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=n>std</span><span class=o>::</span><span class=n>mutex</span> <span class=n>mutex_</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=n>std</span><span class=o>::</span><span class=n>shared_mutex</span> <span class=n>rw_mutex_</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=c1>// 利用fd作为下标来获取对应的FdContext*，也可以使用哈希表代替
+</span></span></span><span class=line><span class=cl>    <span class=n>std</span><span class=o>::</span><span class=n>vector</span><span class=o>&lt;</span><span class=n>FdContext</span><span class=o>*&gt;</span> <span class=n>fd_contexts_</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>};</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=cp>#endif </span><span class=cm>/* IOMANAGER_H_ */</span><span class=cp>
+</span></span></span></code></pre></td></tr></table></div></div><h2 id=schedulerrun>Scheduler::Run()</h2><p>我们可以先回顾一下 <code>Scheduler::Run()</code> 这个函数：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span><span class=lnt>34
+</span><span class=lnt>35
+</span><span class=lnt>36
+</span><span class=lnt>37
+</span><span class=lnt>38
+</span><span class=lnt>39
+</span><span class=lnt>40
+</span><span class=lnt>41
+</span><span class=lnt>42
+</span><span class=lnt>43
+</span><span class=lnt>44
+</span><span class=lnt>45
+</span><span class=lnt>46
+</span><span class=lnt>47
+</span><span class=lnt>48
+</span><span class=lnt>49
+</span><span class=lnt>50
+</span><span class=lnt>51
+</span><span class=lnt>52
+</span><span class=lnt>53
+</span><span class=lnt>54
+</span><span class=lnt>55
+</span><span class=lnt>56
+</span><span class=lnt>57
+</span><span class=lnt>58
+</span><span class=lnt>59
+</span><span class=lnt>60
+</span><span class=lnt>61
+</span><span class=lnt>62
+</span><span class=lnt>63
+</span><span class=lnt>64
+</span><span class=lnt>65
+</span><span class=lnt>66
+</span><span class=lnt>67
+</span><span class=lnt>68
+</span><span class=lnt>69
+</span><span class=lnt>70
+</span><span class=lnt>71
+</span><span class=lnt>72
+</span><span class=lnt>73
+</span><span class=lnt>74
+</span><span class=lnt>75
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=cl><span class=kt>void</span> <span class=n>Scheduler</span><span class=o>::</span><span class=n>Run</span><span class=p>()</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=n>LOG</span> <span class=o>&lt;&lt;</span> <span class=s>&#34;Scheduler running...</span><span class=se>\n</span><span class=s>&#34;</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=n>SetHookFlag</span><span class=p>(</span><span class=nb>true</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=n>SetThisAsScheduler</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=c1>// 如果当前线程不是调度器所在线程，设置调度的协程为当前线程运行的协程
+</span></span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=p>(</span><span class=n>std</span><span class=o>::</span><span class=n>this_thread</span><span class=o>::</span><span class=n>get_id</span><span class=p>()</span> <span class=o>!=</span> <span class=n>sched_id_</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=n>sched_coroutine</span> <span class=o>=</span> <span class=n>Coroutine</span><span class=o>::</span><span class=n>GetNowCoroutine</span><span class=p>().</span><span class=n>get</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=n>Coroutine</span><span class=o>::</span><span class=n>Ptr</span> <span class=n>idle_co</span> <span class=o>=</span> <span class=n>std</span><span class=o>::</span><span class=n>make_shared</span><span class=o>&lt;</span><span class=n>Coroutine</span><span class=o>&gt;</span><span class=p>([</span><span class=k>this</span><span class=p>]</span> <span class=p>{</span> <span class=k>this</span><span class=o>-&gt;</span><span class=n>Idle</span><span class=p>();</span> <span class=p>});</span>
+</span></span><span class=line><span class=cl>    <span class=n>Coroutine</span><span class=o>::</span><span class=n>Ptr</span> <span class=n>callback_co</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=n>SchedulerTask</span> <span class=n>task</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>while</span> <span class=p>(</span><span class=nb>true</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=n>task</span><span class=p>.</span><span class=n>Reset</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>        <span class=kt>bool</span> <span class=n>tickle</span> <span class=o>=</span> <span class=nb>false</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=p>{</span>
+</span></span><span class=line><span class=cl>            <span class=n>std</span><span class=o>::</span><span class=n>lock_guard</span> <span class=n>lock</span><span class=p>(</span><span class=n>mutex_</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>            <span class=k>auto</span> <span class=n>iter</span> <span class=o>=</span> <span class=n>tasks_</span><span class=p>.</span><span class=n>begin</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>            <span class=k>while</span> <span class=p>(</span><span class=n>iter</span> <span class=o>!=</span> <span class=n>tasks_</span><span class=p>.</span><span class=n>end</span><span class=p>())</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>                <span class=c1>// 当前遍历的task已经分配了线程去执行且这个线程不是当前线程，则不用管
+</span></span></span><span class=line><span class=cl>                <span class=k>if</span> <span class=p>(</span><span class=n>iter</span><span class=o>-&gt;</span><span class=n>thread_id_</span> <span class=o>&amp;&amp;</span> <span class=o>*</span><span class=n>iter</span><span class=o>-&gt;</span><span class=n>thread_id_</span> <span class=o>!=</span> <span class=n>std</span><span class=o>::</span><span class=n>this_thread</span><span class=o>::</span><span class=n>get_id</span><span class=p>())</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>                    <span class=o>++</span><span class=n>iter</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>                    <span class=n>tickle</span> <span class=o>=</span> <span class=nb>true</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>                    <span class=k>continue</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>                <span class=p>}</span>
+</span></span><span class=line><span class=cl>                <span class=k>if</span> <span class=p>(</span><span class=n>iter</span><span class=o>-&gt;</span><span class=n>coroutine_</span> <span class=o>&amp;&amp;</span> <span class=n>iter</span><span class=o>-&gt;</span><span class=n>coroutine_</span><span class=o>-&gt;</span><span class=n>GetState</span><span class=p>()</span> <span class=o>!=</span> <span class=n>Coroutine</span><span class=o>::</span><span class=n>READY</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>                    <span class=n>LOG</span> <span class=o>&lt;&lt;</span> <span class=s>&#34;Coroutine task&#39;s state should be READY!</span><span class=se>\n</span><span class=s>&#34;</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>                    <span class=n>assert</span><span class=p>(</span><span class=nb>false</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>                <span class=p>}</span>
+</span></span><span class=line><span class=cl>                <span class=n>task</span> <span class=o>=</span> <span class=o>*</span><span class=n>iter</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>                <span class=n>tasks_</span><span class=p>.</span><span class=n>erase</span><span class=p>(</span><span class=n>iter</span><span class=o>++</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>                <span class=n>active_threads_</span><span class=o>++</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>                <span class=k>break</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>            <span class=p>}</span>
+</span></span><span class=line><span class=cl>            <span class=c1>// 有任务可以去执行，需要tickle一下
+</span></span></span><span class=line><span class=cl>            <span class=n>tickle</span> <span class=o>|=</span> <span class=p>(</span><span class=n>iter</span> <span class=o>!=</span> <span class=n>tasks_</span><span class=p>.</span><span class=n>end</span><span class=p>());</span>
+</span></span><span class=line><span class=cl>        <span class=p>}</span>
+</span></span><span class=line><span class=cl>        <span class=k>if</span> <span class=p>(</span><span class=n>tickle</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>            <span class=n>Tickle</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>        <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=c1>// 子协程执行完毕后yield会回到Run()中
+</span></span></span><span class=line><span class=cl>        <span class=c1>// 注意，每次运行了一个task后需要Reset一下
+</span></span></span><span class=line><span class=cl>        <span class=k>if</span> <span class=p>(</span><span class=n>task</span><span class=p>.</span><span class=n>coroutine_</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>            <span class=c1>// 任务类型为协程
+</span></span></span><span class=line><span class=cl>            <span class=n>task</span><span class=p>.</span><span class=n>coroutine_</span><span class=o>-&gt;</span><span class=n>Resume</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>            <span class=n>active_threads_</span><span class=o>--</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>            <span class=n>task</span><span class=p>.</span><span class=n>Reset</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>        <span class=p>}</span> <span class=k>else</span> <span class=nf>if</span> <span class=p>(</span><span class=n>task</span><span class=p>.</span><span class=n>callback_</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>            <span class=c1>// 任务类型为回调函数，将其包装为协程
+</span></span></span><span class=line><span class=cl>            <span class=k>if</span> <span class=p>(</span><span class=n>callback_co</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>                <span class=n>callback_co</span><span class=o>-&gt;</span><span class=n>Reset</span><span class=p>(</span><span class=n>task</span><span class=p>.</span><span class=n>callback_</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>            <span class=p>}</span> <span class=k>else</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>                <span class=n>callback_co</span> <span class=o>=</span> <span class=n>std</span><span class=o>::</span><span class=n>make_shared</span><span class=o>&lt;</span><span class=n>Coroutine</span><span class=o>&gt;</span><span class=p>(</span><span class=n>task</span><span class=p>.</span><span class=n>callback_</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>            <span class=p>}</span>
+</span></span><span class=line><span class=cl>            <span class=n>callback_co</span><span class=o>-&gt;</span><span class=n>Resume</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>            <span class=n>active_threads_</span><span class=o>--</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>            <span class=n>callback_co</span><span class=p>.</span><span class=n>reset</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>            <span class=n>task</span><span class=p>.</span><span class=n>Reset</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>        <span class=p>}</span> <span class=k>else</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>            <span class=c1>// 无任务，任务队列为空
+</span></span></span><span class=line><span class=cl>            <span class=k>if</span> <span class=p>(</span><span class=n>idle_co</span><span class=o>-&gt;</span><span class=n>GetState</span><span class=p>()</span> <span class=o>==</span> <span class=n>Coroutine</span><span class=o>::</span><span class=n>FINISH</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>                <span class=n>LOG</span> <span class=o>&lt;&lt;</span> <span class=s>&#34;Idle coroutine finish</span><span class=se>\n</span><span class=s>&#34;</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>                <span class=k>break</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>            <span class=p>}</span>
+</span></span><span class=line><span class=cl>            <span class=n>idle_threads_</span><span class=o>++</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>            <span class=n>idle_co</span><span class=o>-&gt;</span><span class=n>Resume</span><span class=p>();</span> <span class=c1>// Idle最后Yeild时回到这里
+</span></span></span><span class=line><span class=cl>            <span class=n>idle_threads_</span><span class=o>--</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=p>}</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>    <span class=n>LOG</span> <span class=o>&lt;&lt;</span> <span class=s>&#34;Scheduler Run() exit</span><span class=se>\n</span><span class=s>&#34;</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p>这个函数就是每个线程会启动的协程调度函数，负责管理和执行任务队列中的任务，包括协程和回调函数两种类型的任务，如果任务队列为空，则执行 Idle 协程。</p><p>在 <code>Scheduler::Idle()</code> 函数中，仅仅只是做了一个简单的处理：调度器没有停止就让出当前正在执行的协程，我们要做的增强后的 IOManager 需要重写 Idle 函数，让它不断等待事件、处理事件、然后再次等待事件的循环过程，它在没有其他协程运行时保持系统的活跃度，并在有事件发生时进行相应的处理。</p><h2 id=重写-idle-函数>重写 Idle 函数</h2><p>在 <code>IOManager</code> 中，我们就需要重写 Idle 函数，我们需要它是一个不断等待事件、处理事件、然后再次等待事件的循环过程，它在没有其他协程运行时保持系统的活跃度，并在有事件发生时进行相应的处理：</p><ol><li>我们会先找到最近一个定时器的超时时间，并将其与自定义最长超时时间（源码中是 5s）进行比较取最小者作为 <code>epoll_wait</code> 的超时时间</li><li>将超时的定时器的回调函数加入调度器</li><li>处理 <code>epoll_wait</code> 送来的事件</li><li>将当前线程运行的协程暂停（也就是暂停 Idle 协程），并将执行权交给调度协程（<code>Scheduler::Run()</code>）</li><li>从 1.又开始重复执行</li></ol><p>具体操作可看代码：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span><span class=lnt>34
+</span><span class=lnt>35
+</span><span class=lnt>36
+</span><span class=lnt>37
+</span><span class=lnt>38
+</span><span class=lnt>39
+</span><span class=lnt>40
+</span><span class=lnt>41
+</span><span class=lnt>42
+</span><span class=lnt>43
+</span><span class=lnt>44
+</span><span class=lnt>45
+</span><span class=lnt>46
+</span><span class=lnt>47
+</span><span class=lnt>48
+</span><span class=lnt>49
+</span><span class=lnt>50
+</span><span class=lnt>51
+</span><span class=lnt>52
+</span><span class=lnt>53
+</span><span class=lnt>54
+</span><span class=lnt>55
+</span><span class=lnt>56
+</span><span class=lnt>57
+</span><span class=lnt>58
+</span><span class=lnt>59
+</span><span class=lnt>60
+</span><span class=lnt>61
+</span><span class=lnt>62
+</span><span class=lnt>63
+</span><span class=lnt>64
+</span><span class=lnt>65
+</span><span class=lnt>66
+</span><span class=lnt>67
+</span><span class=lnt>68
+</span><span class=lnt>69
+</span><span class=lnt>70
+</span><span class=lnt>71
+</span><span class=lnt>72
+</span><span class=lnt>73
+</span><span class=lnt>74
+</span><span class=lnt>75
+</span><span class=lnt>76
+</span><span class=lnt>77
+</span><span class=lnt>78
+</span><span class=lnt>79
+</span><span class=lnt>80
+</span><span class=lnt>81
+</span><span class=lnt>82
+</span><span class=lnt>83
+</span><span class=lnt>84
+</span><span class=lnt>85
+</span><span class=lnt>86
+</span><span class=lnt>87
+</span><span class=lnt>88
+</span><span class=lnt>89
+</span><span class=lnt>90
+</span><span class=lnt>91
+</span><span class=lnt>92
+</span><span class=lnt>93
+</span><span class=lnt>94
+</span><span class=lnt>95
+</span><span class=lnt>96
+</span><span class=lnt>97
+</span><span class=lnt>98
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=cl><span class=kt>void</span> <span class=n>IOManager</span><span class=o>::</span><span class=n>Idle</span><span class=p>()</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=n>LOG</span> <span class=o>&lt;&lt;</span> <span class=s>&#34;idle coroutine start up</span><span class=se>\n</span><span class=s>&#34;</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>const</span> <span class=kt>int</span> <span class=n>MAX_EVENTS</span> <span class=o>=</span> <span class=mi>256</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=k>const</span> <span class=kt>int</span> <span class=n>MAX_TIMEOUT</span> <span class=o>=</span> <span class=mi>5000</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=n>epoll_event</span> <span class=n>events</span><span class=p>[</span><span class=n>MAX_EVENTS</span><span class=p>]{};</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>while</span> <span class=p>(</span><span class=nb>true</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=c1>// LOG &lt;&lt; &#34;in idle now\n&#34;;
+</span></span></span><span class=line><span class=cl>        <span class=k>if</span> <span class=p>(</span><span class=n>IsStop</span><span class=p>())</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>            <span class=n>LOG</span> <span class=o>&lt;&lt;</span> <span class=n>GetName</span><span class=p>()</span> <span class=o>&lt;&lt;</span> <span class=s>&#34;idle stop now</span><span class=se>\n</span><span class=s>&#34;</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>            <span class=k>break</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=kt>uint64_t</span> <span class=n>next_timeout</span> <span class=o>=</span> <span class=n>GetNextTimerInterval</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>        <span class=kt>int</span> <span class=n>triggered_events</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=k>do</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>            <span class=c1>// 如果时间堆中有超时的定时器，则比较这个超时定时器的下一次触发的时间与MAX_TIMEOUT（5s），选取最小值作为超时时间
+</span></span></span><span class=line><span class=cl>            <span class=n>next_timeout</span> <span class=o>=</span> <span class=n>next_timeout</span> <span class=o>!=</span> <span class=o>~</span><span class=mi>0ull</span> <span class=o>?</span> <span class=n>std</span><span class=o>::</span><span class=n>min</span><span class=p>(</span><span class=k>static_cast</span><span class=o>&lt;</span><span class=kt>int</span><span class=o>&gt;</span><span class=p>(</span><span class=n>next_timeout</span><span class=p>),</span> <span class=n>MAX_TIMEOUT</span><span class=p>)</span> <span class=o>:</span> <span class=n>MAX_TIMEOUT</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>            <span class=c1>// 没有事件到来时会阻塞在epoll_wait上，除非到了超时时间
+</span></span></span><span class=line><span class=cl>            <span class=n>triggered_events</span> <span class=o>=</span> <span class=n>epoll_wait</span><span class=p>(</span><span class=n>epfd_</span><span class=p>,</span> <span class=n>events</span><span class=p>,</span> <span class=n>MAX_EVENTS</span><span class=p>,</span> <span class=k>static_cast</span><span class=o>&lt;</span><span class=kt>int</span><span class=o>&gt;</span><span class=p>(</span><span class=n>next_timeout</span><span class=p>));</span>
+</span></span><span class=line><span class=cl>            <span class=k>if</span> <span class=p>(</span><span class=n>triggered_events</span> <span class=o>&lt;</span> <span class=mi>0</span> <span class=o>&amp;&amp;</span> <span class=n>errno</span> <span class=o>==</span> <span class=n>EINTR</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>                <span class=k>continue</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>            <span class=p>}</span> <span class=k>else</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>                <span class=k>break</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>            <span class=p>}</span>
+</span></span><span class=line><span class=cl>        <span class=p>}</span> <span class=k>while</span> <span class=p>(</span><span class=nb>true</span><span class=p>);</span> <span class=c1>// 用while(true)的目的是确保在出现特定错误情况时能够重新尝试执行 epoll_wait
+</span></span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=c1>// 将超时的定时器的回调函数加入调度器
+</span></span></span><span class=line><span class=cl>        <span class=c1>// 这些回调函数的作用可能是关闭连接等操作
+</span></span></span><span class=line><span class=cl>        <span class=n>std</span><span class=o>::</span><span class=n>vector</span><span class=o>&lt;</span><span class=n>std</span><span class=o>::</span><span class=n>function</span><span class=o>&lt;</span><span class=kt>void</span><span class=p>()</span><span class=o>&gt;&gt;</span> <span class=n>cbs</span> <span class=o>=</span> <span class=n>GetExpiredCbList</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>        <span class=k>for</span> <span class=p>(</span><span class=k>auto</span><span class=o>&amp;</span> <span class=nl>cb</span> <span class=p>:</span> <span class=n>cbs</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>            <span class=n>Sched</span><span class=p>(</span><span class=n>cb</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>        <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=c1>// 处理事件
+</span></span></span><span class=line><span class=cl>        <span class=k>for</span> <span class=p>(</span><span class=kt>int</span> <span class=n>i</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span> <span class=n>i</span> <span class=o>&lt;</span> <span class=n>triggered_events</span><span class=p>;</span> <span class=n>i</span><span class=o>++</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>            <span class=n>epoll_event</span><span class=o>&amp;</span> <span class=n>event</span> <span class=o>=</span> <span class=n>events</span><span class=p>[</span><span class=n>i</span><span class=p>];</span>
+</span></span><span class=line><span class=cl>            <span class=c1>// 是一个用于通知协程调度的事件
+</span></span></span><span class=line><span class=cl>            <span class=c1>// epoll中监听了用于通知的管道读端fd，当有数据到时即会触发
+</span></span></span><span class=line><span class=cl>            <span class=k>if</span> <span class=p>(</span><span class=n>event</span><span class=p>.</span><span class=n>data</span><span class=p>.</span><span class=n>fd</span> <span class=o>==</span> <span class=n>tickle_fd_</span><span class=p>[</span><span class=mi>0</span><span class=p>])</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>                <span class=kt>char</span> <span class=n>buf</span><span class=p>[</span><span class=mi>256</span><span class=p>]{};</span>
+</span></span><span class=line><span class=cl>                <span class=c1>// 将管道内的数据读完
+</span></span></span><span class=line><span class=cl>                <span class=k>while</span> <span class=p>(</span><span class=n>read</span><span class=p>(</span><span class=n>tickle_fd_</span><span class=p>[</span><span class=mi>0</span><span class=p>],</span> <span class=n>buf</span><span class=p>,</span> <span class=k>sizeof</span><span class=p>(</span><span class=n>buf</span><span class=p>))</span> <span class=o>&gt;</span> <span class=mi>0</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>                    <span class=p>;</span>
+</span></span><span class=line><span class=cl>                <span class=k>continue</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>            <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>            <span class=c1>// FdContext* fd_ctx = (FdContext*) event.data.ptr;
+</span></span></span><span class=line><span class=cl>            <span class=n>FdContext</span><span class=o>*</span> <span class=n>fd_ctx</span> <span class=o>=</span> <span class=k>static_cast</span><span class=o>&lt;</span><span class=n>FdContext</span><span class=o>*&gt;</span><span class=p>(</span><span class=n>event</span><span class=p>.</span><span class=n>data</span><span class=p>.</span><span class=n>ptr</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>            <span class=n>std</span><span class=o>::</span><span class=n>lock_guard</span> <span class=n>lock</span><span class=p>(</span><span class=n>fd_ctx</span><span class=o>-&gt;</span><span class=n>mutex</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>            <span class=c1>// 发生错误时，如果原来的文件描述符上下文（fd_ctx）中有可读或可写事件标志被设置，那么现在将重新触发这些事件
+</span></span></span><span class=line><span class=cl>            <span class=k>if</span> <span class=p>(</span><span class=n>event</span><span class=p>.</span><span class=n>events</span> <span class=o>&amp;</span> <span class=p>(</span><span class=n>EPOLLERR</span> <span class=o>|</span> <span class=n>EPOLLHUP</span><span class=p>))</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>                <span class=n>event</span><span class=p>.</span><span class=n>events</span> <span class=o>|=</span> <span class=p>(</span><span class=n>EPOLLIN</span> <span class=o>|</span> <span class=n>EPOLLOUT</span><span class=p>)</span> <span class=o>&amp;</span> <span class=n>fd_ctx</span><span class=o>-&gt;</span><span class=n>events</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>            <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>            <span class=c1>// 获取fd_ctx对应的事件
+</span></span></span><span class=line><span class=cl>            <span class=kt>int</span> <span class=n>real_event</span> <span class=o>=</span> <span class=n>Event</span><span class=o>::</span><span class=n>NONE</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>            <span class=k>if</span> <span class=p>(</span><span class=n>event</span><span class=p>.</span><span class=n>events</span> <span class=o>&amp;</span> <span class=n>EPOLLIN</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>                <span class=n>real_event</span> <span class=o>|=</span> <span class=n>Event</span><span class=o>::</span><span class=n>READ</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>            <span class=p>}</span>
+</span></span><span class=line><span class=cl>            <span class=k>if</span> <span class=p>(</span><span class=n>event</span><span class=p>.</span><span class=n>events</span> <span class=o>&amp;</span> <span class=n>EPOLLOUT</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>                <span class=n>real_event</span> <span class=o>|=</span> <span class=n>Event</span><span class=o>::</span><span class=n>WRITE</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>            <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>            <span class=k>if</span> <span class=p>((</span><span class=n>fd_ctx</span><span class=o>-&gt;</span><span class=n>events</span> <span class=o>&amp;</span> <span class=n>real_event</span><span class=p>)</span> <span class=o>==</span> <span class=n>Event</span><span class=o>::</span><span class=n>NONE</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>                <span class=k>continue</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>            <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>            <span class=c1>// 如果还有剩余事件，则修改；否则将其从epoll中删除
+</span></span></span><span class=line><span class=cl>            <span class=c1>// 注意获取rest_events时不是使用的event.events &amp; ~real_event，因为是要去除fd_ctx-&gt;fd中本次触发的事件
+</span></span></span><span class=line><span class=cl>            <span class=kt>int</span> <span class=n>rest_events</span> <span class=o>=</span> <span class=n>fd_ctx</span><span class=o>-&gt;</span><span class=n>events</span> <span class=o>&amp;</span> <span class=o>~</span><span class=n>real_event</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>            <span class=kt>int</span> <span class=n>op</span> <span class=o>=</span> <span class=n>rest_events</span> <span class=o>?</span> <span class=nl>EPOLL_CTL_MOD</span> <span class=p>:</span> <span class=n>EPOLL_CTL_DEL</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>            <span class=n>event</span><span class=p>.</span><span class=n>events</span> <span class=o>=</span> <span class=n>EPOLLET</span> <span class=o>|</span> <span class=n>rest_events</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>            <span class=k>if</span> <span class=p>(</span><span class=n>epoll_ctl</span><span class=p>(</span><span class=n>epfd_</span><span class=p>,</span> <span class=n>op</span><span class=p>,</span> <span class=n>fd_ctx</span><span class=o>-&gt;</span><span class=n>fd</span><span class=p>,</span> <span class=o>&amp;</span><span class=n>event</span><span class=p>)</span> <span class=o>&lt;</span> <span class=mi>0</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>                <span class=n>LOG_ERROR</span> <span class=o>&lt;&lt;</span> <span class=n>strerror</span><span class=p>(</span><span class=n>errno</span><span class=p>)</span> <span class=o>&lt;&lt;</span> <span class=s>&#34;</span><span class=se>\n</span><span class=s>&#34;</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>                <span class=k>continue</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>            <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>            <span class=k>if</span> <span class=p>(</span><span class=n>real_event</span> <span class=o>&amp;</span> <span class=n>Event</span><span class=o>::</span><span class=n>READ</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>                <span class=n>fd_ctx</span><span class=o>-&gt;</span><span class=n>TriggerEvent</span><span class=p>(</span><span class=n>Event</span><span class=o>::</span><span class=n>READ</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>                <span class=o>--</span><span class=n>pending_evt_cnt_</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>            <span class=p>}</span>
+</span></span><span class=line><span class=cl>            <span class=k>if</span> <span class=p>(</span><span class=n>real_event</span> <span class=o>&amp;</span> <span class=n>Event</span><span class=o>::</span><span class=n>WRITE</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>                <span class=n>fd_ctx</span><span class=o>-&gt;</span><span class=n>TriggerEvent</span><span class=p>(</span><span class=n>Event</span><span class=o>::</span><span class=n>WRITE</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>                <span class=o>--</span><span class=n>pending_evt_cnt_</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>            <span class=p>}</span>
+</span></span><span class=line><span class=cl>        <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=c1>// 将当前线程运行的协程暂停（也就是暂停Idle协程），并将执行权交给调度协程
+</span></span></span><span class=line><span class=cl>        <span class=n>Coroutine</span><span class=o>::</span><span class=n>Ptr</span> <span class=n>co_ptr</span> <span class=o>=</span> <span class=n>Coroutine</span><span class=o>::</span><span class=n>GetNowCoroutine</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>        <span class=k>auto</span> <span class=n>co</span> <span class=o>=</span> <span class=n>co_ptr</span><span class=p>.</span><span class=n>get</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>        <span class=n>co_ptr</span><span class=p>.</span><span class=n>reset</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>        <span class=n>co</span><span class=o>-&gt;</span><span class=n>Yield</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><h2 id=添加事件>添加事件</h2><p>IOManager 除了重写 Idle 函数这个重要点外，还有个重要点就是为指定文件描述符添加事件。</p><p>IOManager 内部有一个 [<code>FdContext</code>](#IOManger API) 结构体用来封装 socket fd 的上下文（需要绑定的回调函数，对应的事件、协程），并使用一个 vector 保存这些 FdContext。</p><p>我们在添加 fd 的事件时，需要将其加入 vector 中，并且需要通过 <code>epoll_ctl</code> 注册 fd 的对应事件。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span><span class=lnt>34
+</span><span class=lnt>35
+</span><span class=lnt>36
+</span><span class=lnt>37
+</span><span class=lnt>38
+</span><span class=lnt>39
+</span><span class=lnt>40
+</span><span class=lnt>41
+</span><span class=lnt>42
+</span><span class=lnt>43
+</span><span class=lnt>44
+</span><span class=lnt>45
+</span><span class=lnt>46
+</span><span class=lnt>47
+</span><span class=lnt>48
+</span><span class=lnt>49
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=cl><span class=kt>bool</span> <span class=n>IOManager</span><span class=o>::</span><span class=n>AddEvent</span><span class=p>(</span><span class=kt>int</span> <span class=n>fd</span><span class=p>,</span> <span class=n>Event</span> <span class=n>event</span><span class=p>,</span> <span class=n>std</span><span class=o>::</span><span class=n>function</span><span class=o>&lt;</span><span class=kt>void</span><span class=p>()</span><span class=o>&gt;</span> <span class=n>cb</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=n>FdContext</span><span class=o>*</span> <span class=n>fd_ctx</span> <span class=o>=</span> <span class=k>nullptr</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=n>std</span><span class=o>::</span><span class=n>shared_lock</span> <span class=n>rw_lock</span><span class=p>(</span><span class=n>rw_mutex_</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>        <span class=k>if</span> <span class=p>(</span><span class=n>fd_contexts_</span><span class=p>.</span><span class=n>size</span><span class=p>()</span> <span class=o>&gt;</span> <span class=n>fd</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>            <span class=n>fd_ctx</span> <span class=o>=</span> <span class=n>fd_contexts_</span><span class=p>[</span><span class=n>fd</span><span class=p>];</span>
+</span></span><span class=line><span class=cl>            <span class=n>rw_lock</span><span class=p>.</span><span class=n>unlock</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>        <span class=p>}</span> <span class=k>else</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>            <span class=n>rw_lock</span><span class=p>.</span><span class=n>unlock</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>            <span class=n>std</span><span class=o>::</span><span class=n>unique_lock</span> <span class=n>rw_lock2</span><span class=p>(</span><span class=n>rw_mutex_</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>            <span class=n>ResizeContexts</span><span class=p>(</span><span class=n>fd</span> <span class=o>*</span> <span class=mf>1.5</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>            <span class=n>fd_ctx</span> <span class=o>=</span> <span class=n>fd_contexts_</span><span class=p>[</span><span class=n>fd</span><span class=p>];</span>
+</span></span><span class=line><span class=cl>        <span class=p>}</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=n>std</span><span class=o>::</span><span class=n>lock_guard</span> <span class=n>lock</span><span class=p>(</span><span class=n>mutex_</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=p>(</span><span class=n>fd_ctx</span><span class=o>-&gt;</span><span class=n>events</span> <span class=o>&amp;</span> <span class=n>event</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=n>LOG_ERROR</span> <span class=o>&lt;&lt;</span> <span class=s>&#34;A fd can&#39;t add same event</span><span class=se>\n</span><span class=s>&#34;</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=nb>false</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=kt>int</span> <span class=n>op</span> <span class=o>=</span> <span class=n>fd_ctx</span><span class=o>-&gt;</span><span class=n>events</span> <span class=o>?</span> <span class=nl>EPOLL_CTL_MOD</span> <span class=p>:</span> <span class=n>EPOLL_CTL_ADD</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=n>epoll_event</span> <span class=n>ep_evt</span><span class=p>{};</span>
+</span></span><span class=line><span class=cl>    <span class=n>ep_evt</span><span class=p>.</span><span class=n>events</span> <span class=o>=</span> <span class=k>static_cast</span><span class=o>&lt;</span><span class=kt>int</span><span class=o>&gt;</span><span class=p>(</span><span class=n>fd_ctx</span><span class=o>-&gt;</span><span class=n>events</span><span class=p>)</span> <span class=o>|</span> <span class=n>EPOLLET</span> <span class=o>|</span> <span class=n>event</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=n>ep_evt</span><span class=p>.</span><span class=n>data</span><span class=p>.</span><span class=n>ptr</span> <span class=o>=</span> <span class=n>fd_ctx</span><span class=p>;</span> <span class=c1>// 在Idle()中将使用fd对应的这个ep_evt
+</span></span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=kt>int</span> <span class=n>ret</span> <span class=o>=</span> <span class=n>epoll_ctl</span><span class=p>(</span><span class=n>epfd_</span><span class=p>,</span> <span class=n>op</span><span class=p>,</span> <span class=n>fd</span><span class=p>,</span> <span class=o>&amp;</span><span class=n>ep_evt</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=p>(</span><span class=n>ret</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=n>LOG_ERROR</span> <span class=o>&lt;&lt;</span> <span class=s>&#34;epoll_ctl &#34;</span> <span class=o>&lt;&lt;</span> <span class=n>strerror</span><span class=p>(</span><span class=n>errno</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=nb>false</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=o>++</span><span class=n>pending_evt_cnt_</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=c1>// 设置fd对应事件的EventContext
+</span></span></span><span class=line><span class=cl>    <span class=n>fd_ctx</span><span class=o>-&gt;</span><span class=n>events</span> <span class=o>=</span> <span class=k>static_cast</span><span class=o>&lt;</span><span class=n>Event</span><span class=o>&gt;</span><span class=p>(</span><span class=n>fd_ctx</span><span class=o>-&gt;</span><span class=n>events</span> <span class=o>|</span> <span class=n>event</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=c1>// 使用event_ctx相当于使用fd_ctx-&gt;read_ctx or fd_ctx-&gt;write_ctx（注意是auto&amp;而不是auto）
+</span></span></span><span class=line><span class=cl>    <span class=k>auto</span><span class=o>&amp;</span> <span class=n>event_ctx</span> <span class=o>=</span> <span class=n>fd_ctx</span><span class=o>-&gt;</span><span class=n>GetEventContext</span><span class=p>(</span><span class=n>event</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=n>assert</span><span class=p>(</span><span class=o>!</span><span class=n>event_ctx</span><span class=p>.</span><span class=n>scheduler</span> <span class=o>&amp;&amp;</span> <span class=o>!</span><span class=n>event_ctx</span><span class=p>.</span><span class=n>callback</span> <span class=o>&amp;&amp;</span> <span class=o>!</span><span class=n>event_ctx</span><span class=p>.</span><span class=n>coroutine</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=n>event_ctx</span><span class=p>.</span><span class=n>scheduler</span> <span class=o>=</span> <span class=n>Scheduler</span><span class=o>::</span><span class=n>GetScheduler</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=p>(</span><span class=n>cb</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=n>event_ctx</span><span class=p>.</span><span class=n>callback</span> <span class=o>=</span> <span class=n>cb</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span> <span class=k>else</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=c1>// 设置fd相关事件触发时使用的协程为当前
+</span></span></span><span class=line><span class=cl>        <span class=n>event_ctx</span><span class=p>.</span><span class=n>coroutine</span> <span class=o>=</span> <span class=n>Coroutine</span><span class=o>::</span><span class=n>GetNowCoroutine</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>        <span class=n>assert</span><span class=p>(</span><span class=n>event_ctx</span><span class=p>.</span><span class=n>coroutine</span><span class=o>-&gt;</span><span class=n>GetState</span><span class=p>()</span> <span class=o>==</span> <span class=n>Coroutine</span><span class=o>::</span><span class=n>RUNNING</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=nb>true</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div></section><footer class="article-meta article-footer"><section class=article-tags><a href=/tags/coroutine/>Coroutine</a>
+<a href=/tags/cplusplus/>CPlusPlus</a></section><section class="article-copyright inline-meta"><svg class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><path d="M14.5 9a3.5 4 0 100 6"/></svg>
+<span>Licensed under CC BY-NC-SA 4.0</span></section><section class="article-lastmod inline-meta"><svg class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg>
+<span>最后更新于 2026年3月18日星期三</span></section></footer></article><footer class=site-footer><section class=copyright>&copy;
+2025 -
+2026 Kerolt's Note</section><section class=powerby>使用 <a href=https://gohugo.io/ target=_blank rel=noopener>Hugo</a> 构建<br>主题 <b><a href=https://github.com/CaiJimmy/hugo-theme-stack target=_blank rel=noopener data-version=4.0.3>Stack</a></b> 由 <a href=https://jimmycai.com target=_blank rel=noopener>Jimmy</a> 设计</section></footer><script type=module>
+    import gallery from '\/ts\/gallery.js';
+
+    const articleContent = document.querySelector('.article-content');
+    const shouldLoad = articleContent && (articleContent.querySelectorAll('figure').length > 0 || articleContent.querySelectorAll('img.gallery-image').length > 0);
+    
+    if (shouldLoad) {
+        gallery(articleContent);
+
+        const PhotoSwipeLightbox = (await import("https:\/\/cdn.jsdelivr.net\/npm\/photoswipe@5.4.4\/dist\/photoswipe-lightbox.esm.min.js")).default;
+        const styleHref = "https:\/\/cdn.jsdelivr.net\/npm\/photoswipe@5.4.4\/dist\/photoswipe.css";
+
+        const styleTag = document.createElement('link');
+        styleTag.rel = 'stylesheet';
+        styleTag.href = styleHref;
+        document.head.appendChild(styleTag);
+
+        const lightbox = new PhotoSwipeLightbox({
+            gallerySelector: '.article-content',
+            childSelector: 'figure a.image-link',
+            pswpModule: () => import("https:\/\/cdn.jsdelivr.net\/npm\/photoswipe@5.4.4\/dist\/photoswipe.esm.min.js")
+        });
+        lightbox.init();
+    }
+</script></main></div><script type=text/javascript src=/ts/main.f856840516f7c2ad1769a8f5937e3d08d6cb386e2cd2dd025ae696e0ff207958.js defer></script></body></html>

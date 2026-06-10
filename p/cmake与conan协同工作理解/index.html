@@ -1,0 +1,154 @@
+<!doctype html><html lang=zh-cn dir=ltr><head><meta charset=utf-8><meta name=viewport content='width=device-width,initial-scale=1'><meta name=description content="背景 最近根据 【eBPF 入门实践教程十二：使用 eBPF 程序 profile 进行性能分析】 这篇文章，写了一个性能分析的小工具。不过文章中的实现是 rust，但我还不怎么熟悉 rust，因而打算参考其代码使用 c++ 来实现相同的功能。项目地址：profiler。\n"><title>CMake与Conan协同工作理解</title><link rel=canonical href=https://kerolt.github.io/p/cmake%E4%B8%8Econan%E5%8D%8F%E5%90%8C%E5%B7%A5%E4%BD%9C%E7%90%86%E8%A7%A3/><link rel=preconnect href=https://fonts.googleapis.com><link rel=preconnect href=https://fonts.gstatic.com crossorigin><link rel=preload as=style href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap"><link rel=stylesheet href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap"><link rel=stylesheet href=/scss/style.min.e62e09c60ba428a627e03568fa3df938f6a8224f815b5846f00816c17d4a0be4.css><meta property='og:title' content="CMake与Conan协同工作理解"><meta property='og:description' content="背景 最近根据 【eBPF 入门实践教程十二：使用 eBPF 程序 profile 进行性能分析】 这篇文章，写了一个性能分析的小工具。不过文章中的实现是 rust，但我还不怎么熟悉 rust，因而打算参考其代码使用 c++ 来实现相同的功能。项目地址：profiler。\n"><meta property='og:url' content='https://kerolt.github.io/p/cmake%E4%B8%8Econan%E5%8D%8F%E5%90%8C%E5%B7%A5%E4%BD%9C%E7%90%86%E8%A7%A3/'><meta property='og:site_name' content="Kerolt's Note"><meta property='og:type' content='article'><meta property='article:section' content='Post'><meta property='article:tag' content='CMake'><meta property='article:tag' content='Conan'><meta property='article:published_time' content='2026-01-22T00:00:00+00:00'><meta property='article:modified_time' content='2026-01-23T00:00:00+00:00'><meta name=twitter:title content="CMake与Conan协同工作理解"><meta name=twitter:description content="背景 最近根据 【eBPF 入门实践教程十二：使用 eBPF 程序 profile 进行性能分析】 这篇文章，写了一个性能分析的小工具。不过文章中的实现是 rust，但我还不怎么熟悉 rust，因而打算参考其代码使用 c++ 来实现相同的功能。项目地址：profiler。\n"><link rel="shortcut icon" href=/images/favicon.png></head><body class=article-page><script>(function(){const e="StackColorScheme";localStorage.getItem(e)||localStorage.setItem(e,"auto")})()</script><script>(function(){const t="StackColorScheme",e=localStorage.getItem(t),n=window.matchMedia("(prefers-color-scheme: dark)").matches===!0;e=="dark"||e==="auto"&&n?document.documentElement.dataset.scheme="dark":document.documentElement.dataset.scheme="light"})()</script><div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky"><button class="hamburger hamburger--spin" type=button id=toggle-menu aria-label=切换菜单>
+<span class=hamburger-box><span class=hamburger-inner></span></span></button><header><figure class=site-avatar><a href=/><img src=/images/avatar.jpg width=200 height=200 class=site-logo loading=lazy alt=Avatar>
+</a><span class=emoji>🏸</span></figure><div class=site-meta><h1 class=site-name><a href=/>Kerolt's Note</a></h1><h2 class=site-description>宇宙是秩序的，也是混乱的。</h2></div></header><ol class=menu-social><li><a href=https://github.com/kerolt title=GitHub rel=me><svg class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 19c-4.3 1.4-4.3-2.5-6-3m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6.0 00-1.3-3.2 4.2 4.2.0 00-.1-3.2s-1.1-.3-3.5 1.3a12.3 12.3.0 00-6.2.0C6.5 2.8 5.4 3.1 5.4 3.1a4.2 4.2.0 00-.1 3.2A4.6 4.6.0 004 9.5c0 4.6 2.7 5.7 5.5 6-.6.6-.6 1.2-.5 2V21"/></svg></a></li></ol><ol class=menu id=main-menu><li><a href=/><svg class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><polyline points="5 12 3 12 12 3 21 12 19 12"/><path d="M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"/><path d="M9 21v-6a2 2 0 012-2h2a2 2 0 012 2v6"/></svg>
+<span>首页</span></a></li><li><a href=/archives/><svg class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><rect x="3" y="4" width="18" height="4" rx="2"/><path d="M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
+<span>归档</span></a></li><li><a href=/categories/><svg class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><line x1="5" y1="9" x2="19" y2="9"/><line x1="5" y1="15" x2="19" y2="15"/><line x1="11" y1="4" x2="7" y2="20"/><line x1="17" y1="4" x2="13" y2="20"/></svg>
+<span>分类</span></a></li><li><a href=/tags/><svg class="icon icon-tabler icon-tabler-tag" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><path d="M11 3l9 9a1.5 1.5.0 010 2l-6 6a1.5 1.5.0 01-2 0L3 11V7a4 4 0 014-4h4"/><circle cx="9" cy="9" r="2"/></svg>
+<span>标签</span></a></li><li><a href=/about/><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-info-circle"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 12a9 9 0 1018 0A9 9 0 003 12"/><path d="M12 9h.01"/><path d="M11 12h1v4h1"/></svg>
+<span>关于我</span></a></li><li><a href=/search/><svg class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="10" cy="10" r="7"/><line x1="21" y1="21" x2="15" y2="15"/></svg>
+<span>搜索</span></a></li><li class=menu-bottom-section><ol class=menu><li id=dark-mode-toggle><svg class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="8" cy="12" r="2"/><rect x="2" y="6" width="20" height="12" rx="6"/></svg>
+<svg class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="16" cy="12" r="2"/><rect x="2" y="6" width="20" height="12" rx="6"/></svg>
+<span>暗色模式</span></li></ol></li></ol></aside><aside class="sidebar right-sidebar sticky"><section class="widget archives"><div class=widget-icon><svg class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><line x1="5" y1="9" x2="19" y2="9"/><line x1="5" y1="15" x2="19" y2="15"/><line x1="11" y1="4" x2="7" y2="20"/><line x1="17" y1="4" x2="13" y2="20"/></svg></div><h2 class="widget-title section-title">目录</h2><div class=widget--toc><nav class=toc-nav id=TableOfContents><ol><li><a href=#背景>背景</a></li><li><a href=#cmake-查找依赖>CMake 查找依赖</a><ol><li><a href=#cmake_prefix_path>CMAKE_PREFIX_PATH</a></li></ol></li><li><a href=#conan-generator>Conan Generator</a><ol><li><a href=#cmakedeps>CMakeDeps</a></li><li><a href=#cmaketoolchain>CMakeToolchain</a></li></ol></li><li><a href=#cmake-工具链文件>CMake 工具链文件</a></li><li><a href=#总结>总结</a></li></ol></nav></div></section></aside><main class="main full-width"><article class=main-article><header class=article-header><div class=article-details><header class=article-category><a href=/categories/cmake/ style=background-color:#efc4be;color:#3d150f>CMake</a></header><div class=article-title-wrapper><h2 class=article-title><a href=/p/cmake%E4%B8%8Econan%E5%8D%8F%E5%90%8C%E5%B7%A5%E4%BD%9C%E7%90%86%E8%A7%A3/>CMake与Conan协同工作理解</a></h2></div><footer class=article-meta><div class=inline-meta><svg class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><path d="M11.795 21H5a2 2 0 01-2-2V7a2 2 0 012-2h12a2 2 0 012 2v4"/><circle cx="18" cy="18" r="4"/><path d="M15 3v4"/><path d="M7 3v4"/><path d="M3 11h16"/><path d="M18 16.496V18l1 1"/></svg>
+<time class=article-time--published datetime=2026-01-22T00:00:00Z>2026年1月22日星期四</time>
+<svg class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg>
+<time class=article-time--reading>阅读时长: 4 分钟</time></div></footer></div></header><aside class=article-toc><details><summary><div class=article-toc-title><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-chevron-right"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 6l6 6-6 6"/></svg>
+<span>目录</span></div></summary><nav class=toc-nav><ol><li><a href=#背景>背景</a></li><li><a href=#cmake-查找依赖>CMake 查找依赖</a><ol><li><a href=#cmake_prefix_path>CMAKE_PREFIX_PATH</a></li></ol></li><li><a href=#conan-generator>Conan Generator</a><ol><li><a href=#cmakedeps>CMakeDeps</a></li><li><a href=#cmaketoolchain>CMakeToolchain</a></li></ol></li><li><a href=#cmake-工具链文件>CMake 工具链文件</a></li><li><a href=#总结>总结</a></li></ol></nav></details></aside><section class=article-content><h2 id=背景>背景</h2><p>最近根据 <a class=link href=https://eunomia.dev/zh/tutorials/12-profile/ target=_blank rel=noopener>【eBPF 入门实践教程十二：使用 eBPF 程序 profile 进行性能分析】</a> 这篇文章，写了一个性能分析的小工具。不过文章中的实现是 rust，但我还不怎么熟悉 rust，因而打算参考其代码使用 c++ 来实现相同的功能。项目地址：<a class=link href=https://github.com/kerolt/profiler target=_blank rel=noopener>profiler</a>。</p><p>rust 中使用 cargo 就能非常方便的管理依赖与构建项目，c++ 中我使用 CMake 来构建项目，Conan 来管理依赖。在使用期间，我对于这二者的协同工作原理感到好奇，因此有了这篇笔记。</p><blockquote><p>文中的出现的“依赖”、“包”、“库”等名词都是指代同一个概念，只是不同的说法而已~</p></blockquote><h2 id=cmake-查找依赖>CMake 查找依赖</h2><p>在 CMake 中查找和管理项目依赖，主要是通过内置的 <code>find_package</code> 命令完成，其会在系统中寻找指定的库。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-shell data-lang=shell><span class=line><span class=cl>find_package<span class=o>(</span>&lt;PackageName&gt; <span class=o>[</span>version<span class=o>]</span> <span class=o>[</span>REQUIRED<span class=o>]</span> <span class=o>[</span>COMPONENTS components...<span class=o>])</span>
+</span></span></code></pre></td></tr></table></div></div><ul><li><strong>PackageName</strong>: 库的名称（区分大小写，如 <code>OpenCV</code>、<code>Qt5</code>）。</li><li><strong>REQUIRED</strong>: 如果找不到该库，CMake 会直接报错并停止配置。</li><li><strong>COMPONENTS</strong>: 查找库中的特定模块（例如 <code>Qt5</code> 里的 <code>Widgets</code>）。</li></ul><p>CMake 有两种查找库的逻辑：</p><ol><li><p><strong>Module 模式</strong> (查找 <code>Find&lt;PackageName>.cmake</code>)</p><p>CMake 预置了一系列脚本（在 <code>/usr/share/cmake/Modules</code> 下）。它会寻找名为 <code>FindGSL.cmake</code> 这样的文件。</p><ul><li><strong>适用场景</strong>: 较老或不直接支持 CMake 的库（如 <code>CURL</code>, <code>ZLIB</code>）。</li></ul></li><li><p><strong>Config 模式</strong> (查找 <code>&lt;PackageName>Config.cmake</code> 或 <code>&lt;lower-case-pkg>-config.cmake</code>)</p><p>这是现代库推荐的方式。库在安装时会自带一个配置文件。</p><ul><li><strong>适用场景</strong>: <code>OpenCV</code>, <code>Qt</code>, <code>Protobuf</code> 等现代库。</li><li><strong>查找路径</strong>: 库的安装路径、<code>CMAKE_PREFIX_PATH</code> 或环境变量。</li></ul></li></ol><h3 id=cmake_prefix_path>CMAKE_PREFIX_PATH</h3><p>当在 CMake 中使用 <code>find_package</code>、<code>find_library</code> 或 <code>find_path</code> 等指令去寻找一个外部库时，CMake 并不知道这个库安装在哪里。<code>CMAKE_PREFIX_PATH</code> 就是用来告诉 CMake 去这些目录下找找看。</p><p>这里有三种设置的方法：</p><ol><li><p>命令行设置</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-sh data-lang=sh><span class=line><span class=cl>cmake -DCMAKE_PREFIX_PATH<span class=o>=</span><span class=s2>&#34;/path/to&#34;</span>
+</span></span></code></pre></td></tr></table></div></div></li><li><p>CMakeLists.txt</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-sh data-lang=sh><span class=line><span class=cl>list<span class=o>(</span>APPEND CMAKE_PREFIX_PATH <span class=s2>&#34;/path/to&#34;</span><span class=o>)</span>
+</span></span></code></pre></td></tr></table></div></div></li><li><p>环境变量</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-sh data-lang=sh><span class=line><span class=cl><span class=nb>export</span> <span class=nv>CMAKE_PREFIX_PATH</span><span class=o>=</span><span class=nv>$CMAKE_PREFIX_PATH</span>:/path/to
+</span></span></code></pre></td></tr></table></div></div></li></ol><h2 id=conan-generator>Conan Generator</h2><p>在一个比较简单的项目里，通常使用 <code>conanfile.txt</code> 来管理依赖即可，例如：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-ini data-lang=ini><span class=line><span class=cl><span class=k>[requires]</span>
+</span></span><span class=line><span class=cl><span class=na>cli11/2.6.0</span>
+</span></span><span class=line><span class=cl><span class=na>spdlog/1.17.0</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>[generators]</span>
+</span></span><span class=line><span class=cl><span class=na>CMakeDeps</span>
+</span></span><span class=line><span class=cl><span class=na>CMakeToolchain</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>[layout]</span>
+</span></span><span class=line><span class=cl><span class=na>cmake_layout</span>
+</span></span></code></pre></td></tr></table></div></div><p>注意 <code>[generators]</code> 中的 <code>CMakeDeps</code> 和 <code>CMakeToolchain</code>，他们在 Conan 与 CMake 集成使用中起了至关重要的作用。</p><h3 id=cmakedeps>CMakeDeps</h3><p>当我们安装了 spdlog 这样的库后，需要 CMake 能看到它。CMakeDeps 就是这样一个<strong>依赖关系生成器</strong>，它会为每一个依赖库生成一个标准的 <code>spdlog-config.cmake</code> 文件。</p><p>将 CMakeDeps 生成的 <code>spdlog-config.cmake</code> 目录位置加入 <code>CMAKE_PREFIX_PATH</code> 后，就可以在 <code>CMakeLists.txt</code> 中写 <code>find_package(spdlog REQUIRED)</code> 来查找依赖了。</p><h3 id=cmaketoolchain>CMakeToolchain</h3><p>CMakeToolchain 负责将你在 Conan Profile（配置文件）中定义的设置（如 <code>compiler=gcc</code>, <code>build_type=Release</code>）注入给 CMake。同时，<strong>其生成 <code>conan_toolchain.cmake</code>，并自动设置 <code>CMAKE_PREFIX_PATH</code></strong>。</p><p><strong>重要的一点就是：它会自动把 <code>CMakeDeps</code> 生成的配置文件目录加入搜索路径。</strong></p><p>当执行 <code>conan install</code> 后，这两个生成器会接力完成任务：</p><ol><li>Conan 下载库到缓存。</li><li><strong><code>CMakeDeps</code></strong> 生成 spdlog-config.cmake 等文件，描述如何链接这些库。</li><li><strong><code>CMakeToolchain</code></strong> 生成 <code>conan_toolchain.cmake</code>，里面有一行代码告诉 CMake：“去 <code>CMakeDeps</code> 生成的那个文件夹里找包”。</li></ol><p>例如我的项目里， <code>~/Workspace/profiler-cpp/build/Debug/generators/conan_toolchain.cmake</code> 中的一部分如下：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-cmake data-lang=cmake><span class=line><span class=cl><span class=c>########## &#39;find_paths&#39; block #############
+</span></span></span><span class=line><span class=cl><span class=c># Define paths to find packages, programs, libraries, etc.
+</span></span></span><span class=line><span class=cl><span class=nb>if</span><span class=p>(</span><span class=s>EXISTS</span> <span class=s2>&#34;${CMAKE_CURRENT_LIST_DIR}/conan_cmakedeps_paths.cmake&#34;</span><span class=p>)</span><span class=err>
+</span></span></span><span class=line><span class=cl>  <span class=nb>message</span><span class=p>(</span><span class=s>STATUS</span> <span class=s2>&#34;Conan toolchain: Including CMakeDeps generated conan_cmakedeps_paths.cmake&#34;</span><span class=p>)</span><span class=err>
+</span></span></span><span class=line><span class=cl>  <span class=nb>include</span><span class=p>(</span><span class=s2>&#34;${CMAKE_CURRENT_LIST_DIR}/conan_cmakedeps_paths.cmake&#34;</span><span class=p>)</span><span class=err>
+</span></span></span><span class=line><span class=cl><span class=nb>else</span><span class=p>()</span><span class=err>
+</span></span></span><span class=line><span class=cl><span class=err>
+</span></span></span><span class=line><span class=cl><span class=nb>set</span><span class=p>(</span><span class=s>CMAKE_FIND_PACKAGE_PREFER_CONFIG</span> <span class=s>ON</span><span class=p>)</span><span class=err>
+</span></span></span><span class=line><span class=cl><span class=err>
+</span></span></span><span class=line><span class=cl><span class=c># Definition of CMAKE_MODULE_PATH
+</span></span></span><span class=line><span class=cl><span class=c># the generators folder (where conan generates files, like this toolchain)
+</span></span></span><span class=line><span class=cl><span class=nb>list</span><span class=p>(</span><span class=s>PREPEND</span> <span class=s>CMAKE_MODULE_PATH</span> <span class=o>${</span><span class=nv>CMAKE_CURRENT_LIST_DIR</span><span class=o>}</span><span class=p>)</span><span class=err>
+</span></span></span><span class=line><span class=cl><span class=err>
+</span></span></span><span class=line><span class=cl><span class=c># Definition of CMAKE_PREFIX_PATH, CMAKE_XXXXX_PATH
+</span></span></span><span class=line><span class=cl><span class=c># The Conan local &#34;generators&#34; folder, where this toolchain is saved.
+</span></span></span><span class=line><span class=cl><span class=nb>list</span><span class=p>(</span><span class=s>PREPEND</span> <span class=s>CMAKE_PREFIX_PATH</span> <span class=o>${</span><span class=nv>CMAKE_CURRENT_LIST_DIR</span><span class=o>}</span> <span class=p>)</span><span class=err>
+</span></span></span><span class=line><span class=cl><span class=nb>list</span><span class=p>(</span><span class=s>PREPEND</span> <span class=s>CMAKE_LIBRARY_PATH</span> <span class=s2>&#34;/home/kerolt/.conan2/p/b/spdlo964bc6492d317/p/lib&#34;</span> <span class=s2>&#34;/home/kerolt/.conan2/p/b/fmtc7b4bad61f66e/p/lib&#34;</span><span class=p>)</span><span class=err>
+</span></span></span><span class=line><span class=cl><span class=nb>list</span><span class=p>(</span><span class=s>PREPEND</span> <span class=s>CMAKE_INCLUDE_PATH</span> <span class=s2>&#34;/home/kerolt/.conan2/p/cli115c29056d7e51f/p/include&#34;</span> <span class=s2>&#34;/home/kerolt/.conan2/p/b/spdlo964bc6492d317/p/include&#34;</span> <span class=s2>&#34;/home/kerolt/.conan2/p/b/fmtc7b4bad61f66e/p/include&#34;</span><span class=p>)</span><span class=err>
+</span></span></span><span class=line><span class=cl><span class=nb>set</span><span class=p>(</span><span class=s>CONAN_RUNTIME_LIB_DIRS</span> <span class=s2>&#34;/home/kerolt/.conan2/p/b/spdlo964bc6492d317/p/lib&#34;</span> <span class=s2>&#34;/home/kerolt/.conan2/p/b/fmtc7b4bad61f66e/p/lib&#34;</span> <span class=p>)</span><span class=err>
+</span></span></span><span class=line><span class=cl><span class=err>
+</span></span></span><span class=line><span class=cl><span class=nb>endif</span><span class=p>()</span><span class=err>
+</span></span></span></code></pre></td></tr></table></div></div><h2 id=cmake-工具链文件>CMake 工具链文件</h2><p>工具链文件是一个以 <code>.cmake</code> 结尾的脚本，通过在配置阶段指定变量 <code>CMAKE_TOOLCHAIN_FILE</code> 来加载：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-shell data-lang=shell><span class=line><span class=cl>cmake -DCMAKE_TOOLCHAIN_FILE<span class=o>=</span>my_toolchain.cmake ..
+</span></span></code></pre></td></tr></table></div></div><p>它通常在 <code>project()</code> 指令执行 <strong>之前</strong> 被加载，用于初始化编译器路径、目标平台信息等关键底层变量。</p><p>现在通过 Conan 的 <code>CMakeDeps</code> 和 <code>CMakeToolchain</code>，直接引入 Conan 自动生成的工具链文件，就能无感地使用下载的依赖了。</p><p>例如直接在命令里使用：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-sh data-lang=sh><span class=line><span class=cl>cmake -DCMAKE_TOOLCHAIN_FILE<span class=o>=</span>/home/kerolt/Workspace/profiler-cpp/build/Debug/generators/conan_toolchain.cmake ...
+</span></span></code></pre></td></tr></table></div></div><p>或者通过 CMakePresets（CMake >= 3.19）来使用：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-json data-lang=json><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=nt>&#34;version&#34;</span><span class=p>:</span> <span class=mi>8</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>    <span class=nt>&#34;configurePresets&#34;</span><span class=p>:</span> <span class=p>[</span>
+</span></span><span class=line><span class=cl>        <span class=p>{</span>
+</span></span><span class=line><span class=cl>            <span class=nt>&#34;name&#34;</span><span class=p>:</span> <span class=s2>&#34;debug&#34;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>            <span class=nt>&#34;displayName&#34;</span><span class=p>:</span> <span class=s2>&#34;Profiler Debug 构建&#34;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>            <span class=nt>&#34;description&#34;</span><span class=p>:</span> <span class=s2>&#34;正在使用编译器: C = /usr/bin/gcc, CXX = /usr/bin/g++&#34;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>            <span class=nt>&#34;binaryDir&#34;</span><span class=p>:</span> <span class=s2>&#34;${sourceDir}/build/Debug&#34;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>            <span class=c1>// 就是这个 toolchainFile ~
+</span></span></span><span class=line><span class=cl>            <span class=nt>&#34;toolchainFile&#34;</span><span class=p>:</span> <span class=s2>&#34;${sourceDir}/build/Debug/generators/conan_toolchain.cmake&#34;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>            <span class=nt>&#34;cacheVariables&#34;</span><span class=p>:</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>                <span class=nt>&#34;CMAKE_BUILD_TYPE&#34;</span><span class=p>:</span> <span class=s2>&#34;Debug&#34;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>                <span class=nt>&#34;CMAKE_CXX_STANDARD&#34;</span><span class=p>:</span> <span class=s2>&#34;23&#34;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>                <span class=nt>&#34;CMAKE_EXPORT_COMPILE_COMMANDS&#34;</span><span class=p>:</span> <span class=s2>&#34;ON&#34;</span>
+</span></span><span class=line><span class=cl>            <span class=p>}</span>
+</span></span><span class=line><span class=cl>        <span class=p>}</span>
+</span></span><span class=line><span class=cl>    <span class=p>]</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><h2 id=总结>总结</h2><p>理解了 CMake 是如何查找依赖包后，二者的协同工作原理就明了了：Conan 通过自动生成的配置能告诉 CMake 在哪里找依赖包后，就能直接在 <code>CMakeLists.txt</code> 中使用 <code>find_package</code> 来查找对应的依赖了。</p></section><footer class="article-meta article-footer"><section class=article-tags><a href=/tags/cmake/>CMake</a>
+<a href=/tags/conan/>Conan</a></section><section class="article-copyright inline-meta"><svg class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><path d="M14.5 9a3.5 4 0 100 6"/></svg>
+<span>Licensed under CC BY-NC-SA 4.0</span></section><section class="article-lastmod inline-meta"><svg class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg>
+<span>最后更新于 2026年1月23日星期五</span></section></footer></article><footer class=site-footer><section class=copyright>&copy;
+2025 -
+2026 Kerolt's Note</section><section class=powerby>使用 <a href=https://gohugo.io/ target=_blank rel=noopener>Hugo</a> 构建<br>主题 <b><a href=https://github.com/CaiJimmy/hugo-theme-stack target=_blank rel=noopener data-version=4.0.3>Stack</a></b> 由 <a href=https://jimmycai.com target=_blank rel=noopener>Jimmy</a> 设计</section></footer><script type=module>
+    import gallery from '\/ts\/gallery.js';
+
+    const articleContent = document.querySelector('.article-content');
+    const shouldLoad = articleContent && (articleContent.querySelectorAll('figure').length > 0 || articleContent.querySelectorAll('img.gallery-image').length > 0);
+    
+    if (shouldLoad) {
+        gallery(articleContent);
+
+        const PhotoSwipeLightbox = (await import("https:\/\/cdn.jsdelivr.net\/npm\/photoswipe@5.4.4\/dist\/photoswipe-lightbox.esm.min.js")).default;
+        const styleHref = "https:\/\/cdn.jsdelivr.net\/npm\/photoswipe@5.4.4\/dist\/photoswipe.css";
+
+        const styleTag = document.createElement('link');
+        styleTag.rel = 'stylesheet';
+        styleTag.href = styleHref;
+        document.head.appendChild(styleTag);
+
+        const lightbox = new PhotoSwipeLightbox({
+            gallerySelector: '.article-content',
+            childSelector: 'figure a.image-link',
+            pswpModule: () => import("https:\/\/cdn.jsdelivr.net\/npm\/photoswipe@5.4.4\/dist\/photoswipe.esm.min.js")
+        });
+        lightbox.init();
+    }
+</script></main></div><script type=text/javascript src=/ts/main.f856840516f7c2ad1769a8f5937e3d08d6cb386e2cd2dd025ae696e0ff207958.js defer></script></body></html>

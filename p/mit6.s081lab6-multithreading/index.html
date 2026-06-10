@@ -1,0 +1,466 @@
+<!doctype html><html lang=zh-cn dir=ltr><head><meta charset=utf-8><meta name=viewport content='width=device-width,initial-scale=1'><meta name=description content="本次的实验总体都不是很难，第一个练习让我们在用户态模拟了线程的切换，这里重要的就是进程/线程上下文的保存与恢复；第二三个练习则是让我们跳出了xv6，去熟悉pthread库和线程的同步互斥。\n"><title>【MIT6.S081】Lab6 multithreading</title><link rel=canonical href=https://kerolt.github.io/p/mit6.s081lab6-multithreading/><link rel=preconnect href=https://fonts.googleapis.com><link rel=preconnect href=https://fonts.gstatic.com crossorigin><link rel=preload as=style href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap"><link rel=stylesheet href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap"><link rel=stylesheet href=/scss/style.min.e62e09c60ba428a627e03568fa3df938f6a8224f815b5846f00816c17d4a0be4.css><meta property='og:title' content="【MIT6.S081】Lab6 multithreading"><meta property='og:description' content="本次的实验总体都不是很难，第一个练习让我们在用户态模拟了线程的切换，这里重要的就是进程/线程上下文的保存与恢复；第二三个练习则是让我们跳出了xv6，去熟悉pthread库和线程的同步互斥。\n"><meta property='og:url' content='https://kerolt.github.io/p/mit6.s081lab6-multithreading/'><meta property='og:site_name' content="Kerolt's Note"><meta property='og:type' content='article'><meta property='article:section' content='Post'><meta property='article:tag' content='MIT6-S081'><meta property='article:tag' content='OS'><meta property='article:tag' content='xv6'><meta property='article:published_time' content='2024-11-15T00:00:00+00:00'><meta property='article:modified_time' content='2024-11-15T00:00:00+00:00'><meta name=twitter:title content="【MIT6.S081】Lab6 multithreading"><meta name=twitter:description content="本次的实验总体都不是很难，第一个练习让我们在用户态模拟了线程的切换，这里重要的就是进程/线程上下文的保存与恢复；第二三个练习则是让我们跳出了xv6，去熟悉pthread库和线程的同步互斥。\n"><link rel="shortcut icon" href=/images/favicon.png></head><body class=article-page><script>(function(){const e="StackColorScheme";localStorage.getItem(e)||localStorage.setItem(e,"auto")})()</script><script>(function(){const t="StackColorScheme",e=localStorage.getItem(t),n=window.matchMedia("(prefers-color-scheme: dark)").matches===!0;e=="dark"||e==="auto"&&n?document.documentElement.dataset.scheme="dark":document.documentElement.dataset.scheme="light"})()</script><div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky"><button class="hamburger hamburger--spin" type=button id=toggle-menu aria-label=切换菜单>
+<span class=hamburger-box><span class=hamburger-inner></span></span></button><header><figure class=site-avatar><a href=/><img src=/images/avatar.jpg width=200 height=200 class=site-logo loading=lazy alt=Avatar>
+</a><span class=emoji>🏸</span></figure><div class=site-meta><h1 class=site-name><a href=/>Kerolt's Note</a></h1><h2 class=site-description>宇宙是秩序的，也是混乱的。</h2></div></header><ol class=menu-social><li><a href=https://github.com/kerolt title=GitHub rel=me><svg class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 19c-4.3 1.4-4.3-2.5-6-3m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6.0 00-1.3-3.2 4.2 4.2.0 00-.1-3.2s-1.1-.3-3.5 1.3a12.3 12.3.0 00-6.2.0C6.5 2.8 5.4 3.1 5.4 3.1a4.2 4.2.0 00-.1 3.2A4.6 4.6.0 004 9.5c0 4.6 2.7 5.7 5.5 6-.6.6-.6 1.2-.5 2V21"/></svg></a></li></ol><ol class=menu id=main-menu><li><a href=/><svg class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><polyline points="5 12 3 12 12 3 21 12 19 12"/><path d="M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"/><path d="M9 21v-6a2 2 0 012-2h2a2 2 0 012 2v6"/></svg>
+<span>首页</span></a></li><li><a href=/archives/><svg class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><rect x="3" y="4" width="18" height="4" rx="2"/><path d="M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
+<span>归档</span></a></li><li><a href=/categories/><svg class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><line x1="5" y1="9" x2="19" y2="9"/><line x1="5" y1="15" x2="19" y2="15"/><line x1="11" y1="4" x2="7" y2="20"/><line x1="17" y1="4" x2="13" y2="20"/></svg>
+<span>分类</span></a></li><li><a href=/tags/><svg class="icon icon-tabler icon-tabler-tag" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><path d="M11 3l9 9a1.5 1.5.0 010 2l-6 6a1.5 1.5.0 01-2 0L3 11V7a4 4 0 014-4h4"/><circle cx="9" cy="9" r="2"/></svg>
+<span>标签</span></a></li><li><a href=/about/><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-info-circle"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 12a9 9 0 1018 0A9 9 0 003 12"/><path d="M12 9h.01"/><path d="M11 12h1v4h1"/></svg>
+<span>关于我</span></a></li><li><a href=/search/><svg class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="10" cy="10" r="7"/><line x1="21" y1="21" x2="15" y2="15"/></svg>
+<span>搜索</span></a></li><li class=menu-bottom-section><ol class=menu><li id=dark-mode-toggle><svg class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="8" cy="12" r="2"/><rect x="2" y="6" width="20" height="12" rx="6"/></svg>
+<svg class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="16" cy="12" r="2"/><rect x="2" y="6" width="20" height="12" rx="6"/></svg>
+<span>暗色模式</span></li></ol></li></ol></aside><aside class="sidebar right-sidebar sticky"><section class="widget archives"><div class=widget-icon><svg class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><line x1="5" y1="9" x2="19" y2="9"/><line x1="5" y1="15" x2="19" y2="15"/><line x1="11" y1="4" x2="7" y2="20"/><line x1="17" y1="4" x2="13" y2="20"/></svg></div><h2 class="widget-title section-title">目录</h2><div class=widget--toc><nav class=toc-nav id=TableOfContents><ol><li><a href=#简单分析xv6中的进程切换>简单分析xv6中的进程切换</a></li><li><a href=#uthread-switching-between-threads>Uthread: switching between threads</a><ol><li><a href=#前置准备>前置准备</a></li><li><a href=#启动>启动</a></li><li><a href=#调度>调度</a></li></ol></li><li><a href=#using-threads>Using threads</a></li><li><a href=#barrier>Barrier</a><ol><li><a href=#尝试1>尝试1</a></li><li><a href=#尝试2>尝试2</a></li><li><a href=#正确做法>正确做法</a></li></ol></li><li><a href=#代码实现详情>代码实现详情</a></li><li><a href=#reference>Reference</a></li></ol></nav></div></section></aside><main class="main full-width"><article class=main-article><header class=article-header><div class=article-details><header class=article-category><a href=/categories/mit6.s081/ style=background-color:#beefec;color:#0f3d3b>MIT6.s081</a></header><div class=article-title-wrapper><h2 class=article-title><a href=/p/mit6.s081lab6-multithreading/>【MIT6.S081】Lab6 multithreading</a></h2></div><footer class=article-meta><div class=inline-meta><svg class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><path d="M11.795 21H5a2 2 0 01-2-2V7a2 2 0 012-2h12a2 2 0 012 2v4"/><circle cx="18" cy="18" r="4"/><path d="M15 3v4"/><path d="M7 3v4"/><path d="M3 11h16"/><path d="M18 16.496V18l1 1"/></svg>
+<time class=article-time--published datetime=2024-11-15T00:00:00Z>2024年11月15日星期五</time>
+<svg class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg>
+<time class=article-time--reading>阅读时长: 7 分钟</time></div></footer></div></header><aside class=article-toc><details><summary><div class=article-toc-title><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-chevron-right"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 6l6 6-6 6"/></svg>
+<span>目录</span></div></summary><nav class=toc-nav><ol><li><a href=#简单分析xv6中的进程切换>简单分析xv6中的进程切换</a></li><li><a href=#uthread-switching-between-threads>Uthread: switching between threads</a><ol><li><a href=#前置准备>前置准备</a></li><li><a href=#启动>启动</a></li><li><a href=#调度>调度</a></li></ol></li><li><a href=#using-threads>Using threads</a></li><li><a href=#barrier>Barrier</a><ol><li><a href=#尝试1>尝试1</a></li><li><a href=#尝试2>尝试2</a></li><li><a href=#正确做法>正确做法</a></li></ol></li><li><a href=#代码实现详情>代码实现详情</a></li><li><a href=#reference>Reference</a></li></ol></nav></details></aside><section class=article-content><p>本次的实验总体都不是很难，第一个练习让我们在用户态模拟了线程的切换，这里重要的就是进程/线程上下文的保存与恢复；第二三个练习则是让我们跳出了xv6，去熟悉pthread库和线程的同步互斥。</p><h2 id=简单分析xv6中的进程切换>简单分析xv6中的进程切换</h2><p>init是用户态最先启动的进程，其启动后会创建sh进程，sh进程又会fork并exec其他命令：</p><ol><li>内核会在<code>userinit()</code>中准备init进程，这是最先启动的用户态进程，将其运行状态设置为<code>RUNNABLE</code></li><li>内核启动scheduler进行进程调度（这个函数会一直执行），当前只有init进程，且其状态为<code>RUNNABLE</code>，故运行</li><li>init进程会fork一个子进程，并使用exec执行sh进程，其用于处理用户在控制台的输入</li><li>用户输入命令后，sh解析命令后fork子进程并用exec来将命令对应的进程替换掉fork的子进程</li></ol><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-text data-lang=text><span class=line><span class=cl>init
+</span></span><span class=line><span class=cl>- sh
+</span></span><span class=line><span class=cl>	- ls
+</span></span><span class=line><span class=cl>	- cat
+</span></span><span class=line><span class=cl>	- ...
+</span></span></code></pre></td></tr></table></div></div><p>xv6内部采用时间片轮转来进行进程调度，当进程时间片到了后，触发时钟中断，执行yield，在yield中，会将当前进程的状态从运行态RUNNING设置为RUNNABLE，并切换至scheduler调度器，由其来寻找下一个可运行的进程进行切换。</p><p>那么xv6是怎么切换当前进程和scheduler调度器的呢？其实现是根据<code>swtch</code>函数来实现的：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span><span class=lnt>34
+</span><span class=lnt>35
+</span><span class=lnt>36
+</span><span class=lnt>37
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-c data-lang=c><span class=line><span class=cl><span class=c1>// Switch to scheduler.  Must hold only p-&gt;lock
+</span></span></span><span class=line><span class=cl><span class=c1>// and have changed proc-&gt;state. Saves and restores
+</span></span></span><span class=line><span class=cl><span class=c1>// intena because intena is a property of this
+</span></span></span><span class=line><span class=cl><span class=c1>// kernel thread, not this CPU. It should
+</span></span></span><span class=line><span class=cl><span class=c1>// be proc-&gt;intena and proc-&gt;noff, but that would
+</span></span></span><span class=line><span class=cl><span class=c1>// break in the few places where a lock is held but
+</span></span></span><span class=line><span class=cl><span class=c1>// there&#39;s no process.
+</span></span></span><span class=line><span class=cl><span class=kt>void</span>
+</span></span><span class=line><span class=cl><span class=nf>sched</span><span class=p>(</span><span class=kt>void</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>  <span class=kt>int</span> <span class=n>intena</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=k>struct</span> <span class=n>proc</span> <span class=o>*</span><span class=n>p</span> <span class=o>=</span> <span class=nf>myproc</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>  <span class=k>if</span><span class=p>(</span><span class=o>!</span><span class=nf>holding</span><span class=p>(</span><span class=o>&amp;</span><span class=n>p</span><span class=o>-&gt;</span><span class=n>lock</span><span class=p>))</span>
+</span></span><span class=line><span class=cl>    <span class=nf>panic</span><span class=p>(</span><span class=s>&#34;sched p-&gt;lock&#34;</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>  <span class=k>if</span><span class=p>(</span><span class=nf>mycpu</span><span class=p>()</span><span class=o>-&gt;</span><span class=n>noff</span> <span class=o>!=</span> <span class=mi>1</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=nf>panic</span><span class=p>(</span><span class=s>&#34;sched locks&#34;</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>  <span class=k>if</span><span class=p>(</span><span class=n>p</span><span class=o>-&gt;</span><span class=n>state</span> <span class=o>==</span> <span class=n>RUNNING</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=nf>panic</span><span class=p>(</span><span class=s>&#34;sched running&#34;</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>  <span class=k>if</span><span class=p>(</span><span class=nf>intr_get</span><span class=p>())</span>
+</span></span><span class=line><span class=cl>    <span class=nf>panic</span><span class=p>(</span><span class=s>&#34;sched interruptible&#34;</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>  <span class=n>intena</span> <span class=o>=</span> <span class=nf>mycpu</span><span class=p>()</span><span class=o>-&gt;</span><span class=n>intena</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=nf>swtch</span><span class=p>(</span><span class=o>&amp;</span><span class=n>p</span><span class=o>-&gt;</span><span class=n>context</span><span class=p>,</span> <span class=o>&amp;</span><span class=nf>mycpu</span><span class=p>()</span><span class=o>-&gt;</span><span class=n>context</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>  <span class=nf>mycpu</span><span class=p>()</span><span class=o>-&gt;</span><span class=n>intena</span> <span class=o>=</span> <span class=n>intena</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1>// Give up the CPU for one scheduling round.
+</span></span></span><span class=line><span class=cl><span class=kt>void</span>
+</span></span><span class=line><span class=cl><span class=nf>yield</span><span class=p>(</span><span class=kt>void</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>  <span class=k>struct</span> <span class=n>proc</span> <span class=o>*</span><span class=n>p</span> <span class=o>=</span> <span class=nf>myproc</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>  <span class=nf>acquire</span><span class=p>(</span><span class=o>&amp;</span><span class=n>p</span><span class=o>-&gt;</span><span class=n>lock</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>  <span class=n>p</span><span class=o>-&gt;</span><span class=n>state</span> <span class=o>=</span> <span class=n>RUNNABLE</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=nf>sched</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>  <span class=nf>release</span><span class=p>(</span><span class=o>&amp;</span><span class=n>p</span><span class=o>-&gt;</span><span class=n>lock</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p><code>swtch(&amp;p->context, &amp;mycpu()->context)</code>函数会将当前寄存器中的值保存到p->context中，并将当前cpu中context的内容恢复到寄存器中，其中最重要的就是<code>ra</code>寄存器，当恢复了这个后，ra的值对应的地址在调度器<code>scheduler()</code>中：</p><p><img class=gallery-image data-flex-basis=231px data-flex-grow=96 height=990 loading=lazy sizes="(max-width: 767px) calc(100vw - 30px), (max-width: 1023px) 700px, (max-width: 1279px) 950px, 1232px" src=https://gitee.com/kerolt/picture/raw/main/20241215-134724.png srcset="/'20241215-134724_13063291559617015402_hu_90d54013ede01dc7.png 800w, https://gitee.com/kerolt/picture/raw/main/20241215-134724.png 954w" width=954></p><p>（这里ra的16进制为0x8000141e）</p><p>这样，xv6就从：执行当前进程 -> yield -> shed -> scheduler；在scheduler调度器中，内核会找到下一个就绪态的进程，并使用swtch进行进程切换：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span><span class=lnt>34
+</span><span class=lnt>35
+</span><span class=lnt>36
+</span><span class=lnt>37
+</span><span class=lnt>38
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-c data-lang=c><span class=line><span class=cl><span class=c1>// Per-CPU process scheduler.
+</span></span></span><span class=line><span class=cl><span class=c1>// Each CPU calls scheduler() after setting itself up.
+</span></span></span><span class=line><span class=cl><span class=c1>// Scheduler never returns.  It loops, doing:
+</span></span></span><span class=line><span class=cl><span class=c1>//  - choose a process to run.
+</span></span></span><span class=line><span class=cl><span class=c1>//  - swtch to start running that process.
+</span></span></span><span class=line><span class=cl><span class=c1>//  - eventually that process transfers control
+</span></span></span><span class=line><span class=cl><span class=c1>//    via swtch back to the scheduler.
+</span></span></span><span class=line><span class=cl><span class=kt>void</span>
+</span></span><span class=line><span class=cl><span class=nf>scheduler</span><span class=p>(</span><span class=kt>void</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>  <span class=k>struct</span> <span class=n>proc</span> <span class=o>*</span><span class=n>p</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=k>struct</span> <span class=n>cpu</span> <span class=o>*</span><span class=n>c</span> <span class=o>=</span> <span class=nf>mycpu</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>  <span class=n>c</span><span class=o>-&gt;</span><span class=n>proc</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=k>for</span><span class=p>(;;){</span>
+</span></span><span class=line><span class=cl>    <span class=c1>// The most recent process to run may have had interrupts
+</span></span></span><span class=line><span class=cl>    <span class=c1>// turned off; enable them to avoid a deadlock if all
+</span></span></span><span class=line><span class=cl>    <span class=c1>// processes are waiting.
+</span></span></span><span class=line><span class=cl>    <span class=nf>intr_on</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>for</span><span class=p>(</span><span class=n>p</span> <span class=o>=</span> <span class=n>proc</span><span class=p>;</span> <span class=n>p</span> <span class=o>&lt;</span> <span class=o>&amp;</span><span class=n>proc</span><span class=p>[</span><span class=n>NPROC</span><span class=p>];</span> <span class=n>p</span><span class=o>++</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>      <span class=nf>acquire</span><span class=p>(</span><span class=o>&amp;</span><span class=n>p</span><span class=o>-&gt;</span><span class=n>lock</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>      <span class=k>if</span><span class=p>(</span><span class=n>p</span><span class=o>-&gt;</span><span class=n>state</span> <span class=o>==</span> <span class=n>RUNNABLE</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=c1>// Switch to chosen process.  It is the process&#39;s job
+</span></span></span><span class=line><span class=cl>        <span class=c1>// to release its lock and then reacquire it
+</span></span></span><span class=line><span class=cl>        <span class=c1>// before jumping back to us.
+</span></span></span><span class=line><span class=cl>        <span class=n>p</span><span class=o>-&gt;</span><span class=n>state</span> <span class=o>=</span> <span class=n>RUNNING</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=n>c</span><span class=o>-&gt;</span><span class=n>proc</span> <span class=o>=</span> <span class=n>p</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=nf>swtch</span><span class=p>(</span><span class=o>&amp;</span><span class=n>c</span><span class=o>-&gt;</span><span class=n>context</span><span class=p>,</span> <span class=o>&amp;</span><span class=n>p</span><span class=o>-&gt;</span><span class=n>context</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=c1>// Process is done running for now.
+</span></span></span><span class=line><span class=cl>        <span class=c1>// It should have changed its p-&gt;state before coming back.
+</span></span></span><span class=line><span class=cl>        <span class=n>c</span><span class=o>-&gt;</span><span class=n>proc</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>      <span class=p>}</span>
+</span></span><span class=line><span class=cl>      <span class=nf>release</span><span class=p>(</span><span class=o>&amp;</span><span class=n>p</span><span class=o>-&gt;</span><span class=n>lock</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>  <span class=p>}</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p>这样，xv6又从调度器切换到了下一个进程去执行了。</p><h2 id=uthread-switching-between-threads>Uthread: switching between threads</h2><p>在<code>uthread.c</code>中，我们需要在用户态下模拟了线程的运行与切换。可以简单理解，运行一个线程就是执行了一个函数。</p><p>源代码中已经给出要运行的线程（函数），如何启动它们并对他们进行切换呢？</p><h3 id=前置准备>前置准备</h3><p>线程的切换同进程的切换相似，需要保存通用寄存器的值，所以我们可以对内核照猫画虎般在用户线程<code>struct thread</code>中添加一个<code>struct context</code>变量：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-c data-lang=c><span class=line><span class=cl><span class=k>struct</span> <span class=n>context</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>  <span class=n>uint64</span> <span class=n>ra</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=n>uint64</span> <span class=n>sp</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>  <span class=c1>// callee-saved
+</span></span></span><span class=line><span class=cl>  <span class=n>uint64</span> <span class=n>s0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=n>uint64</span> <span class=n>s1</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=n>uint64</span> <span class=n>s2</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=n>uint64</span> <span class=n>s3</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=n>uint64</span> <span class=n>s4</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=n>uint64</span> <span class=n>s5</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=n>uint64</span> <span class=n>s6</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=n>uint64</span> <span class=n>s7</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=n>uint64</span> <span class=n>s8</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=n>uint64</span> <span class=n>s9</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=n>uint64</span> <span class=n>s10</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=n>uint64</span> <span class=n>s11</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>};</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>struct</span> <span class=kr>thread</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>  <span class=kt>char</span>       <span class=n>stack</span><span class=p>[</span><span class=n>STACK_SIZE</span><span class=p>];</span> <span class=cm>/* the thread&#39;s stack */</span>
+</span></span><span class=line><span class=cl>  <span class=kt>int</span>        <span class=n>state</span><span class=p>;</span>             <span class=cm>/* FREE, RUNNING, RUNNABLE */</span>
+</span></span><span class=line><span class=cl>  <span class=k>struct</span> <span class=n>context</span> <span class=n>t_context</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>};</span>
+</span></span></code></pre></td></tr></table></div></div><h3 id=启动>启动</h3><p>risc-v中的ra寄存器的作用是保存函数返回地址。具体来说，当一个函数被调用时，调用指令会将返回地址，即调用该函数的下一条指令的地址，保存在<code>ra</code>寄存器中。</p><p>在实验中，我们通过<code>thread_create</code>来创建线程，那么，在执行玩thread_create之后并进行了调度后，是不是就该运行线程函数了？没错，那么我们需要保存创建的线程对应的函数的地址到ra寄存器中，同时，还需要设置线程的栈指针：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-c data-lang=c><span class=line><span class=cl><span class=kt>void</span> 
+</span></span><span class=line><span class=cl><span class=nf>thread_create</span><span class=p>(</span><span class=kt>void</span> <span class=p>(</span><span class=o>*</span><span class=n>func</span><span class=p>)())</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>  <span class=k>struct</span> <span class=kr>thread</span> <span class=o>*</span><span class=n>t</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>  <span class=k>for</span> <span class=p>(</span><span class=n>t</span> <span class=o>=</span> <span class=n>all_thread</span><span class=p>;</span> <span class=n>t</span> <span class=o>&lt;</span> <span class=n>all_thread</span> <span class=o>+</span> <span class=n>MAX_THREAD</span><span class=p>;</span> <span class=n>t</span><span class=o>++</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=p>(</span><span class=n>t</span><span class=o>-&gt;</span><span class=n>state</span> <span class=o>==</span> <span class=n>FREE</span><span class=p>)</span> <span class=k>break</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=p>}</span>
+</span></span><span class=line><span class=cl>  <span class=n>t</span><span class=o>-&gt;</span><span class=n>state</span> <span class=o>=</span> <span class=n>RUNNABLE</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=c1>// YOUR CODE HERE
+</span></span></span><span class=line><span class=cl>  <span class=n>t</span><span class=o>-&gt;</span><span class=n>t_context</span><span class=p>.</span><span class=n>ra</span> <span class=o>=</span> <span class=p>(</span><span class=n>uint64</span><span class=p>)</span><span class=n>func</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=n>t</span><span class=o>-&gt;</span><span class=n>t_context</span><span class=p>.</span><span class=n>sp</span> <span class=o>=</span> <span class=p>(</span><span class=n>uint64</span><span class=p>)</span><span class=n>t</span><span class=o>-&gt;</span><span class=n>stack</span> <span class=o>+</span> <span class=n>STACK_SIZE</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><h3 id=调度>调度</h3><p>即切换线程，我们需要保存当前线程的通用寄存器，并将下一个要运行的线程的通用寄存器值恢复到硬件上，如同进程切换那样：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span><span class=lnt>34
+</span><span class=lnt>35
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-asm data-lang=asm><span class=line><span class=cl><span class=c1># uthread_switch.S
+</span></span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=nl>thread_switch:</span>
+</span></span><span class=line><span class=cl>	<span class=cm>/* YOUR CODE HERE */</span>
+</span></span><span class=line><span class=cl>	<span class=nf>sd</span> <span class=no>ra</span><span class=p>,</span> <span class=mi>0</span><span class=p>(</span><span class=no>a0</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>	<span class=nf>sd</span> <span class=no>sp</span><span class=p>,</span> <span class=mi>8</span><span class=p>(</span><span class=no>a0</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>	<span class=nf>sd</span> <span class=no>s0</span><span class=p>,</span> <span class=mi>16</span><span class=p>(</span><span class=no>a0</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>	<span class=nf>sd</span> <span class=no>s1</span><span class=p>,</span> <span class=mi>24</span><span class=p>(</span><span class=no>a0</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>	<span class=nf>sd</span> <span class=no>s2</span><span class=p>,</span> <span class=mi>32</span><span class=p>(</span><span class=no>a0</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>	<span class=nf>sd</span> <span class=no>s3</span><span class=p>,</span> <span class=mi>40</span><span class=p>(</span><span class=no>a0</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>	<span class=nf>sd</span> <span class=no>s4</span><span class=p>,</span> <span class=mi>48</span><span class=p>(</span><span class=no>a0</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>	<span class=nf>sd</span> <span class=no>s5</span><span class=p>,</span> <span class=mi>56</span><span class=p>(</span><span class=no>a0</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>	<span class=nf>sd</span> <span class=no>s6</span><span class=p>,</span> <span class=mi>64</span><span class=p>(</span><span class=no>a0</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>	<span class=nf>sd</span> <span class=no>s7</span><span class=p>,</span> <span class=mi>72</span><span class=p>(</span><span class=no>a0</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>	<span class=nf>sd</span> <span class=no>s8</span><span class=p>,</span> <span class=mi>80</span><span class=p>(</span><span class=no>a0</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>	<span class=nf>sd</span> <span class=no>s9</span><span class=p>,</span> <span class=mi>88</span><span class=p>(</span><span class=no>a0</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>	<span class=nf>sd</span> <span class=no>s10</span><span class=p>,</span> <span class=mi>96</span><span class=p>(</span><span class=no>a0</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>	<span class=nf>sd</span> <span class=no>s11</span><span class=p>,</span> <span class=mi>104</span><span class=p>(</span><span class=no>a0</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>	<span class=nf>ld</span> <span class=no>ra</span><span class=p>,</span> <span class=mi>0</span><span class=p>(</span><span class=no>a1</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>	<span class=nf>ld</span> <span class=no>sp</span><span class=p>,</span> <span class=mi>8</span><span class=p>(</span><span class=no>a1</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>	<span class=nf>ld</span> <span class=no>s0</span><span class=p>,</span> <span class=mi>16</span><span class=p>(</span><span class=no>a1</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>	<span class=nf>ld</span> <span class=no>s1</span><span class=p>,</span> <span class=mi>24</span><span class=p>(</span><span class=no>a1</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>	<span class=nf>ld</span> <span class=no>s2</span><span class=p>,</span> <span class=mi>32</span><span class=p>(</span><span class=no>a1</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>	<span class=nf>ld</span> <span class=no>s3</span><span class=p>,</span> <span class=mi>40</span><span class=p>(</span><span class=no>a1</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>	<span class=nf>ld</span> <span class=no>s4</span><span class=p>,</span> <span class=mi>48</span><span class=p>(</span><span class=no>a1</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>	<span class=nf>ld</span> <span class=no>s5</span><span class=p>,</span> <span class=mi>56</span><span class=p>(</span><span class=no>a1</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>	<span class=nf>ld</span> <span class=no>s6</span><span class=p>,</span> <span class=mi>64</span><span class=p>(</span><span class=no>a1</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>	<span class=nf>ld</span> <span class=no>s7</span><span class=p>,</span> <span class=mi>72</span><span class=p>(</span><span class=no>a1</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>	<span class=nf>ld</span> <span class=no>s8</span><span class=p>,</span> <span class=mi>80</span><span class=p>(</span><span class=no>a1</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>	<span class=nf>ld</span> <span class=no>s9</span><span class=p>,</span> <span class=mi>88</span><span class=p>(</span><span class=no>a1</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>	<span class=nf>ld</span> <span class=no>s10</span><span class=p>,</span> <span class=mi>96</span><span class=p>(</span><span class=no>a1</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>	<span class=nf>ld</span> <span class=no>s11</span><span class=p>,</span> <span class=mi>104</span><span class=p>(</span><span class=no>a1</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>	<span class=nf>ret</span>    <span class=cm>/* return to ra */</span>
+</span></span></code></pre></td></tr></table></div></div><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-c data-lang=c><span class=line><span class=cl><span class=c1>// uthread.c
+</span></span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=kt>void</span> 
+</span></span><span class=line><span class=cl><span class=nf>thread_schedule</span><span class=p>(</span><span class=kt>void</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>  <span class=p>...</span>
+</span></span><span class=line><span class=cl>  <span class=k>if</span> <span class=p>(</span><span class=n>current_thread</span> <span class=o>!=</span> <span class=n>next_thread</span><span class=p>)</span> <span class=p>{</span>         <span class=cm>/* switch threads?  */</span>
+</span></span><span class=line><span class=cl>    <span class=n>next_thread</span><span class=o>-&gt;</span><span class=n>state</span> <span class=o>=</span> <span class=n>RUNNING</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=n>t</span> <span class=o>=</span> <span class=n>current_thread</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=n>current_thread</span> <span class=o>=</span> <span class=n>next_thread</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=cm>/* YOUR CODE HERE
+</span></span></span><span class=line><span class=cl><span class=cm>     * Invoke thread_switch to switch from t to next_thread:
+</span></span></span><span class=line><span class=cl><span class=cm>     * thread_switch(??, ??);
+</span></span></span><span class=line><span class=cl><span class=cm>     */</span>
+</span></span><span class=line><span class=cl>    <span class=nf>thread_switch</span><span class=p>((</span><span class=n>uint64</span><span class=p>)</span><span class=o>&amp;</span><span class=n>t</span><span class=o>-&gt;</span><span class=n>t_context</span><span class=p>,</span> <span class=p>(</span><span class=n>uint64</span><span class=p>)</span><span class=o>&amp;</span><span class=n>next_thread</span><span class=o>-&gt;</span><span class=n>t_context</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>  <span class=p>}</span> <span class=k>else</span>
+</span></span><span class=line><span class=cl>    <span class=n>next_thread</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><h2 id=using-threads>Using threads</h2><p>如果只是简单在get和put操作中加上锁，那么这样虽然能够保证对共享资源的互斥访问，当时无法达到双线程所带来的性能提升。</p><p>应该实现的是两个线程，你放你的，我放我的，现在有5个entry table，我们可以不止使用一把锁来锁住5个table，而是使用5把锁，哪一个table需要互斥操作时只锁它一个就行，这样就细化了锁的粒度。</p><p>这里需要把table改为一个数组，实现代码比较简单，这里就不放了。</p><h2 id=barrier>Barrier</h2><p>实验的要求是每来一个线程运行到barrier就阻塞，直到所有线程都运行到了barrier才释放。这里是想让我们熟悉pthread库中关于锁和条件变量的使用，更加了解线程的同步关系。</p><p>我们可以给全局的bstate中添加一个变量<code>count</code>用于记录当前轮次有多少个线程已经到达了barrier，只要有线程到达，执行<code>++bstate.count</code>，需要注意的是，这个全局变量会被多个线程使用，故需要使用锁来保证互斥访问。</p><p>接下来判断count的值是否等于线程的数量，如果不相等，就wait阻塞当前线程，并释放锁；否则，说明一轮结束，将count置0，轮次+1，并使用broadcaset唤醒被阻塞的线程。</p><h3 id=尝试1>尝试1</h3><p>按刚刚说的思路，如果这么写代码，将会造成系统程序死锁。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-c data-lang=c><span class=line><span class=cl><span class=k>static</span> <span class=kt>void</span> 
+</span></span><span class=line><span class=cl><span class=nf>barrier</span><span class=p>()</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>  <span class=nf>pthread_mutex_lock</span><span class=p>(</span><span class=o>&amp;</span><span class=n>bstate</span><span class=p>.</span><span class=n>barrier_mutex</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>  <span class=o>++</span><span class=n>bstate</span><span class=p>.</span><span class=n>count</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=nf>pthread_mutex_unlock</span><span class=p>(</span><span class=o>&amp;</span><span class=n>bstate</span><span class=p>.</span><span class=n>barrier_mutex</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>  <span class=k>if</span> <span class=p>(</span><span class=n>bstate</span><span class=p>.</span><span class=n>count</span> <span class=o>==</span> <span class=n>bstate</span><span class=p>.</span><span class=n>nthread</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=n>bstate</span><span class=p>.</span><span class=n>count</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=o>++</span><span class=n>bstate</span><span class=p>.</span><span class=n>round</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=nf>pthread_cond_broadcast</span><span class=p>(</span><span class=o>&amp;</span><span class=n>bstate</span><span class=p>.</span><span class=n>barrier_cond</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=p>}</span>
+</span></span><span class=line><span class=cl>  <span class=nf>pthread_cond_wait</span><span class=p>(</span><span class=o>&amp;</span><span class=n>bstate</span><span class=p>.</span><span class=n>barrier_cond</span><span class=p>,</span> <span class=o>&amp;</span><span class=n>bstate</span><span class=p>.</span><span class=n>barrier_mutex</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p><img class=gallery-image data-flex-basis=298px data-flex-grow=124 height=159 loading=lazy sizes="(max-width: 767px) calc(100vw - 30px), (max-width: 1023px) 700px, (max-width: 1279px) 950px, 1232px" src=https://gitee.com/kerolt/picture/raw/main/20241215-134724-1.png width=198></p><p>当条件变量 <code>cond</code> 变为真且该线程被唤醒时，<code>pthread_cond_wait</code> <strong>会自动重新获取互斥锁</strong> <code>mutex</code>，然后返回。</p><ul><li>线程1第0轮获得锁，++count后释放锁，然后在wait处阻塞，并释放锁</li><li>接着线程2在第0轮获得锁，++count后进入if判断，使用broadcast唤醒线程1</li><li>线程1被唤醒，并自动获取锁</li><li>线程2进入第1轮，尝试获得锁，但是此时线程1正持有锁，故线程2阻塞</li><li>线程1进入第1轮，但之前自己已经获得锁了，此时又请求锁，故阻塞</li><li>两个线程都阻塞，程序出现死锁</li></ul><h3 id=尝试2>尝试2</h3><p>既然<code>pthread_cond_wait</code>会自动重新获取互斥锁，那就在调用之后使用<code>pthread_mutex_unlock</code>释放锁不久好了吗？</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-c data-lang=c><span class=line><span class=cl><span class=k>static</span> <span class=kt>void</span> 
+</span></span><span class=line><span class=cl><span class=nf>barrier</span><span class=p>()</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>  <span class=nf>pthread_mutex_lock</span><span class=p>(</span><span class=o>&amp;</span><span class=n>bstate</span><span class=p>.</span><span class=n>barrier_mutex</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>  <span class=k>if</span> <span class=p>(</span><span class=o>++</span><span class=n>bstate</span><span class=p>.</span><span class=n>count</span> <span class=o>==</span> <span class=n>bstate</span><span class=p>.</span><span class=n>nthread</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=n>bstate</span><span class=p>.</span><span class=n>count</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=o>++</span><span class=n>bstate</span><span class=p>.</span><span class=n>round</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=nf>pthread_cond_broadcast</span><span class=p>(</span><span class=o>&amp;</span><span class=n>bstate</span><span class=p>.</span><span class=n>barrier_cond</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=p>}</span>
+</span></span><span class=line><span class=cl>  <span class=nf>pthread_cond_wait</span><span class=p>(</span><span class=o>&amp;</span><span class=n>bstate</span><span class=p>.</span><span class=n>barrier_cond</span><span class=p>,</span> <span class=o>&amp;</span><span class=n>bstate</span><span class=p>.</span><span class=n>barrier_mutex</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>  <span class=nf>pthread_mutex_unlock</span><span class=p>(</span><span class=o>&amp;</span><span class=n>bstate</span><span class=p>.</span><span class=n>barrier_mutex</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p><img class=gallery-image data-flex-basis=326px data-flex-grow=136 height=136 loading=lazy sizes="(max-width: 767px) calc(100vw - 30px), (max-width: 1023px) 700px, (max-width: 1279px) 950px, 1232px" src=https://gitee.com/kerolt/picture/raw/main/20241215-134724-2.png width=185></p><p>这样还是不行：原因是<code>pthread_cond_broadcast</code><strong>不会释放锁</strong>。</p><ul><li>在第0轮线程1拿到锁后++count后进入wait状态，此时线程1阻塞并释放锁</li><li>在第0轮线程2拿到锁，执行++count操作后使用broadcast尝试唤醒线程1，但是线程2并没有释放锁</li><li>线程1抢到CPU，但是拿不到锁，继续阻塞</li><li>线程2抢到了CPU的执行权进入第1轮，企图获得锁，但是之前自己没有释放锁，也阻塞</li><li>两个线程都阻塞，程序出现死锁</li></ul><h3 id=正确做法>正确做法</h3><p>所以正确的做法是在broadcast后也使用unlock释放锁：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-c data-lang=c><span class=line><span class=cl><span class=k>static</span> <span class=kt>void</span> 
+</span></span><span class=line><span class=cl><span class=nf>barrier</span><span class=p>()</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>  <span class=nf>pthread_mutex_lock</span><span class=p>(</span><span class=o>&amp;</span><span class=n>bstate</span><span class=p>.</span><span class=n>barrier_mutex</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>  <span class=k>if</span> <span class=p>(</span><span class=o>++</span><span class=n>bstate</span><span class=p>.</span><span class=n>count</span> <span class=o>==</span> <span class=n>bstate</span><span class=p>.</span><span class=n>nthread</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=n>bstate</span><span class=p>.</span><span class=n>count</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=o>++</span><span class=n>bstate</span><span class=p>.</span><span class=n>round</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=nf>pthread_cond_broadcast</span><span class=p>(</span><span class=o>&amp;</span><span class=n>bstate</span><span class=p>.</span><span class=n>barrier_cond</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=nf>pthread_mutex_unlock</span><span class=p>(</span><span class=o>&amp;</span><span class=n>bstate</span><span class=p>.</span><span class=n>barrier_mutex</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=p>}</span>
+</span></span><span class=line><span class=cl>  <span class=nf>pthread_cond_wait</span><span class=p>(</span><span class=o>&amp;</span><span class=n>bstate</span><span class=p>.</span><span class=n>barrier_cond</span><span class=p>,</span> <span class=o>&amp;</span><span class=n>bstate</span><span class=p>.</span><span class=n>barrier_mutex</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>  <span class=nf>pthread_mutex_unlock</span><span class=p>(</span><span class=o>&amp;</span><span class=n>bstate</span><span class=p>.</span><span class=n>barrier_mutex</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><h2 id=代码实现详情>代码实现详情</h2><p>请见Github：<a class=link href=https://github.com/kerolt/xv6-labs-2023/tree/thread target=_blank rel=noopener>https://github.com/kerolt/xv6-labs-2023/tree/thread</a></p><h2 id=reference>Reference</h2><ol><li><a class=link href=https://www.cnblogs.com/looking-for-zihuatanejo/p/17682582.html target=_blank rel=noopener>https://www.cnblogs.com/looking-for-zihuatanejo/p/17682582.html</a></li><li><a class=link href=https://mit-public-courses-cn-translatio.gitbook.io/mit6-s081/lec11-thread-switching-robert/11.7-xv6-switch-function target=_blank rel=noopener>https://mit-public-courses-cn-translatio.gitbook.io/mit6-s081/lec11-thread-switching-robert/11.7-xv6-switch-function</a></li><li><a class=link href="https://www.bilibili.com/video/BV1bZ421U75W/?spm_id_from=333.999.0.0&amp;vd_source=e7bb0cfb7224c8d6671fa62c0e80c832" target=_blank rel=noopener>https://www.bilibili.com/video/BV1bZ421U75W/?spm_id_from=333.999.0.0&vd_source=e7bb0cfb7224c8d6671fa62c0e80c832</a></li><li><a class=link href=https://pdos.csail.mit.edu/6.S081/2023/labs/thread.html target=_blank rel=noopener>https://pdos.csail.mit.edu/6.S081/2023/labs/thread.html</a></li></ol></section><footer class="article-meta article-footer"><section class=article-tags><a href=/tags/mit6-s081/>MIT6-S081</a>
+<a href=/tags/os/>OS</a>
+<a href=/tags/xv6/>Xv6</a></section><section class="article-copyright inline-meta"><svg class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><path d="M14.5 9a3.5 4 0 100 6"/></svg>
+<span>Licensed under CC BY-NC-SA 4.0</span></section></footer></article><footer class=site-footer><section class=copyright>&copy;
+2025 -
+2026 Kerolt's Note</section><section class=powerby>使用 <a href=https://gohugo.io/ target=_blank rel=noopener>Hugo</a> 构建<br>主题 <b><a href=https://github.com/CaiJimmy/hugo-theme-stack target=_blank rel=noopener data-version=4.0.3>Stack</a></b> 由 <a href=https://jimmycai.com target=_blank rel=noopener>Jimmy</a> 设计</section></footer><script type=module>
+    import gallery from '\/ts\/gallery.js';
+
+    const articleContent = document.querySelector('.article-content');
+    const shouldLoad = articleContent && (articleContent.querySelectorAll('figure').length > 0 || articleContent.querySelectorAll('img.gallery-image').length > 0);
+    
+    if (shouldLoad) {
+        gallery(articleContent);
+
+        const PhotoSwipeLightbox = (await import("https:\/\/cdn.jsdelivr.net\/npm\/photoswipe@5.4.4\/dist\/photoswipe-lightbox.esm.min.js")).default;
+        const styleHref = "https:\/\/cdn.jsdelivr.net\/npm\/photoswipe@5.4.4\/dist\/photoswipe.css";
+
+        const styleTag = document.createElement('link');
+        styleTag.rel = 'stylesheet';
+        styleTag.href = styleHref;
+        document.head.appendChild(styleTag);
+
+        const lightbox = new PhotoSwipeLightbox({
+            gallerySelector: '.article-content',
+            childSelector: 'figure a.image-link',
+            pswpModule: () => import("https:\/\/cdn.jsdelivr.net\/npm\/photoswipe@5.4.4\/dist\/photoswipe.esm.min.js")
+        });
+        lightbox.init();
+    }
+</script></main></div><script type=text/javascript src=/ts/main.f856840516f7c2ad1769a8f5937e3d08d6cb386e2cd2dd025ae696e0ff207958.js defer></script></body></html>

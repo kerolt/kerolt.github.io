@@ -1,63 +1,339 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?>
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
-  <channel>
-    <title>Linux on Kerolt&#39;s Blog</title>
-    <link>https://kerolt.github.io/categories/linux/</link>
-    <description>Recent content in Linux on Kerolt&#39;s Blog</description>
-    <image>
-      <title>Kerolt&#39;s Blog</title>
-      <url>https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</url>
-      <link>https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</link>
-    </image>
-    <generator>Hugo -- 0.158.0</generator>
-    <language>en</language>
-    <lastBuildDate>Thu, 12 Feb 2026 00:00:00 +0000</lastBuildDate>
-    <atom:link href="https://kerolt.github.io/categories/linux/index.xml" rel="self" type="application/rss+xml" />
-    <item>
-      <title>使用nmcli连接Wi-Fi</title>
-      <link>https://kerolt.github.io/posts/net/%E4%BD%BF%E7%94%A8nmcli%E8%BF%9E%E6%8E%A5wi-fi/</link>
-      <pubDate>Thu, 12 Feb 2026 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/net/%E4%BD%BF%E7%94%A8nmcli%E8%BF%9E%E6%8E%A5wi-fi/</guid>
-      <description>&lt;p&gt;现在个人的环境是 Fedora43，使用&lt;strong&gt;NetworkManager&lt;/strong&gt;管理网络，因而基于 &lt;code&gt;nmcli&lt;/code&gt;（NetworkManager Command Line Interface）来高效、可靠地配置 WiFi&lt;/p&gt;
-&lt;h2 id=&#34;第一步确认-networkmanager-已接管无线接口&#34;&gt;第一步：确认 NetworkManager 已接管无线接口&lt;/h2&gt;
-&lt;p&gt;首先确保你的无线网卡（如 &lt;code&gt;wlan0&lt;/code&gt;）处于 NetworkManager 的管理之下：&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;nmcli device status
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;输出应类似：&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;DEVICE   TYPE      STATE         CONNECTION 
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;wlan0    wifi      disconnected  --         
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;eth0     ethernet  connected     Wired connection &lt;span style=&#34;color:#f60&#34;&gt;1&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;blockquote&gt;
-&lt;p&gt;🔍 注意：如果 &lt;code&gt;STATE&lt;/code&gt; 显示为 &lt;code&gt;unmanaged&lt;/code&gt;，说明该设备被排除在 NM 管理之外。检查 &lt;code&gt;/etc/NetworkManager/NetworkManager.conf&lt;/code&gt; 是否有 &lt;code&gt;unmanaged-devices&lt;/code&gt; 规则，或运行：&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;sudo nmcli device &lt;span style=&#34;color:#366&#34;&gt;set&lt;/span&gt; wlan0 managed yes
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/blockquote&gt;
-&lt;h2 id=&#34;第二步扫描并连接-wifi支持-wpa2wpa3&#34;&gt;第二步：扫描并连接 WiFi（支持 WPA2/WPA3）&lt;/h2&gt;
-&lt;h3 id=&#34;1扫描可用网络可选用于确认-ssid-拼写&#34;&gt;（1）扫描可用网络（可选，用于确认 SSID 拼写）&lt;/h3&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;nmcli device wifi list
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id=&#34;2连接目标-wifi自动保存连接配置&#34;&gt;（2）连接目标 WiFi（自动保存连接配置）&lt;/h3&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;sudo nmcli device wifi connect &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;Your_SSID&amp;#34;&lt;/span&gt; password &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;Your_Password&amp;#34;&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;成功时你会看到：&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Device &lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;wlan0&amp;#39;&lt;/span&gt; successfully activated with &lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX&amp;#39;&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;blockquote&gt;
-&lt;p&gt;💡 &lt;strong&gt;底层机制&lt;/strong&gt;：
-此命令会：&lt;/p&gt;</description>
-    </item>
-    <item>
-      <title>Linux SSH免密登陆</title>
-      <link>https://kerolt.github.io/posts/linux/linux-ssh%E5%85%8D%E5%AF%86%E7%99%BB%E9%99%86/</link>
-      <pubDate>Tue, 10 Feb 2026 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/linux/linux-ssh%E5%85%8D%E5%AF%86%E7%99%BB%E9%99%86/</guid>
-      <description>&lt;h2 id=&#34;一生成-ssh-密钥对在本地机器上&#34;&gt;一、生成 SSH 密钥对（在本地机器上）&lt;/h2&gt;
-&lt;ol&gt;
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Linux on Kerolt's Note</title><link>https://kerolt.github.io/categories/linux/</link><description>Recent content in Linux on Kerolt's Note</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><lastBuildDate>Wed, 20 May 2026 00:00:00 +0000</lastBuildDate><atom:link href="https://kerolt.github.io/categories/linux/index.xml" rel="self" type="application/rss+xml"/><item><title>使用nmcli管理Wi-Fi连接</title><link>https://kerolt.github.io/p/%E4%BD%BF%E7%94%A8nmcli%E7%AE%A1%E7%90%86wi-fi%E8%BF%9E%E6%8E%A5/</link><pubDate>Thu, 12 Feb 2026 00:00:00 +0000</pubDate><guid>https://kerolt.github.io/p/%E4%BD%BF%E7%94%A8nmcli%E7%AE%A1%E7%90%86wi-fi%E8%BF%9E%E6%8E%A5/</guid><description>&lt;p&gt;环境：Fedora 43，NetworkManager 管理网络，基于 &lt;code&gt;nmcli&lt;/code&gt;（NetworkManager Command Line Interface）操作。&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2 id="wifi-连接全流程"&gt;WiFi 连接全流程
+&lt;/h2&gt;&lt;h3 id="1-确认网卡状态"&gt;1. 确认网卡状态
+&lt;/h3&gt;&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;nmcli device status
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;输出示例：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-fallback" data-lang="fallback"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;DEVICE TYPE STATE CONNECTION
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;wlan0 wifi disconnected --
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;eth0 ethernet connected Wired connection 1
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;如果 &lt;code&gt;STATE&lt;/code&gt; 为 &lt;code&gt;unmanaged&lt;/code&gt;，说明网卡未被 NetworkManager 接管：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;sudo nmcli device &lt;span class="nb"&gt;set&lt;/span&gt; wlan0 managed yes
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h3 id="2-扫描可用网络"&gt;2. 扫描可用网络
+&lt;/h3&gt;&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;nmcli device wifi list
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;输出示例：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;span class="lnt"&gt;4
+&lt;/span&gt;&lt;span class="lnt"&gt;5
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-fallback" data-lang="fallback"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;IN-USE SSID MODE CHAN RATE SIGNAL BARS SECURITY
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; MyHome_5G Infra 149 1300 Mbit/s 75 ▂▄▆_ WPA2
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; MyHome_2.4G Infra 6 1300 Mbit/s 90 ▂▄▆█ WPA3
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; Neighbor_WiFi Infra 1 195 Mbit/s 30 ▂___ WPA2
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;* Office_Guest Infra 36 540 Mbit/s 60 ▂▄▆_ WPA2
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;&lt;code&gt;IN-USE&lt;/code&gt; 列带 &lt;code&gt;*&lt;/code&gt; 表示当前已连接的网络。&lt;/p&gt;
+&lt;h3 id="3-连接-wifi"&gt;3. 连接 WiFi
+&lt;/h3&gt;&lt;h4 id="基本连接自动保存配置"&gt;基本连接（自动保存配置）
+&lt;/h4&gt;&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;sudo nmcli device wifi connect &lt;span class="s2"&gt;&amp;#34;MyHome_5G&amp;#34;&lt;/span&gt; password &lt;span class="s2"&gt;&amp;#34;your_password&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;成功输出：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-fallback" data-lang="fallback"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;Device &amp;#39;wlan0&amp;#39; successfully activated with &amp;#39;xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx&amp;#39;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+ &lt;blockquote&gt;
+ &lt;p&gt;此命令自动完成：生成 connection profile（保存在 &lt;code&gt;/etc/NetworkManager/system-connections/&lt;/code&gt;）→ 触发 DHCP → 设置 &lt;code&gt;autoconnect=yes&lt;/code&gt;。&lt;/p&gt;
+
+ &lt;/blockquote&gt;
+&lt;h4 id="连接隐藏-ssid"&gt;连接隐藏 SSID
+&lt;/h4&gt;&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;sudo nmcli device wifi connect &lt;span class="s2"&gt;&amp;#34;Hidden_SSID&amp;#34;&lt;/span&gt; password &lt;span class="s2"&gt;&amp;#34;your_password&amp;#34;&lt;/span&gt; hidden yes
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h4 id="指定加密方式避免协商不确定性"&gt;指定加密方式（避免协商不确定性）
+&lt;/h4&gt;&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;sudo nmcli device wifi connect &lt;span class="s2"&gt;&amp;#34;MyHome_5G&amp;#34;&lt;/span&gt; password &lt;span class="s2"&gt;&amp;#34;your_password&amp;#34;&lt;/span&gt; wep-key-type key
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h3 id="4-查看活动连接与-ip"&gt;4. 查看活动连接与 IP
+&lt;/h3&gt;&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;nmcli connection show --active
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;ip addr show wlan0
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;ping -c &lt;span class="m"&gt;3&lt;/span&gt; 8.8.8.8
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h3 id="5-切换-wifi断旧连新一步完成"&gt;5. 切换 WiFi（断旧连新一步完成）
+&lt;/h3&gt;&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;sudo nmcli device wifi connect &lt;span class="s2"&gt;&amp;#34;New_SSID&amp;#34;&lt;/span&gt; password &lt;span class="s2"&gt;&amp;#34;new_password&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+ &lt;blockquote&gt;
+ &lt;p&gt;&lt;code&gt;nmcli device wifi connect&lt;/code&gt; 会自动断开当前连接，无需手动先行断开。&lt;/p&gt;
+
+ &lt;/blockquote&gt;
+&lt;h3 id="6-断开当前-wifi"&gt;6. 断开当前 WiFi
+&lt;/h3&gt;&lt;h4 id="方式一断开网卡不会自动重连"&gt;方式一：断开网卡（不会自动重连）
+&lt;/h4&gt;&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;sudo nmcli device disconnect wlan0
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h4 id="方式二禁用连接配置autoconnect-可能触发重连"&gt;方式二：禁用连接配置（autoconnect 可能触发重连）
+&lt;/h4&gt;&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;sudo nmcli connection down &lt;span class="s2"&gt;&amp;#34;MyHome_5G&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h4 id="方式三彻底删除配置"&gt;方式三：彻底删除配置
+&lt;/h4&gt;&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;sudo nmcli connection delete &lt;span class="s2"&gt;&amp;#34;MyHome_5G&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;hr&gt;
+&lt;h2 id="nmcli-网卡操作参考"&gt;nmcli 网卡操作参考
+&lt;/h2&gt;&lt;h3 id="查看设备与连接"&gt;查看设备与连接
+&lt;/h3&gt;&lt;table&gt;
+	&lt;thead&gt;
+			&lt;tr&gt;
+					&lt;th&gt;命令&lt;/th&gt;
+					&lt;th&gt;用途&lt;/th&gt;
+			&lt;/tr&gt;
+	&lt;/thead&gt;
+	&lt;tbody&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;code&gt;nmcli device status&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;查看所有网卡状态、类型、连接情况&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;code&gt;nmcli device show wlan0&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;查看指定网卡详细信息（驱动、MAC、IP、DNS 等）&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;code&gt;nmcli connection show&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;列出所有 connection profile&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;code&gt;nmcli connection show --active&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;列出当前活动的连接&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;code&gt;nmcli connection show &amp;quot;MyHome_5G&amp;quot;&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;查看指定连接配置详情&lt;/td&gt;
+			&lt;/tr&gt;
+	&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h3 id="设备管理"&gt;设备管理
+&lt;/h3&gt;&lt;table&gt;
+	&lt;thead&gt;
+			&lt;tr&gt;
+					&lt;th&gt;命令&lt;/th&gt;
+					&lt;th&gt;用途&lt;/th&gt;
+			&lt;/tr&gt;
+	&lt;/thead&gt;
+	&lt;tbody&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;code&gt;nmcli device connect wlan0&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;让网卡尝试自动连接（根据已有 profile）&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;code&gt;nmcli device disconnect wlan0&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;断开网卡，不再自动连接&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;code&gt;nmcli device set wlan0 managed yes&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;将网卡纳入 NetworkManager 管理&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;code&gt;nmcli device set wlan0 managed no&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;将网卡排除出管理（变为 unmanaged）&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;code&gt;nmcli device reapply wlan0&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;重新应用当前连接配置&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;code&gt;nmcli device wifi list&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;扫描并列出附近 WiFi&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;code&gt;nmcli device wifi rescan&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;强制重新扫描&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;code&gt;nmcli device monitor wlan0&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;实时监控网卡状态变化&lt;/td&gt;
+			&lt;/tr&gt;
+	&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h3 id="connection-profile-管理"&gt;Connection Profile 管理
+&lt;/h3&gt;&lt;h4 id="modify-常用示例"&gt;modify 常用示例
+&lt;/h4&gt;&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt; 1
+&lt;/span&gt;&lt;span class="lnt"&gt; 2
+&lt;/span&gt;&lt;span class="lnt"&gt; 3
+&lt;/span&gt;&lt;span class="lnt"&gt; 4
+&lt;/span&gt;&lt;span class="lnt"&gt; 5
+&lt;/span&gt;&lt;span class="lnt"&gt; 6
+&lt;/span&gt;&lt;span class="lnt"&gt; 7
+&lt;/span&gt;&lt;span class="lnt"&gt; 8
+&lt;/span&gt;&lt;span class="lnt"&gt; 9
+&lt;/span&gt;&lt;span class="lnt"&gt;10
+&lt;/span&gt;&lt;span class="lnt"&gt;11
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# 设置静态 IP&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;sudo nmcli con modify &lt;span class="s2"&gt;&amp;#34;MyHome_5G&amp;#34;&lt;/span&gt; ipv4.addresses 192.168.1.100/24
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;sudo nmcli con modify &lt;span class="s2"&gt;&amp;#34;MyHome_5G&amp;#34;&lt;/span&gt; ipv4.gateway 192.168.1.1
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;sudo nmcli con modify &lt;span class="s2"&gt;&amp;#34;MyHome_5G&amp;#34;&lt;/span&gt; ipv4.dns &lt;span class="s2"&gt;&amp;#34;8.8.8.8,1.1.1.1&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;sudo nmcli con modify &lt;span class="s2"&gt;&amp;#34;MyHome_5G&amp;#34;&lt;/span&gt; ipv4.method manual
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# 关闭自动连接&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;sudo nmcli con modify &lt;span class="s2"&gt;&amp;#34;MyHome_5G&amp;#34;&lt;/span&gt; connection.autoconnect no
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# 设置连接优先级（数字越大越优先）&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;sudo nmcli con modify &lt;span class="s2"&gt;&amp;#34;MyHome_5G&amp;#34;&lt;/span&gt; connection.autoconnect-priority &lt;span class="m"&gt;10&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h3 id="全局设置"&gt;全局设置
+&lt;/h3&gt;&lt;table&gt;
+	&lt;thead&gt;
+			&lt;tr&gt;
+					&lt;th&gt;命令&lt;/th&gt;
+					&lt;th&gt;用途&lt;/th&gt;
+			&lt;/tr&gt;
+	&lt;/thead&gt;
+	&lt;tbody&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;code&gt;nmcli general status&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;查看 NetworkManager 整体状态&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;code&gt;nmcli general hostname&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;查看/设置主机名&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;code&gt;nmcli general set wifi.on-demand on&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;仅在需要时启用 WiFi（省电/安全）&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;code&gt;nmcli general permissions&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;查看当前用户权限&lt;/td&gt;
+			&lt;/tr&gt;
+	&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h3 id="配置文件操作"&gt;配置文件操作
+&lt;/h3&gt;&lt;p&gt;直接编辑后重载：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;sudo vim /etc/NetworkManager/system-connections/MyHome_5G.nmconnection
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;sudo nmcli connection reload
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+ &lt;blockquote&gt;
+ &lt;p&gt;配置文件为 INI 格式，手动修改后必须 &lt;code&gt;reload&lt;/code&gt; 才能生效。注意设置权限：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;sudo chmod &lt;span class="m"&gt;600&lt;/span&gt; /etc/NetworkManager/system-connections/*.nmconnection
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;sudo chown root:root /etc/NetworkManager/system-connections/*.nmconnection
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+ &lt;/blockquote&gt;</description></item><item><title>Linux SSH免密登陆</title><link>https://kerolt.github.io/p/linux-ssh%E5%85%8D%E5%AF%86%E7%99%BB%E9%99%86/</link><pubDate>Tue, 10 Feb 2026 00:00:00 +0000</pubDate><guid>https://kerolt.github.io/p/linux-ssh%E5%85%8D%E5%AF%86%E7%99%BB%E9%99%86/</guid><description>&lt;h2 id="一生成-ssh-密钥对在本地机器上"&gt;一、生成 SSH 密钥对（在本地机器上）
+&lt;/h2&gt;&lt;ol&gt;
 &lt;li&gt;打开终端（Linux/macOS）或使用 PowerShell/WSL（Windows）。&lt;/li&gt;
 &lt;li&gt;执行以下命令生成密钥对：&lt;/li&gt;
 &lt;/ol&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;ssh-keygen -t rsa -b &lt;span style=&#34;color:#f60&#34;&gt;4096&lt;/span&gt; -C &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;your_email@example.com&amp;#34;&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;ul&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;ssh-keygen -t rsa -b &lt;span class="m"&gt;4096&lt;/span&gt; -C &lt;span class="s2"&gt;&amp;#34;your_email@example.com&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;ul&gt;
 &lt;li&gt;&lt;code&gt;-t rsa&lt;/code&gt;：指定密钥类型为 RSA（也可以使用 &lt;code&gt;-t ed25519&lt;/code&gt; 更安全）。&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;-b 4096&lt;/code&gt;：密钥长度（RSA 推荐 4096 位）。&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;-C&lt;/code&gt;：添加注释（通常是邮箱，可选）。&lt;/li&gt;
 &lt;/ul&gt;
-&lt;ol start=&#34;3&#34;&gt;
+&lt;ol start="3"&gt;
 &lt;li&gt;按提示操作：
 &lt;ul&gt;
 &lt;li&gt;保存路径：直接回车使用默认路径 &lt;code&gt;~/.ssh/id_rsa&lt;/code&gt;。&lt;/li&gt;
@@ -70,69 +346,193 @@
 &lt;li&gt;&lt;code&gt;id_rsa&lt;/code&gt;：私钥（&lt;strong&gt;不要泄露&lt;/strong&gt;）&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;id_rsa.pub&lt;/code&gt;：公钥（用于上传到服务器）&lt;/li&gt;
 &lt;/ul&gt;
-&lt;h2 id=&#34;二将公钥上传到远程服务器&#34;&gt;二、将公钥上传到远程服务器&lt;/h2&gt;
-&lt;h3 id=&#34;方法一使用-ssh-copy-id&#34;&gt;方法一：使用 &lt;code&gt;ssh-copy-id&lt;/code&gt;&lt;/h3&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;ssh-copy-id username@server_ip
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;例如：&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;ssh-copy-id user@192.168.1.100
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;系统会提示你输入远程用户的密码，验证通过后，公钥会被自动追加到服务器的 &lt;code&gt;~/.ssh/authorized_keys&lt;/code&gt; 文件中。&lt;/p&gt;
-&lt;blockquote&gt;
-&lt;p&gt;⚠️ 如果提示 &lt;code&gt;command not found&lt;/code&gt;，说明 &lt;code&gt;ssh-copy-id&lt;/code&gt; 不存在（常见于 macOS 或某些 Linux 发行版），请使用方法二。&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;h3 id=&#34;方法二手动复制公钥&#34;&gt;方法二：手动复制公钥&lt;/h3&gt;
-&lt;ol&gt;
+&lt;h2 id="二将公钥上传到远程服务器"&gt;二、将公钥上传到远程服务器
+&lt;/h2&gt;&lt;h3 id="方法一使用-ssh-copy-id"&gt;方法一：使用 &lt;code&gt;ssh-copy-id&lt;/code&gt;
+&lt;/h3&gt;&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;ssh-copy-id username@server_ip
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;例如：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;ssh-copy-id user@192.168.1.100
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;系统会提示你输入远程用户的密码，验证通过后，公钥会被自动追加到服务器的 &lt;code&gt;~/.ssh/authorized_keys&lt;/code&gt; 文件中。&lt;/p&gt;
+
+ &lt;blockquote&gt;
+ &lt;p&gt;⚠️ 如果提示 &lt;code&gt;command not found&lt;/code&gt;，说明 &lt;code&gt;ssh-copy-id&lt;/code&gt; 不存在（常见于 macOS 或某些 Linux 发行版），请使用方法二。&lt;/p&gt;
+
+ &lt;/blockquote&gt;
+&lt;h3 id="方法二手动复制公钥"&gt;方法二：手动复制公钥
+&lt;/h3&gt;&lt;ol&gt;
 &lt;li&gt;查看本地公钥内容：&lt;/li&gt;
 &lt;/ol&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;cat ~/.ssh/id_rsa.pub
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;复制输出的整段内容（以 &lt;code&gt;ssh-rsa AAAAB3...&lt;/code&gt; 开头）。&lt;/p&gt;
-&lt;ol start=&#34;2&#34;&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;cat ~/.ssh/id_rsa.pub
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;复制输出的整段内容（以 &lt;code&gt;ssh-rsa AAAAB3...&lt;/code&gt; 开头）。&lt;/p&gt;
+&lt;ol start="2"&gt;
 &lt;li&gt;登录远程服务器：&lt;/li&gt;
 &lt;/ol&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;ssh username@server_ip
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;ol start=&#34;3&#34;&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;ssh username@server_ip
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;ol start="3"&gt;
 &lt;li&gt;在服务器上创建 &lt;code&gt;.ssh&lt;/code&gt; 目录（如果不存在）：&lt;/li&gt;
 &lt;/ol&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;mkdir -p ~/.ssh
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;ol start=&#34;4&#34;&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;mkdir -p ~/.ssh
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;ol start="4"&gt;
 &lt;li&gt;将公钥内容写入 &lt;code&gt;authorized_keys&lt;/code&gt; 文件：&lt;/li&gt;
 &lt;/ol&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#366&#34;&gt;echo&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;你复制的公钥内容&amp;#34;&lt;/span&gt; &amp;gt;&amp;gt; ~/.ssh/authorized_keys
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;blockquote&gt;
-&lt;p&gt;注意替换“你复制的公钥内容”为实际内容。&lt;/p&gt;</description>
-    </item>
-    <item>
-      <title>Linux校准时间</title>
-      <link>https://kerolt.github.io/posts/linux/linux%E6%A0%A1%E5%87%86%E6%97%B6%E9%97%B4/</link>
-      <pubDate>Fri, 07 Nov 2025 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/linux/linux%E6%A0%A1%E5%87%86%E6%97%B6%E9%97%B4/</guid>
-      <description>&lt;p&gt;服务器是用旧笔记本装的 Debian13，然后用 ddns-go 做动态域名解析，但是装好之后貌似由于时钟没有校准因此 ddns-go 无法更新域名解析（使用的 aliyun），以下是解决方法。&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nb"&gt;echo&lt;/span&gt; &lt;span class="s2"&gt;&amp;#34;你复制的公钥内容&amp;#34;&lt;/span&gt; &amp;gt;&amp;gt; ~/.ssh/authorized_keys
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+ &lt;blockquote&gt;
+ &lt;p&gt;注意替换“你复制的公钥内容”为实际内容。&lt;/p&gt;
+
+ &lt;/blockquote&gt;
+&lt;ol start="5"&gt;
+&lt;li&gt;设置正确的权限（非常重要！SSH 要求严格权限）：&lt;/li&gt;
+&lt;/ol&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;chmod &lt;span class="m"&gt;700&lt;/span&gt; ~/.ssh
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;chmod &lt;span class="m"&gt;600&lt;/span&gt; ~/.ssh/authorized_keys
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;chown &lt;span class="nv"&gt;$USER&lt;/span&gt;:&lt;span class="nv"&gt;$USER&lt;/span&gt; ~/.ssh -R
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h2 id="三配置别名"&gt;三、配置别名
+&lt;/h2&gt;&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;配置别名&lt;/strong&gt;：编辑 &lt;code&gt;~/.ssh/config&lt;/code&gt;，简化连接命令：&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;span class="lnt"&gt;4
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-fallback" data-lang="fallback"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;Host myserver
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; HostName 192.168.1.100
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; User myuser
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; IdentityFile ~/.ssh/id_rsa
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;之后只需运行：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;ssh myserver
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;</description></item><item><title>Linux校准时间</title><link>https://kerolt.github.io/p/linux%E6%A0%A1%E5%87%86%E6%97%B6%E9%97%B4/</link><pubDate>Fri, 07 Nov 2025 00:00:00 +0000</pubDate><guid>https://kerolt.github.io/p/linux%E6%A0%A1%E5%87%86%E6%97%B6%E9%97%B4/</guid><description>&lt;p&gt;服务器是用旧笔记本装的 Debian13，然后用 ddns-go 做动态域名解析，但是装好之后貌似由于时钟没有校准因此 ddns-go 无法更新域名解析（使用的 aliyun），以下是解决方法。&lt;/p&gt;
 &lt;hr&gt;
 &lt;p&gt;首先我使用 &lt;code&gt;timedatectl&lt;/code&gt; 的结果如下：&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;~ $ timedatectl 
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Local time: 六 2025-11-08 00:20:49 CST 
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Universal time: 五 2025-11-07 16:20:49 UTC 
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;RTC time: 五 2025-11-07 16:20:49 
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Time zone: Asia/Shanghai &lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;CST, +0800&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt; 
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;System clock synchronized: no 
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;NTP service: n/a 
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;RTC in &lt;span style=&#34;color:#366&#34;&gt;local&lt;/span&gt; TZ: no
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;使用 &lt;code&gt;systemd-timesyncd&lt;/code&gt; 可以让系统自动校时：&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;sudo timedatectl set-ntp &lt;span style=&#34;color:#366&#34;&gt;true&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;如果显示：&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Failed to &lt;span style=&#34;color:#366&#34;&gt;set&lt;/span&gt; ntp: NTP not supported
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;说明当前系统里没有可用的 NTP 同步服务（比如 &lt;code&gt;systemd-timesyncd&lt;/code&gt;、&lt;code&gt;chronyd&lt;/code&gt; 或 &lt;code&gt;ntpd&lt;/code&gt;）被启用或支持，可以执行：&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;sudo apt install systemd-timesyncd
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;sudo systemctl &lt;span style=&#34;color:#366&#34;&gt;enable&lt;/span&gt; --now systemd-timesyncd.service
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;之后再执行 &lt;code&gt;timedatectl&lt;/code&gt; 可以看到：&lt;/p&gt;</description>
-    </item>
-    <item>
-      <title>如何理解内核态与用户态切换的上下文开销</title>
-      <link>https://kerolt.github.io/posts/linux/%E5%A6%82%E4%BD%95%E7%90%86%E8%A7%A3%E5%86%85%E6%A0%B8%E6%80%81%E4%B8%8E%E7%94%A8%E6%88%B7%E6%80%81%E5%88%87%E6%8D%A2%E7%9A%84%E4%B8%8A%E4%B8%8B%E6%96%87%E5%BC%80%E9%94%80/</link>
-      <pubDate>Thu, 06 Nov 2025 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/linux/%E5%A6%82%E4%BD%95%E7%90%86%E8%A7%A3%E5%86%85%E6%A0%B8%E6%80%81%E4%B8%8E%E7%94%A8%E6%88%B7%E6%80%81%E5%88%87%E6%8D%A2%E7%9A%84%E4%B8%8A%E4%B8%8B%E6%96%87%E5%BC%80%E9%94%80/</guid>
-      <description>&lt;h2 id=&#34;一什么是用户态和内核态&#34;&gt;一、什么是“用户态”和“内核态”&lt;/h2&gt;
-&lt;p&gt;CPU 有不同的 &lt;strong&gt;特权级（Privilege Level）&lt;/strong&gt;：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;span class="lnt"&gt;4
+&lt;/span&gt;&lt;span class="lnt"&gt;5
+&lt;/span&gt;&lt;span class="lnt"&gt;6
+&lt;/span&gt;&lt;span class="lnt"&gt;7
+&lt;/span&gt;&lt;span class="lnt"&gt;8
+&lt;/span&gt;&lt;span class="lnt"&gt;9
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;~ $ timedatectl 
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;Local time: 六 2025-11-08 00:20:49 CST 
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;Universal time: 五 2025-11-07 16:20:49 UTC 
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;RTC time: 五 2025-11-07 16:20:49 
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;Time zone: Asia/Shanghai &lt;span class="o"&gt;(&lt;/span&gt;CST, +0800&lt;span class="o"&gt;)&lt;/span&gt; 
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;System clock synchronized: no 
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;NTP service: n/a 
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;RTC in &lt;span class="nb"&gt;local&lt;/span&gt; TZ: no
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;使用 &lt;code&gt;systemd-timesyncd&lt;/code&gt; 可以让系统自动校时：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;sudo timedatectl set-ntp &lt;span class="nb"&gt;true&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;如果显示：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;Failed to &lt;span class="nb"&gt;set&lt;/span&gt; ntp: NTP not supported
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;说明当前系统里没有可用的 NTP 同步服务（比如 &lt;code&gt;systemd-timesyncd&lt;/code&gt;、&lt;code&gt;chronyd&lt;/code&gt; 或 &lt;code&gt;ntpd&lt;/code&gt;）被启用或支持，可以执行：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;sudo apt install systemd-timesyncd
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;sudo systemctl &lt;span class="nb"&gt;enable&lt;/span&gt; --now systemd-timesyncd.service
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;之后再执行 &lt;code&gt;timedatectl&lt;/code&gt; 可以看到：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;System clock synchronized: yes
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;NTP service: active
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;这样就 ok 了。&lt;/p&gt;</description></item><item><title>如何理解内核态与用户态切换的上下文开销</title><link>https://kerolt.github.io/p/%E5%A6%82%E4%BD%95%E7%90%86%E8%A7%A3%E5%86%85%E6%A0%B8%E6%80%81%E4%B8%8E%E7%94%A8%E6%88%B7%E6%80%81%E5%88%87%E6%8D%A2%E7%9A%84%E4%B8%8A%E4%B8%8B%E6%96%87%E5%BC%80%E9%94%80/</link><pubDate>Thu, 06 Nov 2025 00:00:00 +0000</pubDate><guid>https://kerolt.github.io/p/%E5%A6%82%E4%BD%95%E7%90%86%E8%A7%A3%E5%86%85%E6%A0%B8%E6%80%81%E4%B8%8E%E7%94%A8%E6%88%B7%E6%80%81%E5%88%87%E6%8D%A2%E7%9A%84%E4%B8%8A%E4%B8%8B%E6%96%87%E5%BC%80%E9%94%80/</guid><description>&lt;h2 id="一什么是用户态和内核态"&gt;一、什么是“用户态”和“内核态”
+&lt;/h2&gt;&lt;p&gt;CPU 有不同的 &lt;strong&gt;特权级（Privilege Level）&lt;/strong&gt;：&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;
 &lt;p&gt;&lt;strong&gt;用户态（User Mode）&lt;/strong&gt;：
@@ -143,8 +543,8 @@
 操作系统内核运行在这里，拥有完全的访问权限，可以管理内存、设备、中断等。&lt;/p&gt;
 &lt;/li&gt;
 &lt;/ul&gt;
-&lt;h2 id=&#34;二什么是上下文切换context-switch&#34;&gt;二、什么是“上下文切换（Context Switch）”&lt;/h2&gt;
-&lt;p&gt;“上下文”就是 CPU 当前正在执行的任务的所有状态，包括：&lt;/p&gt;
+&lt;h2 id="二什么是上下文切换context-switch"&gt;二、什么是“上下文切换（Context Switch）”
+&lt;/h2&gt;&lt;p&gt;“上下文”就是 CPU 当前正在执行的任务的所有状态，包括：&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;寄存器内容（RIP、RSP、RAX 等）&lt;/li&gt;
 &lt;li&gt;程序计数器（Program Counter）&lt;/li&gt;
@@ -153,39 +553,39 @@
 &lt;li&gt;调度信息（优先级、时间片等）&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;&lt;strong&gt;上下文切换&lt;/strong&gt;指的是 CPU 从一个执行上下文切换到另一个（比如进程 A → 进程 B）。&lt;/p&gt;
-&lt;h2 id=&#34;三内核态与用户态切换--进程切换但都属于上下文切换&#34;&gt;三、内核态与用户态切换 ≠ 进程切换，但都属于“上下文切换”&lt;/h2&gt;
-&lt;p&gt;这两种是不同层次的“切换”：&lt;/p&gt;
+&lt;h2 id="三内核态与用户态切换--进程切换但都属于上下文切换"&gt;三、内核态与用户态切换 ≠ 进程切换，但都属于“上下文切换”
+&lt;/h2&gt;&lt;p&gt;这两种是不同层次的“切换”：&lt;/p&gt;
 &lt;table&gt;
-  &lt;thead&gt;
-      &lt;tr&gt;
-          &lt;th&gt;类型&lt;/th&gt;
-          &lt;th&gt;示例&lt;/th&gt;
-          &lt;th&gt;是否涉及调度&lt;/th&gt;
-          &lt;th&gt;开销大小&lt;/th&gt;
-          &lt;th&gt;备注&lt;/th&gt;
-      &lt;/tr&gt;
-  &lt;/thead&gt;
-  &lt;tbody&gt;
-      &lt;tr&gt;
-          &lt;td&gt;&lt;strong&gt;用户态 → 内核态&lt;/strong&gt;&lt;/td&gt;
-          &lt;td&gt;系统调用、I/O、中断&lt;/td&gt;
-          &lt;td&gt;否&lt;/td&gt;
-          &lt;td&gt;小（几十到几百纳秒）&lt;/td&gt;
-          &lt;td&gt;同一线程，只是 CPU 特权级变化&lt;/td&gt;
-      &lt;/tr&gt;
-      &lt;tr&gt;
-          &lt;td&gt;&lt;strong&gt;进程上下文切换&lt;/strong&gt;&lt;/td&gt;
-          &lt;td&gt;从进程 A → 进程 B&lt;/td&gt;
-          &lt;td&gt;是&lt;/td&gt;
-          &lt;td&gt;大（微秒级）&lt;/td&gt;
-          &lt;td&gt;不仅换栈，还要换虚拟内存上下文&lt;/td&gt;
-      &lt;/tr&gt;
-  &lt;/tbody&gt;
+	&lt;thead&gt;
+			&lt;tr&gt;
+					&lt;th&gt;类型&lt;/th&gt;
+					&lt;th&gt;示例&lt;/th&gt;
+					&lt;th&gt;是否涉及调度&lt;/th&gt;
+					&lt;th&gt;开销大小&lt;/th&gt;
+					&lt;th&gt;备注&lt;/th&gt;
+			&lt;/tr&gt;
+	&lt;/thead&gt;
+	&lt;tbody&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;strong&gt;用户态 → 内核态&lt;/strong&gt;&lt;/td&gt;
+					&lt;td&gt;系统调用、I/O、中断&lt;/td&gt;
+					&lt;td&gt;否&lt;/td&gt;
+					&lt;td&gt;小（几十到几百纳秒）&lt;/td&gt;
+					&lt;td&gt;同一线程，只是 CPU 特权级变化&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;strong&gt;进程上下文切换&lt;/strong&gt;&lt;/td&gt;
+					&lt;td&gt;从进程 A → 进程 B&lt;/td&gt;
+					&lt;td&gt;是&lt;/td&gt;
+					&lt;td&gt;大（微秒级）&lt;/td&gt;
+					&lt;td&gt;不仅换栈，还要换虚拟内存上下文&lt;/td&gt;
+			&lt;/tr&gt;
+	&lt;/tbody&gt;
 &lt;/table&gt;
-&lt;h2 id=&#34;四为什么内核用户态切换有开销&#34;&gt;四、为什么内核/用户态切换有“开销”&lt;/h2&gt;
-&lt;p&gt;内核态切换的代价来自几个部分：&lt;/p&gt;
-&lt;h3 id=&#34;1-cpu-特权级变化&#34;&gt;1. CPU 特权级变化&lt;/h3&gt;
-&lt;p&gt;切换时 CPU 会：&lt;/p&gt;
+&lt;h2 id="四为什么内核用户态切换有开销"&gt;四、为什么内核/用户态切换有“开销”
+&lt;/h2&gt;&lt;p&gt;内核态切换的代价来自几个部分：&lt;/p&gt;
+&lt;h3 id="1-cpu-特权级变化"&gt;1. CPU 特权级变化
+&lt;/h3&gt;&lt;p&gt;切换时 CPU 会：&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;保存当前寄存器状态；&lt;/li&gt;
 &lt;li&gt;改变特权级（从 ring3 → ring0）；&lt;/li&gt;
@@ -193,21 +593,119 @@
 &lt;li&gt;执行系统调用入口代码（&lt;code&gt;syscall&lt;/code&gt;、&lt;code&gt;sysenter&lt;/code&gt; 指令）；&lt;/li&gt;
 &lt;li&gt;执行完后再反向恢复回用户态。&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;这些过程虽然不是“线程切换”，但都需要 CPU 做额外操作。&lt;/p&gt;</description>
-    </item>
-    <item>
-      <title>Linux NAPI机制知识点总结</title>
-      <link>https://kerolt.github.io/posts/linux/linux-napi%E6%9C%BA%E5%88%B6%E7%9F%A5%E8%AF%86%E7%82%B9%E6%80%BB%E7%BB%93/</link>
-      <pubDate>Wed, 17 Sep 2025 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/linux/linux-napi%E6%9C%BA%E5%88%B6%E7%9F%A5%E8%AF%86%E7%82%B9%E6%80%BB%E7%BB%93/</guid>
-      <description>&lt;blockquote&gt;
-&lt;p&gt;对 &lt;a href=&#34;https://docs.kernel.org/networking/napi.html&#34;&gt;https://docs.kernel.org/networking/napi.html&lt;/a&gt; 的总结&lt;/p&gt;
-&lt;/blockquote&gt;
+&lt;p&gt;这些过程虽然不是“线程切换”，但都需要 CPU 做额外操作。&lt;/p&gt;
+&lt;h3 id="2-缓存污染cachetlb-flush"&gt;2. 缓存污染（Cache/TLB flush）
+&lt;/h3&gt;&lt;p&gt;在切换时，可能触发：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;指令缓存（I-Cache）和数据缓存（D-Cache）失效&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;TLB（页表缓存）失效&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;这会让下一次访问内存时性能下降。尤其是跨页表切换（进程切换）时，TLB 必须刷新。&lt;/p&gt;
+&lt;h3 id="3-管线冲刷pipeline-flush"&gt;3. 管线冲刷（Pipeline Flush）
+&lt;/h3&gt;&lt;p&gt;现代 CPU 使用深流水线和乱序执行，切换到内核态后，这些指令流需要被中断、清空、重新加载，浪费了几十个周期。&lt;/p&gt;
+&lt;h3 id="4-安全隔离检查比如-kpti"&gt;4. 安全隔离检查（比如 KPTI）
+&lt;/h3&gt;&lt;p&gt;在 Spectre/Meltdown 漏洞后，Linux 内核加了 &lt;strong&gt;KPTI（Kernel Page Table Isolation）&lt;/strong&gt;，在用户态和内核态之间切换时需要切换页表来隔离内核地址空间，进一步增加了 TLB flush 和页表切换开销。&lt;/p&gt;
+&lt;h2 id="五开销有多大"&gt;五、开销有多大？
+&lt;/h2&gt;&lt;p&gt;大致数量级（不同架构差异很大）：&lt;/p&gt;
+&lt;table&gt;
+	&lt;thead&gt;
+			&lt;tr&gt;
+					&lt;th&gt;操作&lt;/th&gt;
+					&lt;th&gt;典型开销&lt;/th&gt;
+			&lt;/tr&gt;
+	&lt;/thead&gt;
+	&lt;tbody&gt;
+			&lt;tr&gt;
+					&lt;td&gt;一次函数调用&lt;/td&gt;
+					&lt;td&gt;1~5 ns&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;一次系统调用（空）&lt;/td&gt;
+					&lt;td&gt;100~500 ns&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;一次进程上下文切换&lt;/td&gt;
+					&lt;td&gt;1~5 µs&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;一次磁盘 I/O 系统调用&lt;/td&gt;
+					&lt;td&gt;1 ms 以上&lt;/td&gt;
+			&lt;/tr&gt;
+	&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;比如：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;$ strace -c ls
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# 可以看到每个系统调用耗时几十到几百纳秒&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h2 id="六举个例子read-系统调用"&gt;六、举个例子：&lt;code&gt;read()&lt;/code&gt; 系统调用
+&lt;/h2&gt;&lt;p&gt;当用户调用：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-c" data-lang="c"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nf"&gt;read&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;fd&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;buf&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;size&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;实际发生的事：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;程序在 &lt;strong&gt;用户态&lt;/strong&gt; 调用 read；&lt;/li&gt;
+&lt;li&gt;CPU 执行 &lt;code&gt;syscall&lt;/code&gt; 指令，切到 &lt;strong&gt;内核态&lt;/strong&gt;；&lt;/li&gt;
+&lt;li&gt;内核检查参数、文件描述符合法性；&lt;/li&gt;
+&lt;li&gt;调用文件系统层 → 设备驱动；&lt;/li&gt;
+&lt;li&gt;如果是磁盘 I/O，线程可能被阻塞，调度其他任务；&lt;/li&gt;
+&lt;li&gt;数据准备好后再切回用户态。&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;这整个过程涉及 &lt;strong&gt;多次用户态 ↔ 内核态切换 + 潜在调度切换&lt;/strong&gt;。&lt;/p&gt;
+&lt;h2 id="七如何减少这种开销"&gt;七、如何减少这种开销
+&lt;/h2&gt;&lt;p&gt;性能优化中，常见的做法是&lt;strong&gt;减少切换频率&lt;/strong&gt;：&lt;/p&gt;
+&lt;table&gt;
+	&lt;thead&gt;
+			&lt;tr&gt;
+					&lt;th&gt;技术&lt;/th&gt;
+					&lt;th&gt;思路&lt;/th&gt;
+			&lt;/tr&gt;
+	&lt;/thead&gt;
+	&lt;tbody&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;strong&gt;批处理系统调用&lt;/strong&gt;&lt;/td&gt;
+					&lt;td&gt;一次调用处理多个请求（如 &lt;code&gt;readv&lt;/code&gt;, &lt;code&gt;writev&lt;/code&gt;）&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;strong&gt;零拷贝 I/O&lt;/strong&gt;&lt;/td&gt;
+					&lt;td&gt;减少数据在内核与用户空间之间的复制&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;strong&gt;IO_uring / eBPF / XDP&lt;/strong&gt;&lt;/td&gt;
+					&lt;td&gt;通过内核接口减少 syscalls 次数或在内核内直接处理&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;strong&gt;epoll / io_uring&lt;/strong&gt;&lt;/td&gt;
+					&lt;td&gt;异步 I/O，减少阻塞导致的频繁切换&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;strong&gt;用户态网络栈（DPDK）&lt;/strong&gt;&lt;/td&gt;
+					&lt;td&gt;完全绕过内核态，直接用户态驱动网卡&lt;/td&gt;
+			&lt;/tr&gt;
+	&lt;/tbody&gt;
+&lt;/table&gt;</description></item><item><title>Linux NAPI机制知识点总结</title><link>https://kerolt.github.io/p/linux-napi%E6%9C%BA%E5%88%B6%E7%9F%A5%E8%AF%86%E7%82%B9%E6%80%BB%E7%BB%93/</link><pubDate>Wed, 17 Sep 2025 00:00:00 +0000</pubDate><guid>https://kerolt.github.io/p/linux-napi%E6%9C%BA%E5%88%B6%E7%9F%A5%E8%AF%86%E7%82%B9%E6%80%BB%E7%BB%93/</guid><description>
+ &lt;blockquote&gt;
+ &lt;p&gt;对 &lt;a class="link" href="https://docs.kernel.org/networking/napi.html" target="_blank" rel="noopener"
+ &gt;https://docs.kernel.org/networking/napi.html&lt;/a&gt; 的总结&lt;/p&gt;
+
+ &lt;/blockquote&gt;
 &lt;p&gt;NAPI (New API，但现已无特定含义) 是 Linux 内核中用于高效处理网络数据包的一种机制，旨在减少高负载下的中断开销。&lt;/p&gt;
 &lt;p&gt;其​目的​​是为了解决传统基于中断的包处理在高流量下的性能问题（“中断活锁”）。通过混合​&lt;strong&gt;​中断​&lt;/strong&gt;​和​&lt;strong&gt;​轮询​&lt;/strong&gt;​模式，在低负载时使用中断保证低延迟，在高负载时切换到轮询保证高吞吐量。&lt;/p&gt;
 &lt;p&gt;设备通过中断通知有新数据包 -&amp;gt; 内核调度对应的 NAPI 实例 -&amp;gt; 在软中断上下文（或内核线程）中轮询处理多个数据包 -&amp;gt; 处理完毕后再打开中断。&lt;/p&gt;
-&lt;h2 id=&#34;核心数据结构与-api&#34;&gt;核心数据结构与 API&lt;/h2&gt;
-&lt;ol&gt;
+&lt;h2 id="核心数据结构与-api"&gt;核心数据结构与 API
+&lt;/h2&gt;&lt;ol&gt;
 &lt;li&gt;
 &lt;p&gt;​&lt;strong&gt;​&lt;code&gt;struct napi_struct&lt;/code&gt;​&lt;/strong&gt;​：&lt;/p&gt;
 &lt;ul&gt;
@@ -231,8 +729,8 @@
 &lt;/ul&gt;
 &lt;/li&gt;
 &lt;/ol&gt;
-&lt;h2 id=&#34;驱动程序实现要点&#34;&gt;驱动程序实现要点&lt;/h2&gt;
-&lt;ol&gt;
+&lt;h2 id="驱动程序实现要点"&gt;驱动程序实现要点
+&lt;/h2&gt;&lt;ol&gt;
 &lt;li&gt;
 &lt;p&gt;​&lt;strong&gt;​&lt;code&gt;poll&lt;/code&gt; 方法​&lt;/strong&gt;​：&lt;/p&gt;
 &lt;ul&gt;
@@ -241,39 +739,143 @@
 &lt;/ul&gt;
 &lt;/li&gt;
 &lt;li&gt;
-&lt;p&gt;​&lt;strong&gt;​中断屏蔽策略​&lt;/strong&gt;​：&lt;/p&gt;</description>
-    </item>
-    <item>
-      <title>【解决】Fedora42升级启动时显示kernel panic</title>
-      <link>https://kerolt.github.io/posts/linux/%E8%A7%A3%E5%86%B3fedora42%E5%8D%87%E7%BA%A7%E5%90%AF%E5%8A%A8%E6%97%B6%E6%98%BE%E7%A4%BAkernel-panic/</link>
-      <pubDate>Sun, 27 Apr 2025 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/linux/%E8%A7%A3%E5%86%B3fedora42%E5%8D%87%E7%BA%A7%E5%90%AF%E5%8A%A8%E6%97%B6%E6%98%BE%E7%A4%BAkernel-panic/</guid>
-      <description>&lt;p&gt;最近 Fedora42 更新了，因此我打算升级一下玩玩。在执行完下面的命令后：&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;sudo dnf upgrade --refresh
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;sudo dnf system-upgrade download --releasever&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#f60&#34;&gt;42&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;sudo dnf system-upgrade reboot
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;重启开机成了这样:(&lt;/p&gt;
-&lt;p&gt;
-&lt;div class=&#34;post-img-view&#34;&gt;
-  &lt;a data-fancybox=&#34;gallery&#34; href=&#34;&#34;&gt;
-    &lt;img src=&#34;&#34; alt=&#34;&#34;  /&gt;
-  &lt;/a&gt;
+&lt;p&gt;​&lt;strong&gt;​中断屏蔽策略​&lt;/strong&gt;​：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;调度 NAPI 后应​&lt;strong&gt;​屏蔽设备中断​&lt;/strong&gt;​，防止不必要的重复中断，直到 &lt;code&gt;napi_complete_done()&lt;/code&gt; 被调用后再解除屏蔽。&lt;/li&gt;
+&lt;li&gt;推荐使用 &lt;code&gt;napi_schedule_prep()&lt;/code&gt; 检查 + &lt;code&gt;__napi_schedule()&lt;/code&gt; 调用的组合，确保在屏蔽中断后调度，避免竞态条件。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h2 id="高级特性与配置"&gt;高级特性与配置
+&lt;/h2&gt;&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;​&lt;strong&gt;​实例映射​&lt;/strong&gt;​：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;现代网卡多队列：通常一个 NAPI 实例对应一个中断源和一个队列对（RX+TX）。但映射关系灵活，可一对多或多对一。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;​&lt;strong&gt;​软件中断合并 (Coalescing)​&lt;/strong&gt;​：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;可通过 &lt;code&gt;gro_flush_timeout&lt;/code&gt; 和 &lt;code&gt;napi_defer_hard_irqs&lt;/code&gt; 参数配置 NAPI 在数据包处理完后启动一个定时器，延迟解除中断屏蔽，以合并更多数据包，减少中断次数，提升吞吐量。可通过 sysfs 或 Netlink (&lt;code&gt;netdev-genl&lt;/code&gt;) ​&lt;strong&gt;​按每个 NAPI 实例​&lt;/strong&gt;​进行配置。&lt;/p&gt;
+
+ &lt;blockquote&gt;
+ &lt;p&gt;GRO（Generic Receive Offload，通用接收卸载）是 Linux 内核中的一种网络数据包处理机制，主要用于​&lt;strong&gt;​在接收数据时将多个小数据包合并成一个大包​&lt;/strong&gt;​，再上传给网络协议栈处理，以此减少 CPU 的开销，提升网络吞吐性能&lt;/p&gt;
+
+ &lt;/blockquote&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;​&lt;strong&gt;​忙轮询 (Busy Polling)​&lt;/strong&gt;​：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;允许用户态进程主动轮询设备，在中断触发前检查并处理数据包，​&lt;strong&gt;​以 CPU 资源换取极低延迟​&lt;/strong&gt;​。&lt;/li&gt;
+&lt;li&gt;启用方式：套接字选项 &lt;code&gt;SO_BUSY_POLL&lt;/code&gt;、系统参数 &lt;code&gt;net.core.busy_poll&lt;/code&gt;、&lt;code&gt;io_uring&lt;/code&gt; API 或基于 epoll 的配置。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;​&lt;strong&gt;​基于 epoll 的忙轮询​&lt;/strong&gt;​：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;可从 &lt;code&gt;epoll_wait&lt;/code&gt; 调用中直接触发 NAPI 处理。&lt;/li&gt;
+&lt;li&gt;要求：添加到同一 epoll 上下文的所有文件描述符应具有相同的 NAPI ID（可通过 &lt;code&gt;SO_INCOMING_NAPI_ID&lt;/code&gt; 获取）。&lt;/li&gt;
+&lt;li&gt;可通过 &lt;code&gt;ioctl&lt;/code&gt; (&lt;code&gt;EPIOCSPARAMS&lt;/code&gt;) 设置 &lt;code&gt;epoll_params&lt;/code&gt; 结构，精细控制每个 epoll 上下文的忙轮询超时 (&lt;code&gt;busy_poll_usecs&lt;/code&gt;)、预算 (&lt;code&gt;busy_poll_budget&lt;/code&gt;) 和偏好 (&lt;code&gt;prefer_busy_poll&lt;/code&gt;)。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;​&lt;strong&gt;​IRQ 缓解 (Mitigation) 与挂起 (Suspension)​&lt;/strong&gt;​：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;​&lt;strong&gt;​IRQ 缓解​&lt;/strong&gt;​：使用 &lt;code&gt;SO_PREFER_BUSY_POLL&lt;/code&gt;，承诺应用程序会定期忙轮询，驱动可​&lt;strong&gt;​长时间屏蔽中断​&lt;/strong&gt;​。由 &lt;code&gt;gro_flush_timeout&lt;/code&gt; 作为安全机制防止停滞。&lt;/li&gt;
+&lt;li&gt;​&lt;strong&gt;​IRQ 挂停​&lt;/strong&gt;​：更激进的机制。当 &lt;code&gt;epoll_wait&lt;/code&gt; 成功获取事件时，启动一个 &lt;code&gt;irq-suspend-timeout&lt;/code&gt; 定时器来​&lt;strong&gt;​挂起（屏蔽）IRQ​&lt;/strong&gt;​。只要应用程序持续处理，IRQ 就保持挂起状态，避免任何中断干扰。超时或处理空闲后 fallback 到常规模式。需要与 &lt;code&gt;gro_flush_timeout&lt;/code&gt; 等配合使用。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;​&lt;strong&gt;​线程化 NAPI​&lt;/strong&gt;​：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;可配置 NAPI 在​&lt;strong&gt;​独立的内核线程​&lt;/strong&gt;​中运行，而不是软中断上下文。可针对每个网络设备或每个 NAPI 实例进行配置（通过 sysfs 或 Netlink）。&lt;/li&gt;
+&lt;li&gt;优点：可能提供更可预测的调度或利于实时性（&lt;code&gt;PREEMPT_RT&lt;/code&gt;）内核。&lt;/li&gt;
+&lt;li&gt;建议：将 NAPI 线程固定到与处理其中断相同的 CPU 上。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h2 id="用户空间交互"&gt;用户空间交互
+&lt;/h2&gt;&lt;ul&gt;
+&lt;li&gt;​&lt;strong&gt;​NAPI ID​&lt;/strong&gt;​：每个 NAPI 实例有唯一 ID，用户空间可通过 &lt;code&gt;SO_INCOMING_NAPI_ID&lt;/code&gt; 套接字选项获取。&lt;/li&gt;
+&lt;li&gt;​&lt;strong&gt;​查询与配置​&lt;/strong&gt;​：可通过 Netlink (&lt;code&gt;netdev-genl&lt;/code&gt; 家族) 查询设备队列信息（包括 NAPI ID）和配置每个 NAPI 实例的参数（如合并参数、线程化开关）。可使用 &lt;code&gt;tools/net/ynl/&lt;/code&gt; 下的工具（如 &lt;code&gt;cli.py&lt;/code&gt;）进行操作。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr&gt;
+&lt;p&gt;​&lt;strong&gt;核心思想​&lt;/strong&gt;​：中断通知 + 轮询处理，平衡延迟与吞吐。&lt;/p&gt;
+&lt;p&gt;实现 &lt;code&gt;poll&lt;/code&gt; 方法，正确使用 &lt;code&gt;napi_schedule()&lt;/code&gt; 和 &lt;code&gt;napi_complete_done()&lt;/code&gt;，管理好中断屏蔽。通过软件中断合并、忙轮询、IRQ 缓解/挂起等机制针对低延迟或高吞吐场景进行精细配置。支持多种处理上下文（软中断、线程），映射关系（实例 - 中断 - 队列）灵活。&lt;/p&gt;</description></item><item><title>【解决】Fedora42升级启动时显示kernel panic</title><link>https://kerolt.github.io/p/%E8%A7%A3%E5%86%B3fedora42%E5%8D%87%E7%BA%A7%E5%90%AF%E5%8A%A8%E6%97%B6%E6%98%BE%E7%A4%BAkernel-panic/</link><pubDate>Sun, 27 Apr 2025 00:00:00 +0000</pubDate><guid>https://kerolt.github.io/p/%E8%A7%A3%E5%86%B3fedora42%E5%8D%87%E7%BA%A7%E5%90%AF%E5%8A%A8%E6%97%B6%E6%98%BE%E7%A4%BAkernel-panic/</guid><description>&lt;p&gt;最近 Fedora42 更新了，因此我打算升级一下玩玩。在执行完下面的命令后：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;sudo dnf upgrade --refresh
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;sudo dnf system-upgrade download --releasever&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="m"&gt;42&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;sudo dnf system-upgrade reboot
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
-&lt;/p&gt;
+&lt;/div&gt;&lt;p&gt;重启开机成了这样:(&lt;/p&gt;
+&lt;p&gt;&lt;img loading="lazy" sizes="(max-width: 767px) calc(100vw - 30px), (max-width: 1023px) 700px, (max-width: 1279px) 950px, 1232px"&gt;&lt;/p&gt;
 &lt;p&gt;在网上搜索一圈后，执行以下命令系统就 ok 了：&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;sudo dracut --regenerate-all --force
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;错误的原因可能是更新内核后没有正确生成新的 initramfs 文件，系统可能会使用旧的、不兼容的 initramfs 文件，从而导致启动失败。&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;sudo dracut --regenerate-all --force
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;错误的原因可能是更新内核后没有正确生成新的 initramfs 文件，系统可能会使用旧的、不兼容的 initramfs 文件，从而导致启动失败。&lt;/p&gt;
 &lt;p&gt;而 &lt;code&gt;dracut&lt;/code&gt; 是一个用于生成 Linux 系统 initramfs（初始内存文件系统）的工具。运行 这条命令后，&lt;code&gt;dracut&lt;/code&gt; 会重新生成与当前系统中所有已安装内核对应的 initramfs 文件。&lt;/p&gt;
-&lt;blockquote&gt;
-&lt;p&gt;参考：https://www.reddit.com/r/Fedora/comments/1hfkqnq/boot_error_after_updating_to_6124200&lt;/p&gt;
-&lt;/blockquote&gt;</description>
-    </item>
-    <item>
-      <title>Linux下微信无法使用中文输入法问题解决</title>
-      <link>https://kerolt.github.io/posts/linux/linux%E4%B8%8B%E5%BE%AE%E4%BF%A1%E6%97%A0%E6%B3%95%E4%BD%BF%E7%94%A8%E4%B8%AD%E6%96%87%E8%BE%93%E5%85%A5%E6%B3%95%E9%97%AE%E9%A2%98%E8%A7%A3%E5%86%B3/</link>
-      <pubDate>Tue, 31 Dec 2024 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/linux/linux%E4%B8%8B%E5%BE%AE%E4%BF%A1%E6%97%A0%E6%B3%95%E4%BD%BF%E7%94%A8%E4%B8%AD%E6%96%87%E8%BE%93%E5%85%A5%E6%B3%95%E9%97%AE%E9%A2%98%E8%A7%A3%E5%86%B3/</guid>
-      <description>&lt;p&gt;微信在不久前终于有了 Linux 原生版本，我的电脑是 Fedora41，之前安装的是 flatpak 打包的微信，现在在官网下载 rpm 包后运行发现无法使用 fcitx 的中文输入法，找了一下是环境遍历的问题。&lt;/p&gt;</description>
-    </item>
-  </channel>
-</rss>
+
+ &lt;blockquote&gt;
+ &lt;p&gt;参考：https://www.reddit.com/r/Fedora/comments/1hfkqnq/boot_error_after_updating_to_6124200&lt;/p&gt;
+
+ &lt;/blockquote&gt;</description></item><item><title>Linux下微信无法使用中文输入法问题解决</title><link>https://kerolt.github.io/p/linux%E4%B8%8B%E5%BE%AE%E4%BF%A1%E6%97%A0%E6%B3%95%E4%BD%BF%E7%94%A8%E4%B8%AD%E6%96%87%E8%BE%93%E5%85%A5%E6%B3%95%E9%97%AE%E9%A2%98%E8%A7%A3%E5%86%B3/</link><pubDate>Tue, 31 Dec 2024 00:00:00 +0000</pubDate><guid>https://kerolt.github.io/p/linux%E4%B8%8B%E5%BE%AE%E4%BF%A1%E6%97%A0%E6%B3%95%E4%BD%BF%E7%94%A8%E4%B8%AD%E6%96%87%E8%BE%93%E5%85%A5%E6%B3%95%E9%97%AE%E9%A2%98%E8%A7%A3%E5%86%B3/</guid><description>&lt;p&gt;微信在不久前终于有了 Linux 原生版本，我的电脑是 Fedora41，之前安装的是 flatpak 打包的微信，现在在官网下载 rpm 包后运行发现无法使用 fcitx 的中文输入法，找了一下是环境遍历的问题。&lt;/p&gt;
+&lt;p&gt;需要添加的环境变量为：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-shell" data-lang="shell"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nb"&gt;export&lt;/span&gt; &lt;span class="nv"&gt;XMODIFIERS&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;&amp;#34;@im=fcitx&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nb"&gt;export&lt;/span&gt; &lt;span class="nv"&gt;GTK_IM_MODULE&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;&amp;#34;fcitx&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nb"&gt;export&lt;/span&gt; &lt;span class="nv"&gt;QT_IM_MODULE&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;&amp;#34;fcitx&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;但是在 KDE6 Wayland 下如果把它写入 &lt;code&gt;/etc/profile&lt;/code&gt; 中好像会有问题？所以我把这个环境变量放到 &lt;code&gt;wechat.desktop&lt;/code&gt; 中去，相当于给 &lt;code&gt;/usr/bin/wechat&lt;/code&gt; 这个程序进行隔离（重点在 &lt;code&gt;Exec&lt;/code&gt; 中）：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt; 1
+&lt;/span&gt;&lt;span class="lnt"&gt; 2
+&lt;/span&gt;&lt;span class="lnt"&gt; 3
+&lt;/span&gt;&lt;span class="lnt"&gt; 4
+&lt;/span&gt;&lt;span class="lnt"&gt; 5
+&lt;/span&gt;&lt;span class="lnt"&gt; 6
+&lt;/span&gt;&lt;span class="lnt"&gt; 7
+&lt;/span&gt;&lt;span class="lnt"&gt; 8
+&lt;/span&gt;&lt;span class="lnt"&gt; 9
+&lt;/span&gt;&lt;span class="lnt"&gt;10
+&lt;/span&gt;&lt;span class="lnt"&gt;11
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-text" data-lang="text"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;[Desktop Entry]
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;Name=wechat
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;Name[zh_CN]=微信
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;Exec=env XMODIFIERS=&amp;#34;@im=fcitx&amp;#34; GTK_IM_MODULE=&amp;#34;fcitx&amp;#34; QT_IM_MODULE=&amp;#34;fcitx&amp;#34; /usr/bin/wechat %U
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;StartupNotify=true
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;Terminal=false
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;Icon=/opt/wechat/icons/wechat.png
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;Type=Application
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;Categories=Utility;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;Comment=Wechat Desktop
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;Comment[zh_CN]=微信桌面版
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;</description></item></channel></rss>

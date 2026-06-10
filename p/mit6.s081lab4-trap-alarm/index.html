@@ -1,0 +1,182 @@
+<!doctype html><html lang=zh-cn dir=ltr><head><meta charset=utf-8><meta name=viewport content='width=device-width,initial-scale=1'><meta name=description content="Alarm综合了该lab中前几个练习的知识点：系统调用、中断、寄存器等，我们需要对trap机制有比较好的认识才能理解。Alarm的任务是需要我们完成一个定时器的实现：sigalarm(interval, handler)，当调用sigalarm(n, fn)时，内核会每n个时间间隔（tick）执行fn函数。\n该实验的代码实现见：仓库commit\n"><title>【MIT6.S081】Lab4 trap alarm</title><link rel=canonical href=https://kerolt.github.io/p/mit6.s081lab4-trap-alarm/><link rel=preconnect href=https://fonts.googleapis.com><link rel=preconnect href=https://fonts.gstatic.com crossorigin><link rel=preload as=style href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap"><link rel=stylesheet href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap"><link rel=stylesheet href=/scss/style.min.e62e09c60ba428a627e03568fa3df938f6a8224f815b5846f00816c17d4a0be4.css><meta property='og:title' content="【MIT6.S081】Lab4 trap alarm"><meta property='og:description' content="Alarm综合了该lab中前几个练习的知识点：系统调用、中断、寄存器等，我们需要对trap机制有比较好的认识才能理解。Alarm的任务是需要我们完成一个定时器的实现：sigalarm(interval, handler)，当调用sigalarm(n, fn)时，内核会每n个时间间隔（tick）执行fn函数。\n该实验的代码实现见：仓库commit\n"><meta property='og:url' content='https://kerolt.github.io/p/mit6.s081lab4-trap-alarm/'><meta property='og:site_name' content="Kerolt's Note"><meta property='og:type' content='article'><meta property='article:section' content='Post'><meta property='article:tag' content='MIT6-S081'><meta property='article:tag' content='OS'><meta property='article:tag' content='xv6'><meta property='article:published_time' content='2024-11-07T00:00:00+00:00'><meta property='article:modified_time' content='2024-11-07T00:00:00+00:00'><meta name=twitter:title content="【MIT6.S081】Lab4 trap alarm"><meta name=twitter:description content="Alarm综合了该lab中前几个练习的知识点：系统调用、中断、寄存器等，我们需要对trap机制有比较好的认识才能理解。Alarm的任务是需要我们完成一个定时器的实现：sigalarm(interval, handler)，当调用sigalarm(n, fn)时，内核会每n个时间间隔（tick）执行fn函数。\n该实验的代码实现见：仓库commit\n"><link rel="shortcut icon" href=/images/favicon.png></head><body class=article-page><script>(function(){const e="StackColorScheme";localStorage.getItem(e)||localStorage.setItem(e,"auto")})()</script><script>(function(){const t="StackColorScheme",e=localStorage.getItem(t),n=window.matchMedia("(prefers-color-scheme: dark)").matches===!0;e=="dark"||e==="auto"&&n?document.documentElement.dataset.scheme="dark":document.documentElement.dataset.scheme="light"})()</script><div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky"><button class="hamburger hamburger--spin" type=button id=toggle-menu aria-label=切换菜单>
+<span class=hamburger-box><span class=hamburger-inner></span></span></button><header><figure class=site-avatar><a href=/><img src=/images/avatar.jpg width=200 height=200 class=site-logo loading=lazy alt=Avatar>
+</a><span class=emoji>🏸</span></figure><div class=site-meta><h1 class=site-name><a href=/>Kerolt's Note</a></h1><h2 class=site-description>宇宙是秩序的，也是混乱的。</h2></div></header><ol class=menu-social><li><a href=https://github.com/kerolt title=GitHub rel=me><svg class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 19c-4.3 1.4-4.3-2.5-6-3m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6.0 00-1.3-3.2 4.2 4.2.0 00-.1-3.2s-1.1-.3-3.5 1.3a12.3 12.3.0 00-6.2.0C6.5 2.8 5.4 3.1 5.4 3.1a4.2 4.2.0 00-.1 3.2A4.6 4.6.0 004 9.5c0 4.6 2.7 5.7 5.5 6-.6.6-.6 1.2-.5 2V21"/></svg></a></li></ol><ol class=menu id=main-menu><li><a href=/><svg class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><polyline points="5 12 3 12 12 3 21 12 19 12"/><path d="M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"/><path d="M9 21v-6a2 2 0 012-2h2a2 2 0 012 2v6"/></svg>
+<span>首页</span></a></li><li><a href=/archives/><svg class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><rect x="3" y="4" width="18" height="4" rx="2"/><path d="M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
+<span>归档</span></a></li><li><a href=/categories/><svg class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><line x1="5" y1="9" x2="19" y2="9"/><line x1="5" y1="15" x2="19" y2="15"/><line x1="11" y1="4" x2="7" y2="20"/><line x1="17" y1="4" x2="13" y2="20"/></svg>
+<span>分类</span></a></li><li><a href=/tags/><svg class="icon icon-tabler icon-tabler-tag" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><path d="M11 3l9 9a1.5 1.5.0 010 2l-6 6a1.5 1.5.0 01-2 0L3 11V7a4 4 0 014-4h4"/><circle cx="9" cy="9" r="2"/></svg>
+<span>标签</span></a></li><li><a href=/about/><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-info-circle"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 12a9 9 0 1018 0A9 9 0 003 12"/><path d="M12 9h.01"/><path d="M11 12h1v4h1"/></svg>
+<span>关于我</span></a></li><li><a href=/search/><svg class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="10" cy="10" r="7"/><line x1="21" y1="21" x2="15" y2="15"/></svg>
+<span>搜索</span></a></li><li class=menu-bottom-section><ol class=menu><li id=dark-mode-toggle><svg class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="8" cy="12" r="2"/><rect x="2" y="6" width="20" height="12" rx="6"/></svg>
+<svg class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="16" cy="12" r="2"/><rect x="2" y="6" width="20" height="12" rx="6"/></svg>
+<span>暗色模式</span></li></ol></li></ol></aside><aside class="sidebar right-sidebar sticky"><section class="widget archives"><div class=widget-icon><svg class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><line x1="5" y1="9" x2="19" y2="9"/><line x1="5" y1="15" x2="19" y2="15"/><line x1="11" y1="4" x2="7" y2="20"/><line x1="17" y1="4" x2="13" y2="20"/></svg></div><h2 class="widget-title section-title">目录</h2><div class=widget--toc><nav class=toc-nav id=TableOfContents><ol><li><a href=#如何理解alarm>如何理解Alarm</a></li><li><a href=#test03所做的事>test0~3所做的事</a></li><li><a href=#实现>实现</a><ol><li><a href=#注册系统调用>注册系统调用</a></li><li><a href=#struc-proc结构体>struc proc结构体</a></li><li><a href=#实现sys_sigalarm>实现sys_sigalarm</a></li><li><a href=#进程初始化与结束销毁>进程初始化与结束销毁</a></li><li><a href=#补全usertrap>补全usertrap</a></li><li><a href=#返回恢复现场>返回，恢复现场</a></li></ol></li></ol></nav></div></section></aside><main class="main full-width"><article class=main-article><header class=article-header><div class=article-details><header class=article-category><a href=/categories/mit6.s081/ style=background-color:#beefec;color:#0f3d3b>MIT6.s081</a></header><div class=article-title-wrapper><h2 class=article-title><a href=/p/mit6.s081lab4-trap-alarm/>【MIT6.S081】Lab4 trap alarm</a></h2></div><footer class=article-meta><div class=inline-meta><svg class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><path d="M11.795 21H5a2 2 0 01-2-2V7a2 2 0 012-2h12a2 2 0 012 2v4"/><circle cx="18" cy="18" r="4"/><path d="M15 3v4"/><path d="M7 3v4"/><path d="M3 11h16"/><path d="M18 16.496V18l1 1"/></svg>
+<time class=article-time--published datetime=2024-11-07T00:00:00Z>2024年11月7日星期四</time>
+<svg class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg>
+<time class=article-time--reading>阅读时长: 4 分钟</time></div></footer></div></header><aside class=article-toc><details><summary><div class=article-toc-title><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-chevron-right"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 6l6 6-6 6"/></svg>
+<span>目录</span></div></summary><nav class=toc-nav><ol><li><a href=#如何理解alarm>如何理解Alarm</a></li><li><a href=#test03所做的事>test0~3所做的事</a></li><li><a href=#实现>实现</a><ol><li><a href=#注册系统调用>注册系统调用</a></li><li><a href=#struc-proc结构体>struc proc结构体</a></li><li><a href=#实现sys_sigalarm>实现sys_sigalarm</a></li><li><a href=#进程初始化与结束销毁>进程初始化与结束销毁</a></li><li><a href=#补全usertrap>补全usertrap</a></li><li><a href=#返回恢复现场>返回，恢复现场</a></li></ol></li></ol></nav></details></aside><section class=article-content><p>Alarm综合了该lab中前几个练习的知识点：系统调用、中断、寄存器等，我们需要对trap机制有比较好的认识才能理解。Alarm的任务是需要我们完成一个定时器的实现：<code>sigalarm(interval, handler)</code>，当调用<code>sigalarm(n, fn)</code>时，内核会每n个时间间隔（tick）执行fn函数。</p><blockquote><p>该实验的代码实现见：<a class=link href=https://github.com/kerolt/xv6-labs-2023/commit/0f70ef7d68ab1273262b8d43a2deaf7345a87698 target=_blank rel=noopener>仓库commit</a></p></blockquote><h2 id=如何理解alarm>如何理解Alarm</h2><p>“内核会每n个时间间隔执行fn函数”，如何理解这“每n个时间间隔”呢？在计算机中有一个“时钟周期”的概念，而我们这里所说的时间间隔就是xv6中设置的每次发生时钟中断所间隔的始终周期。在xv6内核初始化时会执行<code>timerinit()</code>函数，其中有：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-c data-lang=c><span class=line><span class=cl><span class=c1>// ask the CLINT for a timer interrupt.
+</span></span></span><span class=line><span class=cl><span class=kt>int</span> <span class=n>interval</span> <span class=o>=</span> <span class=mi>1000000</span><span class=p>;</span> <span class=c1>// cycles; about 1/10th second in qemu.
+</span></span></span><span class=line><span class=cl><span class=o>*</span><span class=p>(</span><span class=n>uint64</span><span class=o>*</span><span class=p>)</span><span class=nf>CLINT_MTIMECMP</span><span class=p>(</span><span class=n>id</span><span class=p>)</span> <span class=o>=</span> <span class=o>*</span><span class=p>(</span><span class=n>uint64</span><span class=o>*</span><span class=p>)</span><span class=n>CLINT_MTIME</span> <span class=o>+</span> <span class=n>interval</span><span class=p>;</span>
+</span></span></code></pre></td></tr></table></div></div><p>这里就是设置了xv6会每经过interval个时钟周期（在qemu中大概为0.1秒）进行一次时钟中断，这个中断是<strong>硬件自动执行的</strong>（在没看源码之前，一直没搞懂xv6是什么时候、怎么进行的时钟中断）。下文将以时钟中断的间隔tick作为基本单位。</p><p>所以简单来说，Alarm需要我们在内核中进行计数，每当经过n个tick的时候，需要去执行fn函数。</p><h2 id=test03所做的事>test0~3所做的事</h2><ul><li><code>test0</code>：用于测试我们的sigalarm是否起作用了；</li><li><code>test1</code>：用于测试内核是否多次调用处理函数，需要确保中断发生时跳转的地址为处理函数所在的地址，还有中断时需要保存好之前寄存器中的值；</li><li><code>test2</code>：用于测试内核不允许重入sysalarm系统调用，即若某个进程正在执行处理函数，那么内核就不应该再次调用它；</li><li><code>test3</code>：用于测试sys_sigreturn系统调用能否正确返回寄存器a0的值。</li></ul><h2 id=实现>实现</h2><h3 id=注册系统调用>注册系统调用</h3><p>首先的注册系统调用的步骤这里就不展开了，具体可参考之前的lab。</p><h3 id=struc-proc结构体>struc proc结构体</h3><p>为了完成定时执行某个函数，我们需要在<code>struct proc</code>结构体中加入一些成员：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span><span class=lnt>8
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-c data-lang=c><span class=line><span class=cl><span class=k>struct</span> <span class=n>proc</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>  <span class=p>...</span>
+</span></span><span class=line><span class=cl>  <span class=kt>int</span> <span class=n>is_handling</span><span class=p>;</span>                   <span class=c1>// 用于判断当前进程是否正在执行处理函数
+</span></span></span><span class=line><span class=cl>  <span class=kt>int</span> <span class=n>tick_interval</span><span class=p>;</span>                 <span class=c1>// 定时器间隔，由系统sigalarm的第一个参数传入
+</span></span></span><span class=line><span class=cl>  <span class=kt>int</span> <span class=n>tick_counter</span><span class=p>;</span>                  <span class=c1>// 定时器计数器，每次tick进行+1
+</span></span></span><span class=line><span class=cl>  <span class=n>uint64</span> <span class=n>tick_handler</span><span class=p>;</span>               <span class=c1>// 间隔到了后执行的处理函数
+</span></span></span><span class=line><span class=cl>  <span class=k>struct</span> <span class=n>trapframe</span> <span class=o>*</span><span class=n>saved_trapframe</span><span class=p>;</span> <span class=c1>// 保存寄存器
+</span></span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p>值的注意的是处理函数的类型我们设置为了<code>uint64</code>，为什么不是一个函数指针呢？其实都差不多，在之后设置跳转处理函数的时候，就是通过地址来跳转，而地址在xv6中就是用的uint64来表示。故这里的设置即是处理函数所在的起始地址。</p><h3 id=实现sys_sigalarm>实现sys_sigalarm</h3><p>在<code>sysproc.c</code>中实现<code>sys_sigalarm()</code>函数：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-c data-lang=c><span class=line><span class=cl><span class=n>uint64</span> <span class=nf>sys_sigalarm</span><span class=p>(</span><span class=kt>void</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>  <span class=k>struct</span> <span class=n>proc</span> <span class=o>*</span><span class=n>p</span> <span class=o>=</span> <span class=nf>myproc</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>  <span class=nf>argint</span><span class=p>(</span><span class=mi>0</span><span class=p>,</span> <span class=o>&amp;</span><span class=p>(</span><span class=n>p</span><span class=o>-&gt;</span><span class=n>tick_interval</span><span class=p>));</span>
+</span></span><span class=line><span class=cl>  <span class=nf>argaddr</span><span class=p>(</span><span class=mi>1</span><span class=p>,</span> <span class=o>&amp;</span><span class=p>(</span><span class=n>p</span><span class=o>-&gt;</span><span class=n>tick_handler</span><span class=p>));</span>
+</span></span><span class=line><span class=cl>  <span class=k>return</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p>该函数要做的事情很简单，只需要接收从用户态传来的两个参数，并将其赋值给当前进程的<code>tick_interval</code>和<code>tick_handler</code>。</p><h3 id=进程初始化与结束销毁>进程初始化与结束销毁</h3><p>接着需要在进程创建和销毁时对这些变量进行相应的初始化和清零：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-c data-lang=c><span class=line><span class=cl><span class=k>static</span> <span class=k>struct</span> <span class=n>proc</span><span class=o>*</span>
+</span></span><span class=line><span class=cl><span class=nf>allocproc</span><span class=p>(</span><span class=kt>void</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>  <span class=p>...</span>
+</span></span><span class=line><span class=cl>  <span class=n>p</span><span class=o>-&gt;</span><span class=n>tick_interval</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=n>p</span><span class=o>-&gt;</span><span class=n>tick_counter</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=n>p</span><span class=o>-&gt;</span><span class=n>tick_handler</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=n>p</span><span class=o>-&gt;</span><span class=n>is_handling</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=p>...</span>
+</span></span><span class=line><span class=cl>  <span class=c1>// Allocate a saved_trapframe page.
+</span></span></span><span class=line><span class=cl>  <span class=k>if</span><span class=p>((</span><span class=n>p</span><span class=o>-&gt;</span><span class=n>saved_trapframe</span> <span class=o>=</span> <span class=p>(</span><span class=k>struct</span> <span class=n>trapframe</span> <span class=o>*</span><span class=p>)</span><span class=nf>kalloc</span><span class=p>())</span> <span class=o>==</span> <span class=mi>0</span><span class=p>){</span>
+</span></span><span class=line><span class=cl>    <span class=nf>freeproc</span><span class=p>(</span><span class=n>p</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=nf>release</span><span class=p>(</span><span class=o>&amp;</span><span class=n>p</span><span class=o>-&gt;</span><span class=n>lock</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=p>}</span>
+</span></span><span class=line><span class=cl>  <span class=p>...</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>static</span> <span class=kt>void</span>
+</span></span><span class=line><span class=cl><span class=nf>freeproc</span><span class=p>(</span><span class=k>struct</span> <span class=n>proc</span> <span class=o>*</span><span class=n>p</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>  <span class=p>...</span>
+</span></span><span class=line><span class=cl>  <span class=k>if</span><span class=p>(</span><span class=n>p</span><span class=o>-&gt;</span><span class=n>saved_trapframe</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=nf>kfree</span><span class=p>((</span><span class=kt>void</span><span class=o>*</span><span class=p>)</span><span class=n>p</span><span class=o>-&gt;</span><span class=n>saved_trapframe</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>  <span class=n>p</span><span class=o>-&gt;</span><span class=n>saved_trapframe</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=p>...</span>
+</span></span><span class=line><span class=cl>  <span class=n>p</span><span class=o>-&gt;</span><span class=n>tick_counter</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=n>p</span><span class=o>-&gt;</span><span class=n>tick_interval</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=n>p</span><span class=o>-&gt;</span><span class=n>tick_handler</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=n>p</span><span class=o>-&gt;</span><span class=n>is_handling</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><h3 id=补全usertrap>补全usertrap</h3><p>接下来就是需要实现在usertrap中处理时钟中断，在实验指导书中提示我们在<code>if(which_dev == 2) ...</code>中处理时钟中断。这里我的处理逻辑为，当时钟中断发生时：</p><ol><li>当前进程的tick计数器++</li><li>判断进程设置的定时器间隔是否不为0、当前计数器是否已经经过了interval个间隔、且当前进程未执行处理函数，如果其中一项不满足，则不进行第三步</li><li>将当前进程的trapframe的内容（即寄存器的值）保存到saved_trapframe（用于恢复现场），将<code>SEPC</code>寄存器的值设置为处理函数的地址，这样中断结束返回时就会去执行处理函数了，最后设置当前进程“正在执行处理函数”</li></ol><p>代码如下：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-c data-lang=c><span class=line><span class=cl><span class=kt>void</span>
+</span></span><span class=line><span class=cl><span class=nf>usertrap</span><span class=p>(</span><span class=kt>void</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>  <span class=p>...</span>
+</span></span><span class=line><span class=cl>  <span class=c1>// give up the CPU if this is a timer interrupt.
+</span></span></span><span class=line><span class=cl>  <span class=k>if</span> <span class=p>(</span><span class=n>which_dev</span> <span class=o>==</span> <span class=mi>2</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=n>p</span><span class=o>-&gt;</span><span class=n>tick_counter</span><span class=o>++</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=p>(</span><span class=n>p</span><span class=o>-&gt;</span><span class=n>tick_interval</span> <span class=o>&amp;&amp;</span> <span class=n>p</span><span class=o>-&gt;</span><span class=n>tick_counter</span> <span class=o>%</span> <span class=n>p</span><span class=o>-&gt;</span><span class=n>tick_interval</span> <span class=o>==</span> <span class=mi>0</span> <span class=o>&amp;&amp;</span> <span class=n>p</span><span class=o>-&gt;</span><span class=n>is_handling</span> <span class=o>==</span> <span class=mi>0</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>      <span class=nf>memmove</span><span class=p>(</span><span class=n>p</span><span class=o>-&gt;</span><span class=n>saved_trapframe</span><span class=p>,</span> <span class=n>p</span><span class=o>-&gt;</span><span class=n>trapframe</span><span class=p>,</span> <span class=n>PGSIZE</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>      <span class=n>p</span><span class=o>-&gt;</span><span class=n>trapframe</span><span class=o>-&gt;</span><span class=n>epc</span> <span class=o>=</span> <span class=n>p</span><span class=o>-&gt;</span><span class=n>tick_handler</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>      <span class=n>p</span><span class=o>-&gt;</span><span class=n>is_handling</span> <span class=o>=</span> <span class=mi>1</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>    <span class=nf>yield</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>  <span class=p>}</span>
+</span></span><span class=line><span class=cl>  <span class=p>...</span>
+</span></span></code></pre></td></tr></table></div></div><blockquote><p>在第二步中不知道是xv6的bug还是我有地方没理解好，如果不先检查<code>tick_interval != 0</code>，则可能在执行<code>p->tick_counter % p->tick_interval</code>会有问题，因为取模运算符<code>%</code>在分母为0时是未定义的，但这么运行时xv6并没有任何错误。</p></blockquote><h3 id=返回恢复现场>返回，恢复现场</h3><p>在处理函数执行的最后，将会执行<code>sigreturn</code>系统调用进行返回并恢复现场，这时我们就可以将之前存放在saved_trapframe中的值拷贝回trapframe中，并设置当前进程“未执行处理函数”。实验指导书中还提示我们最终返回的结果为a0寄存器中的值。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-c data-lang=c><span class=line><span class=cl><span class=n>uint64</span> <span class=nf>sys_sigreturn</span><span class=p>(</span><span class=kt>void</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>  <span class=k>struct</span> <span class=n>proc</span> <span class=o>*</span><span class=n>p</span> <span class=o>=</span> <span class=nf>myproc</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>  <span class=nf>memmove</span><span class=p>(</span><span class=n>p</span><span class=o>-&gt;</span><span class=n>trapframe</span><span class=p>,</span> <span class=n>p</span><span class=o>-&gt;</span><span class=n>saved_trapframe</span><span class=p>,</span> <span class=n>PGSIZE</span><span class=p>);</span> 
+</span></span><span class=line><span class=cl>  <span class=n>p</span><span class=o>-&gt;</span><span class=n>is_handling</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=k>return</span> <span class=n>p</span><span class=o>-&gt;</span><span class=n>trapframe</span><span class=o>-&gt;</span><span class=n>a0</span><span class=p>;</span> <span class=c1>// return this for alarm test3
+</span></span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div></section><footer class="article-meta article-footer"><section class=article-tags><a href=/tags/mit6-s081/>MIT6-S081</a>
+<a href=/tags/os/>OS</a>
+<a href=/tags/xv6/>Xv6</a></section><section class="article-copyright inline-meta"><svg class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><path d="M14.5 9a3.5 4 0 100 6"/></svg>
+<span>Licensed under CC BY-NC-SA 4.0</span></section></footer></article><footer class=site-footer><section class=copyright>&copy;
+2025 -
+2026 Kerolt's Note</section><section class=powerby>使用 <a href=https://gohugo.io/ target=_blank rel=noopener>Hugo</a> 构建<br>主题 <b><a href=https://github.com/CaiJimmy/hugo-theme-stack target=_blank rel=noopener data-version=4.0.3>Stack</a></b> 由 <a href=https://jimmycai.com target=_blank rel=noopener>Jimmy</a> 设计</section></footer><script type=module>
+    import gallery from '\/ts\/gallery.js';
+
+    const articleContent = document.querySelector('.article-content');
+    const shouldLoad = articleContent && (articleContent.querySelectorAll('figure').length > 0 || articleContent.querySelectorAll('img.gallery-image').length > 0);
+    
+    if (shouldLoad) {
+        gallery(articleContent);
+
+        const PhotoSwipeLightbox = (await import("https:\/\/cdn.jsdelivr.net\/npm\/photoswipe@5.4.4\/dist\/photoswipe-lightbox.esm.min.js")).default;
+        const styleHref = "https:\/\/cdn.jsdelivr.net\/npm\/photoswipe@5.4.4\/dist\/photoswipe.css";
+
+        const styleTag = document.createElement('link');
+        styleTag.rel = 'stylesheet';
+        styleTag.href = styleHref;
+        document.head.appendChild(styleTag);
+
+        const lightbox = new PhotoSwipeLightbox({
+            gallerySelector: '.article-content',
+            childSelector: 'figure a.image-link',
+            pswpModule: () => import("https:\/\/cdn.jsdelivr.net\/npm\/photoswipe@5.4.4\/dist\/photoswipe.esm.min.js")
+        });
+        lightbox.init();
+    }
+</script></main></div><script type=text/javascript src=/ts/main.f856840516f7c2ad1769a8f5937e3d08d6cb386e2cd2dd025ae696e0ff207958.js defer></script></body></html>

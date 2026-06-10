@@ -1,0 +1,119 @@
+<!doctype html><html lang=zh-cn dir=ltr><head><meta charset=utf-8><meta name=viewport content='width=device-width,initial-scale=1'><meta name=description content="在 【eBPF 入门实践教程十二：使用 eBPF 程序 profile 进行性能分析】 这篇文章中， profiler 工具的实现是使用了 rust 编写的 blazesym 库，而我现在打算使用 C++ 实现，还好这个库提供了 C API，但是需要我们将这个 Rust 库的构建集成到 CMake 中。\n"><title>如何在CMake工程中使用Rust库blazesym</title><link rel=canonical href=https://kerolt.github.io/p/%E5%A6%82%E4%BD%95%E5%9C%A8cmake%E5%B7%A5%E7%A8%8B%E4%B8%AD%E4%BD%BF%E7%94%A8rust%E5%BA%93blazesym/><link rel=preconnect href=https://fonts.googleapis.com><link rel=preconnect href=https://fonts.gstatic.com crossorigin><link rel=preload as=style href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap"><link rel=stylesheet href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap"><link rel=stylesheet href=/scss/style.min.e62e09c60ba428a627e03568fa3df938f6a8224f815b5846f00816c17d4a0be4.css><meta property='og:title' content="如何在CMake工程中使用Rust库blazesym"><meta property='og:description' content="在 【eBPF 入门实践教程十二：使用 eBPF 程序 profile 进行性能分析】 这篇文章中， profiler 工具的实现是使用了 rust 编写的 blazesym 库，而我现在打算使用 C++ 实现，还好这个库提供了 C API，但是需要我们将这个 Rust 库的构建集成到 CMake 中。\n"><meta property='og:url' content='https://kerolt.github.io/p/%E5%A6%82%E4%BD%95%E5%9C%A8cmake%E5%B7%A5%E7%A8%8B%E4%B8%AD%E4%BD%BF%E7%94%A8rust%E5%BA%93blazesym/'><meta property='og:site_name' content="Kerolt's Note"><meta property='og:type' content='article'><meta property='article:section' content='Post'><meta property='article:tag' content='CMake'><meta property='article:tag' content='Cargo'><meta property='article:published_time' content='2026-01-22T00:00:00+00:00'><meta property='article:modified_time' content='2026-01-22T00:00:00+00:00'><meta name=twitter:title content="如何在CMake工程中使用Rust库blazesym"><meta name=twitter:description content="在 【eBPF 入门实践教程十二：使用 eBPF 程序 profile 进行性能分析】 这篇文章中， profiler 工具的实现是使用了 rust 编写的 blazesym 库，而我现在打算使用 C++ 实现，还好这个库提供了 C API，但是需要我们将这个 Rust 库的构建集成到 CMake 中。\n"><link rel="shortcut icon" href=/images/favicon.png></head><body class=article-page><script>(function(){const e="StackColorScheme";localStorage.getItem(e)||localStorage.setItem(e,"auto")})()</script><script>(function(){const t="StackColorScheme",e=localStorage.getItem(t),n=window.matchMedia("(prefers-color-scheme: dark)").matches===!0;e=="dark"||e==="auto"&&n?document.documentElement.dataset.scheme="dark":document.documentElement.dataset.scheme="light"})()</script><div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky"><button class="hamburger hamburger--spin" type=button id=toggle-menu aria-label=切换菜单>
+<span class=hamburger-box><span class=hamburger-inner></span></span></button><header><figure class=site-avatar><a href=/><img src=/images/avatar.jpg width=200 height=200 class=site-logo loading=lazy alt=Avatar>
+</a><span class=emoji>🏸</span></figure><div class=site-meta><h1 class=site-name><a href=/>Kerolt's Note</a></h1><h2 class=site-description>宇宙是秩序的，也是混乱的。</h2></div></header><ol class=menu-social><li><a href=https://github.com/kerolt title=GitHub rel=me><svg class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 19c-4.3 1.4-4.3-2.5-6-3m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6.0 00-1.3-3.2 4.2 4.2.0 00-.1-3.2s-1.1-.3-3.5 1.3a12.3 12.3.0 00-6.2.0C6.5 2.8 5.4 3.1 5.4 3.1a4.2 4.2.0 00-.1 3.2A4.6 4.6.0 004 9.5c0 4.6 2.7 5.7 5.5 6-.6.6-.6 1.2-.5 2V21"/></svg></a></li></ol><ol class=menu id=main-menu><li><a href=/><svg class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><polyline points="5 12 3 12 12 3 21 12 19 12"/><path d="M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"/><path d="M9 21v-6a2 2 0 012-2h2a2 2 0 012 2v6"/></svg>
+<span>首页</span></a></li><li><a href=/archives/><svg class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><rect x="3" y="4" width="18" height="4" rx="2"/><path d="M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
+<span>归档</span></a></li><li><a href=/categories/><svg class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><line x1="5" y1="9" x2="19" y2="9"/><line x1="5" y1="15" x2="19" y2="15"/><line x1="11" y1="4" x2="7" y2="20"/><line x1="17" y1="4" x2="13" y2="20"/></svg>
+<span>分类</span></a></li><li><a href=/tags/><svg class="icon icon-tabler icon-tabler-tag" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><path d="M11 3l9 9a1.5 1.5.0 010 2l-6 6a1.5 1.5.0 01-2 0L3 11V7a4 4 0 014-4h4"/><circle cx="9" cy="9" r="2"/></svg>
+<span>标签</span></a></li><li><a href=/about/><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-info-circle"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 12a9 9 0 1018 0A9 9 0 003 12"/><path d="M12 9h.01"/><path d="M11 12h1v4h1"/></svg>
+<span>关于我</span></a></li><li><a href=/search/><svg class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="10" cy="10" r="7"/><line x1="21" y1="21" x2="15" y2="15"/></svg>
+<span>搜索</span></a></li><li class=menu-bottom-section><ol class=menu><li id=dark-mode-toggle><svg class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="8" cy="12" r="2"/><rect x="2" y="6" width="20" height="12" rx="6"/></svg>
+<svg class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="16" cy="12" r="2"/><rect x="2" y="6" width="20" height="12" rx="6"/></svg>
+<span>暗色模式</span></li></ol></li></ol></aside><aside class="sidebar right-sidebar sticky"><section class="widget archives"><div class=widget-icon><svg class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><line x1="5" y1="9" x2="19" y2="9"/><line x1="5" y1="15" x2="19" y2="15"/><line x1="11" y1="4" x2="7" y2="20"/><line x1="17" y1="4" x2="13" y2="20"/></svg></div><h2 class="widget-title section-title">目录</h2><div class=widget--toc><nav class=toc-nav id=TableOfContents><ol><li><a href=#corrosion-的核心功能>Corrosion 的核心功能</a></li><li><a href=#项目结构>项目结构</a></li><li><a href=#如何在-cmake-中使用-corrosion>如何在 CMake 中使用 Corrosion</a><ol><li><a href=#1通过-fetchcontent-自动下载并集成>（1）通过 FetchContent 自动下载并集成</a></li><li><a href=#2导入-rust-项目>（2）导入 Rust 项目</a></li><li><a href=#3配置静态库>（3）配置静态库</a></li><li><a href=#4使用静态库>（4）使用静态库</a></li></ol></li></ol></nav></div></section></aside><main class="main full-width"><article class=main-article><header class=article-header><div class=article-details><header class=article-category><a href=/categories/cmake/ style=background-color:#efc4be;color:#3d150f>CMake</a></header><div class=article-title-wrapper><h2 class=article-title><a href=/p/%E5%A6%82%E4%BD%95%E5%9C%A8cmake%E5%B7%A5%E7%A8%8B%E4%B8%AD%E4%BD%BF%E7%94%A8rust%E5%BA%93blazesym/>如何在CMake工程中使用Rust库blazesym</a></h2></div><footer class=article-meta><div class=inline-meta><svg class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><path d="M11.795 21H5a2 2 0 01-2-2V7a2 2 0 012-2h12a2 2 0 012 2v4"/><circle cx="18" cy="18" r="4"/><path d="M15 3v4"/><path d="M7 3v4"/><path d="M3 11h16"/><path d="M18 16.496V18l1 1"/></svg>
+<time class=article-time--published datetime=2026-01-22T00:00:00Z>2026年1月22日星期四</time>
+<svg class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg>
+<time class=article-time--reading>阅读时长: 2 分钟</time></div></footer></div></header><aside class=article-toc><details><summary><div class=article-toc-title><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-chevron-right"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 6l6 6-6 6"/></svg>
+<span>目录</span></div></summary><nav class=toc-nav><ol><li><a href=#corrosion-的核心功能>Corrosion 的核心功能</a></li><li><a href=#项目结构>项目结构</a></li><li><a href=#如何在-cmake-中使用-corrosion>如何在 CMake 中使用 Corrosion</a><ol><li><a href=#1通过-fetchcontent-自动下载并集成>（1）通过 FetchContent 自动下载并集成</a></li><li><a href=#2导入-rust-项目>（2）导入 Rust 项目</a></li><li><a href=#3配置静态库>（3）配置静态库</a></li><li><a href=#4使用静态库>（4）使用静态库</a></li></ol></li></ol></nav></details></aside><section class=article-content><p>在 <a class=link href=https://eunomia.dev/zh/tutorials/12-profile/ target=_blank rel=noopener>【eBPF 入门实践教程十二：使用 eBPF 程序 profile 进行性能分析】</a> 这篇文章中， profiler 工具的实现是使用了 rust 编写的 <code>blazesym</code> 库，而我现在打算使用 C++ 实现，还好这个库提供了 C API，但是需要我们将这个 Rust 库的构建集成到 CMake 中。</p><p><strong>Corrosion</strong> 可将 Rust 集成到现有 CMake 项目中，它是一个 CMake 工具链，旨在让 CMake 像对待原生 C++ 子项目一样对待 Rust 的 <code>Cargo</code> 项目。Corrosion 将手动调用 <code>cargo build</code>，处理复杂的跨平台路径、构建配置（Debug/Release）以及繁琐的链接参数这些过程完全自动化了。</p><h2 id=corrosion-的核心功能>Corrosion 的核心功能</h2><p>Corrosion 的工作原理是在 CMake 层面为 Cargo 包装了一层“外壳”，其主要功能包括：</p><ul><li><strong>自动处理构建类型</strong>：CMake 的 <code>Release</code> 或 <code>Debug</code> 模式会自动映射到 Cargo 的 <code>--release</code> 或默认模式。</li><li><strong>目标导入</strong>：将 Rust 的 <code>staticlib</code> 或 <code>cdylib</code> 导入为标准的 CMake 目标（Targets），你可以直接对它们使用 <code>target_link_libraries</code>。</li><li><strong>跨平台交叉编译</strong>：它能自动将 CMake 的交叉编译设置（如 Android, iOS, 嵌入式等）传递给 Rust 的目标三元组（Target Triple）。</li><li><strong>多包支持</strong>：支持 Cargo 工作区（Workspaces）和单个 Crate。</li></ul><h2 id=项目结构>项目结构</h2><p>在我的项目 <a class=link href=https://github.com/kerolt/profiler target=_blank rel=noopener>profiler</a> 中使用 Corrosion 时，项目布局如下：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-plain data-lang=plain><span class=line><span class=cl>profiler/
+</span></span><span class=line><span class=cl>├── CMakeLists.txt
+</span></span><span class=line><span class=cl>├── src
+</span></span><span class=line><span class=cl>├── third_party/
+</span></span><span class=line><span class=cl>│   └── blazesym
+</span></span><span class=line><span class=cl>└── cmake/             # 存放 Corrosion 脚本
+</span></span></code></pre></td></tr></table></div></div><h2 id=如何在-cmake-中使用-corrosion>如何在 CMake 中使用 Corrosion</h2><h3 id=1通过-fetchcontent-自动下载并集成>（1）通过 FetchContent 自动下载并集成</h3><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span><span class=lnt>8
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-cmake data-lang=cmake><span class=line><span class=cl><span class=nb>include</span><span class=p>(</span><span class=s>FetchContent</span><span class=p>)</span><span class=err>
+</span></span></span><span class=line><span class=cl><span class=err>
+</span></span></span><span class=line><span class=cl><span class=nb>FetchContent_Declare</span><span class=p>(</span>
+</span></span><span class=line><span class=cl>    <span class=s>Corrosion</span>
+</span></span><span class=line><span class=cl>    <span class=s>GIT_REPOSITORY</span> <span class=s>https://github.com/corrosion-rs/corrosion.git</span>
+</span></span><span class=line><span class=cl>    <span class=s>GIT_TAG</span> <span class=s>v0.6.0</span>
+</span></span><span class=line><span class=cl><span class=p>)</span><span class=err>
+</span></span></span><span class=line><span class=cl><span class=nb>FetchContent_MakeAvailable</span><span class=p>(</span><span class=s>Corrosion</span><span class=p>)</span><span class=err>
+</span></span></span></code></pre></td></tr></table></div></div><h3 id=2导入-rust-项目>（2）导入 Rust 项目</h3><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-cmake data-lang=cmake><span class=line><span class=cl><span class=c># 这里的路径指向包含 Cargo.toml 的目录
+</span></span></span><span class=line><span class=cl><span class=nb>corrosion_import_crate</span><span class=p>(</span>
+</span></span><span class=line><span class=cl>    <span class=s>MANIFEST_PATH</span> <span class=o>${</span><span class=nv>CMAKE_CURRENT_SOURCE_DIR</span><span class=o>}</span><span class=s>/third_party/blazesym/Cargo.toml</span>
+</span></span><span class=line><span class=cl>    <span class=s>NO_AUTO_EXE</span>
+</span></span><span class=line><span class=cl><span class=p>)</span><span class=err>
+</span></span></span></code></pre></td></tr></table></div></div><h3 id=3配置静态库>（3）配置静态库</h3><p>在 blazesym 的 C API 构建时，文档中说明了需要链接的 C 库：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-sh data-lang=sh><span class=line><span class=cl>-lrt -ldl -lpthread -lm
+</span></span></code></pre></td></tr></table></div></div><p>为了方便后面的构建目标使用 blazesym 库，我的做法是将其制作的静态库和头文件“打包”，方便构建目标通过 <code>target_link_libraries</code> 使用：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-cmake data-lang=cmake><span class=line><span class=cl><span class=nb>find_package</span><span class=p>(</span><span class=s>Threads</span> <span class=s>REQUIRED</span><span class=p>)</span><span class=err>
+</span></span></span><span class=line><span class=cl><span class=nb>find_library</span><span class=p>(</span><span class=s>LIB_RT</span> <span class=s>rt</span><span class=p>)</span><span class=err>
+</span></span></span><span class=line><span class=cl><span class=nb>find_library</span><span class=p>(</span><span class=s>LIB_DL</span> <span class=s>dl</span><span class=p>)</span><span class=err>
+</span></span></span><span class=line><span class=cl><span class=nb>find_library</span><span class=p>(</span><span class=s>LIB_M</span> <span class=s>m</span><span class=p>)</span><span class=err>
+</span></span></span><span class=line><span class=cl><span class=err>
+</span></span></span><span class=line><span class=cl><span class=c># 定义并配置静态库目标
+</span></span></span><span class=line><span class=cl><span class=nb>add_library</span><span class=p>(</span><span class=s>blazesym</span> <span class=s>STATIC</span> <span class=s>IMPORTED</span> <span class=s>GLOBAL</span><span class=p>)</span><span class=err>
+</span></span></span><span class=line><span class=cl><span class=err>
+</span></span></span><span class=line><span class=cl><span class=nb>set_target_properties</span><span class=p>(</span><span class=s>blazesym</span> <span class=s>PROPERTIES</span>
+</span></span><span class=line><span class=cl>    <span class=s>IMPORTED_LOCATION</span> <span class=s2>&#34;${CMAKE_CURRENT_BINARY_DIR}/libblazesym_c.a&#34;</span>
+</span></span><span class=line><span class=cl>    <span class=s>INTERFACE_INCLUDE_DIRECTORIES</span> <span class=s2>&#34;${CMAKE_CURRENT_SOURCE_DIR}/third_party/blazesym/capi/include&#34;</span>
+</span></span><span class=line><span class=cl>    <span class=s>INTERFACE_LINK_LIBRARIES</span> <span class=s2>&#34;Threads::Threads;${LIB_RT};${LIB_DL};${LIB_M}&#34;</span>
+</span></span><span class=line><span class=cl><span class=p>)</span><span class=err>
+</span></span></span></code></pre></td></tr></table></div></div><h3 id=4使用静态库>（4）使用静态库</h3><p>可以将刚刚的三步的代码合并成一个 cmake 文件中放在项目根目录下的 cmake 目录中（例如我这里的 <code>cmake/SetupBlazesym.cmake</code>），然后在项目的 <code>CMakelists.txt</code> 中 通过 <code>include</code> 使用：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-cmake data-lang=cmake><span class=line><span class=cl><span class=nb>include</span><span class=p>(</span><span class=s2>&#34;${CMAKE_CURRENT_SOURCE_DIR}/cmake/SetupBlazesym.cmake&#34;</span><span class=p>)</span><span class=err>
+</span></span></span><span class=line><span class=cl><span class=err>
+</span></span></span><span class=line><span class=cl><span class=nb>add_executable</span><span class=p>(</span><span class=s>profiler</span> <span class=s>src/...</span><span class=p>)</span><span class=err>
+</span></span></span><span class=line><span class=cl><span class=err>
+</span></span></span><span class=line><span class=cl><span class=nb>target_link_libraries</span><span class=p>(</span><span class=s>profiler</span> <span class=s>PRIVATE</span> <span class=s>blazesym</span><span class=p>)</span><span class=err>
+</span></span></span></code></pre></td></tr></table></div></div></section><footer class="article-meta article-footer"><section class=article-tags><a href=/tags/cmake/>CMake</a>
+<a href=/tags/cargo/>Cargo</a></section><section class="article-copyright inline-meta"><svg class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><path d="M14.5 9a3.5 4 0 100 6"/></svg>
+<span>Licensed under CC BY-NC-SA 4.0</span></section></footer></article><footer class=site-footer><section class=copyright>&copy;
+2025 -
+2026 Kerolt's Note</section><section class=powerby>使用 <a href=https://gohugo.io/ target=_blank rel=noopener>Hugo</a> 构建<br>主题 <b><a href=https://github.com/CaiJimmy/hugo-theme-stack target=_blank rel=noopener data-version=4.0.3>Stack</a></b> 由 <a href=https://jimmycai.com target=_blank rel=noopener>Jimmy</a> 设计</section></footer><script type=module>
+    import gallery from '\/ts\/gallery.js';
+
+    const articleContent = document.querySelector('.article-content');
+    const shouldLoad = articleContent && (articleContent.querySelectorAll('figure').length > 0 || articleContent.querySelectorAll('img.gallery-image').length > 0);
+    
+    if (shouldLoad) {
+        gallery(articleContent);
+
+        const PhotoSwipeLightbox = (await import("https:\/\/cdn.jsdelivr.net\/npm\/photoswipe@5.4.4\/dist\/photoswipe-lightbox.esm.min.js")).default;
+        const styleHref = "https:\/\/cdn.jsdelivr.net\/npm\/photoswipe@5.4.4\/dist\/photoswipe.css";
+
+        const styleTag = document.createElement('link');
+        styleTag.rel = 'stylesheet';
+        styleTag.href = styleHref;
+        document.head.appendChild(styleTag);
+
+        const lightbox = new PhotoSwipeLightbox({
+            gallerySelector: '.article-content',
+            childSelector: 'figure a.image-link',
+            pswpModule: () => import("https:\/\/cdn.jsdelivr.net\/npm\/photoswipe@5.4.4\/dist\/photoswipe.esm.min.js")
+        });
+        lightbox.init();
+    }
+</script></main></div><script type=text/javascript src=/ts/main.f856840516f7c2ad1769a8f5937e3d08d6cb386e2cd2dd025ae696e0ff207958.js defer></script></body></html>

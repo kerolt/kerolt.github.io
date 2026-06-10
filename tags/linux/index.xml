@@ -1,83 +1,235 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?>
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
-  <channel>
-    <title>Linux on Kerolt&#39;s Blog</title>
-    <link>https://kerolt.github.io/tags/linux/</link>
-    <description>Recent content in Linux on Kerolt&#39;s Blog</description>
-    <image>
-      <title>Kerolt&#39;s Blog</title>
-      <url>https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</url>
-      <link>https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</link>
-    </image>
-    <generator>Hugo -- 0.158.0</generator>
-    <language>en</language>
-    <lastBuildDate>Mon, 22 Dec 2025 00:00:00 +0000</lastBuildDate>
-    <atom:link href="https://kerolt.github.io/tags/linux/index.xml" rel="self" type="application/rss+xml" />
-    <item>
-      <title>Linux修改IP</title>
-      <link>https://kerolt.github.io/posts/net/linux%E4%BF%AE%E6%94%B9ip/</link>
-      <pubDate>Sun, 09 Nov 2025 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/net/linux%E4%BF%AE%E6%94%B9ip/</guid>
-      <description>&lt;p&gt;首先确定网络是用什么工具管理：&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-sh&#34; data-lang=&#34;sh&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;$ systemctl is-active NetworkManager
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;active
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;说明 &lt;strong&gt;网络由 NetworkManager 管理&lt;/strong&gt;，这种情况修改 IP 通常使用 &lt;code&gt;nmcli&lt;/code&gt;：&lt;/p&gt;
-&lt;h2 id=&#34;修改静态-ip&#34;&gt;修改静态 IP&lt;/h2&gt;
-&lt;h3 id=&#34;看当前连接名&#34;&gt;看当前连接名&lt;/h3&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;nmcli connection show
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;输出类似：&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;NAME                UUID                                  TYPE      DEVICE
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Wired connection &lt;span style=&#34;color:#f60&#34;&gt;1&lt;/span&gt;  2d3e1f6a-4e87-4a76-8f23-2f459c8c112b  ethernet  enp60s0
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;这里的 &lt;code&gt;NAME&lt;/code&gt;（如 &lt;code&gt;Wired connection 1&lt;/code&gt;）就是连接名，后面命令要用到。&lt;/p&gt;
-&lt;h3 id=&#34;修改为静态-ip&#34;&gt;修改为静态 IP&lt;/h3&gt;
-&lt;p&gt;假设你想把 IP 设置为：&lt;/p&gt;
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Linux on Kerolt's Note</title><link>https://kerolt.github.io/tags/linux/</link><description>Recent content in Linux on Kerolt's Note</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><lastBuildDate>Mon, 22 Dec 2025 00:00:00 +0000</lastBuildDate><atom:link href="https://kerolt.github.io/tags/linux/index.xml" rel="self" type="application/rss+xml"/><item><title>Linux修改IP</title><link>https://kerolt.github.io/p/linux%E4%BF%AE%E6%94%B9ip/</link><pubDate>Sun, 09 Nov 2025 00:00:00 +0000</pubDate><guid>https://kerolt.github.io/p/linux%E4%BF%AE%E6%94%B9ip/</guid><description>&lt;p&gt;首先确定网络是用什么工具管理：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-sh" data-lang="sh"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;$ systemctl is-active NetworkManager
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;active
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;说明 &lt;strong&gt;网络由 NetworkManager 管理&lt;/strong&gt;，这种情况修改 IP 通常使用 &lt;code&gt;nmcli&lt;/code&gt;：&lt;/p&gt;
+&lt;h2 id="修改静态-ip"&gt;修改静态 IP
+&lt;/h2&gt;&lt;h3 id="看当前连接名"&gt;看当前连接名
+&lt;/h3&gt;&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;nmcli connection show
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;输出类似：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-shell" data-lang="shell"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;NAME UUID TYPE DEVICE
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;Wired connection &lt;span class="m"&gt;1&lt;/span&gt; 2d3e1f6a-4e87-4a76-8f23-2f459c8c112b ethernet enp60s0
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;这里的 &lt;code&gt;NAME&lt;/code&gt;（如 &lt;code&gt;Wired connection 1&lt;/code&gt;）就是连接名，后面命令要用到。&lt;/p&gt;
+&lt;h3 id="修改为静态-ip"&gt;修改为静态 IP
+&lt;/h3&gt;&lt;p&gt;假设你想把 IP 设置为：&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;IP：&lt;code&gt;192.168.1.100/24&lt;/code&gt;&lt;/li&gt;
 &lt;li&gt;网关：&lt;code&gt;192.168.1.1&lt;/code&gt;&lt;/li&gt;
 &lt;li&gt;DNS：&lt;code&gt;8.8.8.8, 1.1.1.1&lt;/code&gt;&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;执行：&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;sudo nmcli con mod &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;Wired connection 1&amp;#34;&lt;/span&gt; ipv4.addresses 192.168.1.100/24
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;sudo nmcli con mod &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;Wired connection 1&amp;#34;&lt;/span&gt; ipv4.gateway 192.168.1.1
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;sudo nmcli con mod &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;Wired connection 1&amp;#34;&lt;/span&gt; ipv4.dns &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;8.8.8.8,1.1.1.1&amp;#34;&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;sudo nmcli con mod &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;Wired connection 1&amp;#34;&lt;/span&gt; ipv4.method manual
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;blockquote&gt;
-&lt;p&gt;注意 &lt;code&gt;&amp;quot;Wired connection 1&amp;quot;&lt;/code&gt; 需要替换为你自己的连接名。
-如果名字里有空格，必须加引号。&lt;/p&gt;</description>
-    </item>
-    <item>
-      <title>Linux校准时间</title>
-      <link>https://kerolt.github.io/posts/linux/linux%E6%A0%A1%E5%87%86%E6%97%B6%E9%97%B4/</link>
-      <pubDate>Fri, 07 Nov 2025 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/linux/linux%E6%A0%A1%E5%87%86%E6%97%B6%E9%97%B4/</guid>
-      <description>&lt;p&gt;服务器是用旧笔记本装的 Debian13，然后用 ddns-go 做动态域名解析，但是装好之后貌似由于时钟没有校准因此 ddns-go 无法更新域名解析（使用的 aliyun），以下是解决方法。&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;span class="lnt"&gt;4
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;sudo nmcli con mod &lt;span class="s2"&gt;&amp;#34;Wired connection 1&amp;#34;&lt;/span&gt; ipv4.addresses 192.168.1.100/24
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;sudo nmcli con mod &lt;span class="s2"&gt;&amp;#34;Wired connection 1&amp;#34;&lt;/span&gt; ipv4.gateway 192.168.1.1
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;sudo nmcli con mod &lt;span class="s2"&gt;&amp;#34;Wired connection 1&amp;#34;&lt;/span&gt; ipv4.dns &lt;span class="s2"&gt;&amp;#34;8.8.8.8,1.1.1.1&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;sudo nmcli con mod &lt;span class="s2"&gt;&amp;#34;Wired connection 1&amp;#34;&lt;/span&gt; ipv4.method manual
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+ &lt;blockquote&gt;
+ &lt;p&gt;注意 &lt;code&gt;&amp;quot;Wired connection 1&amp;quot;&lt;/code&gt; 需要替换为你自己的连接名。
+如果名字里有空格，必须加引号。&lt;/p&gt;
+
+ &lt;/blockquote&gt;
+&lt;h3 id="应用修改立即生效"&gt;应用修改（立即生效）
+&lt;/h3&gt;&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;sudo nmcli con down &lt;span class="s2"&gt;&amp;#34;Wired connection 1&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;sudo nmcli con up &lt;span class="s2"&gt;&amp;#34;Wired connection 1&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h3 id="验证"&gt;验证
+&lt;/h3&gt;&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;ip addr show enp60s0
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;ip route
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;你应该能看到：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-shell" data-lang="shell"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;inet 192.168.1.100/24 ...
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;default via 192.168.1.1 ...
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h3 id="改回-dhcp-自动获取"&gt;改回 DHCP 自动获取
+&lt;/h3&gt;&lt;p&gt;如果想恢复为 DHCP：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;sudo nmcli con mod &lt;span class="s2"&gt;&amp;#34;Wired connection 1&amp;#34;&lt;/span&gt; ipv4.method auto
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;sudo nmcli con up &lt;span class="s2"&gt;&amp;#34;Wired connection 1&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h2 id="dhcp-重新获取-ip"&gt;DHCP 重新获取 IP
+&lt;/h2&gt;&lt;h3 id="检查是否是固定分配-ip"&gt;检查是否是固定分配 IP
+&lt;/h3&gt;&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;span class="lnt"&gt;4
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-sh" data-lang="sh"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;sudo nmcli device disconnect enp60s0
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;sudo dhclient -r enp60s0 &lt;span class="c1"&gt;# 释放旧租约（告诉 DHCP 我不要这个 IP 了）&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;sudo pkill dhclient &lt;span class="c1"&gt;# 确保没有旧 dhclient 残留&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;sudo nmcli device connect enp60s0 &lt;span class="c1"&gt;# 重新请求新 IP&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;如果上面的操作无法获得新的 IP，那就说明 &lt;strong&gt;DHCP 服务器端&lt;/strong&gt; 是按 MAC 地址固定分配。&lt;/p&gt;
+&lt;h3 id="获取原本的-mac-地址"&gt;获取原本的 MAC 地址
+&lt;/h3&gt;&lt;p&gt;可以临时更改 MAC 来解决，首先获取一下原本的 MAC：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;span class="lnt"&gt;4
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-sh" data-lang="sh"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;ip link show enp60s0
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# 或者&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;nmcli device show enp60s0 &lt;span class="p"&gt;|&lt;/span&gt; grep -i hwaddr
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h3 id="修改临时-mac"&gt;修改临时 MAC
+&lt;/h3&gt;&lt;p&gt;修改为临时 MAC：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-sh" data-lang="sh"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;sudo nmcli connection modify &lt;span class="s2"&gt;&amp;#34;Wired connection 1&amp;#34;&lt;/span&gt; 802-3-ethernet.cloned-mac-address random
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;sudo nmcli connection down &lt;span class="s2"&gt;&amp;#34;Wired connection 1&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;sudo nmcli connection up &lt;span class="s2"&gt;&amp;#34;Wired connection 1&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;这会让 DHCP 服务器以为是一个新设备，从而分配新 IP。 完成后可以恢复原 MAC：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-sh" data-lang="sh"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;sudo nmcli connection modify &lt;span class="s2"&gt;&amp;#34;Wired connection 1&amp;#34;&lt;/span&gt; 802-3-ethernet.cloned-mac-address &lt;span class="s2"&gt;&amp;#34;YOUR_MAC&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;实测可以获取到新的 IP。&lt;/p&gt;</description></item><item><title>Linux校准时间</title><link>https://kerolt.github.io/p/linux%E6%A0%A1%E5%87%86%E6%97%B6%E9%97%B4/</link><pubDate>Fri, 07 Nov 2025 00:00:00 +0000</pubDate><guid>https://kerolt.github.io/p/linux%E6%A0%A1%E5%87%86%E6%97%B6%E9%97%B4/</guid><description>&lt;p&gt;服务器是用旧笔记本装的 Debian13，然后用 ddns-go 做动态域名解析，但是装好之后貌似由于时钟没有校准因此 ddns-go 无法更新域名解析（使用的 aliyun），以下是解决方法。&lt;/p&gt;
 &lt;hr&gt;
 &lt;p&gt;首先我使用 &lt;code&gt;timedatectl&lt;/code&gt; 的结果如下：&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;~ $ timedatectl 
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Local time: 六 2025-11-08 00:20:49 CST 
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Universal time: 五 2025-11-07 16:20:49 UTC 
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;RTC time: 五 2025-11-07 16:20:49 
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Time zone: Asia/Shanghai &lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;CST, +0800&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt; 
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;System clock synchronized: no 
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;NTP service: n/a 
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;RTC in &lt;span style=&#34;color:#366&#34;&gt;local&lt;/span&gt; TZ: no
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;使用 &lt;code&gt;systemd-timesyncd&lt;/code&gt; 可以让系统自动校时：&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;sudo timedatectl set-ntp &lt;span style=&#34;color:#366&#34;&gt;true&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;如果显示：&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Failed to &lt;span style=&#34;color:#366&#34;&gt;set&lt;/span&gt; ntp: NTP not supported
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;说明当前系统里没有可用的 NTP 同步服务（比如 &lt;code&gt;systemd-timesyncd&lt;/code&gt;、&lt;code&gt;chronyd&lt;/code&gt; 或 &lt;code&gt;ntpd&lt;/code&gt;）被启用或支持，可以执行：&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;sudo apt install systemd-timesyncd
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;sudo systemctl &lt;span style=&#34;color:#366&#34;&gt;enable&lt;/span&gt; --now systemd-timesyncd.service
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;之后再执行 &lt;code&gt;timedatectl&lt;/code&gt; 可以看到：&lt;/p&gt;</description>
-    </item>
-    <item>
-      <title>如何理解内核态与用户态切换的上下文开销</title>
-      <link>https://kerolt.github.io/posts/linux/%E5%A6%82%E4%BD%95%E7%90%86%E8%A7%A3%E5%86%85%E6%A0%B8%E6%80%81%E4%B8%8E%E7%94%A8%E6%88%B7%E6%80%81%E5%88%87%E6%8D%A2%E7%9A%84%E4%B8%8A%E4%B8%8B%E6%96%87%E5%BC%80%E9%94%80/</link>
-      <pubDate>Thu, 06 Nov 2025 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/linux/%E5%A6%82%E4%BD%95%E7%90%86%E8%A7%A3%E5%86%85%E6%A0%B8%E6%80%81%E4%B8%8E%E7%94%A8%E6%88%B7%E6%80%81%E5%88%87%E6%8D%A2%E7%9A%84%E4%B8%8A%E4%B8%8B%E6%96%87%E5%BC%80%E9%94%80/</guid>
-      <description>&lt;h2 id=&#34;一什么是用户态和内核态&#34;&gt;一、什么是“用户态”和“内核态”&lt;/h2&gt;
-&lt;p&gt;CPU 有不同的 &lt;strong&gt;特权级（Privilege Level）&lt;/strong&gt;：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;span class="lnt"&gt;4
+&lt;/span&gt;&lt;span class="lnt"&gt;5
+&lt;/span&gt;&lt;span class="lnt"&gt;6
+&lt;/span&gt;&lt;span class="lnt"&gt;7
+&lt;/span&gt;&lt;span class="lnt"&gt;8
+&lt;/span&gt;&lt;span class="lnt"&gt;9
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;~ $ timedatectl 
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;Local time: 六 2025-11-08 00:20:49 CST 
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;Universal time: 五 2025-11-07 16:20:49 UTC 
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;RTC time: 五 2025-11-07 16:20:49 
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;Time zone: Asia/Shanghai &lt;span class="o"&gt;(&lt;/span&gt;CST, +0800&lt;span class="o"&gt;)&lt;/span&gt; 
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;System clock synchronized: no 
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;NTP service: n/a 
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;RTC in &lt;span class="nb"&gt;local&lt;/span&gt; TZ: no
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;使用 &lt;code&gt;systemd-timesyncd&lt;/code&gt; 可以让系统自动校时：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;sudo timedatectl set-ntp &lt;span class="nb"&gt;true&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;如果显示：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;Failed to &lt;span class="nb"&gt;set&lt;/span&gt; ntp: NTP not supported
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;说明当前系统里没有可用的 NTP 同步服务（比如 &lt;code&gt;systemd-timesyncd&lt;/code&gt;、&lt;code&gt;chronyd&lt;/code&gt; 或 &lt;code&gt;ntpd&lt;/code&gt;）被启用或支持，可以执行：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;sudo apt install systemd-timesyncd
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;sudo systemctl &lt;span class="nb"&gt;enable&lt;/span&gt; --now systemd-timesyncd.service
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;之后再执行 &lt;code&gt;timedatectl&lt;/code&gt; 可以看到：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;System clock synchronized: yes
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;NTP service: active
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;这样就 ok 了。&lt;/p&gt;</description></item><item><title>如何理解内核态与用户态切换的上下文开销</title><link>https://kerolt.github.io/p/%E5%A6%82%E4%BD%95%E7%90%86%E8%A7%A3%E5%86%85%E6%A0%B8%E6%80%81%E4%B8%8E%E7%94%A8%E6%88%B7%E6%80%81%E5%88%87%E6%8D%A2%E7%9A%84%E4%B8%8A%E4%B8%8B%E6%96%87%E5%BC%80%E9%94%80/</link><pubDate>Thu, 06 Nov 2025 00:00:00 +0000</pubDate><guid>https://kerolt.github.io/p/%E5%A6%82%E4%BD%95%E7%90%86%E8%A7%A3%E5%86%85%E6%A0%B8%E6%80%81%E4%B8%8E%E7%94%A8%E6%88%B7%E6%80%81%E5%88%87%E6%8D%A2%E7%9A%84%E4%B8%8A%E4%B8%8B%E6%96%87%E5%BC%80%E9%94%80/</guid><description>&lt;h2 id="一什么是用户态和内核态"&gt;一、什么是“用户态”和“内核态”
+&lt;/h2&gt;&lt;p&gt;CPU 有不同的 &lt;strong&gt;特权级（Privilege Level）&lt;/strong&gt;：&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;
 &lt;p&gt;&lt;strong&gt;用户态（User Mode）&lt;/strong&gt;：
@@ -88,8 +240,8 @@
 操作系统内核运行在这里，拥有完全的访问权限，可以管理内存、设备、中断等。&lt;/p&gt;
 &lt;/li&gt;
 &lt;/ul&gt;
-&lt;h2 id=&#34;二什么是上下文切换context-switch&#34;&gt;二、什么是“上下文切换（Context Switch）”&lt;/h2&gt;
-&lt;p&gt;“上下文”就是 CPU 当前正在执行的任务的所有状态，包括：&lt;/p&gt;
+&lt;h2 id="二什么是上下文切换context-switch"&gt;二、什么是“上下文切换（Context Switch）”
+&lt;/h2&gt;&lt;p&gt;“上下文”就是 CPU 当前正在执行的任务的所有状态，包括：&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;寄存器内容（RIP、RSP、RAX 等）&lt;/li&gt;
 &lt;li&gt;程序计数器（Program Counter）&lt;/li&gt;
@@ -98,39 +250,39 @@
 &lt;li&gt;调度信息（优先级、时间片等）&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;&lt;strong&gt;上下文切换&lt;/strong&gt;指的是 CPU 从一个执行上下文切换到另一个（比如进程 A → 进程 B）。&lt;/p&gt;
-&lt;h2 id=&#34;三内核态与用户态切换--进程切换但都属于上下文切换&#34;&gt;三、内核态与用户态切换 ≠ 进程切换，但都属于“上下文切换”&lt;/h2&gt;
-&lt;p&gt;这两种是不同层次的“切换”：&lt;/p&gt;
+&lt;h2 id="三内核态与用户态切换--进程切换但都属于上下文切换"&gt;三、内核态与用户态切换 ≠ 进程切换，但都属于“上下文切换”
+&lt;/h2&gt;&lt;p&gt;这两种是不同层次的“切换”：&lt;/p&gt;
 &lt;table&gt;
-  &lt;thead&gt;
-      &lt;tr&gt;
-          &lt;th&gt;类型&lt;/th&gt;
-          &lt;th&gt;示例&lt;/th&gt;
-          &lt;th&gt;是否涉及调度&lt;/th&gt;
-          &lt;th&gt;开销大小&lt;/th&gt;
-          &lt;th&gt;备注&lt;/th&gt;
-      &lt;/tr&gt;
-  &lt;/thead&gt;
-  &lt;tbody&gt;
-      &lt;tr&gt;
-          &lt;td&gt;&lt;strong&gt;用户态 → 内核态&lt;/strong&gt;&lt;/td&gt;
-          &lt;td&gt;系统调用、I/O、中断&lt;/td&gt;
-          &lt;td&gt;否&lt;/td&gt;
-          &lt;td&gt;小（几十到几百纳秒）&lt;/td&gt;
-          &lt;td&gt;同一线程，只是 CPU 特权级变化&lt;/td&gt;
-      &lt;/tr&gt;
-      &lt;tr&gt;
-          &lt;td&gt;&lt;strong&gt;进程上下文切换&lt;/strong&gt;&lt;/td&gt;
-          &lt;td&gt;从进程 A → 进程 B&lt;/td&gt;
-          &lt;td&gt;是&lt;/td&gt;
-          &lt;td&gt;大（微秒级）&lt;/td&gt;
-          &lt;td&gt;不仅换栈，还要换虚拟内存上下文&lt;/td&gt;
-      &lt;/tr&gt;
-  &lt;/tbody&gt;
+	&lt;thead&gt;
+			&lt;tr&gt;
+					&lt;th&gt;类型&lt;/th&gt;
+					&lt;th&gt;示例&lt;/th&gt;
+					&lt;th&gt;是否涉及调度&lt;/th&gt;
+					&lt;th&gt;开销大小&lt;/th&gt;
+					&lt;th&gt;备注&lt;/th&gt;
+			&lt;/tr&gt;
+	&lt;/thead&gt;
+	&lt;tbody&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;strong&gt;用户态 → 内核态&lt;/strong&gt;&lt;/td&gt;
+					&lt;td&gt;系统调用、I/O、中断&lt;/td&gt;
+					&lt;td&gt;否&lt;/td&gt;
+					&lt;td&gt;小（几十到几百纳秒）&lt;/td&gt;
+					&lt;td&gt;同一线程，只是 CPU 特权级变化&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;strong&gt;进程上下文切换&lt;/strong&gt;&lt;/td&gt;
+					&lt;td&gt;从进程 A → 进程 B&lt;/td&gt;
+					&lt;td&gt;是&lt;/td&gt;
+					&lt;td&gt;大（微秒级）&lt;/td&gt;
+					&lt;td&gt;不仅换栈，还要换虚拟内存上下文&lt;/td&gt;
+			&lt;/tr&gt;
+	&lt;/tbody&gt;
 &lt;/table&gt;
-&lt;h2 id=&#34;四为什么内核用户态切换有开销&#34;&gt;四、为什么内核/用户态切换有“开销”&lt;/h2&gt;
-&lt;p&gt;内核态切换的代价来自几个部分：&lt;/p&gt;
-&lt;h3 id=&#34;1-cpu-特权级变化&#34;&gt;1. CPU 特权级变化&lt;/h3&gt;
-&lt;p&gt;切换时 CPU 会：&lt;/p&gt;
+&lt;h2 id="四为什么内核用户态切换有开销"&gt;四、为什么内核/用户态切换有“开销”
+&lt;/h2&gt;&lt;p&gt;内核态切换的代价来自几个部分：&lt;/p&gt;
+&lt;h3 id="1-cpu-特权级变化"&gt;1. CPU 特权级变化
+&lt;/h3&gt;&lt;p&gt;切换时 CPU 会：&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;保存当前寄存器状态；&lt;/li&gt;
 &lt;li&gt;改变特权级（从 ring3 → ring0）；&lt;/li&gt;
@@ -138,21 +290,119 @@
 &lt;li&gt;执行系统调用入口代码（&lt;code&gt;syscall&lt;/code&gt;、&lt;code&gt;sysenter&lt;/code&gt; 指令）；&lt;/li&gt;
 &lt;li&gt;执行完后再反向恢复回用户态。&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;这些过程虽然不是“线程切换”，但都需要 CPU 做额外操作。&lt;/p&gt;</description>
-    </item>
-    <item>
-      <title>Linux NAPI机制知识点总结</title>
-      <link>https://kerolt.github.io/posts/linux/linux-napi%E6%9C%BA%E5%88%B6%E7%9F%A5%E8%AF%86%E7%82%B9%E6%80%BB%E7%BB%93/</link>
-      <pubDate>Wed, 17 Sep 2025 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/linux/linux-napi%E6%9C%BA%E5%88%B6%E7%9F%A5%E8%AF%86%E7%82%B9%E6%80%BB%E7%BB%93/</guid>
-      <description>&lt;blockquote&gt;
-&lt;p&gt;对 &lt;a href=&#34;https://docs.kernel.org/networking/napi.html&#34;&gt;https://docs.kernel.org/networking/napi.html&lt;/a&gt; 的总结&lt;/p&gt;
-&lt;/blockquote&gt;
+&lt;p&gt;这些过程虽然不是“线程切换”，但都需要 CPU 做额外操作。&lt;/p&gt;
+&lt;h3 id="2-缓存污染cachetlb-flush"&gt;2. 缓存污染（Cache/TLB flush）
+&lt;/h3&gt;&lt;p&gt;在切换时，可能触发：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;指令缓存（I-Cache）和数据缓存（D-Cache）失效&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;TLB（页表缓存）失效&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;这会让下一次访问内存时性能下降。尤其是跨页表切换（进程切换）时，TLB 必须刷新。&lt;/p&gt;
+&lt;h3 id="3-管线冲刷pipeline-flush"&gt;3. 管线冲刷（Pipeline Flush）
+&lt;/h3&gt;&lt;p&gt;现代 CPU 使用深流水线和乱序执行，切换到内核态后，这些指令流需要被中断、清空、重新加载，浪费了几十个周期。&lt;/p&gt;
+&lt;h3 id="4-安全隔离检查比如-kpti"&gt;4. 安全隔离检查（比如 KPTI）
+&lt;/h3&gt;&lt;p&gt;在 Spectre/Meltdown 漏洞后，Linux 内核加了 &lt;strong&gt;KPTI（Kernel Page Table Isolation）&lt;/strong&gt;，在用户态和内核态之间切换时需要切换页表来隔离内核地址空间，进一步增加了 TLB flush 和页表切换开销。&lt;/p&gt;
+&lt;h2 id="五开销有多大"&gt;五、开销有多大？
+&lt;/h2&gt;&lt;p&gt;大致数量级（不同架构差异很大）：&lt;/p&gt;
+&lt;table&gt;
+	&lt;thead&gt;
+			&lt;tr&gt;
+					&lt;th&gt;操作&lt;/th&gt;
+					&lt;th&gt;典型开销&lt;/th&gt;
+			&lt;/tr&gt;
+	&lt;/thead&gt;
+	&lt;tbody&gt;
+			&lt;tr&gt;
+					&lt;td&gt;一次函数调用&lt;/td&gt;
+					&lt;td&gt;1~5 ns&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;一次系统调用（空）&lt;/td&gt;
+					&lt;td&gt;100~500 ns&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;一次进程上下文切换&lt;/td&gt;
+					&lt;td&gt;1~5 µs&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;一次磁盘 I/O 系统调用&lt;/td&gt;
+					&lt;td&gt;1 ms 以上&lt;/td&gt;
+			&lt;/tr&gt;
+	&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;比如：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;$ strace -c ls
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# 可以看到每个系统调用耗时几十到几百纳秒&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h2 id="六举个例子read-系统调用"&gt;六、举个例子：&lt;code&gt;read()&lt;/code&gt; 系统调用
+&lt;/h2&gt;&lt;p&gt;当用户调用：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-c" data-lang="c"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nf"&gt;read&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;fd&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;buf&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;size&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;实际发生的事：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;程序在 &lt;strong&gt;用户态&lt;/strong&gt; 调用 read；&lt;/li&gt;
+&lt;li&gt;CPU 执行 &lt;code&gt;syscall&lt;/code&gt; 指令，切到 &lt;strong&gt;内核态&lt;/strong&gt;；&lt;/li&gt;
+&lt;li&gt;内核检查参数、文件描述符合法性；&lt;/li&gt;
+&lt;li&gt;调用文件系统层 → 设备驱动；&lt;/li&gt;
+&lt;li&gt;如果是磁盘 I/O，线程可能被阻塞，调度其他任务；&lt;/li&gt;
+&lt;li&gt;数据准备好后再切回用户态。&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;这整个过程涉及 &lt;strong&gt;多次用户态 ↔ 内核态切换 + 潜在调度切换&lt;/strong&gt;。&lt;/p&gt;
+&lt;h2 id="七如何减少这种开销"&gt;七、如何减少这种开销
+&lt;/h2&gt;&lt;p&gt;性能优化中，常见的做法是&lt;strong&gt;减少切换频率&lt;/strong&gt;：&lt;/p&gt;
+&lt;table&gt;
+	&lt;thead&gt;
+			&lt;tr&gt;
+					&lt;th&gt;技术&lt;/th&gt;
+					&lt;th&gt;思路&lt;/th&gt;
+			&lt;/tr&gt;
+	&lt;/thead&gt;
+	&lt;tbody&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;strong&gt;批处理系统调用&lt;/strong&gt;&lt;/td&gt;
+					&lt;td&gt;一次调用处理多个请求（如 &lt;code&gt;readv&lt;/code&gt;, &lt;code&gt;writev&lt;/code&gt;）&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;strong&gt;零拷贝 I/O&lt;/strong&gt;&lt;/td&gt;
+					&lt;td&gt;减少数据在内核与用户空间之间的复制&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;strong&gt;IO_uring / eBPF / XDP&lt;/strong&gt;&lt;/td&gt;
+					&lt;td&gt;通过内核接口减少 syscalls 次数或在内核内直接处理&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;strong&gt;epoll / io_uring&lt;/strong&gt;&lt;/td&gt;
+					&lt;td&gt;异步 I/O，减少阻塞导致的频繁切换&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;strong&gt;用户态网络栈（DPDK）&lt;/strong&gt;&lt;/td&gt;
+					&lt;td&gt;完全绕过内核态，直接用户态驱动网卡&lt;/td&gt;
+			&lt;/tr&gt;
+	&lt;/tbody&gt;
+&lt;/table&gt;</description></item><item><title>Linux NAPI机制知识点总结</title><link>https://kerolt.github.io/p/linux-napi%E6%9C%BA%E5%88%B6%E7%9F%A5%E8%AF%86%E7%82%B9%E6%80%BB%E7%BB%93/</link><pubDate>Wed, 17 Sep 2025 00:00:00 +0000</pubDate><guid>https://kerolt.github.io/p/linux-napi%E6%9C%BA%E5%88%B6%E7%9F%A5%E8%AF%86%E7%82%B9%E6%80%BB%E7%BB%93/</guid><description>
+ &lt;blockquote&gt;
+ &lt;p&gt;对 &lt;a class="link" href="https://docs.kernel.org/networking/napi.html" target="_blank" rel="noopener"
+ &gt;https://docs.kernel.org/networking/napi.html&lt;/a&gt; 的总结&lt;/p&gt;
+
+ &lt;/blockquote&gt;
 &lt;p&gt;NAPI (New API，但现已无特定含义) 是 Linux 内核中用于高效处理网络数据包的一种机制，旨在减少高负载下的中断开销。&lt;/p&gt;
 &lt;p&gt;其​目的​​是为了解决传统基于中断的包处理在高流量下的性能问题（“中断活锁”）。通过混合​&lt;strong&gt;​中断​&lt;/strong&gt;​和​&lt;strong&gt;​轮询​&lt;/strong&gt;​模式，在低负载时使用中断保证低延迟，在高负载时切换到轮询保证高吞吐量。&lt;/p&gt;
 &lt;p&gt;设备通过中断通知有新数据包 -&amp;gt; 内核调度对应的 NAPI 实例 -&amp;gt; 在软中断上下文（或内核线程）中轮询处理多个数据包 -&amp;gt; 处理完毕后再打开中断。&lt;/p&gt;
-&lt;h2 id=&#34;核心数据结构与-api&#34;&gt;核心数据结构与 API&lt;/h2&gt;
-&lt;ol&gt;
+&lt;h2 id="核心数据结构与-api"&gt;核心数据结构与 API
+&lt;/h2&gt;&lt;ol&gt;
 &lt;li&gt;
 &lt;p&gt;​&lt;strong&gt;​&lt;code&gt;struct napi_struct&lt;/code&gt;​&lt;/strong&gt;​：&lt;/p&gt;
 &lt;ul&gt;
@@ -176,8 +426,8 @@
 &lt;/ul&gt;
 &lt;/li&gt;
 &lt;/ol&gt;
-&lt;h2 id=&#34;驱动程序实现要点&#34;&gt;驱动程序实现要点&lt;/h2&gt;
-&lt;ol&gt;
+&lt;h2 id="驱动程序实现要点"&gt;驱动程序实现要点
+&lt;/h2&gt;&lt;ol&gt;
 &lt;li&gt;
 &lt;p&gt;​&lt;strong&gt;​&lt;code&gt;poll&lt;/code&gt; 方法​&lt;/strong&gt;​：&lt;/p&gt;
 &lt;ul&gt;
@@ -186,69 +436,383 @@
 &lt;/ul&gt;
 &lt;/li&gt;
 &lt;li&gt;
-&lt;p&gt;​&lt;strong&gt;​中断屏蔽策略​&lt;/strong&gt;​：&lt;/p&gt;</description>
-    </item>
-    <item>
-      <title>【问题记录】ddns-go与IPv6网络配置</title>
-      <link>https://kerolt.github.io/posts/net/%E9%97%AE%E9%A2%98%E8%AE%B0%E5%BD%95ddns-go%E4%B8%8Eipv6%E7%BD%91%E7%BB%9C%E9%85%8D%E7%BD%AE/</link>
-      <pubDate>Fri, 29 Aug 2025 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/net/%E9%97%AE%E9%A2%98%E8%AE%B0%E5%BD%95ddns-go%E4%B8%8Eipv6%E7%BD%91%E7%BB%9C%E9%85%8D%E7%BD%AE/</guid>
-      <description>&lt;p&gt;在完成 &lt;a href=&#34;https://zhuanlan.zhihu.com/p/1943305270387275457&#34;&gt;Rustdesk 自建服务器&lt;/a&gt; 的搭建后，我又想到：由于实验室服务器的公网 &lt;strong&gt;IPv6 地址&lt;/strong&gt; 并非永久不变，直接使用 IP 进行远程连接（如 SSH 或 Rustdesk）并不现实，如何确保远程访问的稳定性和便利性呢。为了解决这一痛点，我决定利用 &lt;strong&gt;动态域名解析（DDNS）&lt;/strong&gt; 技术，配合 &lt;strong&gt;ddns-go&lt;/strong&gt; 和 &lt;strong&gt;阿里云 DNS&lt;/strong&gt; 服务，将服务器的动态 IP 地址实时绑定到一个易于记忆的域名上。&lt;/p&gt;
+&lt;p&gt;​&lt;strong&gt;​中断屏蔽策略​&lt;/strong&gt;​：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;调度 NAPI 后应​&lt;strong&gt;​屏蔽设备中断​&lt;/strong&gt;​，防止不必要的重复中断，直到 &lt;code&gt;napi_complete_done()&lt;/code&gt; 被调用后再解除屏蔽。&lt;/li&gt;
+&lt;li&gt;推荐使用 &lt;code&gt;napi_schedule_prep()&lt;/code&gt; 检查 + &lt;code&gt;__napi_schedule()&lt;/code&gt; 调用的组合，确保在屏蔽中断后调度，避免竞态条件。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h2 id="高级特性与配置"&gt;高级特性与配置
+&lt;/h2&gt;&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;​&lt;strong&gt;​实例映射​&lt;/strong&gt;​：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;现代网卡多队列：通常一个 NAPI 实例对应一个中断源和一个队列对（RX+TX）。但映射关系灵活，可一对多或多对一。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;​&lt;strong&gt;​软件中断合并 (Coalescing)​&lt;/strong&gt;​：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;可通过 &lt;code&gt;gro_flush_timeout&lt;/code&gt; 和 &lt;code&gt;napi_defer_hard_irqs&lt;/code&gt; 参数配置 NAPI 在数据包处理完后启动一个定时器，延迟解除中断屏蔽，以合并更多数据包，减少中断次数，提升吞吐量。可通过 sysfs 或 Netlink (&lt;code&gt;netdev-genl&lt;/code&gt;) ​&lt;strong&gt;​按每个 NAPI 实例​&lt;/strong&gt;​进行配置。&lt;/p&gt;
+
+ &lt;blockquote&gt;
+ &lt;p&gt;GRO（Generic Receive Offload，通用接收卸载）是 Linux 内核中的一种网络数据包处理机制，主要用于​&lt;strong&gt;​在接收数据时将多个小数据包合并成一个大包​&lt;/strong&gt;​，再上传给网络协议栈处理，以此减少 CPU 的开销，提升网络吞吐性能&lt;/p&gt;
+
+ &lt;/blockquote&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;​&lt;strong&gt;​忙轮询 (Busy Polling)​&lt;/strong&gt;​：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;允许用户态进程主动轮询设备，在中断触发前检查并处理数据包，​&lt;strong&gt;​以 CPU 资源换取极低延迟​&lt;/strong&gt;​。&lt;/li&gt;
+&lt;li&gt;启用方式：套接字选项 &lt;code&gt;SO_BUSY_POLL&lt;/code&gt;、系统参数 &lt;code&gt;net.core.busy_poll&lt;/code&gt;、&lt;code&gt;io_uring&lt;/code&gt; API 或基于 epoll 的配置。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;​&lt;strong&gt;​基于 epoll 的忙轮询​&lt;/strong&gt;​：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;可从 &lt;code&gt;epoll_wait&lt;/code&gt; 调用中直接触发 NAPI 处理。&lt;/li&gt;
+&lt;li&gt;要求：添加到同一 epoll 上下文的所有文件描述符应具有相同的 NAPI ID（可通过 &lt;code&gt;SO_INCOMING_NAPI_ID&lt;/code&gt; 获取）。&lt;/li&gt;
+&lt;li&gt;可通过 &lt;code&gt;ioctl&lt;/code&gt; (&lt;code&gt;EPIOCSPARAMS&lt;/code&gt;) 设置 &lt;code&gt;epoll_params&lt;/code&gt; 结构，精细控制每个 epoll 上下文的忙轮询超时 (&lt;code&gt;busy_poll_usecs&lt;/code&gt;)、预算 (&lt;code&gt;busy_poll_budget&lt;/code&gt;) 和偏好 (&lt;code&gt;prefer_busy_poll&lt;/code&gt;)。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;​&lt;strong&gt;​IRQ 缓解 (Mitigation) 与挂起 (Suspension)​&lt;/strong&gt;​：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;​&lt;strong&gt;​IRQ 缓解​&lt;/strong&gt;​：使用 &lt;code&gt;SO_PREFER_BUSY_POLL&lt;/code&gt;，承诺应用程序会定期忙轮询，驱动可​&lt;strong&gt;​长时间屏蔽中断​&lt;/strong&gt;​。由 &lt;code&gt;gro_flush_timeout&lt;/code&gt; 作为安全机制防止停滞。&lt;/li&gt;
+&lt;li&gt;​&lt;strong&gt;​IRQ 挂停​&lt;/strong&gt;​：更激进的机制。当 &lt;code&gt;epoll_wait&lt;/code&gt; 成功获取事件时，启动一个 &lt;code&gt;irq-suspend-timeout&lt;/code&gt; 定时器来​&lt;strong&gt;​挂起（屏蔽）IRQ​&lt;/strong&gt;​。只要应用程序持续处理，IRQ 就保持挂起状态，避免任何中断干扰。超时或处理空闲后 fallback 到常规模式。需要与 &lt;code&gt;gro_flush_timeout&lt;/code&gt; 等配合使用。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;​&lt;strong&gt;​线程化 NAPI​&lt;/strong&gt;​：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;可配置 NAPI 在​&lt;strong&gt;​独立的内核线程​&lt;/strong&gt;​中运行，而不是软中断上下文。可针对每个网络设备或每个 NAPI 实例进行配置（通过 sysfs 或 Netlink）。&lt;/li&gt;
+&lt;li&gt;优点：可能提供更可预测的调度或利于实时性（&lt;code&gt;PREEMPT_RT&lt;/code&gt;）内核。&lt;/li&gt;
+&lt;li&gt;建议：将 NAPI 线程固定到与处理其中断相同的 CPU 上。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h2 id="用户空间交互"&gt;用户空间交互
+&lt;/h2&gt;&lt;ul&gt;
+&lt;li&gt;​&lt;strong&gt;​NAPI ID​&lt;/strong&gt;​：每个 NAPI 实例有唯一 ID，用户空间可通过 &lt;code&gt;SO_INCOMING_NAPI_ID&lt;/code&gt; 套接字选项获取。&lt;/li&gt;
+&lt;li&gt;​&lt;strong&gt;​查询与配置​&lt;/strong&gt;​：可通过 Netlink (&lt;code&gt;netdev-genl&lt;/code&gt; 家族) 查询设备队列信息（包括 NAPI ID）和配置每个 NAPI 实例的参数（如合并参数、线程化开关）。可使用 &lt;code&gt;tools/net/ynl/&lt;/code&gt; 下的工具（如 &lt;code&gt;cli.py&lt;/code&gt;）进行操作。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr&gt;
+&lt;p&gt;​&lt;strong&gt;核心思想​&lt;/strong&gt;​：中断通知 + 轮询处理，平衡延迟与吞吐。&lt;/p&gt;
+&lt;p&gt;实现 &lt;code&gt;poll&lt;/code&gt; 方法，正确使用 &lt;code&gt;napi_schedule()&lt;/code&gt; 和 &lt;code&gt;napi_complete_done()&lt;/code&gt;，管理好中断屏蔽。通过软件中断合并、忙轮询、IRQ 缓解/挂起等机制针对低延迟或高吞吐场景进行精细配置。支持多种处理上下文（软中断、线程），映射关系（实例 - 中断 - 队列）灵活。&lt;/p&gt;</description></item><item><title>【问题记录】ddns-go与IPv6网络配置</title><link>https://kerolt.github.io/p/%E9%97%AE%E9%A2%98%E8%AE%B0%E5%BD%95ddns-go%E4%B8%8Eipv6%E7%BD%91%E7%BB%9C%E9%85%8D%E7%BD%AE/</link><pubDate>Fri, 29 Aug 2025 00:00:00 +0000</pubDate><guid>https://kerolt.github.io/p/%E9%97%AE%E9%A2%98%E8%AE%B0%E5%BD%95ddns-go%E4%B8%8Eipv6%E7%BD%91%E7%BB%9C%E9%85%8D%E7%BD%AE/</guid><description>&lt;p&gt;在完成 &lt;a class="link" href="https://zhuanlan.zhihu.com/p/1943305270387275457" target="_blank" rel="noopener"
+ &gt;Rustdesk 自建服务器&lt;/a&gt; 的搭建后，我又想到：由于实验室服务器的公网 &lt;strong&gt;IPv6 地址&lt;/strong&gt; 并非永久不变，直接使用 IP 进行远程连接（如 SSH 或 Rustdesk）并不现实，如何确保远程访问的稳定性和便利性呢。为了解决这一痛点，我决定利用 &lt;strong&gt;动态域名解析（DDNS）&lt;/strong&gt; 技术，配合 &lt;strong&gt;ddns-go&lt;/strong&gt; 和 &lt;strong&gt;阿里云 DNS&lt;/strong&gt; 服务，将服务器的动态 IP 地址实时绑定到一个易于记忆的域名上。&lt;/p&gt;
 &lt;p&gt;本文将记录我在配置过程中遇到的四个主要问题及其解决方案。&lt;/p&gt;
 &lt;hr&gt;
-&lt;h2 id=&#34;问题-1ipv6-临时地址导致域名解析不稳定&#34;&gt;问题 1：IPv6 临时地址导致域名解析不稳定&lt;/h2&gt;
-&lt;p&gt;在启用 &lt;strong&gt;ddns-go&lt;/strong&gt; 服务后，我发现尽管程序运行正常，但我的域名解析记录却频繁失效。经过排查，我意识到罪魁祸首是 &lt;strong&gt;IPv6 临时地址（Temporary Address）&lt;/strong&gt;。这是一种为了增强用户隐私而设计的特性，系统会定期生成新的、临时的 IPv6 地址用于出站连接。当服务器的地址发生变化时，DDNS 服务来不及同步更新，就会导致域名无法解析到正确的 IP 地址。&lt;/p&gt;
-&lt;h3 id=&#34;解决方案禁用-ipv6-临时地址&#34;&gt;解决方案：禁用 IPv6 临时地址&lt;/h3&gt;
-&lt;p&gt;要解决这个问题，最直接的方法就是从系统层面禁用 IPv6 临时地址功能，强制使用稳定的、非临时的地址。&lt;/p&gt;
+&lt;h2 id="问题-1ipv6-临时地址导致域名解析不稳定"&gt;问题 1：IPv6 临时地址导致域名解析不稳定
+&lt;/h2&gt;&lt;p&gt;在启用 &lt;strong&gt;ddns-go&lt;/strong&gt; 服务后，我发现尽管程序运行正常，但我的域名解析记录却频繁失效。经过排查，我意识到罪魁祸首是 &lt;strong&gt;IPv6 临时地址（Temporary Address）&lt;/strong&gt;。这是一种为了增强用户隐私而设计的特性，系统会定期生成新的、临时的 IPv6 地址用于出站连接。当服务器的地址发生变化时，DDNS 服务来不及同步更新，就会导致域名无法解析到正确的 IP 地址。&lt;/p&gt;
+&lt;h3 id="解决方案禁用-ipv6-临时地址"&gt;解决方案：禁用 IPv6 临时地址
+&lt;/h3&gt;&lt;p&gt;要解决这个问题，最直接的方法就是从系统层面禁用 IPv6 临时地址功能，强制使用稳定的、非临时的地址。&lt;/p&gt;
 &lt;ol&gt;
 &lt;li&gt;&lt;strong&gt;编辑 sysctl 配置文件&lt;/strong&gt;：
 使用 &lt;code&gt;vim&lt;/code&gt; 或其他编辑器打开 &lt;code&gt;sysctl.conf&lt;/code&gt; 文件，该文件用于在系统启动时配置内核参数。&lt;/li&gt;
 &lt;/ol&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-sh&#34; data-lang=&#34;sh&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;sudo vim /etc/sysctl.conf
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;ol start=&#34;2&#34;&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-sh" data-lang="sh"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;sudo vim /etc/sysctl.conf
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;ol start="2"&gt;
 &lt;li&gt;&lt;strong&gt;添加配置项&lt;/strong&gt;：
 在文件末尾添加以下两行，分别用于&lt;strong&gt;全局禁用&lt;/strong&gt;和&lt;strong&gt;默认禁用&lt;/strong&gt;所有网络接口的 IPv6 临时地址功能。&lt;/li&gt;
 &lt;/ol&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-sh&#34; data-lang=&#34;sh&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;# 禁用 IPv6 临时地址&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;net.ipv6.conf.all.use_tempaddr &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#f60&#34;&gt;0&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;net.ipv6.conf.enp4s0.use_tempaddr &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#f60&#34;&gt;0&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;blockquote&gt;
-&lt;p&gt;&lt;strong&gt;注意&lt;/strong&gt;：如果只想针对特定网卡（例如 &lt;code&gt;enp4s0&lt;/code&gt;）进行配置，可以添加 &lt;code&gt;net.ipv6.conf.enp4s0.use_tempaddr = 0&lt;/code&gt;。你可以通过 &lt;code&gt;ip a&lt;/code&gt; 命令查看你机器的网卡名称。&lt;/p&gt;</description>
-    </item>
-    <item>
-      <title>【解决】Fedora42升级启动时显示kernel panic</title>
-      <link>https://kerolt.github.io/posts/linux/%E8%A7%A3%E5%86%B3fedora42%E5%8D%87%E7%BA%A7%E5%90%AF%E5%8A%A8%E6%97%B6%E6%98%BE%E7%A4%BAkernel-panic/</link>
-      <pubDate>Sun, 27 Apr 2025 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/linux/%E8%A7%A3%E5%86%B3fedora42%E5%8D%87%E7%BA%A7%E5%90%AF%E5%8A%A8%E6%97%B6%E6%98%BE%E7%A4%BAkernel-panic/</guid>
-      <description>&lt;p&gt;最近 Fedora42 更新了，因此我打算升级一下玩玩。在执行完下面的命令后：&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;sudo dnf upgrade --refresh
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;sudo dnf system-upgrade download --releasever&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#f60&#34;&gt;42&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;sudo dnf system-upgrade reboot
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;重启开机成了这样:(&lt;/p&gt;
-&lt;p&gt;
-&lt;div class=&#34;post-img-view&#34;&gt;
-  &lt;a data-fancybox=&#34;gallery&#34; href=&#34;&#34;&gt;
-    &lt;img src=&#34;&#34; alt=&#34;&#34;  /&gt;
-  &lt;/a&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-sh" data-lang="sh"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# 禁用 IPv6 临时地址&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;net.ipv6.conf.all.use_tempaddr &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;net.ipv6.conf.enp4s0.use_tempaddr &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
-&lt;/p&gt;
+&lt;/div&gt;
+ &lt;blockquote&gt;
+ &lt;p&gt;&lt;strong&gt;注意&lt;/strong&gt;：如果只想针对特定网卡（例如 &lt;code&gt;enp4s0&lt;/code&gt;）进行配置，可以添加 &lt;code&gt;net.ipv6.conf.enp4s0.use_tempaddr = 0&lt;/code&gt;。你可以通过 &lt;code&gt;ip a&lt;/code&gt; 命令查看你机器的网卡名称。&lt;/p&gt;
+
+ &lt;/blockquote&gt;
+&lt;ol start="3"&gt;
+&lt;li&gt;&lt;strong&gt;应用配置&lt;/strong&gt;：
+执行以下命令，使新配置即时生效。&lt;/li&gt;
+&lt;/ol&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-sh" data-lang="sh"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;sudo sysctl -p
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;ol start="4"&gt;
+&lt;li&gt;&lt;strong&gt;验证配置是否生效&lt;/strong&gt;：
+最后，可以通过查看特定参数的值来验证修改是否成功。如果返回 &lt;code&gt;0&lt;/code&gt;，则表示临时地址已成功禁用。&lt;/li&gt;
+&lt;/ol&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-sh" data-lang="sh"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;cat /proc/sys/net/ipv6/conf/enp4s0/use_tempaddr
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# 预期输出: 0&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h2 id="问题-2ddns-go-无法通过-systemd-启动"&gt;问题 2：ddns-go 无法通过 systemd 启动
+&lt;/h2&gt;&lt;p&gt;利用 &lt;code&gt;systemctl status ddns-go&lt;/code&gt; 查看 ddns-go 运行状态时，看到：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-text" data-lang="text"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;Unable to locate executable &amp;#39;/usr/local/bin/ddns-go&amp;#39;: Permission denied
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;Failed at step EXEC spawning /usr/local/bin/ddns-go: Permission denied
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;但是对应的文件的权限我都给了，问了问 AI 后说可能造成的原因之一为&lt;strong&gt;SELinux 阻止执行（在 Fedora 上默认开启）&lt;/strong&gt;。输入：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;sudo ausearch -m avc -ts recent &lt;span class="p"&gt;|&lt;/span&gt; grep ddns-go
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;看到有拒绝记录，说明是 SELinux 问题。&lt;/p&gt;
+&lt;h3 id="临时解决方案"&gt;临时解决方案
+&lt;/h3&gt;&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;sudo setenforce &lt;span class="m"&gt;0&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h3 id="永久解决方案"&gt;永久解决方案
+&lt;/h3&gt;&lt;p&gt;为该二进制打上正确的 SELinux 标签&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;sudo restorecon -v /usr/local/bin/ddns-go
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;之后再重启 ddns-go 服务，就 OK 了。&lt;/p&gt;
+&lt;blockquote class="alert alert-note"&gt;
+ &lt;div class="alert-header"&gt;
+ &lt;span class="alert-icon"&gt;📝&lt;/span&gt;
+ &lt;span class="alert-title"&gt;为什么会有 SELinux 相关问题？&lt;/span&gt;
+ &lt;/div&gt;
+ &lt;div class="alert-body"&gt;
+ &lt;p&gt;Linux 传统权限模型（用户/组/other + rwx）是 自主访问控制（DAC）：用户对自己文件有完全控制权；程序继承用户权限 → 一旦用户被攻破，攻击者可为所欲为&lt;/p&gt;
+&lt;p&gt;SELinux 的目标是：即使程序或用户被攻破，也要限制它能做的事&lt;/p&gt;
+&lt;p&gt;我是把 ddns-go 的可执行文件放在/usr/local/bin/下（复制过去的）&lt;/p&gt;
+&lt;p&gt;而 SELinux 有预定义的“文件上下文”：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;/usr/bin/*&lt;/code&gt; → &lt;code&gt;bin_t&lt;/code&gt;（可执行程序）&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;/usr/local/bin/*&lt;/code&gt; → 默认可能不是 &lt;code&gt;bin_t&lt;/code&gt;，尤其是手动复制进去的文件&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;所以即使文件有 &lt;code&gt;chmod +x&lt;/code&gt;，SELinux 仍可能阻止执行&lt;/p&gt;
+ &lt;/div&gt;
+ &lt;/blockquote&gt;
+&lt;h2 id="问题-3ddns-go-无法正确更新-ipv6-地址记录"&gt;问题 3：ddns-go 无法正确更新 IPv6 地址记录
+&lt;/h2&gt;&lt;p&gt;解决了 IPv6 地址变化的问题后，我发现 &lt;strong&gt;ddns-go&lt;/strong&gt; 服务依然无法正常工作，并抛出大量 DNS 相关的超时错误，例如：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-sh" data-lang="sh"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;2025/08/29 10:01:37 查询域名信息发生异常! 
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;Get &lt;span class="s2"&gt;&amp;#34;[https://alidns.aliyuncs.com/?AccessKeyId=xxxxxx](https://alidns.aliyuncs.com/?AccessKeyId=xxxxxx)&amp;#34;&lt;/span&gt;: 
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;dial tcp: lookup alidns.aliyuncs.com on x.x.x.x:53: &lt;span class="nb"&gt;read&lt;/span&gt; udp x.x.x.x:59439-&amp;gt;x.x.x.x:53: i/o timeout
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;通过分析日志，我发现服务在尝试向外部 DNS 服务器（如 &lt;code&gt;8.8.8.8&lt;/code&gt; 或 &lt;code&gt;114.114.114.114&lt;/code&gt;）发起 DNS 请求时失败了。这通常是由于&lt;strong&gt;校园网或实验室网络的防火墙策略&lt;/strong&gt;，限制了对外部公共 DNS 服务器的访问，强制所有 DNS 请求都通过内部服务器。&lt;/p&gt;
+&lt;h3 id="解决方案指定-ddns-go-使用可访问的-dns-服务器"&gt;解决方案：指定 ddns-go 使用可访问的 DNS 服务器
+&lt;/h3&gt;&lt;p&gt;由于 ddns-go 默认使用系统 DNS，而系统 DNS 可能被强制转发到内部服务器，因此我们需要在启动命令中显式指定可访问的公共 DNS 服务器。&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;编辑 ddns-go 服务文件：&lt;/p&gt;
+&lt;p&gt;打开 /etc/systemd/system/ddns-go.service 文件。&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-sh" data-lang="sh"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;sudo vim /etc/systemd/system/ddns-go.service
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;ol start="2"&gt;
+&lt;li&gt;
+&lt;p&gt;修改 ExecStart 参数：&lt;/p&gt;
+&lt;p&gt;在 ExecStart 行的末尾，添加 -dns 参数，指定一个或多个在国内访问稳定的公共 DNS，如阿里云的 223.5.5.5 和腾讯云的 119.29.29.29。&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;span class="lnt"&gt;4
+&lt;/span&gt;&lt;span class="lnt"&gt;5
+&lt;/span&gt;&lt;span class="lnt"&gt;6
+&lt;/span&gt;&lt;span class="lnt"&gt;7
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-toml" data-lang="toml"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="nx"&gt;Service&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nx"&gt;StartLimitInterval&lt;/span&gt;&lt;span class="p"&gt;=&lt;/span&gt;&lt;span class="mi"&gt;5&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nx"&gt;StartLimitBurst&lt;/span&gt;&lt;span class="p"&gt;=&lt;/span&gt;&lt;span class="mi"&gt;10&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nx"&gt;ExecStart&lt;/span&gt;&lt;span class="p"&gt;=&lt;/span&gt;&lt;span class="err"&gt;/&lt;/span&gt;&lt;span class="nx"&gt;usr&lt;/span&gt;&lt;span class="err"&gt;/&lt;/span&gt;&lt;span class="nx"&gt;local&lt;/span&gt;&lt;span class="err"&gt;/&lt;/span&gt;&lt;span class="nx"&gt;bin&lt;/span&gt;&lt;span class="err"&gt;/&lt;/span&gt;&lt;span class="nx"&gt;ddns-go&lt;/span&gt; &lt;span class="s2"&gt;&amp;#34;-l&amp;#34;&lt;/span&gt; &lt;span class="s2"&gt;&amp;#34;:9876&amp;#34;&lt;/span&gt; &lt;span class="s2"&gt;&amp;#34;-f&amp;#34;&lt;/span&gt; &lt;span class="s2"&gt;&amp;#34;300&amp;#34;&lt;/span&gt; &lt;span class="s2"&gt;&amp;#34;-cacheTimes&amp;#34;&lt;/span&gt; &lt;span class="s2"&gt;&amp;#34;5&amp;#34;&lt;/span&gt; &lt;span class="s2"&gt;&amp;#34;-c&amp;#34;&lt;/span&gt; &lt;span class="s2"&gt;&amp;#34;/root/.ddns_go_config.yaml&amp;#34;&lt;/span&gt; &lt;span class="s2"&gt;&amp;#34;-dns&amp;#34;&lt;/span&gt; &lt;span class="s2"&gt;&amp;#34;223.5.5.5&amp;#34;&lt;/span&gt; &lt;span class="s2"&gt;&amp;#34;-dns&amp;#34;&lt;/span&gt; &lt;span class="s2"&gt;&amp;#34;119.29.29.29&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="nx"&gt;Install&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="p"&gt;...&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;ol start="3"&gt;
+&lt;li&gt;
+&lt;p&gt;重新加载并重启服务：&lt;/p&gt;
+&lt;p&gt;保存文件后，重新加载 systemd 配置并重启 ddns-go 服务，使新参数生效。&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-sh" data-lang="sh"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;sudo systemctl daemon-reload
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;sudo systemctl restart ddns-go
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h2 id="问题-4电脑睡眠后网络中断无法远程连接"&gt;问题 4：电脑睡眠后网络中断，无法远程连接
+&lt;/h2&gt;&lt;p&gt;解决了域名解析问题后，我又发现一个新情况：如果服务器闲置一段时间，SSH 连接就会断开。当物理唤醒电脑后，网络连接需要一段时间才能恢复。这是因为 &lt;strong&gt;系统默认的电源管理策略&lt;/strong&gt; 会在电脑进入睡眠状态后，挂起或断开部分硬件（如网卡）以节省电量。&lt;/p&gt;
+&lt;h3 id="解决方案禁用系统休眠与闲置操作"&gt;解决方案：禁用系统休眠与闲置操作
+&lt;/h3&gt;&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-sh" data-lang="sh"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;sudo systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;为了确保服务器 24/7 在线，我们需要修改电源管理配置，禁用自动休眠。&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;编辑 systemd-logind 配置文件：&lt;/p&gt;
+&lt;p&gt;打开 /etc/systemd/logind.conf 文件，该文件用于配置用户登录和电源管理行为。&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-sh" data-lang="sh"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;sudo vim /etc/systemd/logind.conf
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;ol start="2"&gt;
+&lt;li&gt;
+&lt;p&gt;修改配置参数：&lt;/p&gt;
+&lt;p&gt;取消以下几行的注释（如果被注释），并将它们的值修改为 ignore 或 never。&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;span class="lnt"&gt;4
+&lt;/span&gt;&lt;span class="lnt"&gt;5
+&lt;/span&gt;&lt;span class="lnt"&gt;6
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-toml" data-lang="toml"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="nx"&gt;Login&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c"&gt;# 禁用闲置自动操作&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nx"&gt;IdleAction&lt;/span&gt;&lt;span class="p"&gt;=&lt;/span&gt;&lt;span class="nx"&gt;ignore&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nx"&gt;IdleActionSec&lt;/span&gt;&lt;span class="p"&gt;=&lt;/span&gt;&lt;span class="nx"&gt;never&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c"&gt;# 禁用合盖自动操作&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nx"&gt;HandleLidSwitch&lt;/span&gt;&lt;span class="p"&gt;=&lt;/span&gt;&lt;span class="nx"&gt;ignore&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;ol start="3"&gt;
+&lt;li&gt;
+&lt;p&gt;重启服务：&lt;/p&gt;
+&lt;p&gt;修改完成后，重启 systemd-logind 服务使配置生效。&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-sh" data-lang="sh"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;sudo systemctl restart systemd-logind
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;解决完上述问题后，无论是在校内还是校外，我都可以通过一个固定的域名来使用服务器了。&lt;/p&gt;</description></item><item><title>【解决】Fedora42升级启动时显示kernel panic</title><link>https://kerolt.github.io/p/%E8%A7%A3%E5%86%B3fedora42%E5%8D%87%E7%BA%A7%E5%90%AF%E5%8A%A8%E6%97%B6%E6%98%BE%E7%A4%BAkernel-panic/</link><pubDate>Sun, 27 Apr 2025 00:00:00 +0000</pubDate><guid>https://kerolt.github.io/p/%E8%A7%A3%E5%86%B3fedora42%E5%8D%87%E7%BA%A7%E5%90%AF%E5%8A%A8%E6%97%B6%E6%98%BE%E7%A4%BAkernel-panic/</guid><description>&lt;p&gt;最近 Fedora42 更新了，因此我打算升级一下玩玩。在执行完下面的命令后：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;sudo dnf upgrade --refresh
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;sudo dnf system-upgrade download --releasever&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="m"&gt;42&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;sudo dnf system-upgrade reboot
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;重启开机成了这样:(&lt;/p&gt;
+&lt;p&gt;&lt;img loading="lazy" sizes="(max-width: 767px) calc(100vw - 30px), (max-width: 1023px) 700px, (max-width: 1279px) 950px, 1232px"&gt;&lt;/p&gt;
 &lt;p&gt;在网上搜索一圈后，执行以下命令系统就 ok 了：&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;sudo dracut --regenerate-all --force
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;错误的原因可能是更新内核后没有正确生成新的 initramfs 文件，系统可能会使用旧的、不兼容的 initramfs 文件，从而导致启动失败。&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;sudo dracut --regenerate-all --force
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;错误的原因可能是更新内核后没有正确生成新的 initramfs 文件，系统可能会使用旧的、不兼容的 initramfs 文件，从而导致启动失败。&lt;/p&gt;
 &lt;p&gt;而 &lt;code&gt;dracut&lt;/code&gt; 是一个用于生成 Linux 系统 initramfs（初始内存文件系统）的工具。运行 这条命令后，&lt;code&gt;dracut&lt;/code&gt; 会重新生成与当前系统中所有已安装内核对应的 initramfs 文件。&lt;/p&gt;
-&lt;blockquote&gt;
-&lt;p&gt;参考：https://www.reddit.com/r/Fedora/comments/1hfkqnq/boot_error_after_updating_to_6124200&lt;/p&gt;
-&lt;/blockquote&gt;</description>
-    </item>
-    <item>
-      <title>解决X11下窗口拖动撕裂的一个方法</title>
-      <link>https://kerolt.github.io/posts/dev-null/%E8%A7%A3%E5%86%B3x11%E4%B8%8B%E7%AA%97%E5%8F%A3%E6%8B%96%E5%8A%A8%E6%92%95%E8%A3%82%E7%9A%84%E4%B8%80%E4%B8%AA%E6%96%B9%E6%B3%95/</link>
-      <pubDate>Tue, 03 Sep 2024 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/dev-null/%E8%A7%A3%E5%86%B3x11%E4%B8%8B%E7%AA%97%E5%8F%A3%E6%8B%96%E5%8A%A8%E6%92%95%E8%A3%82%E7%9A%84%E4%B8%80%E4%B8%AA%E6%96%B9%E6%B3%95/</guid>
-      <description>&lt;blockquote&gt;
-&lt;p&gt;Debian 系 Linux 安装 N 卡驱动参考这篇 &lt;a href=&#34;https://www.if-not-true-then-false.com/2021/debian-ubuntu-linux-mint-nvidia-guide/&#34;&gt;博客&lt;/a&gt;&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;p&gt;最近 Debian 终于是装好 nvidia 的驱动了，但是只能用在 X11 上，并且相比于不用 n 卡驱动时的 Wayland，X11 下的窗口拖动和视频播放会有比较明显的撕裂感，以下是解决的一个方法。&lt;/p&gt;</description>
-    </item>
-  </channel>
-</rss>
+
+ &lt;blockquote&gt;
+ &lt;p&gt;参考：https://www.reddit.com/r/Fedora/comments/1hfkqnq/boot_error_after_updating_to_6124200&lt;/p&gt;
+
+ &lt;/blockquote&gt;</description></item><item><title>解决X11下窗口拖动撕裂的一个方法</title><link>https://kerolt.github.io/p/%E8%A7%A3%E5%86%B3x11%E4%B8%8B%E7%AA%97%E5%8F%A3%E6%8B%96%E5%8A%A8%E6%92%95%E8%A3%82%E7%9A%84%E4%B8%80%E4%B8%AA%E6%96%B9%E6%B3%95/</link><pubDate>Tue, 03 Sep 2024 00:00:00 +0000</pubDate><guid>https://kerolt.github.io/p/%E8%A7%A3%E5%86%B3x11%E4%B8%8B%E7%AA%97%E5%8F%A3%E6%8B%96%E5%8A%A8%E6%92%95%E8%A3%82%E7%9A%84%E4%B8%80%E4%B8%AA%E6%96%B9%E6%B3%95/</guid><description>&lt;blockquote&gt;
+ &lt;p&gt;Debian 系 Linux 安装 N 卡驱动参考这篇 &lt;a class="link" href="https://www.if-not-true-then-false.com/2021/debian-ubuntu-linux-mint-nvidia-guide/" target="_blank" rel="noopener"
+ &gt;博客&lt;/a&gt;&lt;/p&gt;
+
+ &lt;/blockquote&gt;
+&lt;p&gt;最近 Debian 终于是装好 nvidia 的驱动了，但是只能用在 X11 上，并且相比于不用 n 卡驱动时的 Wayland，X11 下的窗口拖动和视频播放会有比较明显的撕裂感，以下是解决的一个方法。&lt;/p&gt;
+&lt;p&gt;修改 &lt;code&gt;/etc/X11/xorg.conf&lt;/code&gt; 文件，在屏幕相关的区域内加上：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-text" data-lang="text"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;Option &amp;#34;TripleBuffer&amp;#34; &amp;#34;true&amp;#34;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;Option &amp;#34;ForceFullCompositionPipeline&amp;#34; &amp;#34;on&amp;#34;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;Option &amp;quot;TripleBuffer&amp;quot; &amp;quot;true&amp;quot;&lt;/code&gt; 启用三重缓冲（Triple Buffering）来减少屏幕撕裂，它通过增加一个额外的缓冲区来同步视频输出和显示器的刷新率。&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;Option &amp;quot;ForceFullCompositionPipeline&amp;quot; &amp;quot;on&amp;quot;&lt;/code&gt; 用于强制使用完整的合成管线（Full Composition Pipeline）。启用这个选项可以提高性能，在某些游戏和应用程序中，它可以帮助减少延迟和提高帧率。&lt;/li&gt;
+&lt;/ul&gt;</description></item></channel></rss>

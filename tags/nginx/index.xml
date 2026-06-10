@@ -1,90 +1,462 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?>
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
-  <channel>
-    <title>Nginx on Kerolt&#39;s Blog</title>
-    <link>https://kerolt.github.io/tags/nginx/</link>
-    <description>Recent content in Nginx on Kerolt&#39;s Blog</description>
-    <image>
-      <title>Kerolt&#39;s Blog</title>
-      <url>https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</url>
-      <link>https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</link>
-    </image>
-    <generator>Hugo -- 0.158.0</generator>
-    <language>en</language>
-    <lastBuildDate>Mon, 05 Jan 2026 00:00:00 +0000</lastBuildDate>
-    <atom:link href="https://kerolt.github.io/tags/nginx/index.xml" rel="self" type="application/rss+xml" />
-    <item>
-      <title>【Nginx】location与proxy_pass配置中的斜杠差异</title>
-      <link>https://kerolt.github.io/posts/dev-null/nginxlocation%E4%B8%8Eproxy_pass%E9%85%8D%E7%BD%AE%E4%B8%AD%E7%9A%84%E6%96%9C%E6%9D%A0%E5%B7%AE%E5%BC%82/</link>
-      <pubDate>Mon, 05 Jan 2026 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/dev-null/nginxlocation%E4%B8%8Eproxy_pass%E9%85%8D%E7%BD%AE%E4%B8%AD%E7%9A%84%E6%96%9C%E6%9D%A0%E5%B7%AE%E5%BC%82/</guid>
-      <description>&lt;p&gt;Nginx 作为反向代理服务器，需要精确匹配客户端请求路径，并将请求转发到后端服务。在这个过程中：&lt;/p&gt;
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Nginx on Kerolt's Note</title><link>https://kerolt.github.io/tags/nginx/</link><description>Recent content in Nginx on Kerolt's Note</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><lastBuildDate>Mon, 05 Jan 2026 00:00:00 +0000</lastBuildDate><atom:link href="https://kerolt.github.io/tags/nginx/index.xml" rel="self" type="application/rss+xml"/><item><title>【Nginx】location与proxy_pass配置中的斜杠差异</title><link>https://kerolt.github.io/p/nginxlocation%E4%B8%8Eproxy_pass%E9%85%8D%E7%BD%AE%E4%B8%AD%E7%9A%84%E6%96%9C%E6%9D%A0%E5%B7%AE%E5%BC%82/</link><pubDate>Mon, 05 Jan 2026 00:00:00 +0000</pubDate><guid>https://kerolt.github.io/p/nginxlocation%E4%B8%8Eproxy_pass%E9%85%8D%E7%BD%AE%E4%B8%AD%E7%9A%84%E6%96%9C%E6%9D%A0%E5%B7%AE%E5%BC%82/</guid><description>&lt;p&gt;Nginx 作为反向代理服务器，需要精确匹配客户端请求路径，并将请求转发到后端服务。在这个过程中：&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;strong&gt;&lt;code&gt;location&lt;/code&gt; 指令&lt;/strong&gt;：决定哪些请求会被当前配置块处理&lt;/li&gt;
 &lt;li&gt;&lt;strong&gt;&lt;code&gt;proxy_pass&lt;/code&gt; 指令&lt;/strong&gt;：决定如何将请求转发到后端&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;而斜杠在这两个指令中的不同位置，会改变 Nginx 的匹配逻辑和路径传递行为，配置不当可能导致 404 错误、路径污染或安全风险。&lt;/p&gt;
-&lt;h2 id=&#34;1location-配置apivs-api-的核心差异&#34;&gt;1、Location 配置：&lt;code&gt;/api/&lt;/code&gt;vs &lt;code&gt;/api&lt;/code&gt; 的核心差异&lt;/h2&gt;
-&lt;h3 id=&#34;11-语法对比&#34;&gt;1.1 语法对比&lt;/h3&gt;
-&lt;table&gt;
-  &lt;thead&gt;
-      &lt;tr&gt;
-          &lt;th&gt;配置&lt;/th&gt;
-          &lt;th&gt;匹配模式&lt;/th&gt;
-          &lt;th&gt;精确要求&lt;/th&gt;
-          &lt;th&gt;示例匹配结果&lt;/th&gt;
-      &lt;/tr&gt;
-  &lt;/thead&gt;
-  &lt;tbody&gt;
-      &lt;tr&gt;
-          &lt;td&gt;&lt;code&gt;location /api/&lt;/code&gt;&lt;/td&gt;
-          &lt;td&gt;前缀匹配（带斜杠）&lt;/td&gt;
-          &lt;td&gt;必须以 &lt;code&gt;/api/&lt;/code&gt; 开头&lt;/td&gt;
-          &lt;td&gt;&lt;code&gt;/api/user&lt;/code&gt;✅  &lt;br&gt;&lt;code&gt;/api&lt;/code&gt;❌  &lt;br&gt;&lt;code&gt;/api-test&lt;/code&gt;❌&lt;/td&gt;
-      &lt;/tr&gt;
-      &lt;tr&gt;
-          &lt;td&gt;&lt;code&gt;location /api&lt;/code&gt;&lt;/td&gt;
-          &lt;td&gt;前缀匹配（无斜杠）&lt;/td&gt;
-          &lt;td&gt;以 &lt;code&gt;/api&lt;/code&gt; 开头即可&lt;/td&gt;
-          &lt;td&gt;&lt;code&gt;/api/user&lt;/code&gt;✅  &lt;br&gt;&lt;code&gt;/api&lt;/code&gt;✅  &lt;br&gt;&lt;code&gt;/api-test&lt;/code&gt;✅&lt;/td&gt;
-      &lt;/tr&gt;
-  &lt;/tbody&gt;
+&lt;h2 id="1location-配置apivs-api-的核心差异"&gt;1、Location 配置：&lt;code&gt;/api/&lt;/code&gt;vs &lt;code&gt;/api&lt;/code&gt; 的核心差异
+&lt;/h2&gt;&lt;h3 id="11-语法对比"&gt;1.1 语法对比
+&lt;/h3&gt;&lt;table&gt;
+	&lt;thead&gt;
+			&lt;tr&gt;
+					&lt;th&gt;配置&lt;/th&gt;
+					&lt;th&gt;匹配模式&lt;/th&gt;
+					&lt;th&gt;精确要求&lt;/th&gt;
+					&lt;th&gt;示例匹配结果&lt;/th&gt;
+			&lt;/tr&gt;
+	&lt;/thead&gt;
+	&lt;tbody&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;code&gt;location /api/&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;前缀匹配（带斜杠）&lt;/td&gt;
+					&lt;td&gt;必须以 &lt;code&gt;/api/&lt;/code&gt; 开头&lt;/td&gt;
+					&lt;td&gt;&lt;code&gt;/api/user&lt;/code&gt;✅ &lt;br&gt;&lt;code&gt;/api&lt;/code&gt;❌ &lt;br&gt;&lt;code&gt;/api-test&lt;/code&gt;❌&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;code&gt;location /api&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;前缀匹配（无斜杠）&lt;/td&gt;
+					&lt;td&gt;以 &lt;code&gt;/api&lt;/code&gt; 开头即可&lt;/td&gt;
+					&lt;td&gt;&lt;code&gt;/api/user&lt;/code&gt;✅ &lt;br&gt;&lt;code&gt;/api&lt;/code&gt;✅ &lt;br&gt;&lt;code&gt;/api-test&lt;/code&gt;✅&lt;/td&gt;
+			&lt;/tr&gt;
+	&lt;/tbody&gt;
 &lt;/table&gt;
-&lt;h3 id=&#34;12-语义解释&#34;&gt;1.2 语义解释&lt;/h3&gt;
-&lt;p&gt;&lt;strong&gt;&lt;code&gt;/api/&lt;/code&gt;&lt;/strong&gt;：表示一个 &amp;quot; 目录 &amp;quot; 路径，Nginx 会将其视为完整的路径段，只匹配以 &lt;code&gt;/api/&lt;/code&gt; 开头的请求。这种配置更精确，避免了意外匹配。&lt;/p&gt;
+&lt;h3 id="12-语义解释"&gt;1.2 语义解释
+&lt;/h3&gt;&lt;p&gt;&lt;strong&gt;&lt;code&gt;/api/&lt;/code&gt;&lt;/strong&gt;：表示一个 &amp;quot; 目录 &amp;quot; 路径，Nginx 会将其视为完整的路径段，只匹配以 &lt;code&gt;/api/&lt;/code&gt; 开头的请求。这种配置更精确，避免了意外匹配。&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;&lt;code&gt;/api&lt;/code&gt;&lt;/strong&gt;：表示一个 &amp;quot; 前缀字符串 &amp;ldquo;，匹配所有以 &lt;code&gt;/api&lt;/code&gt; 开头的请求，包括 &lt;code&gt;/api&lt;/code&gt; 本身、&lt;code&gt;/api/xxx&lt;/code&gt; 以及 &lt;code&gt;/api-anything&lt;/code&gt;。这种配置更宽泛，可能产生误匹配。&lt;/p&gt;
-&lt;h3 id=&#34;13-实际场景分析&#34;&gt;1.3 实际场景分析&lt;/h3&gt;
-&lt;p&gt;&lt;strong&gt;场景 1：API 接口路由（推荐使用 &lt;code&gt;/api/&lt;/code&gt;）&lt;/strong&gt;&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;# 推荐配置：精确匹配API目录&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;location /api/ &lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    proxy_pass http://backend;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;# 只处理/api/下的所有请求，不会误匹配/api-test&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#555&#34;&gt;}&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;# 不推荐：可能误匹配其他路径&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;location /api &lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;# 会匹配/api、/api/、/api-test、/api-v2等&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;# 如果后端没有/api-test接口，可能返回404或错误数据&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#555&#34;&gt;}&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;strong&gt;场景 2：静态资源目录（必须使用 &lt;code&gt;/xxx/&lt;/code&gt;）&lt;/strong&gt;&lt;/p&gt;</description>
-    </item>
-    <item>
-      <title>eBPF增强Nginx负载均衡</title>
-      <link>https://kerolt.github.io/posts/ebpf/ebpf%E5%A2%9E%E5%BC%BAnginx%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1/</link>
-      <pubDate>Tue, 21 Oct 2025 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/ebpf/ebpf%E5%A2%9E%E5%BC%BAnginx%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1/</guid>
-      <description>&lt;h2 id=&#34;nginx-负载均衡基准测试&#34;&gt;Nginx 负载均衡基准测试&lt;/h2&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-sh&#34; data-lang=&#34;sh&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;/ &lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;# wrk -c100 &amp;#34;http://172.17.0.5&amp;#34;&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Running 10s &lt;span style=&#34;color:#366&#34;&gt;test&lt;/span&gt; @ http://172.17.0.5
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#f60&#34;&gt;2&lt;/span&gt; threads and &lt;span style=&#34;color:#f60&#34;&gt;100&lt;/span&gt; connections
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  Thread Stats   Avg      Stdev     Max   +/- Stdev
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    Latency    12.31ms   12.66ms  84.49ms   82.31%
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    Req/Sec     5.71k     4.96k   12.98k    63.00%
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#f60&#34;&gt;113583&lt;/span&gt; requests in 10.04s, 17.87MB &lt;span style=&#34;color:#366&#34;&gt;read&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Requests/sec:  11313.86
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Transfer/sec:      1.78MB
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;blockquote&gt;
-&lt;p&gt;&lt;strong&gt;Latency（延迟）&lt;/strong&gt;&lt;/p&gt;
+&lt;h3 id="13-实际场景分析"&gt;1.3 实际场景分析
+&lt;/h3&gt;&lt;p&gt;&lt;strong&gt;场景 1：API 接口路由（推荐使用 &lt;code&gt;/api/&lt;/code&gt;）&lt;/strong&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt; 1
+&lt;/span&gt;&lt;span class="lnt"&gt; 2
+&lt;/span&gt;&lt;span class="lnt"&gt; 3
+&lt;/span&gt;&lt;span class="lnt"&gt; 4
+&lt;/span&gt;&lt;span class="lnt"&gt; 5
+&lt;/span&gt;&lt;span class="lnt"&gt; 6
+&lt;/span&gt;&lt;span class="lnt"&gt; 7
+&lt;/span&gt;&lt;span class="lnt"&gt; 8
+&lt;/span&gt;&lt;span class="lnt"&gt; 9
+&lt;/span&gt;&lt;span class="lnt"&gt;10
+&lt;/span&gt;&lt;span class="lnt"&gt;11
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-shell" data-lang="shell"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# 推荐配置：精确匹配API目录&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;location /api/ &lt;span class="o"&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; proxy_pass http://backend&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="c1"&gt;# 只处理/api/下的所有请求，不会误匹配/api-test&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="o"&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# 不推荐：可能误匹配其他路径&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;location /api &lt;span class="o"&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="c1"&gt;# 会匹配/api、/api/、/api-test、/api-v2等&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="c1"&gt;# 如果后端没有/api-test接口，可能返回404或错误数据&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="o"&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;&lt;strong&gt;场景 2：静态资源目录（必须使用 &lt;code&gt;/xxx/&lt;/code&gt;）&lt;/strong&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt; 1
+&lt;/span&gt;&lt;span class="lnt"&gt; 2
+&lt;/span&gt;&lt;span class="lnt"&gt; 3
+&lt;/span&gt;&lt;span class="lnt"&gt; 4
+&lt;/span&gt;&lt;span class="lnt"&gt; 5
+&lt;/span&gt;&lt;span class="lnt"&gt; 6
+&lt;/span&gt;&lt;span class="lnt"&gt; 7
+&lt;/span&gt;&lt;span class="lnt"&gt; 8
+&lt;/span&gt;&lt;span class="lnt"&gt; 9
+&lt;/span&gt;&lt;span class="lnt"&gt;10
+&lt;/span&gt;&lt;span class="lnt"&gt;11
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-shell" data-lang="shell"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# 静态文件目录，必须带斜杠&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;location /static/ &lt;span class="o"&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="nb"&gt;alias&lt;/span&gt; /path/to/static/&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="c1"&gt;# 确保只匹配/static/目录下的文件&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="o"&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# 错误配置：可能误匹配静态文件&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;location /static &lt;span class="o"&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="c1"&gt;# 会匹配/static、/static/、/static-file.txt&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="c1"&gt;# 如果存在/static-file.txt文件，可能被错误处理&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="o"&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h3 id="14-优先级与冲突处理"&gt;1.4 优先级与冲突处理
+&lt;/h3&gt;&lt;p&gt;当同时存在多个 location 时，Nginx 按&lt;strong&gt;最长前缀匹配&lt;/strong&gt;原则。但需要注意：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;location /api/&lt;/code&gt; 和 &lt;code&gt;location /api&lt;/code&gt; 可能同时匹配 &lt;code&gt;/api/user&lt;/code&gt;，此时 &lt;code&gt;/api/&lt;/code&gt; 优先级更高（更长匹配）&lt;/li&gt;
+&lt;li&gt;建议避免同时配置，以免产生预期外的匹配结果&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="2proxy_pass-配置斜杠在-url-末尾的影响"&gt;2、Proxy_pass 配置：斜杠在 URL 末尾的影响
+&lt;/h2&gt;&lt;h3 id="21-核心区别对比"&gt;2.1 核心区别对比
+&lt;/h3&gt;&lt;table&gt;
+	&lt;thead&gt;
+			&lt;tr&gt;
+					&lt;th&gt;配置方式&lt;/th&gt;
+					&lt;th&gt;后端接收的路径&lt;/th&gt;
+					&lt;th&gt;URI 传递行为&lt;/th&gt;
+					&lt;th&gt;适用场景&lt;/th&gt;
+			&lt;/tr&gt;
+	&lt;/thead&gt;
+	&lt;tbody&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;code&gt;proxy_pass http://127.0.0.1:8080&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;保留原始 URI&lt;/td&gt;
+					&lt;td&gt;传递完整路径&lt;/td&gt;
+					&lt;td&gt;常规代理，需要保留路径上下文&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;code&gt;proxy_pass http://127.0.0.1:8080/&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;去除 location 匹配部分&lt;/td&gt;
+					&lt;td&gt;只传递 location 后的部分&lt;/td&gt;
+					&lt;td&gt;路径重写，去除前缀&lt;/td&gt;
+			&lt;/tr&gt;
+	&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h3 id="22-具体行为演示"&gt;2.2 具体行为演示
+&lt;/h3&gt;&lt;p&gt;假设配置：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;span class="lnt"&gt;4
+&lt;/span&gt;&lt;span class="lnt"&gt;5
+&lt;/span&gt;&lt;span class="lnt"&gt;6
+&lt;/span&gt;&lt;span class="lnt"&gt;7
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-shell" data-lang="shell"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;location /api/ &lt;span class="o"&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="c1"&gt;# 配置1：不带斜杠&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; proxy_pass http://127.0.0.1:8080&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; 
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="c1"&gt;# 配置2：带斜杠&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="c1"&gt;# proxy_pass http://127.0.0.1:8080/;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="o"&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;请求路径映射结果：&lt;/p&gt;
+&lt;table&gt;
+	&lt;thead&gt;
+			&lt;tr&gt;
+					&lt;th&gt;客户端请求&lt;/th&gt;
+					&lt;th&gt;配置 1（不带/）→ 后端路径&lt;/th&gt;
+					&lt;th&gt;配置 2（带/）→ 后端路径&lt;/th&gt;
+			&lt;/tr&gt;
+	&lt;/thead&gt;
+	&lt;tbody&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;code&gt;/api/user&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;&lt;code&gt;/api/user&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;&lt;code&gt;/user&lt;/code&gt;&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;code&gt;/api/user/list&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;&lt;code&gt;/api/user/list&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;&lt;code&gt;/user/list&lt;/code&gt;&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;code&gt;/api/&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;&lt;code&gt;/api/&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;&lt;code&gt;/&lt;/code&gt;&lt;/td&gt;
+			&lt;/tr&gt;
+	&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;&lt;strong&gt;关键规则&lt;/strong&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;&lt;code&gt;proxy_pass&lt;/code&gt; 末尾无斜杠&lt;/strong&gt;：将 &lt;code&gt;location&lt;/code&gt; 匹配的完整路径传递给后端&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;&lt;code&gt;proxy_pass&lt;/code&gt; 末尾有斜杠&lt;/strong&gt;：将 &lt;code&gt;location&lt;/code&gt; 匹配部分&lt;strong&gt;去除&lt;/strong&gt;，只传递剩余部分&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id="23-实际应用场景"&gt;2.3 实际应用场景
+&lt;/h3&gt;&lt;p&gt;&lt;strong&gt;场景 1：后端服务需要完整路径（推荐配置 1）&lt;/strong&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;span class="lnt"&gt;4
+&lt;/span&gt;&lt;span class="lnt"&gt;5
+&lt;/span&gt;&lt;span class="lnt"&gt;6
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-shell" data-lang="shell"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# 后端Spring Boot应用：@RequestMapping(&amp;#34;/api&amp;#34;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;location /api/ &lt;span class="o"&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; proxy_pass http://127.0.0.1:8080&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="c1"&gt;# 请求/api/user → 后端收到/api/user&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="c1"&gt;# Controller的@GetMapping(&amp;#34;/user&amp;#34;)可以正常匹配&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="o"&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;&lt;strong&gt;场景 2：后端服务无前缀（使用配置 2）&lt;/strong&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;span class="lnt"&gt;4
+&lt;/span&gt;&lt;span class="lnt"&gt;5
+&lt;/span&gt;&lt;span class="lnt"&gt;6
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-shell" data-lang="shell"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# 后端服务直接处理/user路径&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;location /api/ &lt;span class="o"&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; proxy_pass http://127.0.0.1:8080/&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="c1"&gt;# 请求/api/user → 后端收到/user&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="c1"&gt;# 后端Controller：@GetMapping(&amp;#34;/user&amp;#34;)直接匹配&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="o"&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;&lt;strong&gt;场景 3：路径重写场景&lt;/strong&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;span class="lnt"&gt;4
+&lt;/span&gt;&lt;span class="lnt"&gt;5
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-shell" data-lang="shell"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# 将/static映射到后端的/static目录&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;location /static/ &lt;span class="o"&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; proxy_pass http://127.0.0.1:8080/static/&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="c1"&gt;# 请求/static/css/style.css → 后端收到/static/css/style.css&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="o"&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h3 id="24-常见误区"&gt;2.4 常见误区
+&lt;/h3&gt;&lt;p&gt;&lt;strong&gt;误区 1&lt;/strong&gt;：认为 &lt;code&gt;proxy_pass&lt;/code&gt; 的斜杠只是格式问题，实际效果相同&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;误区 2&lt;/strong&gt;：混淆 &lt;code&gt;location&lt;/code&gt; 斜杠和 &lt;code&gt;proxy_pass&lt;/code&gt; 斜杠的作用&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;location /api/&lt;/code&gt; 的斜杠：影响路径匹配规则&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;proxy_pass http://backend/&lt;/code&gt; 的斜杠：影响 URI 传递行为&lt;/li&gt;
+&lt;li&gt;两者是&lt;strong&gt;独立&lt;/strong&gt;的配置项&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="3综合配置location-与-proxy_pass-的协同工作"&gt;3、综合配置：Location 与 Proxy_pass 的协同工作
+&lt;/h2&gt;&lt;h3 id="31-推荐的最佳实践组合"&gt;3.1 推荐的最佳实践组合
+&lt;/h3&gt;&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt; 1
+&lt;/span&gt;&lt;span class="lnt"&gt; 2
+&lt;/span&gt;&lt;span class="lnt"&gt; 3
+&lt;/span&gt;&lt;span class="lnt"&gt; 4
+&lt;/span&gt;&lt;span class="lnt"&gt; 5
+&lt;/span&gt;&lt;span class="lnt"&gt; 6
+&lt;/span&gt;&lt;span class="lnt"&gt; 7
+&lt;/span&gt;&lt;span class="lnt"&gt; 8
+&lt;/span&gt;&lt;span class="lnt"&gt; 9
+&lt;/span&gt;&lt;span class="lnt"&gt;10
+&lt;/span&gt;&lt;span class="lnt"&gt;11
+&lt;/span&gt;&lt;span class="lnt"&gt;12
+&lt;/span&gt;&lt;span class="lnt"&gt;13
+&lt;/span&gt;&lt;span class="lnt"&gt;14
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-shell" data-lang="shell"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# 场景：API网关，精确匹配API路径并保留完整上下文&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;location /api/ &lt;span class="o"&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; proxy_pass http://127.0.0.1:8080&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="c1"&gt;# 匹配规则：只处理/api/开头的请求&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="c1"&gt;# 路径传递：保留完整路径（/api/user → /api/user）&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="c1"&gt;# 后端服务可以正常处理带前缀的路径&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="o"&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# 场景：静态资源代理&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;location /static/ &lt;span class="o"&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; proxy_pass http://127.0.0.1:8080/static/&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="c1"&gt;# 匹配规则：只处理/static/目录&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="c1"&gt;# 路径传递：保留相对路径（/static/css/style.css → /static/css/style.css）&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="o"&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h3 id="32-错误配置示例"&gt;3.2 错误配置示例
+&lt;/h3&gt;&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt; 1
+&lt;/span&gt;&lt;span class="lnt"&gt; 2
+&lt;/span&gt;&lt;span class="lnt"&gt; 3
+&lt;/span&gt;&lt;span class="lnt"&gt; 4
+&lt;/span&gt;&lt;span class="lnt"&gt; 5
+&lt;/span&gt;&lt;span class="lnt"&gt; 6
+&lt;/span&gt;&lt;span class="lnt"&gt; 7
+&lt;/span&gt;&lt;span class="lnt"&gt; 8
+&lt;/span&gt;&lt;span class="lnt"&gt; 9
+&lt;/span&gt;&lt;span class="lnt"&gt;10
+&lt;/span&gt;&lt;span class="lnt"&gt;11
+&lt;/span&gt;&lt;span class="lnt"&gt;12
+&lt;/span&gt;&lt;span class="lnt"&gt;13
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-shell" data-lang="shell"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# 问题配置：可能产生路径污染&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;location /api &lt;span class="o"&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; proxy_pass http://127.0.0.1:8080/&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="c1"&gt;# 问题1：会匹配/api-test等非API路径&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="c1"&gt;# 问题2：路径被重写（/api/user → /user）&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="c1"&gt;# 如果后端没有/user接口，返回404&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="o"&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# 正确改进方案&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;location /api/ &lt;span class="o"&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; proxy_pass http://127.0.0.1:8080&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="c1"&gt;# 或根据后端需求选择是否带斜杠&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="o"&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h3 id="33-调试与验证方法"&gt;3.3 调试与验证方法
+&lt;/h3&gt;&lt;p&gt;&lt;strong&gt;方法 1：查看 Nginx 访问日志&lt;/strong&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-shell" data-lang="shell"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# 在nginx.conf中配置日志格式&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;log_format main &lt;span class="s1"&gt;&amp;#39;$remote_addr - $request - $upstream_addr&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;&lt;strong&gt;方法 2：后端服务日志查看&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;查看后端应用日志，确认实际接收的请求路径&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;方法 3：使用 curl 测试&lt;/strong&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-shell" data-lang="shell"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# 测试不同路径的响应&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;curl -v http://nginx-host/api/user
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;curl -v http://nginx-host/api
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;&lt;strong&gt;方法 4：添加调试 header&lt;/strong&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;span class="lnt"&gt;4
+&lt;/span&gt;&lt;span class="lnt"&gt;5
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-shell" data-lang="shell"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;location /api/ &lt;span class="o"&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; proxy_pass http://127.0.0.1:8080&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; proxy_set_header X-Original-URI &lt;span class="nv"&gt;$request_uri&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="c1"&gt;# 在header中查看原始URI&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="o"&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h2 id="4总结与最佳实践"&gt;4、总结与最佳实践
+&lt;/h2&gt;&lt;h3 id="41-核心要点总结"&gt;4.1 核心要点总结
+&lt;/h3&gt;&lt;table&gt;
+	&lt;thead&gt;
+			&lt;tr&gt;
+					&lt;th&gt;配置项&lt;/th&gt;
+					&lt;th&gt;关键规则&lt;/th&gt;
+					&lt;th&gt;推荐做法&lt;/th&gt;
+			&lt;/tr&gt;
+	&lt;/thead&gt;
+	&lt;tbody&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;code&gt;location /api/&lt;/code&gt;vs &lt;code&gt;/api&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;&lt;code&gt;/api/&lt;/code&gt; 是目录匹配，更精确；&lt;code&gt;/api&lt;/code&gt; 是前缀匹配，更宽泛&lt;/td&gt;
+					&lt;td&gt;&lt;strong&gt;API 路由优先用 &lt;code&gt;/api/&lt;/code&gt;&lt;/strong&gt;，避免误匹配&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;code&gt;proxy_pass&lt;/code&gt; 末尾斜杠&lt;/td&gt;
+					&lt;td&gt;无斜杠保留完整路径，有斜杠去除前缀&lt;/td&gt;
+					&lt;td&gt;&lt;strong&gt;根据后端需求选择&lt;/strong&gt;，默认建议保留完整路径&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;组合使用&lt;/td&gt;
+					&lt;td&gt;两者独立作用，需协同考虑&lt;/td&gt;
+					&lt;td&gt;明确业务需求，测试验证路径映射&lt;/td&gt;
+			&lt;/tr&gt;
+	&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h3 id="42-配置原则"&gt;4.2 配置原则
+&lt;/h3&gt;&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;明确性优先&lt;/strong&gt;：配置应明确表达意图，避免模糊匹配&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;测试驱动&lt;/strong&gt;：部署前用真实请求测试所有路径&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;文档注释&lt;/strong&gt;：在配置文件中添加注释说明匹配逻辑和路径传递规则&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;团队约定&lt;/strong&gt;：建立统一的配置规范，减少理解成本&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h3 id="43-常见问题速查"&gt;4.3 常见问题速查
+&lt;/h3&gt;&lt;table&gt;
+	&lt;thead&gt;
+			&lt;tr&gt;
+					&lt;th&gt;问题现象&lt;/th&gt;
+					&lt;th&gt;可能原因&lt;/th&gt;
+					&lt;th&gt;解决方案&lt;/th&gt;
+			&lt;/tr&gt;
+	&lt;/thead&gt;
+	&lt;tbody&gt;
+			&lt;tr&gt;
+					&lt;td&gt;访问 &lt;code&gt;/api&lt;/code&gt; 返回 404&lt;/td&gt;
+					&lt;td&gt;&lt;code&gt;location /api/&lt;/code&gt; 不匹配 &lt;code&gt;/api&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;添加 &lt;code&gt;location = /api&lt;/code&gt; 或重定向&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;code&gt;/api-test&lt;/code&gt; 被错误代理&lt;/td&gt;
+					&lt;td&gt;使用了 &lt;code&gt;location /api&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;改为 &lt;code&gt;location /api/&lt;/code&gt;&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;后端收到错误路径&lt;/td&gt;
+					&lt;td&gt;&lt;code&gt;proxy_pass&lt;/code&gt; 斜杠配置错误&lt;/td&gt;
+					&lt;td&gt;根据后端需求调整斜杠&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;路径污染&lt;/td&gt;
+					&lt;td&gt;无斜杠前缀匹配过宽&lt;/td&gt;
+					&lt;td&gt;使用带斜杠的精确匹配&lt;/td&gt;
+			&lt;/tr&gt;
+	&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h2 id="写在最后"&gt;写在最后
+&lt;/h2&gt;&lt;p&gt;Nginx 配置中的斜杠看似简单，实则体现了“精确配置”的工程哲学。在实际项目中，建议：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;理解原理&lt;/strong&gt;：不要死记硬背，理解每个斜杠的语义含义&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;小步验证&lt;/strong&gt;：每次修改配置后，用真实请求验证效果&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;监控告警&lt;/strong&gt;：配置日志监控，及时发现异常匹配&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;版本控制&lt;/strong&gt;：将 Nginx 配置纳入版本管理，便于追溯和回滚&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>eBPF增强Nginx负载均衡</title><link>https://kerolt.github.io/p/ebpf%E5%A2%9E%E5%BC%BAnginx%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1/</link><pubDate>Tue, 21 Oct 2025 00:00:00 +0000</pubDate><guid>https://kerolt.github.io/p/ebpf%E5%A2%9E%E5%BC%BAnginx%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1/</guid><description>&lt;h2 id="nginx-负载均衡基准测试"&gt;Nginx 负载均衡基准测试
+&lt;/h2&gt;&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;span class="lnt"&gt;4
+&lt;/span&gt;&lt;span class="lnt"&gt;5
+&lt;/span&gt;&lt;span class="lnt"&gt;6
+&lt;/span&gt;&lt;span class="lnt"&gt;7
+&lt;/span&gt;&lt;span class="lnt"&gt;8
+&lt;/span&gt;&lt;span class="lnt"&gt;9
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-sh" data-lang="sh"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;/ &lt;span class="c1"&gt;# wrk -c100 &amp;#34;http://172.17.0.5&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;Running 10s &lt;span class="nb"&gt;test&lt;/span&gt; @ http://172.17.0.5
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="m"&gt;2&lt;/span&gt; threads and &lt;span class="m"&gt;100&lt;/span&gt; connections
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; Thread Stats Avg Stdev Max +/- Stdev
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; Latency 12.31ms 12.66ms 84.49ms 82.31%
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; Req/Sec 5.71k 4.96k 12.98k 63.00%
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="m"&gt;113583&lt;/span&gt; requests in 10.04s, 17.87MB &lt;span class="nb"&gt;read&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;Requests/sec: 11313.86
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;Transfer/sec: 1.78MB
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+ &lt;blockquote&gt;
+ &lt;p&gt;&lt;strong&gt;Latency（延迟）&lt;/strong&gt;&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;strong&gt;Avg 12.31ms&lt;/strong&gt;：平均每个请求的响应时间为 &lt;strong&gt;12.31 毫秒&lt;/strong&gt;&lt;/li&gt;
 &lt;li&gt;&lt;strong&gt;Stdev 12.66ms&lt;/strong&gt;：标准差说明响应时间波动较大&lt;/li&gt;
@@ -98,8 +470,310 @@
 &lt;li&gt;&lt;strong&gt;Max 12.98k&lt;/strong&gt;：单个线程的最高瞬时请求速率为 12.98k/s&lt;/li&gt;
 &lt;li&gt;&lt;strong&gt;63.00% +/- Stdev&lt;/strong&gt;：约 63% 的样本在这个范围内&lt;/li&gt;
 &lt;/ul&gt;
-&lt;/blockquote&gt;
-&lt;p&gt;接下来我们利用套接字 eBPF 程序优化&lt;/p&gt;</description>
-    </item>
-  </channel>
-</rss>
+
+ &lt;/blockquote&gt;
+&lt;p&gt;接下来我们利用套接字 eBPF 程序优化&lt;/p&gt;
+&lt;h2 id="理解-nginx-负载均衡的本质"&gt;理解 Nginx 负载均衡的本质
+&lt;/h2&gt;&lt;p&gt;Nginx 作为反向代理或负载均衡器，本质上是：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;从客户端接收请求&lt;/strong&gt;（通过 &lt;code&gt;accept()&lt;/code&gt; 建立 TCP 连接）&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;选择一个上游后端（upstream server）&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;在用户态发起一个新的 TCP 连接&lt;/strong&gt; 到该后端&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;在两个 socket 之间中转数据&lt;/strong&gt;（前端 &amp;lt;-&amp;gt; 后端）&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;关键点：Nginx 的负载均衡策略（如 round robin、ip_hash）在&lt;strong&gt;用户态&lt;/strong&gt;决定；而实际的数据流是&lt;strong&gt;两个独立的 socket&lt;/strong&gt;，中间的数据转发也在用户态进行（效率上有损）。&lt;/p&gt;
+&lt;p&gt;当我们引入 &lt;strong&gt;eBPF（extended Berkeley Packet Filter）&lt;/strong&gt; 时，目标往往是：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;把负载均衡逻辑下放到内核态&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;减少 Nginx 用户态转发开销&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;实现更快的流量分发（零拷贝、低延迟）&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;例如：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;用 eBPF 程序在 &lt;strong&gt;XDP&lt;/strong&gt; 或 &lt;strong&gt;TC ingress hook&lt;/strong&gt; 阶段直接选择后端；&lt;/li&gt;
+&lt;li&gt;或者使用 &lt;strong&gt;sockmap/sockhash&lt;/strong&gt; 在内核中直接“转发”两个 socket 之间的数据。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="使用-socket-映射转发网络包"&gt;使用 socket 映射转发网络包
+&lt;/h2&gt;&lt;p&gt;&lt;strong&gt;socket 映射&lt;/strong&gt;（socket map）是 eBPF 中的一种 &lt;strong&gt;BPF map&lt;/strong&gt; 类型，它可以在内核中保存 &lt;strong&gt;socket 的引用&lt;/strong&gt;（即 TCP 连接对象）， 从而允许 eBPF 程序直接操作和转发这些连接上的数据。它有两种形式：&lt;/p&gt;
+&lt;table&gt;
+	&lt;thead&gt;
+			&lt;tr&gt;
+					&lt;th&gt;类型&lt;/th&gt;
+					&lt;th&gt;名称&lt;/th&gt;
+					&lt;th&gt;特点&lt;/th&gt;
+			&lt;/tr&gt;
+	&lt;/thead&gt;
+	&lt;tbody&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;code&gt;BPF_MAP_TYPE_SOCKMAP&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;sockmap&lt;/td&gt;
+					&lt;td&gt;数组结构，按索引存 socket&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;code&gt;BPF_MAP_TYPE_SOCKHASH&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;sockhash&lt;/td&gt;
+					&lt;td&gt;哈希结构，可按 key 查找 socket&lt;/td&gt;
+			&lt;/tr&gt;
+	&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;可以理解为：&lt;strong&gt;sockmap/sockhash = 一个“连接路由表”，存放 &lt;code&gt;&amp;lt;key, socket&amp;gt;&lt;/code&gt; 映射关系。 让 eBPF 程序在内核中知道“哪个 key 对应哪个 socket”&lt;/strong&gt;。&lt;/p&gt;
+&lt;hr&gt;
+&lt;p&gt;传统用户态转发的性能瓶颈，以 Nginx 为例：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-fallback" data-lang="fallback"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;client socket → Nginx 用户态 → upstream socket
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;数据流需要经过：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;2 次系统调用（recv + send）&lt;/li&gt;
+&lt;li&gt;2 次上下文切换（内核↔用户态）&lt;/li&gt;
+&lt;li&gt;1 次数据拷贝（内核缓冲区↔用户缓冲区）&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;当并发量很高（比如 wrk 10k QPS）时，这个过程就成为瓶颈。&lt;/p&gt;
+&lt;p&gt;于是 Linux 引入了 &lt;strong&gt;socket 映射 + SK_MSG eBPF 程序&lt;/strong&gt;可以直接在内核中完成转发：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;把所有连接（client 和 upstream）的 socket 引用注册进 sockmap；&lt;/li&gt;
+&lt;li&gt;eBPF 程序在发送路径中（&lt;code&gt;BPF_PROG_TYPE_SK_MSG&lt;/code&gt;）执行；&lt;/li&gt;
+&lt;li&gt;程序从 sockmap 中查找目标 socket；&lt;/li&gt;
+&lt;li&gt;内核直接把数据从一个 socket 发送到另一个 socket —— &lt;strong&gt;零拷贝转发&lt;/strong&gt;。&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;在 eBPF 优化体系中：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;控制面（Control Plane）&lt;/strong&gt;：决定怎么转发（谁转发给谁） → 用户态（Nginx）&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;数据面（Data Plane）&lt;/strong&gt;：实际执行转发 → 内核态（eBPF）&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;socket 映射就是两者的“桥梁”：Nginx 负责把 socket 注册进 sockmap（告诉内核：client_fd 对应 upstream_fd），eBPF 程序负责从 sockmap 中查找目标并完成转发。&lt;/p&gt;
+&lt;p&gt;这种模式的好处是：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;eBPF 不需要自己维护连接；&lt;/li&gt;
+&lt;li&gt;用户态应用可以动态调整映射；&lt;/li&gt;
+&lt;li&gt;内核可以高性能地完成数据转发。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr&gt;
+&lt;p&gt;数据流简化示意图如下：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;传统 Nginx 转发&lt;/li&gt;
+&lt;/ol&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;span class="lnt"&gt;4
+&lt;/span&gt;&lt;span class="lnt"&gt;5
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-fallback" data-lang="fallback"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;[Client Socket]
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; ↓ recv()
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;[用户态缓冲区]
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; ↓ send()
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;[Upstream Socket]
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;ol start="2"&gt;
+&lt;li&gt;eBPF + socket 映射优化后&lt;/li&gt;
+&lt;/ol&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;span class="lnt"&gt;4
+&lt;/span&gt;&lt;span class="lnt"&gt;5
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-fallback" data-lang="fallback"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;[Client Socket]
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; ↓ eBPF 程序 (SK_MSG)
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; ↘︎ 查找 sockmap[key]
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; ↓
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; [Upstream Socket]
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;整个转发在内核中完成，无需进入 Nginx 用户态。&lt;/p&gt;
+&lt;hr&gt;
+&lt;p&gt;那优化的步骤如下：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;创建套接字映射；&lt;/li&gt;
+&lt;li&gt;在 &lt;code&gt;BPF_PROG_TYPE_SOCK_OPS&lt;/code&gt; 类型的 eBPF 程序中，将新创建的套接字存入套接字映射中；&lt;/li&gt;
+&lt;li&gt;在流解析类的 eBPF 程序 (如 &lt;code&gt;BPF_PROG_TYPE_SK_SKB&lt;/code&gt; 或 &lt;code&gt;BPF_PROG_TYPE_SK_MSG&lt;/code&gt; ) 中，从套接字映射中提取套接字信息，并调用 BPF 辅助函数转发网络包;&lt;/li&gt;
+&lt;li&gt;加载并挂载 eBPF 程序到套接字事件。&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h2 id="socket-映射"&gt;socket 映射
+&lt;/h2&gt;&lt;p&gt;这里使用 &lt;strong&gt;socket 映射&lt;/strong&gt;（socket map）中的一种 BPF Map 类型：&lt;code&gt;BPF_MAP_TYPE_SOCKHASH&lt;/code&gt;，它的值总是套接字文件描述符，而键则需要我们去定义。&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt; 1
+&lt;/span&gt;&lt;span class="lnt"&gt; 2
+&lt;/span&gt;&lt;span class="lnt"&gt; 3
+&lt;/span&gt;&lt;span class="lnt"&gt; 4
+&lt;/span&gt;&lt;span class="lnt"&gt; 5
+&lt;/span&gt;&lt;span class="lnt"&gt; 6
+&lt;/span&gt;&lt;span class="lnt"&gt; 7
+&lt;/span&gt;&lt;span class="lnt"&gt; 8
+&lt;/span&gt;&lt;span class="lnt"&gt; 9
+&lt;/span&gt;&lt;span class="lnt"&gt;10
+&lt;/span&gt;&lt;span class="lnt"&gt;11
+&lt;/span&gt;&lt;span class="lnt"&gt;12
+&lt;/span&gt;&lt;span class="lnt"&gt;13
+&lt;/span&gt;&lt;span class="lnt"&gt;14
+&lt;/span&gt;&lt;span class="lnt"&gt;15
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-c" data-lang="c"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="k"&gt;typedef&lt;/span&gt; &lt;span class="k"&gt;struct&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="n"&gt;__u32&lt;/span&gt; &lt;span class="n"&gt;source_ip&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="n"&gt;__u32&lt;/span&gt; &lt;span class="n"&gt;dest_ip&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="n"&gt;__u16&lt;/span&gt; &lt;span class="n"&gt;source_port&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="n"&gt;__u16&lt;/span&gt; &lt;span class="n"&gt;dest_port&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="n"&gt;__u32&lt;/span&gt; &lt;span class="n"&gt;protocol&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="p"&gt;}&lt;/span&gt; &lt;span class="n"&gt;SockKey&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="k"&gt;struct&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="nf"&gt;__uint&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;type&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;BPF_MAP_TYPE_SOCKHASH&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="nf"&gt;__uint&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;key_size&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="k"&gt;sizeof&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;SockKey&lt;/span&gt;&lt;span class="p"&gt;));&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="nf"&gt;__uint&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;value_size&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="k"&gt;sizeof&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;int&lt;/span&gt;&lt;span class="p"&gt;));&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="nf"&gt;__uint&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;max_entries&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;65535&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="nf"&gt;__uint&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;map_flags&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="p"&gt;}&lt;/span&gt; &lt;span class="n"&gt;sock_ops_map&lt;/span&gt; &lt;span class="nf"&gt;SEC&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;#34;.maps&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;&lt;code&gt;BPF_PROG_TYPE_SOCK_OPS&lt;/code&gt; 是 &lt;strong&gt;内核套接字操作回调类型&lt;/strong&gt;的 eBPF 程序，它能在 &lt;strong&gt;TCP 连接的生命周期事件&lt;/strong&gt;被触发时执行，包括：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;BPF_SOCK_OPS_PASSIVE_ESTABLISHED_CB&lt;/code&gt;：被动连接建立（如服务器 accept）&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;BPF_SOCK_OPS_ACTIVE_ESTABLISHED_CB&lt;/code&gt;：主动连接建立（如客户端 connect）&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;BPF_SOCK_OPS_TCP_CLOSE_CB&lt;/code&gt;：连接关闭&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;BPF_SOCK_OPS_STATE_CB&lt;/code&gt;：状态变化&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;也就是说，它可以跟踪 TCP socket 的整个生命周期，在&lt;strong&gt;连接建立/关闭时获取 socket 的五元组信息&lt;/strong&gt;，并把 socket 存入 sockhash，从而让 &lt;strong&gt;内核态 eBPF 数据面程序（如 SK_MSG）可以直接高效地查找和转发 socket 数据&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;需要注意的是，&lt;code&gt;BPF_PROG_TYPE_SOCK_OPS&lt;/code&gt; 程序跟踪了所有类型的套接字操作，我们只需要把&lt;strong&gt;新创建&lt;/strong&gt;的套接字更新到映射中。&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt; 1
+&lt;/span&gt;&lt;span class="lnt"&gt; 2
+&lt;/span&gt;&lt;span class="lnt"&gt; 3
+&lt;/span&gt;&lt;span class="lnt"&gt; 4
+&lt;/span&gt;&lt;span class="lnt"&gt; 5
+&lt;/span&gt;&lt;span class="lnt"&gt; 6
+&lt;/span&gt;&lt;span class="lnt"&gt; 7
+&lt;/span&gt;&lt;span class="lnt"&gt; 8
+&lt;/span&gt;&lt;span class="lnt"&gt; 9
+&lt;/span&gt;&lt;span class="lnt"&gt;10
+&lt;/span&gt;&lt;span class="lnt"&gt;11
+&lt;/span&gt;&lt;span class="lnt"&gt;12
+&lt;/span&gt;&lt;span class="lnt"&gt;13
+&lt;/span&gt;&lt;span class="lnt"&gt;14
+&lt;/span&gt;&lt;span class="lnt"&gt;15
+&lt;/span&gt;&lt;span class="lnt"&gt;16
+&lt;/span&gt;&lt;span class="lnt"&gt;17
+&lt;/span&gt;&lt;span class="lnt"&gt;18
+&lt;/span&gt;&lt;span class="lnt"&gt;19
+&lt;/span&gt;&lt;span class="lnt"&gt;20
+&lt;/span&gt;&lt;span class="lnt"&gt;21
+&lt;/span&gt;&lt;span class="lnt"&gt;22
+&lt;/span&gt;&lt;span class="lnt"&gt;23
+&lt;/span&gt;&lt;span class="lnt"&gt;24
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-c" data-lang="c"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nf"&gt;SEC&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;#34;sockops&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="kt"&gt;int&lt;/span&gt; &lt;span class="nf"&gt;bpf_sockmap&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="k"&gt;struct&lt;/span&gt; &lt;span class="n"&gt;bpf_sock_ops&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="n"&gt;sockops&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="c1"&gt;// 只处理 IPv4 连接
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;sockops&lt;/span&gt;&lt;span class="o"&gt;-&amp;gt;&lt;/span&gt;&lt;span class="n"&gt;family&lt;/span&gt; &lt;span class="o"&gt;!=&lt;/span&gt; &lt;span class="n"&gt;AF_INET&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;BPF_OK&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="c1"&gt;// 只处理已建立的连接
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;sockops&lt;/span&gt;&lt;span class="o"&gt;-&amp;gt;&lt;/span&gt;&lt;span class="n"&gt;op&lt;/span&gt; &lt;span class="o"&gt;!=&lt;/span&gt; &lt;span class="n"&gt;BPF_SOCK_OPS_PASSIVE_ESTABLISHED_CB&lt;/span&gt; &lt;span class="o"&gt;&amp;amp;&amp;amp;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="n"&gt;sockops&lt;/span&gt;&lt;span class="o"&gt;-&amp;gt;&lt;/span&gt;&lt;span class="n"&gt;op&lt;/span&gt; &lt;span class="o"&gt;!=&lt;/span&gt; &lt;span class="n"&gt;BPF_SOCK_OPS_ACTIVE_ESTABLISHED_CB&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;BPF_OK&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="n"&gt;SockKey&lt;/span&gt; &lt;span class="n"&gt;key&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;dest_ip&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;sockops&lt;/span&gt;&lt;span class="o"&gt;-&amp;gt;&lt;/span&gt;&lt;span class="n"&gt;remote_ip4&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;source_ip&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;sockops&lt;/span&gt;&lt;span class="o"&gt;-&amp;gt;&lt;/span&gt;&lt;span class="n"&gt;local_ip4&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;dest_port&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;sockops&lt;/span&gt;&lt;span class="o"&gt;-&amp;gt;&lt;/span&gt;&lt;span class="n"&gt;remote_port&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;source_port&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nf"&gt;bpf_htonl&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;sockops&lt;/span&gt;&lt;span class="o"&gt;-&amp;gt;&lt;/span&gt;&lt;span class="n"&gt;local_port&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;protocol&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;sockops&lt;/span&gt;&lt;span class="o"&gt;-&amp;gt;&lt;/span&gt;&lt;span class="n"&gt;family&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="p"&gt;};&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="nf"&gt;bpf_sock_hash_update&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;sockops&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="n"&gt;sock_ops_map&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="n"&gt;key&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;BPF_NOEXIST&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;BPF_OK&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h2 id="转发-socket"&gt;转发 socket
+&lt;/h2&gt;&lt;p&gt;转发 socket 可以使用 &lt;code&gt;BPF_PROG_TYPE_SK_MSG&lt;/code&gt; 类型的 eBPF 程序，它在内核中的定义是这样的：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-c" data-lang="c"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nf"&gt;BPF_PROG_TYPE&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;BPF_PROG_TYPE_SK_MSG&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;sk_msg&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;	 &lt;span class="k"&gt;struct&lt;/span&gt; &lt;span class="n"&gt;sk_msg_md&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="k"&gt;struct&lt;/span&gt; &lt;span class="n"&gt;sk_msg&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;捕获 socket 中的发送数据包，并根据之前的 socket 映射进行转发：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt; 1
+&lt;/span&gt;&lt;span class="lnt"&gt; 2
+&lt;/span&gt;&lt;span class="lnt"&gt; 3
+&lt;/span&gt;&lt;span class="lnt"&gt; 4
+&lt;/span&gt;&lt;span class="lnt"&gt; 5
+&lt;/span&gt;&lt;span class="lnt"&gt; 6
+&lt;/span&gt;&lt;span class="lnt"&gt; 7
+&lt;/span&gt;&lt;span class="lnt"&gt; 8
+&lt;/span&gt;&lt;span class="lnt"&gt; 9
+&lt;/span&gt;&lt;span class="lnt"&gt;10
+&lt;/span&gt;&lt;span class="lnt"&gt;11
+&lt;/span&gt;&lt;span class="lnt"&gt;12
+&lt;/span&gt;&lt;span class="lnt"&gt;13
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-c" data-lang="c"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nf"&gt;SEC&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;#34;sk_msg&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="kt"&gt;int&lt;/span&gt; &lt;span class="nf"&gt;bpf_sock_redirect&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="k"&gt;struct&lt;/span&gt; &lt;span class="n"&gt;sk_msg_md&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="n"&gt;msg&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="n"&gt;SockKey&lt;/span&gt; &lt;span class="n"&gt;key&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;source_ip&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;msg&lt;/span&gt;&lt;span class="o"&gt;-&amp;gt;&lt;/span&gt;&lt;span class="n"&gt;remote_ip4&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;dest_ip&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;msg&lt;/span&gt;&lt;span class="o"&gt;-&amp;gt;&lt;/span&gt;&lt;span class="n"&gt;local_ip4&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;source_port&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;msg&lt;/span&gt;&lt;span class="o"&gt;-&amp;gt;&lt;/span&gt;&lt;span class="n"&gt;remote_port&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;dest_port&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nf"&gt;bpf_htonl&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;msg&lt;/span&gt;&lt;span class="o"&gt;-&amp;gt;&lt;/span&gt;&lt;span class="n"&gt;local_port&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;protocol&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;msg&lt;/span&gt;&lt;span class="o"&gt;-&amp;gt;&lt;/span&gt;&lt;span class="n"&gt;family&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="p"&gt;};&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="nf"&gt;bpf_msg_redirect_hash&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;msg&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="n"&gt;sock_ops_map&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="n"&gt;key&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;BPF_F_INGRESS&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;SK_PASS&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h2 id="测试结果"&gt;测试结果
+&lt;/h2&gt;&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;span class="lnt"&gt;4
+&lt;/span&gt;&lt;span class="lnt"&gt;5
+&lt;/span&gt;&lt;span class="lnt"&gt;6
+&lt;/span&gt;&lt;span class="lnt"&gt;7
+&lt;/span&gt;&lt;span class="lnt"&gt;8
+&lt;/span&gt;&lt;span class="lnt"&gt;9
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-sh" data-lang="sh"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;/ &lt;span class="c1"&gt;# wrk -c100 &amp;#34;http://172.17.0.5&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;Running 10s &lt;span class="nb"&gt;test&lt;/span&gt; @ http://172.17.0.5
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="m"&gt;2&lt;/span&gt; threads and &lt;span class="m"&gt;100&lt;/span&gt; connections
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; Thread Stats Avg Stdev Max +/- Stdev
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; Latency 7.88ms 6.22ms 55.43ms 68.53%
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; Req/Sec 7.03k 4.99k 15.03k 69.00%
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="m"&gt;140073&lt;/span&gt; requests in 10.05s, 22.04MB &lt;span class="nb"&gt;read&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;Requests/sec: 13940.22
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;Transfer/sec: 2.19MB
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;ul&gt;
+&lt;li&gt;吞吐提升 ≈ &lt;strong&gt;23.2%&lt;/strong&gt;。&lt;/li&gt;
+&lt;li&gt;平均延迟下降 ≈ &lt;strong&gt;36.0%&lt;/strong&gt;。&lt;/li&gt;
+&lt;/ul&gt;</description></item></channel></rss>

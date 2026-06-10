@@ -1,0 +1,113 @@
+<!doctype html><html lang=zh-cn dir=ltr><head><meta charset=utf-8><meta name=viewport content='width=device-width,initial-scale=1'><meta name=description content="我们知道在C++20的协程中，自己实现的Coroutine中必须包含一个Promise，并且这个Promise必须要实现：\nget_return_object() initial_suspend() final_suspend() unhandled_exception() 少了其中任何一个，编译器都会报错。那这是怎么实现的呢？如果是像java那样是一个接口而没有对应的实现从而报错还能理解，但是我们的代码中的Promise完完全全是我们自己写的，也没有使用继承，编译器你怎么知道我在实现协程时少了什么东西呢？\n答案就是：SFINAE（Substitution Failure Is Not An Error，替换失败不是错误）。\n"><title>【协程】C++是如何通过SFINAE来检查promise_type的</title><link rel=canonical href=https://kerolt.github.io/p/%E5%8D%8F%E7%A8%8Bc-%E6%98%AF%E5%A6%82%E4%BD%95%E9%80%9A%E8%BF%87sfinae%E6%9D%A5%E6%A3%80%E6%9F%A5promise_type%E7%9A%84/><link rel=preconnect href=https://fonts.googleapis.com><link rel=preconnect href=https://fonts.gstatic.com crossorigin><link rel=preload as=style href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap"><link rel=stylesheet href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap"><link rel=stylesheet href=/scss/style.min.e62e09c60ba428a627e03568fa3df938f6a8224f815b5846f00816c17d4a0be4.css><meta property='og:title' content="【协程】C++是如何通过SFINAE来检查promise_type的"><meta property='og:description' content="我们知道在C++20的协程中，自己实现的Coroutine中必须包含一个Promise，并且这个Promise必须要实现：\nget_return_object() initial_suspend() final_suspend() unhandled_exception() 少了其中任何一个，编译器都会报错。那这是怎么实现的呢？如果是像java那样是一个接口而没有对应的实现从而报错还能理解，但是我们的代码中的Promise完完全全是我们自己写的，也没有使用继承，编译器你怎么知道我在实现协程时少了什么东西呢？\n答案就是：SFINAE（Substitution Failure Is Not An Error，替换失败不是错误）。\n"><meta property='og:url' content='https://kerolt.github.io/p/%E5%8D%8F%E7%A8%8Bc-%E6%98%AF%E5%A6%82%E4%BD%95%E9%80%9A%E8%BF%87sfinae%E6%9D%A5%E6%A3%80%E6%9F%A5promise_type%E7%9A%84/'><meta property='og:site_name' content="Kerolt's Note"><meta property='og:type' content='article'><meta property='article:section' content='Post'><meta property='article:tag' content='CPlusPlus'><meta property='article:tag' content='Coroutine'><meta property='article:tag' content='cpp模板'><meta property='article:published_time' content='2024-09-01T00:00:00+00:00'><meta property='article:modified_time' content='2024-09-01T00:00:00+00:00'><meta name=twitter:title content="【协程】C++是如何通过SFINAE来检查promise_type的"><meta name=twitter:description content="我们知道在C++20的协程中，自己实现的Coroutine中必须包含一个Promise，并且这个Promise必须要实现：\nget_return_object() initial_suspend() final_suspend() unhandled_exception() 少了其中任何一个，编译器都会报错。那这是怎么实现的呢？如果是像java那样是一个接口而没有对应的实现从而报错还能理解，但是我们的代码中的Promise完完全全是我们自己写的，也没有使用继承，编译器你怎么知道我在实现协程时少了什么东西呢？\n答案就是：SFINAE（Substitution Failure Is Not An Error，替换失败不是错误）。\n"><link rel="shortcut icon" href=/images/favicon.png></head><body class=article-page><script>(function(){const e="StackColorScheme";localStorage.getItem(e)||localStorage.setItem(e,"auto")})()</script><script>(function(){const t="StackColorScheme",e=localStorage.getItem(t),n=window.matchMedia("(prefers-color-scheme: dark)").matches===!0;e=="dark"||e==="auto"&&n?document.documentElement.dataset.scheme="dark":document.documentElement.dataset.scheme="light"})()</script><div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky"><button class="hamburger hamburger--spin" type=button id=toggle-menu aria-label=切换菜单>
+<span class=hamburger-box><span class=hamburger-inner></span></span></button><header><figure class=site-avatar><a href=/><img src=/images/avatar.jpg width=200 height=200 class=site-logo loading=lazy alt=Avatar>
+</a><span class=emoji>🏸</span></figure><div class=site-meta><h1 class=site-name><a href=/>Kerolt's Note</a></h1><h2 class=site-description>宇宙是秩序的，也是混乱的。</h2></div></header><ol class=menu-social><li><a href=https://github.com/kerolt title=GitHub rel=me><svg class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 19c-4.3 1.4-4.3-2.5-6-3m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6.0 00-1.3-3.2 4.2 4.2.0 00-.1-3.2s-1.1-.3-3.5 1.3a12.3 12.3.0 00-6.2.0C6.5 2.8 5.4 3.1 5.4 3.1a4.2 4.2.0 00-.1 3.2A4.6 4.6.0 004 9.5c0 4.6 2.7 5.7 5.5 6-.6.6-.6 1.2-.5 2V21"/></svg></a></li></ol><ol class=menu id=main-menu><li><a href=/><svg class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><polyline points="5 12 3 12 12 3 21 12 19 12"/><path d="M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"/><path d="M9 21v-6a2 2 0 012-2h2a2 2 0 012 2v6"/></svg>
+<span>首页</span></a></li><li><a href=/archives/><svg class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><rect x="3" y="4" width="18" height="4" rx="2"/><path d="M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
+<span>归档</span></a></li><li><a href=/categories/><svg class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><line x1="5" y1="9" x2="19" y2="9"/><line x1="5" y1="15" x2="19" y2="15"/><line x1="11" y1="4" x2="7" y2="20"/><line x1="17" y1="4" x2="13" y2="20"/></svg>
+<span>分类</span></a></li><li><a href=/tags/><svg class="icon icon-tabler icon-tabler-tag" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><path d="M11 3l9 9a1.5 1.5.0 010 2l-6 6a1.5 1.5.0 01-2 0L3 11V7a4 4 0 014-4h4"/><circle cx="9" cy="9" r="2"/></svg>
+<span>标签</span></a></li><li><a href=/about/><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-info-circle"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 12a9 9 0 1018 0A9 9 0 003 12"/><path d="M12 9h.01"/><path d="M11 12h1v4h1"/></svg>
+<span>关于我</span></a></li><li><a href=/search/><svg class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="10" cy="10" r="7"/><line x1="21" y1="21" x2="15" y2="15"/></svg>
+<span>搜索</span></a></li><li class=menu-bottom-section><ol class=menu><li id=dark-mode-toggle><svg class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="8" cy="12" r="2"/><rect x="2" y="6" width="20" height="12" rx="6"/></svg>
+<svg class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="16" cy="12" r="2"/><rect x="2" y="6" width="20" height="12" rx="6"/></svg>
+<span>暗色模式</span></li></ol></li></ol></aside><main class="main full-width"><article class=main-article><header class=article-header><div class=article-details><header class=article-category><a href=/categories/c++/ style=background-color:#bebeef;color:#0f0f3d>C++</a></header><div class=article-title-wrapper><h2 class=article-title><a href=/p/%E5%8D%8F%E7%A8%8Bc-%E6%98%AF%E5%A6%82%E4%BD%95%E9%80%9A%E8%BF%87sfinae%E6%9D%A5%E6%A3%80%E6%9F%A5promise_type%E7%9A%84/>【协程】C++是如何通过SFINAE来检查promise_type的</a></h2></div><footer class=article-meta><div class=inline-meta><svg class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><path d="M11.795 21H5a2 2 0 01-2-2V7a2 2 0 012-2h12a2 2 0 012 2v4"/><circle cx="18" cy="18" r="4"/><path d="M15 3v4"/><path d="M7 3v4"/><path d="M3 11h16"/><path d="M18 16.496V18l1 1"/></svg>
+<time class=article-time--published datetime=2024-09-01T00:00:00Z>2024年9月1日星期日</time>
+<svg class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg>
+<time class=article-time--reading>阅读时长: 3 分钟</time></div></footer></div></header><section class=article-content><p>我们知道在C++20的协程中，自己实现的Coroutine中必须包含一个<code>Promise</code>，并且这个<code>Promise</code>必须要实现：</p><ul><li><code>get_return_object()</code></li><li><code>initial_suspend()</code></li><li><code>final_suspend()</code></li><li><code>unhandled_exception()</code></li></ul><p>少了其中任何一个，编译器都会报错。那这是怎么实现的呢？如果是像java那样是一个接口而没有对应的实现从而报错还能理解，但是我们的代码中的<code>Promise</code>完完全全是我们自己写的，也没有使用继承，编译器你怎么知道我在实现协程时少了什么东西呢？</p><p>答案就是：<strong>SFINAE</strong>（Substitution Failure Is Not An Error，替换失败不是错误）。</p><p>SFINAE 主要应用于函数模板的重载解析过程中。当编译器尝试选择一个合适的函数模板重载版本时，如果某个模板参数的替换导致编译错误，编译器不会立即报错，而是继续尝试其他可能的重载版本。</p><p>在 C++20 协程中，编译器会根据协程函数的定义和 <code>promise_type</code> 的实现来生成协程的执行代码。<code>promise_type</code> 是一个用户定义的类型，它必须提供一些特定的函数，如 <code>get_return_object</code>、<code>initial_suspend</code>、<code>final_suspend</code>、<code>unhandled_exception</code> 和 <code>return_value</code> 等。这些函数定义了协程的行为和状态，编译器会在编译期检查这些函数的存在性和正确性，以确保协程能够正确地执行。</p><p>编译器使用 SFINAE 机制来检查 <code>promise_type</code> 中是否包含特定的函数。具体来说，就是编译器会在协程的实现代码中使用表达式 SFINAE，尝试调用这些函数，并根据调用的结果来确定函数的存在性。</p><p>我们来写个简单的例子，只检查<code>get_return_object</code>函数：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span><span class=lnt>34
+</span><span class=lnt>35
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=cl><span class=cp>#include</span> <span class=cpf>&lt;type_traits&gt;</span><span class=cp>
+</span></span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=cm>/*
+</span></span></span><span class=line><span class=cl><span class=cm> * check(int) 是一个重载的模板函数，用于检查U类型是否有get_return_object()函数。
+</span></span></span><span class=line><span class=cl><span class=cm> * decltype(std::declval&lt;U&gt;().get_return_object(), std::true_type{}) 会在U具有get_return_object()时返回std::true_type。
+</span></span></span><span class=line><span class=cl><span class=cm> * 如果U没有get_return_object()，则会匹配check(...)重载，返回std::false_type。
+</span></span></span><span class=line><span class=cl><span class=cm> * value成员是一个常量布尔值，指示T是否具有get_return_object()函数。
+</span></span></span><span class=line><span class=cl><span class=cm> */</span>
+</span></span><span class=line><span class=cl><span class=k>template</span> <span class=o>&lt;</span><span class=k>typename</span> <span class=n>T</span><span class=o>&gt;</span>
+</span></span><span class=line><span class=cl><span class=k>struct</span> <span class=nc>has_get_return_object</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=k>template</span> <span class=o>&lt;</span><span class=k>typename</span> <span class=n>U</span><span class=o>&gt;</span>
+</span></span><span class=line><span class=cl>    <span class=k>static</span> <span class=k>auto</span> <span class=n>check</span><span class=p>(</span><span class=kt>int</span><span class=p>)</span> <span class=o>-&gt;</span> <span class=k>decltype</span><span class=p>(</span><span class=n>std</span><span class=o>::</span><span class=n>declval</span><span class=o>&lt;</span><span class=n>U</span><span class=o>&gt;</span><span class=p>().</span><span class=n>get_return_object</span><span class=p>(),</span> <span class=n>std</span><span class=o>::</span><span class=n>true_type</span><span class=p>{});</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>template</span> <span class=o>&lt;</span><span class=k>typename</span><span class=o>&gt;</span>
+</span></span><span class=line><span class=cl>    <span class=k>static</span> <span class=n>std</span><span class=o>::</span><span class=n>false_type</span> <span class=n>check</span><span class=p>(...);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>static</span> <span class=k>constexpr</span> <span class=kt>bool</span> <span class=n>value</span> <span class=o>=</span> <span class=k>decltype</span><span class=p>(</span><span class=n>check</span><span class=o>&lt;</span><span class=n>T</span><span class=o>&gt;</span><span class=p>(</span><span class=mi>0</span><span class=p>))</span><span class=o>::</span><span class=n>value</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>};</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>template</span> <span class=o>&lt;</span><span class=k>typename</span> <span class=n>T</span><span class=o>&gt;</span>
+</span></span><span class=line><span class=cl><span class=kt>void</span> <span class=n>check_promise_type</span><span class=p>()</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=k>static_assert</span><span class=p>(</span><span class=n>has_get_return_object</span><span class=o>&lt;</span><span class=n>T</span><span class=o>&gt;::</span><span class=n>value</span><span class=p>,</span> <span class=s>&#34;Promise type must have a get_return_object() method.&#34;</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>struct</span> <span class=nc>MyCoroutine</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=k>struct</span> <span class=nc>promise_type</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=n>MyCoroutine</span> <span class=nf>get_return_object</span><span class=p>()</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>            <span class=k>return</span> <span class=p>{};</span>
+</span></span><span class=line><span class=cl>        <span class=p>}</span>
+</span></span><span class=line><span class=cl>    <span class=p>};</span>
+</span></span><span class=line><span class=cl><span class=p>};</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=kt>int</span> <span class=nf>main</span><span class=p>()</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=n>check_promise_type</span><span class=o>&lt;</span><span class=n>MyCoroutine</span><span class=o>::</span><span class=n>promise_type</span><span class=o>&gt;</span><span class=p>();</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p>当我们去掉<code>Mycoroutine::promise_type</code>中的<code>get_return_object</code>函数时，<code>check_promise_type</code>函数中就会出发断言失败，从而编译不通过。</p><p>这也就是在将一个函数变为协程时编译器是如何检查的一个大概思路了。不得不感叹，C++真是博大精深。</p></section><footer class="article-meta article-footer"><section class=article-tags><a href=/tags/cplusplus/>CPlusPlus</a>
+<a href=/tags/coroutine/>Coroutine</a>
+<a href=/tags/cpp%E6%A8%A1%E6%9D%BF/>Cpp模板</a></section><section class="article-copyright inline-meta"><svg class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><path d="M14.5 9a3.5 4 0 100 6"/></svg>
+<span>Licensed under CC BY-NC-SA 4.0</span></section></footer></article><footer class=site-footer><section class=copyright>&copy;
+2025 -
+2026 Kerolt's Note</section><section class=powerby>使用 <a href=https://gohugo.io/ target=_blank rel=noopener>Hugo</a> 构建<br>主题 <b><a href=https://github.com/CaiJimmy/hugo-theme-stack target=_blank rel=noopener data-version=4.0.3>Stack</a></b> 由 <a href=https://jimmycai.com target=_blank rel=noopener>Jimmy</a> 设计</section></footer><script type=module>
+    import gallery from '\/ts\/gallery.js';
+
+    const articleContent = document.querySelector('.article-content');
+    const shouldLoad = articleContent && (articleContent.querySelectorAll('figure').length > 0 || articleContent.querySelectorAll('img.gallery-image').length > 0);
+    
+    if (shouldLoad) {
+        gallery(articleContent);
+
+        const PhotoSwipeLightbox = (await import("https:\/\/cdn.jsdelivr.net\/npm\/photoswipe@5.4.4\/dist\/photoswipe-lightbox.esm.min.js")).default;
+        const styleHref = "https:\/\/cdn.jsdelivr.net\/npm\/photoswipe@5.4.4\/dist\/photoswipe.css";
+
+        const styleTag = document.createElement('link');
+        styleTag.rel = 'stylesheet';
+        styleTag.href = styleHref;
+        document.head.appendChild(styleTag);
+
+        const lightbox = new PhotoSwipeLightbox({
+            gallerySelector: '.article-content',
+            childSelector: 'figure a.image-link',
+            pswpModule: () => import("https:\/\/cdn.jsdelivr.net\/npm\/photoswipe@5.4.4\/dist\/photoswipe.esm.min.js")
+        });
+        lightbox.init();
+    }
+</script></main></div><script type=text/javascript src=/ts/main.f856840516f7c2ad1769a8f5937e3d08d6cb386e2cd2dd025ae696e0ff207958.js defer></script></body></html>

@@ -1,76 +1,427 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?>
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
-  <channel>
-    <title>Network on Kerolt&#39;s Blog</title>
-    <link>https://kerolt.github.io/tags/network/</link>
-    <description>Recent content in Network on Kerolt&#39;s Blog</description>
-    <image>
-      <title>Kerolt&#39;s Blog</title>
-      <url>https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</url>
-      <link>https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</link>
-    </image>
-    <generator>Hugo -- 0.158.0</generator>
-    <language>en</language>
-    <lastBuildDate>Mon, 22 Dec 2025 00:00:00 +0000</lastBuildDate>
-    <atom:link href="https://kerolt.github.io/tags/network/index.xml" rel="self" type="application/rss+xml" />
-    <item>
-      <title>Linux修改IP</title>
-      <link>https://kerolt.github.io/posts/net/linux%E4%BF%AE%E6%94%B9ip/</link>
-      <pubDate>Sun, 09 Nov 2025 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/net/linux%E4%BF%AE%E6%94%B9ip/</guid>
-      <description>&lt;p&gt;首先确定网络是用什么工具管理：&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-sh&#34; data-lang=&#34;sh&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;$ systemctl is-active NetworkManager
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;active
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;说明 &lt;strong&gt;网络由 NetworkManager 管理&lt;/strong&gt;，这种情况修改 IP 通常使用 &lt;code&gt;nmcli&lt;/code&gt;：&lt;/p&gt;
-&lt;h2 id=&#34;修改静态-ip&#34;&gt;修改静态 IP&lt;/h2&gt;
-&lt;h3 id=&#34;看当前连接名&#34;&gt;看当前连接名&lt;/h3&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;nmcli connection show
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;输出类似：&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;NAME                UUID                                  TYPE      DEVICE
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Wired connection &lt;span style=&#34;color:#f60&#34;&gt;1&lt;/span&gt;  2d3e1f6a-4e87-4a76-8f23-2f459c8c112b  ethernet  enp60s0
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;这里的 &lt;code&gt;NAME&lt;/code&gt;（如 &lt;code&gt;Wired connection 1&lt;/code&gt;）就是连接名，后面命令要用到。&lt;/p&gt;
-&lt;h3 id=&#34;修改为静态-ip&#34;&gt;修改为静态 IP&lt;/h3&gt;
-&lt;p&gt;假设你想把 IP 设置为：&lt;/p&gt;
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Network on Kerolt's Note</title><link>https://kerolt.github.io/tags/network/</link><description>Recent content in Network on Kerolt's Note</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><lastBuildDate>Mon, 22 Dec 2025 00:00:00 +0000</lastBuildDate><atom:link href="https://kerolt.github.io/tags/network/index.xml" rel="self" type="application/rss+xml"/><item><title>Linux修改IP</title><link>https://kerolt.github.io/p/linux%E4%BF%AE%E6%94%B9ip/</link><pubDate>Sun, 09 Nov 2025 00:00:00 +0000</pubDate><guid>https://kerolt.github.io/p/linux%E4%BF%AE%E6%94%B9ip/</guid><description>&lt;p&gt;首先确定网络是用什么工具管理：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-sh" data-lang="sh"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;$ systemctl is-active NetworkManager
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;active
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;说明 &lt;strong&gt;网络由 NetworkManager 管理&lt;/strong&gt;，这种情况修改 IP 通常使用 &lt;code&gt;nmcli&lt;/code&gt;：&lt;/p&gt;
+&lt;h2 id="修改静态-ip"&gt;修改静态 IP
+&lt;/h2&gt;&lt;h3 id="看当前连接名"&gt;看当前连接名
+&lt;/h3&gt;&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;nmcli connection show
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;输出类似：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-shell" data-lang="shell"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;NAME UUID TYPE DEVICE
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;Wired connection &lt;span class="m"&gt;1&lt;/span&gt; 2d3e1f6a-4e87-4a76-8f23-2f459c8c112b ethernet enp60s0
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;这里的 &lt;code&gt;NAME&lt;/code&gt;（如 &lt;code&gt;Wired connection 1&lt;/code&gt;）就是连接名，后面命令要用到。&lt;/p&gt;
+&lt;h3 id="修改为静态-ip"&gt;修改为静态 IP
+&lt;/h3&gt;&lt;p&gt;假设你想把 IP 设置为：&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;IP：&lt;code&gt;192.168.1.100/24&lt;/code&gt;&lt;/li&gt;
 &lt;li&gt;网关：&lt;code&gt;192.168.1.1&lt;/code&gt;&lt;/li&gt;
 &lt;li&gt;DNS：&lt;code&gt;8.8.8.8, 1.1.1.1&lt;/code&gt;&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;执行：&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;sudo nmcli con mod &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;Wired connection 1&amp;#34;&lt;/span&gt; ipv4.addresses 192.168.1.100/24
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;sudo nmcli con mod &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;Wired connection 1&amp;#34;&lt;/span&gt; ipv4.gateway 192.168.1.1
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;sudo nmcli con mod &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;Wired connection 1&amp;#34;&lt;/span&gt; ipv4.dns &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;8.8.8.8,1.1.1.1&amp;#34;&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;sudo nmcli con mod &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;Wired connection 1&amp;#34;&lt;/span&gt; ipv4.method manual
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;blockquote&gt;
-&lt;p&gt;注意 &lt;code&gt;&amp;quot;Wired connection 1&amp;quot;&lt;/code&gt; 需要替换为你自己的连接名。
-如果名字里有空格，必须加引号。&lt;/p&gt;</description>
-    </item>
-    <item>
-      <title>【问题记录】ddns-go与IPv6网络配置</title>
-      <link>https://kerolt.github.io/posts/net/%E9%97%AE%E9%A2%98%E8%AE%B0%E5%BD%95ddns-go%E4%B8%8Eipv6%E7%BD%91%E7%BB%9C%E9%85%8D%E7%BD%AE/</link>
-      <pubDate>Fri, 29 Aug 2025 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/net/%E9%97%AE%E9%A2%98%E8%AE%B0%E5%BD%95ddns-go%E4%B8%8Eipv6%E7%BD%91%E7%BB%9C%E9%85%8D%E7%BD%AE/</guid>
-      <description>&lt;p&gt;在完成 &lt;a href=&#34;https://zhuanlan.zhihu.com/p/1943305270387275457&#34;&gt;Rustdesk 自建服务器&lt;/a&gt; 的搭建后，我又想到：由于实验室服务器的公网 &lt;strong&gt;IPv6 地址&lt;/strong&gt; 并非永久不变，直接使用 IP 进行远程连接（如 SSH 或 Rustdesk）并不现实，如何确保远程访问的稳定性和便利性呢。为了解决这一痛点，我决定利用 &lt;strong&gt;动态域名解析（DDNS）&lt;/strong&gt; 技术，配合 &lt;strong&gt;ddns-go&lt;/strong&gt; 和 &lt;strong&gt;阿里云 DNS&lt;/strong&gt; 服务，将服务器的动态 IP 地址实时绑定到一个易于记忆的域名上。&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;span class="lnt"&gt;4
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;sudo nmcli con mod &lt;span class="s2"&gt;&amp;#34;Wired connection 1&amp;#34;&lt;/span&gt; ipv4.addresses 192.168.1.100/24
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;sudo nmcli con mod &lt;span class="s2"&gt;&amp;#34;Wired connection 1&amp;#34;&lt;/span&gt; ipv4.gateway 192.168.1.1
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;sudo nmcli con mod &lt;span class="s2"&gt;&amp;#34;Wired connection 1&amp;#34;&lt;/span&gt; ipv4.dns &lt;span class="s2"&gt;&amp;#34;8.8.8.8,1.1.1.1&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;sudo nmcli con mod &lt;span class="s2"&gt;&amp;#34;Wired connection 1&amp;#34;&lt;/span&gt; ipv4.method manual
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+ &lt;blockquote&gt;
+ &lt;p&gt;注意 &lt;code&gt;&amp;quot;Wired connection 1&amp;quot;&lt;/code&gt; 需要替换为你自己的连接名。
+如果名字里有空格，必须加引号。&lt;/p&gt;
+
+ &lt;/blockquote&gt;
+&lt;h3 id="应用修改立即生效"&gt;应用修改（立即生效）
+&lt;/h3&gt;&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;sudo nmcli con down &lt;span class="s2"&gt;&amp;#34;Wired connection 1&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;sudo nmcli con up &lt;span class="s2"&gt;&amp;#34;Wired connection 1&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h3 id="验证"&gt;验证
+&lt;/h3&gt;&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;ip addr show enp60s0
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;ip route
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;你应该能看到：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-shell" data-lang="shell"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;inet 192.168.1.100/24 ...
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;default via 192.168.1.1 ...
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h3 id="改回-dhcp-自动获取"&gt;改回 DHCP 自动获取
+&lt;/h3&gt;&lt;p&gt;如果想恢复为 DHCP：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;sudo nmcli con mod &lt;span class="s2"&gt;&amp;#34;Wired connection 1&amp;#34;&lt;/span&gt; ipv4.method auto
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;sudo nmcli con up &lt;span class="s2"&gt;&amp;#34;Wired connection 1&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h2 id="dhcp-重新获取-ip"&gt;DHCP 重新获取 IP
+&lt;/h2&gt;&lt;h3 id="检查是否是固定分配-ip"&gt;检查是否是固定分配 IP
+&lt;/h3&gt;&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;span class="lnt"&gt;4
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-sh" data-lang="sh"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;sudo nmcli device disconnect enp60s0
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;sudo dhclient -r enp60s0 &lt;span class="c1"&gt;# 释放旧租约（告诉 DHCP 我不要这个 IP 了）&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;sudo pkill dhclient &lt;span class="c1"&gt;# 确保没有旧 dhclient 残留&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;sudo nmcli device connect enp60s0 &lt;span class="c1"&gt;# 重新请求新 IP&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;如果上面的操作无法获得新的 IP，那就说明 &lt;strong&gt;DHCP 服务器端&lt;/strong&gt; 是按 MAC 地址固定分配。&lt;/p&gt;
+&lt;h3 id="获取原本的-mac-地址"&gt;获取原本的 MAC 地址
+&lt;/h3&gt;&lt;p&gt;可以临时更改 MAC 来解决，首先获取一下原本的 MAC：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;span class="lnt"&gt;4
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-sh" data-lang="sh"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;ip link show enp60s0
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# 或者&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;nmcli device show enp60s0 &lt;span class="p"&gt;|&lt;/span&gt; grep -i hwaddr
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h3 id="修改临时-mac"&gt;修改临时 MAC
+&lt;/h3&gt;&lt;p&gt;修改为临时 MAC：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-sh" data-lang="sh"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;sudo nmcli connection modify &lt;span class="s2"&gt;&amp;#34;Wired connection 1&amp;#34;&lt;/span&gt; 802-3-ethernet.cloned-mac-address random
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;sudo nmcli connection down &lt;span class="s2"&gt;&amp;#34;Wired connection 1&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;sudo nmcli connection up &lt;span class="s2"&gt;&amp;#34;Wired connection 1&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;这会让 DHCP 服务器以为是一个新设备，从而分配新 IP。 完成后可以恢复原 MAC：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-sh" data-lang="sh"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;sudo nmcli connection modify &lt;span class="s2"&gt;&amp;#34;Wired connection 1&amp;#34;&lt;/span&gt; 802-3-ethernet.cloned-mac-address &lt;span class="s2"&gt;&amp;#34;YOUR_MAC&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;实测可以获取到新的 IP。&lt;/p&gt;</description></item><item><title>【问题记录】ddns-go与IPv6网络配置</title><link>https://kerolt.github.io/p/%E9%97%AE%E9%A2%98%E8%AE%B0%E5%BD%95ddns-go%E4%B8%8Eipv6%E7%BD%91%E7%BB%9C%E9%85%8D%E7%BD%AE/</link><pubDate>Fri, 29 Aug 2025 00:00:00 +0000</pubDate><guid>https://kerolt.github.io/p/%E9%97%AE%E9%A2%98%E8%AE%B0%E5%BD%95ddns-go%E4%B8%8Eipv6%E7%BD%91%E7%BB%9C%E9%85%8D%E7%BD%AE/</guid><description>&lt;p&gt;在完成 &lt;a class="link" href="https://zhuanlan.zhihu.com/p/1943305270387275457" target="_blank" rel="noopener"
+ &gt;Rustdesk 自建服务器&lt;/a&gt; 的搭建后，我又想到：由于实验室服务器的公网 &lt;strong&gt;IPv6 地址&lt;/strong&gt; 并非永久不变，直接使用 IP 进行远程连接（如 SSH 或 Rustdesk）并不现实，如何确保远程访问的稳定性和便利性呢。为了解决这一痛点，我决定利用 &lt;strong&gt;动态域名解析（DDNS）&lt;/strong&gt; 技术，配合 &lt;strong&gt;ddns-go&lt;/strong&gt; 和 &lt;strong&gt;阿里云 DNS&lt;/strong&gt; 服务，将服务器的动态 IP 地址实时绑定到一个易于记忆的域名上。&lt;/p&gt;
 &lt;p&gt;本文将记录我在配置过程中遇到的四个主要问题及其解决方案。&lt;/p&gt;
 &lt;hr&gt;
-&lt;h2 id=&#34;问题-1ipv6-临时地址导致域名解析不稳定&#34;&gt;问题 1：IPv6 临时地址导致域名解析不稳定&lt;/h2&gt;
-&lt;p&gt;在启用 &lt;strong&gt;ddns-go&lt;/strong&gt; 服务后，我发现尽管程序运行正常，但我的域名解析记录却频繁失效。经过排查，我意识到罪魁祸首是 &lt;strong&gt;IPv6 临时地址（Temporary Address）&lt;/strong&gt;。这是一种为了增强用户隐私而设计的特性，系统会定期生成新的、临时的 IPv6 地址用于出站连接。当服务器的地址发生变化时，DDNS 服务来不及同步更新，就会导致域名无法解析到正确的 IP 地址。&lt;/p&gt;
-&lt;h3 id=&#34;解决方案禁用-ipv6-临时地址&#34;&gt;解决方案：禁用 IPv6 临时地址&lt;/h3&gt;
-&lt;p&gt;要解决这个问题，最直接的方法就是从系统层面禁用 IPv6 临时地址功能，强制使用稳定的、非临时的地址。&lt;/p&gt;
+&lt;h2 id="问题-1ipv6-临时地址导致域名解析不稳定"&gt;问题 1：IPv6 临时地址导致域名解析不稳定
+&lt;/h2&gt;&lt;p&gt;在启用 &lt;strong&gt;ddns-go&lt;/strong&gt; 服务后，我发现尽管程序运行正常，但我的域名解析记录却频繁失效。经过排查，我意识到罪魁祸首是 &lt;strong&gt;IPv6 临时地址（Temporary Address）&lt;/strong&gt;。这是一种为了增强用户隐私而设计的特性，系统会定期生成新的、临时的 IPv6 地址用于出站连接。当服务器的地址发生变化时，DDNS 服务来不及同步更新，就会导致域名无法解析到正确的 IP 地址。&lt;/p&gt;
+&lt;h3 id="解决方案禁用-ipv6-临时地址"&gt;解决方案：禁用 IPv6 临时地址
+&lt;/h3&gt;&lt;p&gt;要解决这个问题，最直接的方法就是从系统层面禁用 IPv6 临时地址功能，强制使用稳定的、非临时的地址。&lt;/p&gt;
 &lt;ol&gt;
 &lt;li&gt;&lt;strong&gt;编辑 sysctl 配置文件&lt;/strong&gt;：
 使用 &lt;code&gt;vim&lt;/code&gt; 或其他编辑器打开 &lt;code&gt;sysctl.conf&lt;/code&gt; 文件，该文件用于在系统启动时配置内核参数。&lt;/li&gt;
 &lt;/ol&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-sh&#34; data-lang=&#34;sh&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;sudo vim /etc/sysctl.conf
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;ol start=&#34;2&#34;&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-sh" data-lang="sh"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;sudo vim /etc/sysctl.conf
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;ol start="2"&gt;
 &lt;li&gt;&lt;strong&gt;添加配置项&lt;/strong&gt;：
 在文件末尾添加以下两行，分别用于&lt;strong&gt;全局禁用&lt;/strong&gt;和&lt;strong&gt;默认禁用&lt;/strong&gt;所有网络接口的 IPv6 临时地址功能。&lt;/li&gt;
 &lt;/ol&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-sh&#34; data-lang=&#34;sh&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;# 禁用 IPv6 临时地址&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;net.ipv6.conf.all.use_tempaddr &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#f60&#34;&gt;0&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;net.ipv6.conf.enp4s0.use_tempaddr &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#f60&#34;&gt;0&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;blockquote&gt;
-&lt;p&gt;&lt;strong&gt;注意&lt;/strong&gt;：如果只想针对特定网卡（例如 &lt;code&gt;enp4s0&lt;/code&gt;）进行配置，可以添加 &lt;code&gt;net.ipv6.conf.enp4s0.use_tempaddr = 0&lt;/code&gt;。你可以通过 &lt;code&gt;ip a&lt;/code&gt; 命令查看你机器的网卡名称。&lt;/p&gt;</description>
-    </item>
-  </channel>
-</rss>
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-sh" data-lang="sh"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# 禁用 IPv6 临时地址&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;net.ipv6.conf.all.use_tempaddr &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;net.ipv6.conf.enp4s0.use_tempaddr &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+ &lt;blockquote&gt;
+ &lt;p&gt;&lt;strong&gt;注意&lt;/strong&gt;：如果只想针对特定网卡（例如 &lt;code&gt;enp4s0&lt;/code&gt;）进行配置，可以添加 &lt;code&gt;net.ipv6.conf.enp4s0.use_tempaddr = 0&lt;/code&gt;。你可以通过 &lt;code&gt;ip a&lt;/code&gt; 命令查看你机器的网卡名称。&lt;/p&gt;
+
+ &lt;/blockquote&gt;
+&lt;ol start="3"&gt;
+&lt;li&gt;&lt;strong&gt;应用配置&lt;/strong&gt;：
+执行以下命令，使新配置即时生效。&lt;/li&gt;
+&lt;/ol&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-sh" data-lang="sh"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;sudo sysctl -p
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;ol start="4"&gt;
+&lt;li&gt;&lt;strong&gt;验证配置是否生效&lt;/strong&gt;：
+最后，可以通过查看特定参数的值来验证修改是否成功。如果返回 &lt;code&gt;0&lt;/code&gt;，则表示临时地址已成功禁用。&lt;/li&gt;
+&lt;/ol&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-sh" data-lang="sh"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;cat /proc/sys/net/ipv6/conf/enp4s0/use_tempaddr
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# 预期输出: 0&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h2 id="问题-2ddns-go-无法通过-systemd-启动"&gt;问题 2：ddns-go 无法通过 systemd 启动
+&lt;/h2&gt;&lt;p&gt;利用 &lt;code&gt;systemctl status ddns-go&lt;/code&gt; 查看 ddns-go 运行状态时，看到：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-text" data-lang="text"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;Unable to locate executable &amp;#39;/usr/local/bin/ddns-go&amp;#39;: Permission denied
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;Failed at step EXEC spawning /usr/local/bin/ddns-go: Permission denied
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;但是对应的文件的权限我都给了，问了问 AI 后说可能造成的原因之一为&lt;strong&gt;SELinux 阻止执行（在 Fedora 上默认开启）&lt;/strong&gt;。输入：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;sudo ausearch -m avc -ts recent &lt;span class="p"&gt;|&lt;/span&gt; grep ddns-go
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;看到有拒绝记录，说明是 SELinux 问题。&lt;/p&gt;
+&lt;h3 id="临时解决方案"&gt;临时解决方案
+&lt;/h3&gt;&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;sudo setenforce &lt;span class="m"&gt;0&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h3 id="永久解决方案"&gt;永久解决方案
+&lt;/h3&gt;&lt;p&gt;为该二进制打上正确的 SELinux 标签&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;sudo restorecon -v /usr/local/bin/ddns-go
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;之后再重启 ddns-go 服务，就 OK 了。&lt;/p&gt;
+&lt;blockquote class="alert alert-note"&gt;
+ &lt;div class="alert-header"&gt;
+ &lt;span class="alert-icon"&gt;📝&lt;/span&gt;
+ &lt;span class="alert-title"&gt;为什么会有 SELinux 相关问题？&lt;/span&gt;
+ &lt;/div&gt;
+ &lt;div class="alert-body"&gt;
+ &lt;p&gt;Linux 传统权限模型（用户/组/other + rwx）是 自主访问控制（DAC）：用户对自己文件有完全控制权；程序继承用户权限 → 一旦用户被攻破，攻击者可为所欲为&lt;/p&gt;
+&lt;p&gt;SELinux 的目标是：即使程序或用户被攻破，也要限制它能做的事&lt;/p&gt;
+&lt;p&gt;我是把 ddns-go 的可执行文件放在/usr/local/bin/下（复制过去的）&lt;/p&gt;
+&lt;p&gt;而 SELinux 有预定义的“文件上下文”：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;/usr/bin/*&lt;/code&gt; → &lt;code&gt;bin_t&lt;/code&gt;（可执行程序）&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;/usr/local/bin/*&lt;/code&gt; → 默认可能不是 &lt;code&gt;bin_t&lt;/code&gt;，尤其是手动复制进去的文件&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;所以即使文件有 &lt;code&gt;chmod +x&lt;/code&gt;，SELinux 仍可能阻止执行&lt;/p&gt;
+ &lt;/div&gt;
+ &lt;/blockquote&gt;
+&lt;h2 id="问题-3ddns-go-无法正确更新-ipv6-地址记录"&gt;问题 3：ddns-go 无法正确更新 IPv6 地址记录
+&lt;/h2&gt;&lt;p&gt;解决了 IPv6 地址变化的问题后，我发现 &lt;strong&gt;ddns-go&lt;/strong&gt; 服务依然无法正常工作，并抛出大量 DNS 相关的超时错误，例如：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-sh" data-lang="sh"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;2025/08/29 10:01:37 查询域名信息发生异常! 
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;Get &lt;span class="s2"&gt;&amp;#34;[https://alidns.aliyuncs.com/?AccessKeyId=xxxxxx](https://alidns.aliyuncs.com/?AccessKeyId=xxxxxx)&amp;#34;&lt;/span&gt;: 
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;dial tcp: lookup alidns.aliyuncs.com on x.x.x.x:53: &lt;span class="nb"&gt;read&lt;/span&gt; udp x.x.x.x:59439-&amp;gt;x.x.x.x:53: i/o timeout
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;通过分析日志，我发现服务在尝试向外部 DNS 服务器（如 &lt;code&gt;8.8.8.8&lt;/code&gt; 或 &lt;code&gt;114.114.114.114&lt;/code&gt;）发起 DNS 请求时失败了。这通常是由于&lt;strong&gt;校园网或实验室网络的防火墙策略&lt;/strong&gt;，限制了对外部公共 DNS 服务器的访问，强制所有 DNS 请求都通过内部服务器。&lt;/p&gt;
+&lt;h3 id="解决方案指定-ddns-go-使用可访问的-dns-服务器"&gt;解决方案：指定 ddns-go 使用可访问的 DNS 服务器
+&lt;/h3&gt;&lt;p&gt;由于 ddns-go 默认使用系统 DNS，而系统 DNS 可能被强制转发到内部服务器，因此我们需要在启动命令中显式指定可访问的公共 DNS 服务器。&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;编辑 ddns-go 服务文件：&lt;/p&gt;
+&lt;p&gt;打开 /etc/systemd/system/ddns-go.service 文件。&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-sh" data-lang="sh"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;sudo vim /etc/systemd/system/ddns-go.service
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;ol start="2"&gt;
+&lt;li&gt;
+&lt;p&gt;修改 ExecStart 参数：&lt;/p&gt;
+&lt;p&gt;在 ExecStart 行的末尾，添加 -dns 参数，指定一个或多个在国内访问稳定的公共 DNS，如阿里云的 223.5.5.5 和腾讯云的 119.29.29.29。&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;span class="lnt"&gt;4
+&lt;/span&gt;&lt;span class="lnt"&gt;5
+&lt;/span&gt;&lt;span class="lnt"&gt;6
+&lt;/span&gt;&lt;span class="lnt"&gt;7
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-toml" data-lang="toml"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="nx"&gt;Service&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nx"&gt;StartLimitInterval&lt;/span&gt;&lt;span class="p"&gt;=&lt;/span&gt;&lt;span class="mi"&gt;5&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nx"&gt;StartLimitBurst&lt;/span&gt;&lt;span class="p"&gt;=&lt;/span&gt;&lt;span class="mi"&gt;10&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nx"&gt;ExecStart&lt;/span&gt;&lt;span class="p"&gt;=&lt;/span&gt;&lt;span class="err"&gt;/&lt;/span&gt;&lt;span class="nx"&gt;usr&lt;/span&gt;&lt;span class="err"&gt;/&lt;/span&gt;&lt;span class="nx"&gt;local&lt;/span&gt;&lt;span class="err"&gt;/&lt;/span&gt;&lt;span class="nx"&gt;bin&lt;/span&gt;&lt;span class="err"&gt;/&lt;/span&gt;&lt;span class="nx"&gt;ddns-go&lt;/span&gt; &lt;span class="s2"&gt;&amp;#34;-l&amp;#34;&lt;/span&gt; &lt;span class="s2"&gt;&amp;#34;:9876&amp;#34;&lt;/span&gt; &lt;span class="s2"&gt;&amp;#34;-f&amp;#34;&lt;/span&gt; &lt;span class="s2"&gt;&amp;#34;300&amp;#34;&lt;/span&gt; &lt;span class="s2"&gt;&amp;#34;-cacheTimes&amp;#34;&lt;/span&gt; &lt;span class="s2"&gt;&amp;#34;5&amp;#34;&lt;/span&gt; &lt;span class="s2"&gt;&amp;#34;-c&amp;#34;&lt;/span&gt; &lt;span class="s2"&gt;&amp;#34;/root/.ddns_go_config.yaml&amp;#34;&lt;/span&gt; &lt;span class="s2"&gt;&amp;#34;-dns&amp;#34;&lt;/span&gt; &lt;span class="s2"&gt;&amp;#34;223.5.5.5&amp;#34;&lt;/span&gt; &lt;span class="s2"&gt;&amp;#34;-dns&amp;#34;&lt;/span&gt; &lt;span class="s2"&gt;&amp;#34;119.29.29.29&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="nx"&gt;Install&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="p"&gt;...&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;ol start="3"&gt;
+&lt;li&gt;
+&lt;p&gt;重新加载并重启服务：&lt;/p&gt;
+&lt;p&gt;保存文件后，重新加载 systemd 配置并重启 ddns-go 服务，使新参数生效。&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-sh" data-lang="sh"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;sudo systemctl daemon-reload
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;sudo systemctl restart ddns-go
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h2 id="问题-4电脑睡眠后网络中断无法远程连接"&gt;问题 4：电脑睡眠后网络中断，无法远程连接
+&lt;/h2&gt;&lt;p&gt;解决了域名解析问题后，我又发现一个新情况：如果服务器闲置一段时间，SSH 连接就会断开。当物理唤醒电脑后，网络连接需要一段时间才能恢复。这是因为 &lt;strong&gt;系统默认的电源管理策略&lt;/strong&gt; 会在电脑进入睡眠状态后，挂起或断开部分硬件（如网卡）以节省电量。&lt;/p&gt;
+&lt;h3 id="解决方案禁用系统休眠与闲置操作"&gt;解决方案：禁用系统休眠与闲置操作
+&lt;/h3&gt;&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-sh" data-lang="sh"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;sudo systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;为了确保服务器 24/7 在线，我们需要修改电源管理配置，禁用自动休眠。&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;编辑 systemd-logind 配置文件：&lt;/p&gt;
+&lt;p&gt;打开 /etc/systemd/logind.conf 文件，该文件用于配置用户登录和电源管理行为。&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-sh" data-lang="sh"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;sudo vim /etc/systemd/logind.conf
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;ol start="2"&gt;
+&lt;li&gt;
+&lt;p&gt;修改配置参数：&lt;/p&gt;
+&lt;p&gt;取消以下几行的注释（如果被注释），并将它们的值修改为 ignore 或 never。&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;span class="lnt"&gt;4
+&lt;/span&gt;&lt;span class="lnt"&gt;5
+&lt;/span&gt;&lt;span class="lnt"&gt;6
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-toml" data-lang="toml"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="nx"&gt;Login&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c"&gt;# 禁用闲置自动操作&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nx"&gt;IdleAction&lt;/span&gt;&lt;span class="p"&gt;=&lt;/span&gt;&lt;span class="nx"&gt;ignore&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nx"&gt;IdleActionSec&lt;/span&gt;&lt;span class="p"&gt;=&lt;/span&gt;&lt;span class="nx"&gt;never&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c"&gt;# 禁用合盖自动操作&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nx"&gt;HandleLidSwitch&lt;/span&gt;&lt;span class="p"&gt;=&lt;/span&gt;&lt;span class="nx"&gt;ignore&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;ol start="3"&gt;
+&lt;li&gt;
+&lt;p&gt;重启服务：&lt;/p&gt;
+&lt;p&gt;修改完成后，重启 systemd-logind 服务使配置生效。&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-sh" data-lang="sh"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;sudo systemctl restart systemd-logind
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;解决完上述问题后，无论是在校内还是校外，我都可以通过一个固定的域名来使用服务器了。&lt;/p&gt;</description></item></channel></rss>

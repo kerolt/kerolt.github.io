@@ -1,0 +1,192 @@
+<!doctype html><html lang=zh-cn dir=ltr><head><meta charset=utf-8><meta name=viewport content='width=device-width,initial-scale=1'><meta name=description content=" 环境：在 VMWare 上，启动了两个 Ubuntu 24.04.3 LTS，配置都为 2C2G。一台作为 master，一台作为 worker，需要为两台机器设置不同的 hostname。\nPrepare 安装好 Docker 后，设置一下 cgroup 的驱动：\n"><title>利用kubeadm搭建集群</title><link rel=canonical href=https://kerolt.github.io/p/%E5%88%A9%E7%94%A8kubeadm%E6%90%AD%E5%BB%BA%E9%9B%86%E7%BE%A4/><link rel=preconnect href=https://fonts.googleapis.com><link rel=preconnect href=https://fonts.gstatic.com crossorigin><link rel=preload as=style href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap"><link rel=stylesheet href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap"><link rel=stylesheet href=/scss/style.min.e62e09c60ba428a627e03568fa3df938f6a8224f815b5846f00816c17d4a0be4.css><meta property='og:title' content="利用kubeadm搭建集群"><meta property='og:description' content=" 环境：在 VMWare 上，启动了两个 Ubuntu 24.04.3 LTS，配置都为 2C2G。一台作为 master，一台作为 worker，需要为两台机器设置不同的 hostname。\nPrepare 安装好 Docker 后，设置一下 cgroup 的驱动：\n"><meta property='og:url' content='https://kerolt.github.io/p/%E5%88%A9%E7%94%A8kubeadm%E6%90%AD%E5%BB%BA%E9%9B%86%E7%BE%A4/'><meta property='og:site_name' content="Kerolt's Note"><meta property='og:type' content='article'><meta property='article:section' content='Post'><meta property='article:tag' content='kubeadm'><meta property='article:published_time' content='2025-10-31T00:00:00+00:00'><meta property='article:modified_time' content='2025-10-31T00:00:00+00:00'><meta name=twitter:title content="利用kubeadm搭建集群"><meta name=twitter:description content=" 环境：在 VMWare 上，启动了两个 Ubuntu 24.04.3 LTS，配置都为 2C2G。一台作为 master，一台作为 worker，需要为两台机器设置不同的 hostname。\nPrepare 安装好 Docker 后，设置一下 cgroup 的驱动：\n"><link rel="shortcut icon" href=/images/favicon.png></head><body class=article-page><script>(function(){const e="StackColorScheme";localStorage.getItem(e)||localStorage.setItem(e,"auto")})()</script><script>(function(){const t="StackColorScheme",e=localStorage.getItem(t),n=window.matchMedia("(prefers-color-scheme: dark)").matches===!0;e=="dark"||e==="auto"&&n?document.documentElement.dataset.scheme="dark":document.documentElement.dataset.scheme="light"})()</script><div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky"><button class="hamburger hamburger--spin" type=button id=toggle-menu aria-label=切换菜单>
+<span class=hamburger-box><span class=hamburger-inner></span></span></button><header><figure class=site-avatar><a href=/><img src=/images/avatar.jpg width=200 height=200 class=site-logo loading=lazy alt=Avatar>
+</a><span class=emoji>🏸</span></figure><div class=site-meta><h1 class=site-name><a href=/>Kerolt's Note</a></h1><h2 class=site-description>宇宙是秩序的，也是混乱的。</h2></div></header><ol class=menu-social><li><a href=https://github.com/kerolt title=GitHub rel=me><svg class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 19c-4.3 1.4-4.3-2.5-6-3m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6.0 00-1.3-3.2 4.2 4.2.0 00-.1-3.2s-1.1-.3-3.5 1.3a12.3 12.3.0 00-6.2.0C6.5 2.8 5.4 3.1 5.4 3.1a4.2 4.2.0 00-.1 3.2A4.6 4.6.0 004 9.5c0 4.6 2.7 5.7 5.5 6-.6.6-.6 1.2-.5 2V21"/></svg></a></li></ol><ol class=menu id=main-menu><li><a href=/><svg class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><polyline points="5 12 3 12 12 3 21 12 19 12"/><path d="M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"/><path d="M9 21v-6a2 2 0 012-2h2a2 2 0 012 2v6"/></svg>
+<span>首页</span></a></li><li><a href=/archives/><svg class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><rect x="3" y="4" width="18" height="4" rx="2"/><path d="M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
+<span>归档</span></a></li><li><a href=/categories/><svg class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><line x1="5" y1="9" x2="19" y2="9"/><line x1="5" y1="15" x2="19" y2="15"/><line x1="11" y1="4" x2="7" y2="20"/><line x1="17" y1="4" x2="13" y2="20"/></svg>
+<span>分类</span></a></li><li><a href=/tags/><svg class="icon icon-tabler icon-tabler-tag" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><path d="M11 3l9 9a1.5 1.5.0 010 2l-6 6a1.5 1.5.0 01-2 0L3 11V7a4 4 0 014-4h4"/><circle cx="9" cy="9" r="2"/></svg>
+<span>标签</span></a></li><li><a href=/about/><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-info-circle"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 12a9 9 0 1018 0A9 9 0 003 12"/><path d="M12 9h.01"/><path d="M11 12h1v4h1"/></svg>
+<span>关于我</span></a></li><li><a href=/search/><svg class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="10" cy="10" r="7"/><line x1="21" y1="21" x2="15" y2="15"/></svg>
+<span>搜索</span></a></li><li class=menu-bottom-section><ol class=menu><li id=dark-mode-toggle><svg class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="8" cy="12" r="2"/><rect x="2" y="6" width="20" height="12" rx="6"/></svg>
+<svg class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="16" cy="12" r="2"/><rect x="2" y="6" width="20" height="12" rx="6"/></svg>
+<span>暗色模式</span></li></ol></li></ol></aside><aside class="sidebar right-sidebar sticky"><section class="widget archives"><div class=widget-icon><svg class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><line x1="5" y1="9" x2="19" y2="9"/><line x1="5" y1="15" x2="19" y2="15"/><line x1="11" y1="4" x2="7" y2="20"/><line x1="17" y1="4" x2="13" y2="20"/></svg></div><h2 class="widget-title section-title">目录</h2><div class=widget--toc><nav class=toc-nav id=TableOfContents><ol><li><a href=#prepare>Prepare</a></li><li><a href=#安装-kubeadm>安装 kubeadm</a></li><li><a href=#安装-master-节点>安装 Master 节点</a></li><li><a href=#安装-fannel-网络插件>安装 Fannel 网络插件</a></li><li><a href=#安装-worker-节点>安装 Worker 节点</a></li><li><a href=#碰到的小问题>碰到的小问题</a></li></ol></nav></div></section></aside><main class="main full-width"><article class=main-article><header class=article-header><div class=article-details><header class=article-category><a href=/categories/k8s/ style=background-color:#efbecc;color:#3d0f1c>K8s</a></header><div class=article-title-wrapper><h2 class=article-title><a href=/p/%E5%88%A9%E7%94%A8kubeadm%E6%90%AD%E5%BB%BA%E9%9B%86%E7%BE%A4/>利用kubeadm搭建集群</a></h2></div><footer class=article-meta><div class=inline-meta><svg class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><path d="M11.795 21H5a2 2 0 01-2-2V7a2 2 0 012-2h12a2 2 0 012 2v4"/><circle cx="18" cy="18" r="4"/><path d="M15 3v4"/><path d="M7 3v4"/><path d="M3 11h16"/><path d="M18 16.496V18l1 1"/></svg>
+<time class=article-time--published datetime=2025-10-31T00:00:00Z>2025年10月31日星期五</time>
+<svg class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg>
+<time class=article-time--reading>阅读时长: 3 分钟</time></div></footer></div></header><aside class=article-toc><details><summary><div class=article-toc-title><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-chevron-right"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 6l6 6-6 6"/></svg>
+<span>目录</span></div></summary><nav class=toc-nav><ol><li><a href=#prepare>Prepare</a></li><li><a href=#安装-kubeadm>安装 kubeadm</a></li><li><a href=#安装-master-节点>安装 Master 节点</a></li><li><a href=#安装-fannel-网络插件>安装 Fannel 网络插件</a></li><li><a href=#安装-worker-节点>安装 Worker 节点</a></li><li><a href=#碰到的小问题>碰到的小问题</a></li></ol></nav></details></aside><section class=article-content><blockquote><p>环境：在 VMWare 上，启动了两个 Ubuntu 24.04.3 LTS，配置都为 2C2G。一台作为 master，一台作为 worker，<strong>需要为两台机器设置不同的 hostname</strong>。</p></blockquote><h2 id=prepare>Prepare</h2><p>安装好 Docker 后，设置一下 cgroup 的驱动：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span><span class=lnt>8
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-sh data-lang=sh><span class=line><span class=cl>cat <span class=s>&lt;&lt;EOF | sudo tee /etc/docker/daemon.json 
+</span></span></span><span class=line><span class=cl><span class=s>{
+</span></span></span><span class=line><span class=cl><span class=s>	&#34;exec-opts&#34;: [&#34;native.cgroupdriver=systemd&#34;],
+</span></span></span><span class=line><span class=cl><span class=s>	&#34;log-driver&#34;: &#34;json-file&#34;,
+</span></span></span><span class=line><span class=cl><span class=s>	&#34;log-opts&#34;: { &#34;max-size&#34;: &#34;100m&#34; },
+</span></span></span><span class=line><span class=cl><span class=s>	&#34;storage-driver&#34;: &#34;overlay2&#34; 
+</span></span></span><span class=line><span class=cl><span class=s>}
+</span></span></span><span class=line><span class=cl><span class=s>EOF</span>
+</span></span></code></pre></td></tr></table></div></div><p>然后重启 docker：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-sh data-lang=sh><span class=line><span class=cl>sudo systemctl <span class=nb>enable</span> docker
+</span></span><span class=line><span class=cl>sudo systemctl daemon-reload
+</span></span><span class=line><span class=cl>sudo systemctl restart docker
+</span></span></code></pre></td></tr></table></div></div><p>为了让 Kubernetes 能够检查、转发网络流量，需要修改 iptables 的配置,启 用 <code>br_netfilter</code> 模块:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-sh data-lang=sh><span class=line><span class=cl>cat <span class=s>&lt;&lt;EOF | sudo tee /etc/modules-load.d/k8s.conf
+</span></span></span><span class=line><span class=cl><span class=s>br_netfilter
+</span></span></span><span class=line><span class=cl><span class=s>EOF</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>cat <span class=s>&lt;&lt;EOF | sudo tee /etc/sysctl.d/k8s.conf
+</span></span></span><span class=line><span class=cl><span class=s>net.bridge.bridge-nf-call-ip6tables = 1
+</span></span></span><span class=line><span class=cl><span class=s>net.bridge.bridge-nf-call-iptables = 1
+</span></span></span><span class=line><span class=cl><span class=s>net.ipv4.ip_forward=1 # better than modify /etc/sysctl.conf
+</span></span></span><span class=line><span class=cl><span class=s>EOF</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>sudo sysctl --system
+</span></span></code></pre></td></tr></table></div></div><p>修改“/etc/fstab”，关闭 Linux 的 swap 分区，提升 Kubernetes 的性能：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-sh data-lang=sh><span class=line><span class=cl>sudo swapoff -a
+</span></span><span class=line><span class=cl>sudo sed -ri <span class=s1>&#39;/\sswap\s/s/^#?/#/&#39;</span> /etc/fstab
+</span></span></code></pre></td></tr></table></div></div><h2 id=安装-kubeadm>安装 kubeadm</h2><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span><span class=lnt>8
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-sh data-lang=sh><span class=line><span class=cl>sudo apt install -y apt-transport-https ca-certificates curl
+</span></span><span class=line><span class=cl>curl https://mirrors.aliyun.com/kubernetes/apt/doc/apt-key.gpg <span class=p>|</span> sudo apt-key add
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>cat <span class=s>&lt;&lt;EOF | sudo tee /etc/apt/sources.list.d/kubernetes.list 
+</span></span></span><span class=line><span class=cl><span class=s>deb https://mirrors.aliyun.com/kubernetes/apt/ kubernetes-xenial main 
+</span></span></span><span class=line><span class=cl><span class=s>EOF</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>sudo apt update
+</span></span></code></pre></td></tr></table></div></div><p>然后安装 kubeadm、kubelet、kubectl：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-sh data-lang=sh><span class=line><span class=cl>sudo apt install -y <span class=nv>kubeadm</span><span class=o>=</span>1.23.3-00 <span class=nv>kubelet</span><span class=o>=</span>1.23.3-00 <span class=nv>kubectl</span><span class=o>=</span>1.23.3-00
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># 最好使用 apt-mark hold 锁定版本</span>
+</span></span><span class=line><span class=cl>sudo apt-mark hold kubeadm kubelet kubectl
+</span></span></code></pre></td></tr></table></div></div><p>kubeadm 把 <code>apiserver</code>、<code>etcd</code>、<code>scheduler</code> 等组件都打包成了镜像,以容器的方式启动 Kubernetes。使用命令 <code>kubeadm config images list</code> 可以查看安装 Kubernetes 所需的镜像列表,参数 <code>--kubernetes-version</code> 可以指定版本号:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-sh data-lang=sh><span class=line><span class=cl>kubeadm config images list --kubernetes-version v1.23.3
+</span></span></code></pre></td></tr></table></div></div><p>最好先想办法把列出的镜像下到本地。</p><h2 id=安装-master-节点>安装 Master 节点</h2><p>kubeadm 安装 master 节点非常简单，只需要指定一下几个参数：</p><ul><li><code>--pod-network-cidr</code>：设置集群里 Pod 的 IP 地址段</li><li><code>--apiserver-advertise-address</code>：设置 apiserver 的 IP 地址，可以指定 apiserver 在哪个网卡上对外提供服务</li><li><code>--kubernetes-version</code>：指定 Kubernetes 的版本号</li></ul><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-sh data-lang=sh><span class=line><span class=cl>sudo kubeadm init <span class=se>\
+</span></span></span><span class=line><span class=cl>	--pod-network-cidr<span class=o>=</span>10.10.0.0/16 <span class=se>\ </span>
+</span></span><span class=line><span class=cl>	--apiserver-advertise-address<span class=o>=</span>192.168.10.210 <span class=se>\
+</span></span></span><span class=line><span class=cl>	--kubernetes-version<span class=o>=</span>v1.23.3
+</span></span></code></pre></td></tr></table></div></div><p>完成后，它会提示接下来要干什么：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-sh data-lang=sh><span class=line><span class=cl>Your Kubernetes control-plane has initialized successfully!
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>To start using your cluster, you need to run the following as a regular user:
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>  mkdir -p <span class=nv>$HOME</span>/.kube
+</span></span><span class=line><span class=cl>  sudo cp -i /etc/kubernetes/admin.conf <span class=nv>$HOME</span>/.kube/config
+</span></span><span class=line><span class=cl>  sudo chown <span class=k>$(</span>id -u<span class=k>)</span>:<span class=k>$(</span>id -g<span class=k>)</span> <span class=nv>$HOME</span>/.kube/config
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>Alternatively, <span class=k>if</span> you are the root user, you can run:
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>  <span class=nb>export</span> <span class=nv>KUBECONFIG</span><span class=o>=</span>/etc/kubernetes/admin.conf
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>You should now deploy a pod network to the cluster.
+</span></span><span class=line><span class=cl>Run <span class=s2>&#34;kubectl apply -f [podnetwork].yaml&#34;</span> with one of the options listed at:
+</span></span><span class=line><span class=cl>  https://kubernetes.io/docs/concepts/cluster-administration/addons/
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>Then you can join any number of worker nodes by running the following on each as root:
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>kubeadm join 192.168.116.129:6443 --token e7m92u.o3namkgyg9f5n3qw <span class=se>\
+</span></span></span><span class=line><span class=cl>        --discovery-token-ca-cert-hash sha256:8d15d3ef5536d14706b8efba99b760212a61eccb3a18c179c307045bcea4e950
+</span></span></code></pre></td></tr></table></div></div><p>首先拷⻉ kubectl 的配置文件：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-sh data-lang=sh><span class=line><span class=cl>mkdir -p <span class=nv>$HOME</span>/.kube
+</span></span><span class=line><span class=cl>sudo cp -i /etc/kubernetes/admin.conf <span class=nv>$HOME</span>/.kube/config
+</span></span><span class=line><span class=cl>sudo chown <span class=k>$(</span>id -u<span class=k>)</span>:<span class=k>$(</span>id -g<span class=k>)</span> <span class=nv>$HOME</span>/.kube/config
+</span></span></code></pre></td></tr></table></div></div><p>完成后，运行 <code>kubectl get node</code> 会发现 master 节点的 <code>STATUS</code> 为 <code>NotReady</code>，这是因为我们还没有添加网络插件，集群的内部网络还没有正常运作。</p><h2 id=安装-fannel-网络插件>安装 Fannel 网络插件</h2><p>保存 <a class=link href=https://github.com/flannel-io/flannel/blob/master/Documentation/kube-flannel.yml target=_blank rel=noopener>https://github.com/flannel-io/flannel/blob/master/Documentation/kube-flannel.yml</a> ，然后运行修改其中的 <code>net-conf.json</code> 字段把 Network 改成之前参数 <code>--pod-network-cidr</code> 设置的地址段：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-sh data-lang=sh><span class=line><span class=cl>net-conf.json: <span class=p>|</span> 
+</span></span><span class=line><span class=cl>  <span class=o>{</span> 
+</span></span><span class=line><span class=cl>    <span class=s2>&#34;Network&#34;</span>: <span class=s2>&#34;10.10.0.0/16&#34;</span>, 
+</span></span><span class=line><span class=cl>    <span class=s2>&#34;Backend&#34;</span>: <span class=o>{</span> 
+</span></span><span class=line><span class=cl>      <span class=s2>&#34;Type&#34;</span>: <span class=s2>&#34;vxlan&#34;</span> 
+</span></span><span class=line><span class=cl>    <span class=o>}</span> 
+</span></span><span class=line><span class=cl>  <span class=o>}</span>
+</span></span></code></pre></td></tr></table></div></div><p>然后</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-sh data-lang=sh><span class=line><span class=cl>kubectl apply -f kube-flannel.yml
+</span></span></code></pre></td></tr></table></div></div><p>稍等一会儿 master 节点的状态就变为了 <code>Ready</code>。</p><blockquote><p>Flannel 所处的命名空间在 kube-flannel 中，可以通过 <code>kubectl get pods -n kube-flannel</code> 查看插件是否运行成功</p></blockquote><h2 id=安装-worker-节点>安装 Worker 节点</h2><p>安装好了 master 节点后，worker 节点只需要执行：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-sh data-lang=sh><span class=line><span class=cl>sudo kubeadm join 192.168.116.129:6443 --token e7m92u.o3namkgyg9f5n3qw <span class=se>\
+</span></span></span><span class=line><span class=cl>        --discovery-token-ca-cert-hash sha256:8d15d3ef5536d14706b8efba99b760212a61eccb3a18c179c307045bcea4e950
+</span></span></code></pre></td></tr></table></div></div><p>它会连接 master 节点，然后拉取镜像，安装网络插件，最后把节点加入集群。</p><p>如果需要重新显示 join 信息，可以运行：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-sh data-lang=sh><span class=line><span class=cl>sudo kubeadm token create --print-join-command
+</span></span></code></pre></td></tr></table></div></div><p>安装完后，执行 <code>kubectl get node</code>，就会看到两个节点都是“Ready”状态。</p><h2 id=碰到的小问题>碰到的小问题</h2><p>之前在安装网络插件时，会碰到安装完毕后 master 节点的状态始终还是“NotReady”，然后试着把 <code>$HOME/.kube</code> 目录删掉，然后：</p><ol><li><code>sudo kubeadm reset</code></li><li>重新 <code>kubeadm init</code></li><li>重新安装 Fannel 插件</li></ol><p>就 ok 了~</p></section><footer class="article-meta article-footer"><section class=article-tags><a href=/tags/kubeadm/>Kubeadm</a></section><section class="article-copyright inline-meta"><svg class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><path d="M14.5 9a3.5 4 0 100 6"/></svg>
+<span>Licensed under CC BY-NC-SA 4.0</span></section></footer></article><footer class=site-footer><section class=copyright>&copy;
+2025 -
+2026 Kerolt's Note</section><section class=powerby>使用 <a href=https://gohugo.io/ target=_blank rel=noopener>Hugo</a> 构建<br>主题 <b><a href=https://github.com/CaiJimmy/hugo-theme-stack target=_blank rel=noopener data-version=4.0.3>Stack</a></b> 由 <a href=https://jimmycai.com target=_blank rel=noopener>Jimmy</a> 设计</section></footer><script type=module>
+    import gallery from '\/ts\/gallery.js';
+
+    const articleContent = document.querySelector('.article-content');
+    const shouldLoad = articleContent && (articleContent.querySelectorAll('figure').length > 0 || articleContent.querySelectorAll('img.gallery-image').length > 0);
+    
+    if (shouldLoad) {
+        gallery(articleContent);
+
+        const PhotoSwipeLightbox = (await import("https:\/\/cdn.jsdelivr.net\/npm\/photoswipe@5.4.4\/dist\/photoswipe-lightbox.esm.min.js")).default;
+        const styleHref = "https:\/\/cdn.jsdelivr.net\/npm\/photoswipe@5.4.4\/dist\/photoswipe.css";
+
+        const styleTag = document.createElement('link');
+        styleTag.rel = 'stylesheet';
+        styleTag.href = styleHref;
+        document.head.appendChild(styleTag);
+
+        const lightbox = new PhotoSwipeLightbox({
+            gallerySelector: '.article-content',
+            childSelector: 'figure a.image-link',
+            pswpModule: () => import("https:\/\/cdn.jsdelivr.net\/npm\/photoswipe@5.4.4\/dist\/photoswipe.esm.min.js")
+        });
+        lightbox.init();
+    }
+</script></main></div><script type=text/javascript src=/ts/main.f856840516f7c2ad1769a8f5937e3d08d6cb386e2cd2dd025ae696e0ff207958.js defer></script></body></html>

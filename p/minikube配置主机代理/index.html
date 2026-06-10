@@ -1,0 +1,177 @@
+<!doctype html><html lang=zh-cn dir=ltr><head><meta charset=utf-8><meta name=viewport content='width=device-width,initial-scale=1'><meta name=description content="在使用 minikube 的时候碰到了一个问题，minikube start 之后，虽然我开启了主机的代理，但是在 minikube 节点中 pull 镜像时总是失败。\n在 minikube 官方文档里，推荐通过 HTTP_PROXY、HTTPS_PROXY 和 NO_PROXY 环境变量传给 minikube，并且特别强调 NO_PROXY 很重要，否则集群内部地址也可能被错误地送进代理，导致组件通信异常。\n"><title>Minikube配置主机代理</title><link rel=canonical href=https://kerolt.github.io/p/minikube%E9%85%8D%E7%BD%AE%E4%B8%BB%E6%9C%BA%E4%BB%A3%E7%90%86/><link rel=preconnect href=https://fonts.googleapis.com><link rel=preconnect href=https://fonts.gstatic.com crossorigin><link rel=preload as=style href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap"><link rel=stylesheet href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap"><link rel=stylesheet href=/scss/style.min.e62e09c60ba428a627e03568fa3df938f6a8224f815b5846f00816c17d4a0be4.css><meta property='og:title' content="Minikube配置主机代理"><meta property='og:description' content="在使用 minikube 的时候碰到了一个问题，minikube start 之后，虽然我开启了主机的代理，但是在 minikube 节点中 pull 镜像时总是失败。\n在 minikube 官方文档里，推荐通过 HTTP_PROXY、HTTPS_PROXY 和 NO_PROXY 环境变量传给 minikube，并且特别强调 NO_PROXY 很重要，否则集群内部地址也可能被错误地送进代理，导致组件通信异常。\n"><meta property='og:url' content='https://kerolt.github.io/p/minikube%E9%85%8D%E7%BD%AE%E4%B8%BB%E6%9C%BA%E4%BB%A3%E7%90%86/'><meta property='og:site_name' content="Kerolt's Note"><meta property='og:type' content='article'><meta property='article:section' content='Post'><meta property='article:tag' content='minikube'><meta property='article:tag' content='clash'><meta property='article:published_time' content='2026-04-17T00:00:00+00:00'><meta property='article:modified_time' content='2026-04-18T00:00:00+00:00'><meta name=twitter:title content="Minikube配置主机代理"><meta name=twitter:description content="在使用 minikube 的时候碰到了一个问题，minikube start 之后，虽然我开启了主机的代理，但是在 minikube 节点中 pull 镜像时总是失败。\n在 minikube 官方文档里，推荐通过 HTTP_PROXY、HTTPS_PROXY 和 NO_PROXY 环境变量传给 minikube，并且特别强调 NO_PROXY 很重要，否则集群内部地址也可能被错误地送进代理，导致组件通信异常。\n"><link rel="shortcut icon" href=/images/favicon.png></head><body class=article-page><script>(function(){const e="StackColorScheme";localStorage.getItem(e)||localStorage.setItem(e,"auto")})()</script><script>(function(){const t="StackColorScheme",e=localStorage.getItem(t),n=window.matchMedia("(prefers-color-scheme: dark)").matches===!0;e=="dark"||e==="auto"&&n?document.documentElement.dataset.scheme="dark":document.documentElement.dataset.scheme="light"})()</script><div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky"><button class="hamburger hamburger--spin" type=button id=toggle-menu aria-label=切换菜单>
+<span class=hamburger-box><span class=hamburger-inner></span></span></button><header><figure class=site-avatar><a href=/><img src=/images/avatar.jpg width=200 height=200 class=site-logo loading=lazy alt=Avatar>
+</a><span class=emoji>🏸</span></figure><div class=site-meta><h1 class=site-name><a href=/>Kerolt's Note</a></h1><h2 class=site-description>宇宙是秩序的，也是混乱的。</h2></div></header><ol class=menu-social><li><a href=https://github.com/kerolt title=GitHub rel=me><svg class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 19c-4.3 1.4-4.3-2.5-6-3m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6.0 00-1.3-3.2 4.2 4.2.0 00-.1-3.2s-1.1-.3-3.5 1.3a12.3 12.3.0 00-6.2.0C6.5 2.8 5.4 3.1 5.4 3.1a4.2 4.2.0 00-.1 3.2A4.6 4.6.0 004 9.5c0 4.6 2.7 5.7 5.5 6-.6.6-.6 1.2-.5 2V21"/></svg></a></li></ol><ol class=menu id=main-menu><li><a href=/><svg class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><polyline points="5 12 3 12 12 3 21 12 19 12"/><path d="M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"/><path d="M9 21v-6a2 2 0 012-2h2a2 2 0 012 2v6"/></svg>
+<span>首页</span></a></li><li><a href=/archives/><svg class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><rect x="3" y="4" width="18" height="4" rx="2"/><path d="M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
+<span>归档</span></a></li><li><a href=/categories/><svg class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><line x1="5" y1="9" x2="19" y2="9"/><line x1="5" y1="15" x2="19" y2="15"/><line x1="11" y1="4" x2="7" y2="20"/><line x1="17" y1="4" x2="13" y2="20"/></svg>
+<span>分类</span></a></li><li><a href=/tags/><svg class="icon icon-tabler icon-tabler-tag" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><path d="M11 3l9 9a1.5 1.5.0 010 2l-6 6a1.5 1.5.0 01-2 0L3 11V7a4 4 0 014-4h4"/><circle cx="9" cy="9" r="2"/></svg>
+<span>标签</span></a></li><li><a href=/about/><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-info-circle"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 12a9 9 0 1018 0A9 9 0 003 12"/><path d="M12 9h.01"/><path d="M11 12h1v4h1"/></svg>
+<span>关于我</span></a></li><li><a href=/search/><svg class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="10" cy="10" r="7"/><line x1="21" y1="21" x2="15" y2="15"/></svg>
+<span>搜索</span></a></li><li class=menu-bottom-section><ol class=menu><li id=dark-mode-toggle><svg class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="8" cy="12" r="2"/><rect x="2" y="6" width="20" height="12" rx="6"/></svg>
+<svg class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="16" cy="12" r="2"/><rect x="2" y="6" width="20" height="12" rx="6"/></svg>
+<span>暗色模式</span></li></ol></li></ol></aside><main class="main full-width"><article class=main-article><header class=article-header><div class=article-details><header class=article-category><a href=/categories/k8s/ style=background-color:#efbecc;color:#3d0f1c>K8s</a></header><div class=article-title-wrapper><h2 class=article-title><a href=/p/minikube%E9%85%8D%E7%BD%AE%E4%B8%BB%E6%9C%BA%E4%BB%A3%E7%90%86/>Minikube配置主机代理</a></h2></div><footer class=article-meta><div class=inline-meta><svg class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><path d="M11.795 21H5a2 2 0 01-2-2V7a2 2 0 012-2h12a2 2 0 012 2v4"/><circle cx="18" cy="18" r="4"/><path d="M15 3v4"/><path d="M7 3v4"/><path d="M3 11h16"/><path d="M18 16.496V18l1 1"/></svg>
+<time class=article-time--published datetime=2026-04-17T00:00:00Z>2026年4月17日星期五</time>
+<svg class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg>
+<time class=article-time--reading>阅读时长: 2 分钟</time></div></footer></div></header><section class=article-content><p>在使用 minikube 的时候碰到了一个问题，<code>minikube start</code> 之后，<strong>虽然我开启了主机的代理，但是在 minikube 节点中 pull 镜像时总是失败</strong>。</p><p>在 minikube 官方文档里，推荐通过 <strong><code>HTTP_PROXY</code></strong>、<strong><code>HTTPS_PROXY</code></strong> 和 <strong><code>NO_PROXY</code></strong> 环境变量传给 minikube，并且特别强调 <code>NO_PROXY</code> 很重要，<strong>否则集群内部地址也可能被错误地送进代理，导致组件通信异常</strong>。</p><p>宿主机中执行 <code>ip a</code> 时如下：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-sh data-lang=sh><span class=line><span class=cl>1: lo: &lt;LOOPBACK,UP,LOWER_UP&gt; mtu <span class=m>65536</span> qdisc noqueue state UNKNOWN group default qlen <span class=m>1000</span>
+</span></span><span class=line><span class=cl>    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+</span></span><span class=line><span class=cl>    inet 127.0.0.1/8 scope host lo
+</span></span><span class=line><span class=cl>       valid_lft forever preferred_lft forever
+</span></span><span class=line><span class=cl>    inet6 ::1/128 scope host noprefixroute
+</span></span><span class=line><span class=cl>       valid_lft forever preferred_lft forever
+</span></span><span class=line><span class=cl>3: enp171s0: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu <span class=m>1500</span> qdisc fq_codel state UP group default qlen <span class=m>1000</span>
+</span></span><span class=line><span class=cl>    link/ether 78:55:36:06:e4:22 brd ff:ff:ff:ff:ff:ff
+</span></span><span class=line><span class=cl>    altname enx78553606e422
+</span></span><span class=line><span class=cl>    inet 10.65.163.66/16 brd 10.65.255.255 scope global dynamic noprefixroute enp171s0
+</span></span><span class=line><span class=cl>       valid_lft 240080sec preferred_lft 240080sec
+</span></span><span class=line><span class=cl>    inet6 2001:da8:e021:6565::3:d80e/128 scope global dynamic noprefixroute
+</span></span><span class=line><span class=cl>       valid_lft 179550sec preferred_lft 93150sec
+</span></span><span class=line><span class=cl>    inet6 fe80::e8be:df6a:d5b3:21ee/64 scope link noprefixroute
+</span></span><span class=line><span class=cl>       valid_lft forever preferred_lft forever 
+</span></span><span class=line><span class=cl>6: docker0: &lt;NO-CARRIER,BROADCAST,MULTICAST,UP&gt; mtu <span class=m>1500</span> qdisc noqueue state DOWN group default
+</span></span><span class=line><span class=cl>    link/ether 3a:b6:7f:07:78:26 brd ff:ff:ff:ff:ff:ff
+</span></span><span class=line><span class=cl>    inet 172.17.0.1/16 brd 172.17.255.255 scope global docker0
+</span></span><span class=line><span class=cl>       valid_lft forever preferred_lft forever
+</span></span><span class=line><span class=cl>    inet6 fe80::38b6:7fff:fe07:7826/64 scope link proto kernel_ll
+</span></span><span class=line><span class=cl>       valid_lft forever preferred_lft forever
+</span></span><span class=line><span class=cl>19: br-ef20fd0aa66e: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu <span class=m>1500</span> qdisc noqueue state UP group default
+</span></span><span class=line><span class=cl>    link/ether da:3c:71:a8:5b:17 brd ff:ff:ff:ff:ff:ff
+</span></span><span class=line><span class=cl>    inet 192.168.49.1/24 brd 192.168.49.255 scope global br-ef20fd0aa66e
+</span></span><span class=line><span class=cl>       valid_lft forever preferred_lft forever
+</span></span><span class=line><span class=cl>    inet6 fe80::d83c:71ff:fea8:5b17/64 scope link proto kernel_ll
+</span></span><span class=line><span class=cl>       valid_lft forever preferred_lft forever
+</span></span></code></pre></td></tr></table></div></div><p>在 minikube 节点中执行 <code>ip a</code> 如下：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-sh data-lang=sh><span class=line><span class=cl>1: lo: &lt;LOOPBACK,UP,LOWER_UP&gt; mtu <span class=m>65536</span> qdisc noqueue state UNKNOWN group default qlen <span class=m>1000</span>
+</span></span><span class=line><span class=cl>    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+</span></span><span class=line><span class=cl>    inet 127.0.0.1/8 scope host lo
+</span></span><span class=line><span class=cl>       valid_lft forever preferred_lft forever
+</span></span><span class=line><span class=cl>    inet6 ::1/128 scope host
+</span></span><span class=line><span class=cl>       valid_lft forever preferred_lft forever
+</span></span><span class=line><span class=cl>2: eth0@if24: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu <span class=m>1500</span> qdisc noqueue state UP group default
+</span></span><span class=line><span class=cl>    link/ether 42:0c:2d:36:1b:6b brd ff:ff:ff:ff:ff:ff link-netnsid <span class=m>0</span>
+</span></span><span class=line><span class=cl>    inet 192.168.49.2/24 brd 192.168.49.255 scope global eth0
+</span></span><span class=line><span class=cl>       valid_lft forever preferred_lft forever
+</span></span><span class=line><span class=cl>3: docker0: &lt;NO-CARRIER,BROADCAST,MULTICAST,UP&gt; mtu <span class=m>1500</span> qdisc noqueue state DOWN group default
+</span></span><span class=line><span class=cl>    link/ether e2:c0:91:13:8c:f9 brd ff:ff:ff:ff:ff:ff
+</span></span><span class=line><span class=cl>    inet 172.17.0.1/16 brd 172.17.255.255 scope global docker0
+</span></span><span class=line><span class=cl>       valid_lft forever preferred_lft forever
+</span></span><span class=line><span class=cl>4: bridge: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu <span class=m>1500</span> qdisc noqueue state UP group default qlen <span class=m>1000</span>
+</span></span><span class=line><span class=cl>    link/ether 16:a6:f8:bd:fe:f3 brd ff:ff:ff:ff:ff:ff
+</span></span><span class=line><span class=cl>    inet 10.244.0.1/16 brd 10.244.255.255 scope global bridge
+</span></span><span class=line><span class=cl>       valid_lft forever preferred_lft forever
+</span></span><span class=line><span class=cl>    inet6 fe80::14a6:f8ff:febd:fef3/64 scope link
+</span></span><span class=line><span class=cl>       valid_lft forever preferred_lft forever
+</span></span></code></pre></td></tr></table></div></div><p>这说明 minikube 节点容器和宿主机就在同一个 <code>192.168.49.0/24</code> 二层网段里，<code>192.168.49.1</code> 实际上就是“minikube 看见的宿主机”。minikube 文档中有说明将 <code>192.168.49.0/24</code> 列为 docker driver 的默认集群网段，并要求放进 <code>NO_PROXY</code>，<strong>否则集群内部通信可能异常</strong>。</p><p>前提条件是 Clash 必须监听到宿主机可被 minikube 访问的地址，而不只是 <code>127.0.0.1</code>。<strong>也就是要开启局域网访问</strong>，至少要让代理监听到 <code>0.0.0.0:&lt;port></code> 或 <code>192.168.49.1:&lt;port></code>。否则 minikube 容器虽然能看到宿主机 IP，但连不上对应端口。minikube 官方对代理的要求也是把一个可达的 <code>HTTP_PROXY/HTTPS_PROXY</code> 地址传给 minikube 和容器运行时。</p><p>现在在 minikube 中执行：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-sh data-lang=sh><span class=line><span class=cl>ping -c <span class=m>1</span> 192.168.49.1
+</span></span><span class=line><span class=cl>nc -vz 192.168.49.1 <span class=m>7890</span>
+</span></span></code></pre></td></tr></table></div></div><p>输出为：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-sh data-lang=sh><span class=line><span class=cl>Connection to 192.168.49.1 <span class=m>7890</span> port <span class=o>[</span>tcp/*<span class=o>]</span> succeeded!
+</span></span></code></pre></td></tr></table></div></div><p>说明使用 <code>192.168.49.1:7890</code> 来作为代理地址是没问题的。</p><p>如果可以直接删除原节点，可以：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-sh data-lang=sh><span class=line><span class=cl>minikube delete
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>minikube start <span class=se>\
+</span></span></span><span class=line><span class=cl>  --docker-env <span class=nv>HTTP_PROXY</span><span class=o>=</span>http://192.168.49.1:7890 <span class=se>\
+</span></span></span><span class=line><span class=cl>  --docker-env <span class=nv>HTTPS_PROXY</span><span class=o>=</span>http://192.168.49.1:7890 <span class=se>\
+</span></span></span><span class=line><span class=cl>  --docker-env <span class=nv>NO_PROXY</span><span class=o>=</span>localhost,127.0.0.1,::1,192.168.49.0/24,10.96.0.0/12,10.244.0.0/16,.svc,.cluster.local
+</span></span></code></pre></td></tr></table></div></div><p>或者在原节点内部修改：</p><blockquote><p>如果是 docker driver，可通过 <code>minikube profile list</code> 查看</p></blockquote><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span><span class=lnt>8
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-sh data-lang=sh><span class=line><span class=cl>sudo mkdir -p /etc/systemd/system/docker.service.d
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>sudo tee /etc/systemd/system/docker.service.d/http-proxy.conf <span class=s>&lt;&lt;EOF  
+</span></span></span><span class=line><span class=cl><span class=s>[Service]  
+</span></span></span><span class=line><span class=cl><span class=s>Environment=&#34;HTTP_PROXY=http://192.168.49.1:7890&#34;  
+</span></span></span><span class=line><span class=cl><span class=s>Environment=&#34;HTTPS_PROXY=http://192.168.49.1:7890&#34;  
+</span></span></span><span class=line><span class=cl><span class=s>Environment=&#34;NO_PROXY=localhost,127.0.0.1,192.168.49.0/24,10.96.0.0/12,10.244.0.0/16,.svc,.cluster.local&#34;  
+</span></span></span><span class=line><span class=cl><span class=s>EOF</span>
+</span></span></code></pre></td></tr></table></div></div><p>然后：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-sh data-lang=sh><span class=line><span class=cl>sudo systemctl daemon-reexec  
+</span></span><span class=line><span class=cl>sudo systemctl daemon-reload  
+</span></span><span class=line><span class=cl>sudo systemctl restart docker
+</span></span></code></pre></td></tr></table></div></div></section><footer class="article-meta article-footer"><section class=article-tags><a href=/tags/minikube/>Minikube</a>
+<a href=/tags/clash/>Clash</a></section><section class="article-copyright inline-meta"><svg class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><path d="M14.5 9a3.5 4 0 100 6"/></svg>
+<span>Licensed under CC BY-NC-SA 4.0</span></section><section class="article-lastmod inline-meta"><svg class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg>
+<span>最后更新于 2026年4月18日星期六</span></section></footer></article><footer class=site-footer><section class=copyright>&copy;
+2025 -
+2026 Kerolt's Note</section><section class=powerby>使用 <a href=https://gohugo.io/ target=_blank rel=noopener>Hugo</a> 构建<br>主题 <b><a href=https://github.com/CaiJimmy/hugo-theme-stack target=_blank rel=noopener data-version=4.0.3>Stack</a></b> 由 <a href=https://jimmycai.com target=_blank rel=noopener>Jimmy</a> 设计</section></footer><script type=module>
+    import gallery from '\/ts\/gallery.js';
+
+    const articleContent = document.querySelector('.article-content');
+    const shouldLoad = articleContent && (articleContent.querySelectorAll('figure').length > 0 || articleContent.querySelectorAll('img.gallery-image').length > 0);
+    
+    if (shouldLoad) {
+        gallery(articleContent);
+
+        const PhotoSwipeLightbox = (await import("https:\/\/cdn.jsdelivr.net\/npm\/photoswipe@5.4.4\/dist\/photoswipe-lightbox.esm.min.js")).default;
+        const styleHref = "https:\/\/cdn.jsdelivr.net\/npm\/photoswipe@5.4.4\/dist\/photoswipe.css";
+
+        const styleTag = document.createElement('link');
+        styleTag.rel = 'stylesheet';
+        styleTag.href = styleHref;
+        document.head.appendChild(styleTag);
+
+        const lightbox = new PhotoSwipeLightbox({
+            gallerySelector: '.article-content',
+            childSelector: 'figure a.image-link',
+            pswpModule: () => import("https:\/\/cdn.jsdelivr.net\/npm\/photoswipe@5.4.4\/dist\/photoswipe.esm.min.js")
+        });
+        lightbox.init();
+    }
+</script></main></div><script type=text/javascript src=/ts/main.f856840516f7c2ad1769a8f5937e3d08d6cb386e2cd2dd025ae696e0ff207958.js defer></script></body></html>

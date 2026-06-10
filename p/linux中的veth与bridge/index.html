@@ -1,0 +1,124 @@
+<!doctype html><html lang=zh-cn dir=ltr><head><meta charset=utf-8><meta name=viewport content='width=device-width,initial-scale=1'><meta name=description content="容器网络最典型的基础模型 —— 两个不同的命名空间通过 bridge 通信 。\nDocker 默认的 bridge 模式就是基于此原理,创建 docker0 bridge，容器 veth 对一端连接容器，一端连接 docker0，提供 NAT 功能让容器可以访问外网。\n"><title>Linux中的veth与bridge</title><link rel=canonical href=https://kerolt.github.io/p/linux%E4%B8%AD%E7%9A%84veth%E4%B8%8Ebridge/><link rel=preconnect href=https://fonts.googleapis.com><link rel=preconnect href=https://fonts.gstatic.com crossorigin><link rel=preload as=style href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap"><link rel=stylesheet href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap"><link rel=stylesheet href=/scss/style.min.e62e09c60ba428a627e03568fa3df938f6a8224f815b5846f00816c17d4a0be4.css><meta property='og:title' content="Linux中的veth与bridge"><meta property='og:description' content="容器网络最典型的基础模型 —— 两个不同的命名空间通过 bridge 通信 。\nDocker 默认的 bridge 模式就是基于此原理,创建 docker0 bridge，容器 veth 对一端连接容器，一端连接 docker0，提供 NAT 功能让容器可以访问外网。\n"><meta property='og:url' content='https://kerolt.github.io/p/linux%E4%B8%AD%E7%9A%84veth%E4%B8%8Ebridge/'><meta property='og:site_name' content="Kerolt's Note"><meta property='og:type' content='article'><meta property='article:section' content='Post'><meta property='article:tag' content='veth'><meta property='article:tag' content='bridge'><meta property='article:published_time' content='2025-11-08T00:00:00+00:00'><meta property='article:modified_time' content='2026-01-01T00:00:00+00:00'><meta name=twitter:title content="Linux中的veth与bridge"><meta name=twitter:description content="容器网络最典型的基础模型 —— 两个不同的命名空间通过 bridge 通信 。\nDocker 默认的 bridge 模式就是基于此原理,创建 docker0 bridge，容器 veth 对一端连接容器，一端连接 docker0，提供 NAT 功能让容器可以访问外网。\n"><link rel="shortcut icon" href=/images/favicon.png></head><body class=article-page><script>(function(){const e="StackColorScheme";localStorage.getItem(e)||localStorage.setItem(e,"auto")})()</script><script>(function(){const t="StackColorScheme",e=localStorage.getItem(t),n=window.matchMedia("(prefers-color-scheme: dark)").matches===!0;e=="dark"||e==="auto"&&n?document.documentElement.dataset.scheme="dark":document.documentElement.dataset.scheme="light"})()</script><div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky"><button class="hamburger hamburger--spin" type=button id=toggle-menu aria-label=切换菜单>
+<span class=hamburger-box><span class=hamburger-inner></span></span></button><header><figure class=site-avatar><a href=/><img src=/images/avatar.jpg width=200 height=200 class=site-logo loading=lazy alt=Avatar>
+</a><span class=emoji>🏸</span></figure><div class=site-meta><h1 class=site-name><a href=/>Kerolt's Note</a></h1><h2 class=site-description>宇宙是秩序的，也是混乱的。</h2></div></header><ol class=menu-social><li><a href=https://github.com/kerolt title=GitHub rel=me><svg class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 19c-4.3 1.4-4.3-2.5-6-3m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6.0 00-1.3-3.2 4.2 4.2.0 00-.1-3.2s-1.1-.3-3.5 1.3a12.3 12.3.0 00-6.2.0C6.5 2.8 5.4 3.1 5.4 3.1a4.2 4.2.0 00-.1 3.2A4.6 4.6.0 004 9.5c0 4.6 2.7 5.7 5.5 6-.6.6-.6 1.2-.5 2V21"/></svg></a></li></ol><ol class=menu id=main-menu><li><a href=/><svg class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><polyline points="5 12 3 12 12 3 21 12 19 12"/><path d="M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"/><path d="M9 21v-6a2 2 0 012-2h2a2 2 0 012 2v6"/></svg>
+<span>首页</span></a></li><li><a href=/archives/><svg class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><rect x="3" y="4" width="18" height="4" rx="2"/><path d="M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
+<span>归档</span></a></li><li><a href=/categories/><svg class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><line x1="5" y1="9" x2="19" y2="9"/><line x1="5" y1="15" x2="19" y2="15"/><line x1="11" y1="4" x2="7" y2="20"/><line x1="17" y1="4" x2="13" y2="20"/></svg>
+<span>分类</span></a></li><li><a href=/tags/><svg class="icon icon-tabler icon-tabler-tag" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><path d="M11 3l9 9a1.5 1.5.0 010 2l-6 6a1.5 1.5.0 01-2 0L3 11V7a4 4 0 014-4h4"/><circle cx="9" cy="9" r="2"/></svg>
+<span>标签</span></a></li><li><a href=/about/><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-info-circle"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 12a9 9 0 1018 0A9 9 0 003 12"/><path d="M12 9h.01"/><path d="M11 12h1v4h1"/></svg>
+<span>关于我</span></a></li><li><a href=/search/><svg class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="10" cy="10" r="7"/><line x1="21" y1="21" x2="15" y2="15"/></svg>
+<span>搜索</span></a></li><li class=menu-bottom-section><ol class=menu><li id=dark-mode-toggle><svg class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="8" cy="12" r="2"/><rect x="2" y="6" width="20" height="12" rx="6"/></svg>
+<svg class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="16" cy="12" r="2"/><rect x="2" y="6" width="20" height="12" rx="6"/></svg>
+<span>暗色模式</span></li></ol></li></ol></aside><main class="main full-width"><article class=main-article><header class=article-header><div class=article-details><header class=article-category><a href=/categories/net/ style=background-color:#efdebe;color:#3d2e0f>Net</a></header><div class=article-title-wrapper><h2 class=article-title><a href=/p/linux%E4%B8%AD%E7%9A%84veth%E4%B8%8Ebridge/>Linux中的veth与bridge</a></h2></div><footer class=article-meta><div class=inline-meta><svg class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><path d="M11.795 21H5a2 2 0 01-2-2V7a2 2 0 012-2h12a2 2 0 012 2v4"/><circle cx="18" cy="18" r="4"/><path d="M15 3v4"/><path d="M7 3v4"/><path d="M3 11h16"/><path d="M18 16.496V18l1 1"/></svg>
+<time class=article-time--published datetime=2025-11-08T00:00:00Z>2025年11月8日星期六</time>
+<svg class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg>
+<time class=article-time--reading>阅读时长: 2 分钟</time></div></footer></div></header><section class=article-content><p>容器网络最典型的基础模型 —— <strong>两个不同的命名空间通过 bridge 通信</strong> 。</p><p>Docker 默认的 bridge 模式就是基于此原理,创建 <code>docker0</code> bridge，容器 veth 对一端连接容器，一端连接 docker0，提供 NAT 功能让容器可以访问外网。</p><p>一个简单的结构如下👇：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-shell data-lang=shell><span class=line><span class=cl>                      +---------------------+
+</span></span><span class=line><span class=cl>                      <span class=p>|</span>      root NS        <span class=p>|</span>   <span class=o>(</span>宿主机 / default netns<span class=o>)</span>
+</span></span><span class=line><span class=cl>                      <span class=p>|</span>  bridge: br0<span class=o>(</span>10.0.0.254/24<span class=o>)</span>
+</span></span><span class=line><span class=cl>                      <span class=p>|</span>                     <span class=p>|</span>
+</span></span><span class=line><span class=cl>                      <span class=p>|</span>   veth0 ─────────┐  <span class=p>|</span>   &lt;- veth0 在 root，master<span class=o>=</span>br0
+</span></span><span class=line><span class=cl>                      <span class=p>|</span>                  │  <span class=p>|</span>
+</span></span><span class=line><span class=cl>                      <span class=p>|</span>   veth2 ─────────┴──┘  &lt;- veth2 在 root，master<span class=o>=</span>br0
+</span></span><span class=line><span class=cl>                      +---------------------+
+</span></span><span class=line><span class=cl>                               │
+</span></span><span class=line><span class=cl>             ┌─────────────────┴─────────────────┐
+</span></span><span class=line><span class=cl>             │                                   │
+</span></span><span class=line><span class=cl>       veth0 &lt;-&gt; veth1                       veth2 &lt;-&gt; veth3
+</span></span><span class=line><span class=cl>  <span class=o>(</span>root, peer<span class=o>)</span>   <span class=o>(</span>in ns1<span class=o>)</span>                 <span class=o>(</span>root, peer<span class=o>)</span>   <span class=o>(</span>in ns2<span class=o>)</span>
+</span></span><span class=line><span class=cl>                ns1 namespace                          ns2 namespace
+</span></span><span class=line><span class=cl>                ┌───────────────┐                     ┌───────────────┐
+</span></span><span class=line><span class=cl>                │ veth1         │                     │ veth3         │
+</span></span><span class=line><span class=cl>                │ 10.0.0.1/24   │                     │ 10.0.0.2/24   │
+</span></span><span class=line><span class=cl>                └───────────────┘                     └───────────────┘
+</span></span></code></pre></td></tr></table></div></div><blockquote class="alert alert-note"><div class=alert-header><span class=alert-icon>📝</span>
+<span class=alert-title>veth (Virtual Ethernet Device)</span></div><div class=alert-body><p>虚拟以太网设备，总是成对出现，类似管道两端</p><ul><li>一端发送的数据会在另一端接收到</li><li>主要用途：连接不同网络命名空间，实现网络隔离环境间的通信</li></ul></div></blockquote><blockquote class="alert alert-note"><div class=alert-header><span class=alert-icon>📝</span>
+<span class=alert-title>bridge</span></div><div class=alert-body><ul><li>虚拟交换机，工作在数据链路层（二层）</li><li>可以连接多个网络接口，在它们之间转发数据帧</li><li>Linux bridge 支持 STP、VLAN 等交换机构造特性</li></ul></div></blockquote><blockquote class="alert alert-note"><div class=alert-header><span class=alert-icon>📝</span>
+<span class=alert-title>网络命名空间 (netns)</span></div><div class=alert-body><ul><li>提供完全隔离的网络栈，包括接口、路由表、iptables 规则等</li><li>每个容器通常运行在独立的网络命名空间中</li></ul></div></blockquote><p>实现步骤如下：</p><p><strong>（1）创建两个命名空间</strong></p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>ip netns add ns1
+</span></span><span class=line><span class=cl>ip netns add ns2
+</span></span></code></pre></td></tr></table></div></div><p><strong>（2）创建两对 veth</strong></p><p>每个命名空间各分配一个端口。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>ip link add veth0 <span class=nb>type</span> veth peer name veth1
+</span></span><span class=line><span class=cl>ip link add veth2 <span class=nb>type</span> veth peer name veth3
+</span></span></code></pre></td></tr></table></div></div><p>现在有：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-shell data-lang=shell><span class=line><span class=cl>veth0 &lt;-&gt; veth1
+</span></span><span class=line><span class=cl>veth2 &lt;-&gt; veth3
+</span></span></code></pre></td></tr></table></div></div><p><strong>（3）veth1 和 veth3 移入命名空间</strong></p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>ip link <span class=nb>set</span> veth1 netns ns1
+</span></span><span class=line><span class=cl>ip link <span class=nb>set</span> veth3 netns ns2
+</span></span></code></pre></td></tr></table></div></div><p><strong>（4）创建 bridge（虚拟交换机）</strong></p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>ip link add name br0 <span class=nb>type</span> bridge
+</span></span><span class=line><span class=cl>ip link <span class=nb>set</span> br0 up
+</span></span></code></pre></td></tr></table></div></div><p><strong>（5）把宿主机侧的 veth（veth0、veth2）加入 bridge</strong></p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>ip link <span class=nb>set</span> veth0 master br0
+</span></span><span class=line><span class=cl>ip link <span class=nb>set</span> veth2 master br0
+</span></span><span class=line><span class=cl>ip link <span class=nb>set</span> veth0 up
+</span></span><span class=line><span class=cl>ip link <span class=nb>set</span> veth2 up
+</span></span></code></pre></td></tr></table></div></div><p><strong>（6）配置命名空间内部 IP</strong></p><p><strong>ns1</strong>:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>ip netns <span class=nb>exec</span> ns1 ip addr add 10.0.0.1/24 dev veth1
+</span></span><span class=line><span class=cl>ip netns <span class=nb>exec</span> ns1 ip link <span class=nb>set</span> veth1 up
+</span></span></code></pre></td></tr></table></div></div><p><strong>ns2</strong>:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>ip netns <span class=nb>exec</span> ns2 ip addr add 10.0.0.2/24 dev veth3
+</span></span><span class=line><span class=cl>ip netns <span class=nb>exec</span> ns2 ip link <span class=nb>set</span> veth3 up
+</span></span></code></pre></td></tr></table></div></div><p>测试一下连通性：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>ip netns <span class=nb>exec</span> ns1 ping 10.0.0.2
+</span></span></code></pre></td></tr></table></div></div><p>如果一切正常，应该能 ping 通，因为这两个 namespace 的 " 网线 " 都插在同一个虚拟交换机 <code>br0</code> 上。</p><p><strong>（7）让宿主机也能参与通信</strong></p><p>给宿主机也分配 ip 在同一个网段：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>ip addr add 10.0.0.254/24 dev br0
+</span></span></code></pre></td></tr></table></div></div><p>然后：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>ip netns <span class=nb>exec</span> ns1 ping 10.0.0.254
+</span></span></code></pre></td></tr></table></div></div><p>也能通。这样，通过 <code>veth pair</code> + <code>bridge</code> + <code>netns</code>，可以模拟 Docker 那样是如何搭建一个多容器虚拟局域网。</p></section><footer class="article-meta article-footer"><section class=article-tags><a href=/tags/veth/>Veth</a>
+<a href=/tags/bridge/>Bridge</a></section><section class="article-copyright inline-meta"><svg class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><path d="M14.5 9a3.5 4 0 100 6"/></svg>
+<span>Licensed under CC BY-NC-SA 4.0</span></section><section class="article-lastmod inline-meta"><svg class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg>
+<span>最后更新于 2026年1月1日星期四</span></section></footer></article><footer class=site-footer><section class=copyright>&copy;
+2025 -
+2026 Kerolt's Note</section><section class=powerby>使用 <a href=https://gohugo.io/ target=_blank rel=noopener>Hugo</a> 构建<br>主题 <b><a href=https://github.com/CaiJimmy/hugo-theme-stack target=_blank rel=noopener data-version=4.0.3>Stack</a></b> 由 <a href=https://jimmycai.com target=_blank rel=noopener>Jimmy</a> 设计</section></footer><script type=module>
+    import gallery from '\/ts\/gallery.js';
+
+    const articleContent = document.querySelector('.article-content');
+    const shouldLoad = articleContent && (articleContent.querySelectorAll('figure').length > 0 || articleContent.querySelectorAll('img.gallery-image').length > 0);
+    
+    if (shouldLoad) {
+        gallery(articleContent);
+
+        const PhotoSwipeLightbox = (await import("https:\/\/cdn.jsdelivr.net\/npm\/photoswipe@5.4.4\/dist\/photoswipe-lightbox.esm.min.js")).default;
+        const styleHref = "https:\/\/cdn.jsdelivr.net\/npm\/photoswipe@5.4.4\/dist\/photoswipe.css";
+
+        const styleTag = document.createElement('link');
+        styleTag.rel = 'stylesheet';
+        styleTag.href = styleHref;
+        document.head.appendChild(styleTag);
+
+        const lightbox = new PhotoSwipeLightbox({
+            gallerySelector: '.article-content',
+            childSelector: 'figure a.image-link',
+            pswpModule: () => import("https:\/\/cdn.jsdelivr.net\/npm\/photoswipe@5.4.4\/dist\/photoswipe.esm.min.js")
+        });
+        lightbox.init();
+    }
+</script></main></div><script type=text/javascript src=/ts/main.f856840516f7c2ad1769a8f5937e3d08d6cb386e2cd2dd025ae696e0ff207958.js defer></script></body></html>

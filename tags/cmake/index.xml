@@ -1,33 +1,24 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?>
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
-  <channel>
-    <title>CMake on Kerolt&#39;s Blog</title>
-    <link>https://kerolt.github.io/tags/cmake/</link>
-    <description>Recent content in CMake on Kerolt&#39;s Blog</description>
-    <image>
-      <title>Kerolt&#39;s Blog</title>
-      <url>https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</url>
-      <link>https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</link>
-    </image>
-    <generator>Hugo -- 0.158.0</generator>
-    <language>en</language>
-    <lastBuildDate>Fri, 23 Jan 2026 00:00:00 +0000</lastBuildDate>
-    <atom:link href="https://kerolt.github.io/tags/cmake/index.xml" rel="self" type="application/rss+xml" />
-    <item>
-      <title>CMake与Conan协同工作理解</title>
-      <link>https://kerolt.github.io/posts/cmake/cmake%E4%B8%8Econan%E5%8D%8F%E5%90%8C%E5%B7%A5%E4%BD%9C%E7%90%86%E8%A7%A3/</link>
-      <pubDate>Thu, 22 Jan 2026 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/cmake/cmake%E4%B8%8Econan%E5%8D%8F%E5%90%8C%E5%B7%A5%E4%BD%9C%E7%90%86%E8%A7%A3/</guid>
-      <description>&lt;h2 id=&#34;背景&#34;&gt;背景&lt;/h2&gt;
-&lt;p&gt;最近根据 &lt;a href=&#34;https://eunomia.dev/zh/tutorials/12-profile/&#34;&gt;【eBPF 入门实践教程十二：使用 eBPF 程序 profile 进行性能分析】&lt;/a&gt; 这篇文章，写了一个性能分析的小工具。不过文章中的实现是 rust，但我还不怎么熟悉 rust，因而打算参考其代码使用 c++ 来实现相同的功能。项目地址：&lt;a href=&#34;https://github.com/kerolt/profiler&#34;&gt;profiler&lt;/a&gt;。&lt;/p&gt;
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>CMake on Kerolt's Note</title><link>https://kerolt.github.io/tags/cmake/</link><description>Recent content in CMake on Kerolt's Note</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><lastBuildDate>Fri, 23 Jan 2026 00:00:00 +0000</lastBuildDate><atom:link href="https://kerolt.github.io/tags/cmake/index.xml" rel="self" type="application/rss+xml"/><item><title>CMake与Conan协同工作理解</title><link>https://kerolt.github.io/p/cmake%E4%B8%8Econan%E5%8D%8F%E5%90%8C%E5%B7%A5%E4%BD%9C%E7%90%86%E8%A7%A3/</link><pubDate>Thu, 22 Jan 2026 00:00:00 +0000</pubDate><guid>https://kerolt.github.io/p/cmake%E4%B8%8Econan%E5%8D%8F%E5%90%8C%E5%B7%A5%E4%BD%9C%E7%90%86%E8%A7%A3/</guid><description>&lt;h2 id="背景"&gt;背景
+&lt;/h2&gt;&lt;p&gt;最近根据 &lt;a class="link" href="https://eunomia.dev/zh/tutorials/12-profile/" target="_blank" rel="noopener"
+ &gt;【eBPF 入门实践教程十二：使用 eBPF 程序 profile 进行性能分析】&lt;/a&gt; 这篇文章，写了一个性能分析的小工具。不过文章中的实现是 rust，但我还不怎么熟悉 rust，因而打算参考其代码使用 c++ 来实现相同的功能。项目地址：&lt;a class="link" href="https://github.com/kerolt/profiler" target="_blank" rel="noopener"
+ &gt;profiler&lt;/a&gt;。&lt;/p&gt;
 &lt;p&gt;rust 中使用 cargo 就能非常方便的管理依赖与构建项目，c++ 中我使用 CMake 来构建项目，Conan 来管理依赖。在使用期间，我对于这二者的协同工作原理感到好奇，因此有了这篇笔记。&lt;/p&gt;
-&lt;blockquote&gt;
-&lt;p&gt;文中的出现的“依赖”、“包”、“库”等名词都是指代同一个概念，只是不同的说法而已~&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;h2 id=&#34;cmake-查找依赖&#34;&gt;CMake 查找依赖&lt;/h2&gt;
-&lt;p&gt;在 CMake 中查找和管理项目依赖，主要是通过内置的 &lt;code&gt;find_package&lt;/code&gt; 命令完成，其会在系统中寻找指定的库。&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;find_package&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;&amp;lt;PackageName&amp;gt; &lt;span style=&#34;color:#555&#34;&gt;[&lt;/span&gt;version&lt;span style=&#34;color:#555&#34;&gt;]&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;[&lt;/span&gt;REQUIRED&lt;span style=&#34;color:#555&#34;&gt;]&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;[&lt;/span&gt;COMPONENTS components...&lt;span style=&#34;color:#555&#34;&gt;])&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;ul&gt;
+
+ &lt;blockquote&gt;
+ &lt;p&gt;文中的出现的“依赖”、“包”、“库”等名词都是指代同一个概念，只是不同的说法而已~&lt;/p&gt;
+
+ &lt;/blockquote&gt;
+&lt;h2 id="cmake-查找依赖"&gt;CMake 查找依赖
+&lt;/h2&gt;&lt;p&gt;在 CMake 中查找和管理项目依赖，主要是通过内置的 &lt;code&gt;find_package&lt;/code&gt; 命令完成，其会在系统中寻找指定的库。&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-shell" data-lang="shell"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;find_package&lt;span class="o"&gt;(&lt;/span&gt;&amp;lt;PackageName&amp;gt; &lt;span class="o"&gt;[&lt;/span&gt;version&lt;span class="o"&gt;]&lt;/span&gt; &lt;span class="o"&gt;[&lt;/span&gt;REQUIRED&lt;span class="o"&gt;]&lt;/span&gt; &lt;span class="o"&gt;[&lt;/span&gt;COMPONENTS components...&lt;span class="o"&gt;])&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;ul&gt;
 &lt;li&gt;&lt;strong&gt;PackageName&lt;/strong&gt;: 库的名称（区分大小写，如 &lt;code&gt;OpenCV&lt;/code&gt;、&lt;code&gt;Qt5&lt;/code&gt;）。&lt;/li&gt;
 &lt;li&gt;&lt;strong&gt;REQUIRED&lt;/strong&gt;: 如果找不到该库，CMake 会直接报错并停止配置。&lt;/li&gt;
 &lt;li&gt;&lt;strong&gt;COMPONENTS&lt;/strong&gt;: 查找库中的特定模块（例如 &lt;code&gt;Qt5&lt;/code&gt; 里的 &lt;code&gt;Widgets&lt;/code&gt;）。&lt;/li&gt;
@@ -50,26 +41,331 @@
 &lt;/ul&gt;
 &lt;/li&gt;
 &lt;/ol&gt;
-&lt;h3 id=&#34;cmake_prefix_path&#34;&gt;CMAKE_PREFIX_PATH&lt;/h3&gt;
-&lt;p&gt;当在 CMake 中使用 &lt;code&gt;find_package&lt;/code&gt;、&lt;code&gt;find_library&lt;/code&gt; 或 &lt;code&gt;find_path&lt;/code&gt; 等指令去寻找一个外部库时，CMake 并不知道这个库安装在哪里。&lt;code&gt;CMAKE_PREFIX_PATH&lt;/code&gt; 就是用来告诉 CMake 去这些目录下找找看。&lt;/p&gt;</description>
-    </item>
-    <item>
-      <title>如何在CMake工程中使用Rust库blazesym</title>
-      <link>https://kerolt.github.io/posts/cmake/%E5%A6%82%E4%BD%95%E5%9C%A8cmake%E5%B7%A5%E7%A8%8B%E4%B8%AD%E4%BD%BF%E7%94%A8rust%E5%BA%93blazesym/</link>
-      <pubDate>Thu, 22 Jan 2026 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/cmake/%E5%A6%82%E4%BD%95%E5%9C%A8cmake%E5%B7%A5%E7%A8%8B%E4%B8%AD%E4%BD%BF%E7%94%A8rust%E5%BA%93blazesym/</guid>
-      <description>&lt;p&gt;在 &lt;a href=&#34;https://eunomia.dev/zh/tutorials/12-profile/&#34;&gt;【eBPF 入门实践教程十二：使用 eBPF 程序 profile 进行性能分析】&lt;/a&gt; 这篇文章中， profiler 工具的实现是使用了 rust 编写的 &lt;code&gt;blazesym&lt;/code&gt; 库，而我现在打算使用 C++ 实现，还好这个库提供了 C API，但是需要我们将这个 Rust 库的构建集成到 CMake 中。&lt;/p&gt;
+&lt;h3 id="cmake_prefix_path"&gt;CMAKE_PREFIX_PATH
+&lt;/h3&gt;&lt;p&gt;当在 CMake 中使用 &lt;code&gt;find_package&lt;/code&gt;、&lt;code&gt;find_library&lt;/code&gt; 或 &lt;code&gt;find_path&lt;/code&gt; 等指令去寻找一个外部库时，CMake 并不知道这个库安装在哪里。&lt;code&gt;CMAKE_PREFIX_PATH&lt;/code&gt; 就是用来告诉 CMake 去这些目录下找找看。&lt;/p&gt;
+&lt;p&gt;这里有三种设置的方法：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;命令行设置&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-sh" data-lang="sh"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;cmake -DCMAKE_PREFIX_PATH&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;&amp;#34;/path/to&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;CMakeLists.txt&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-sh" data-lang="sh"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;list&lt;span class="o"&gt;(&lt;/span&gt;APPEND CMAKE_PREFIX_PATH &lt;span class="s2"&gt;&amp;#34;/path/to&amp;#34;&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;环境变量&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-sh" data-lang="sh"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nb"&gt;export&lt;/span&gt; &lt;span class="nv"&gt;CMAKE_PREFIX_PATH&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="nv"&gt;$CMAKE_PREFIX_PATH&lt;/span&gt;:/path/to
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h2 id="conan-generator"&gt;Conan Generator
+&lt;/h2&gt;&lt;p&gt;在一个比较简单的项目里，通常使用 &lt;code&gt;conanfile.txt&lt;/code&gt; 来管理依赖即可，例如：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt; 1
+&lt;/span&gt;&lt;span class="lnt"&gt; 2
+&lt;/span&gt;&lt;span class="lnt"&gt; 3
+&lt;/span&gt;&lt;span class="lnt"&gt; 4
+&lt;/span&gt;&lt;span class="lnt"&gt; 5
+&lt;/span&gt;&lt;span class="lnt"&gt; 6
+&lt;/span&gt;&lt;span class="lnt"&gt; 7
+&lt;/span&gt;&lt;span class="lnt"&gt; 8
+&lt;/span&gt;&lt;span class="lnt"&gt; 9
+&lt;/span&gt;&lt;span class="lnt"&gt;10
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-ini" data-lang="ini"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="k"&gt;[requires]&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="na"&gt;cli11/2.6.0&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="na"&gt;spdlog/1.17.0&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="k"&gt;[generators]&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="na"&gt;CMakeDeps&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="na"&gt;CMakeToolchain&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="k"&gt;[layout]&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="na"&gt;cmake_layout&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;注意 &lt;code&gt;[generators]&lt;/code&gt; 中的 &lt;code&gt;CMakeDeps&lt;/code&gt; 和 &lt;code&gt;CMakeToolchain&lt;/code&gt;，他们在 Conan 与 CMake 集成使用中起了至关重要的作用。&lt;/p&gt;
+&lt;h3 id="cmakedeps"&gt;CMakeDeps
+&lt;/h3&gt;&lt;p&gt;当我们安装了 spdlog 这样的库后，需要 CMake 能看到它。CMakeDeps 就是这样一个&lt;strong&gt;依赖关系生成器&lt;/strong&gt;，它会为每一个依赖库生成一个标准的 &lt;code&gt;spdlog-config.cmake&lt;/code&gt; 文件。&lt;/p&gt;
+&lt;p&gt;将 CMakeDeps 生成的 &lt;code&gt;spdlog-config.cmake&lt;/code&gt; 目录位置加入 &lt;code&gt;CMAKE_PREFIX_PATH&lt;/code&gt; 后，就可以在 &lt;code&gt;CMakeLists.txt&lt;/code&gt; 中写 &lt;code&gt;find_package(spdlog REQUIRED)&lt;/code&gt; 来查找依赖了。&lt;/p&gt;
+&lt;h3 id="cmaketoolchain"&gt;CMakeToolchain
+&lt;/h3&gt;&lt;p&gt;CMakeToolchain 负责将你在 Conan Profile（配置文件）中定义的设置（如 &lt;code&gt;compiler=gcc&lt;/code&gt;, &lt;code&gt;build_type=Release&lt;/code&gt;）注入给 CMake。同时，&lt;strong&gt;其生成 &lt;code&gt;conan_toolchain.cmake&lt;/code&gt;，并自动设置 &lt;code&gt;CMAKE_PREFIX_PATH&lt;/code&gt;&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;重要的一点就是：它会自动把 &lt;code&gt;CMakeDeps&lt;/code&gt; 生成的配置文件目录加入搜索路径。&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;当执行 &lt;code&gt;conan install&lt;/code&gt; 后，这两个生成器会接力完成任务：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;Conan 下载库到缓存。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;&lt;code&gt;CMakeDeps&lt;/code&gt;&lt;/strong&gt; 生成 spdlog-config.cmake 等文件，描述如何链接这些库。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;&lt;code&gt;CMakeToolchain&lt;/code&gt;&lt;/strong&gt; 生成 &lt;code&gt;conan_toolchain.cmake&lt;/code&gt;，里面有一行代码告诉 CMake：“去 &lt;code&gt;CMakeDeps&lt;/code&gt; 生成的那个文件夹里找包”。&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;例如我的项目里， &lt;code&gt;~/Workspace/profiler-cpp/build/Debug/generators/conan_toolchain.cmake&lt;/code&gt; 中的一部分如下：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt; 1
+&lt;/span&gt;&lt;span class="lnt"&gt; 2
+&lt;/span&gt;&lt;span class="lnt"&gt; 3
+&lt;/span&gt;&lt;span class="lnt"&gt; 4
+&lt;/span&gt;&lt;span class="lnt"&gt; 5
+&lt;/span&gt;&lt;span class="lnt"&gt; 6
+&lt;/span&gt;&lt;span class="lnt"&gt; 7
+&lt;/span&gt;&lt;span class="lnt"&gt; 8
+&lt;/span&gt;&lt;span class="lnt"&gt; 9
+&lt;/span&gt;&lt;span class="lnt"&gt;10
+&lt;/span&gt;&lt;span class="lnt"&gt;11
+&lt;/span&gt;&lt;span class="lnt"&gt;12
+&lt;/span&gt;&lt;span class="lnt"&gt;13
+&lt;/span&gt;&lt;span class="lnt"&gt;14
+&lt;/span&gt;&lt;span class="lnt"&gt;15
+&lt;/span&gt;&lt;span class="lnt"&gt;16
+&lt;/span&gt;&lt;span class="lnt"&gt;17
+&lt;/span&gt;&lt;span class="lnt"&gt;18
+&lt;/span&gt;&lt;span class="lnt"&gt;19
+&lt;/span&gt;&lt;span class="lnt"&gt;20
+&lt;/span&gt;&lt;span class="lnt"&gt;21
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-cmake" data-lang="cmake"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c"&gt;########## &amp;#39;find_paths&amp;#39; block #############
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c"&gt;# Define paths to find packages, programs, libraries, etc.
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nb"&gt;if&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;EXISTS&lt;/span&gt; &lt;span class="s2"&gt;&amp;#34;${CMAKE_CURRENT_LIST_DIR}/conan_cmakedeps_paths.cmake&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="err"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="nb"&gt;message&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;STATUS&lt;/span&gt; &lt;span class="s2"&gt;&amp;#34;Conan toolchain: Including CMakeDeps generated conan_cmakedeps_paths.cmake&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="err"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="nb"&gt;include&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;#34;${CMAKE_CURRENT_LIST_DIR}/conan_cmakedeps_paths.cmake&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="err"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nb"&gt;else&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;&lt;span class="err"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="err"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nb"&gt;set&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;CMAKE_FIND_PACKAGE_PREFER_CONFIG&lt;/span&gt; &lt;span class="s"&gt;ON&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="err"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="err"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c"&gt;# Definition of CMAKE_MODULE_PATH
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c"&gt;# the generators folder (where conan generates files, like this toolchain)
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nb"&gt;list&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;PREPEND&lt;/span&gt; &lt;span class="s"&gt;CMAKE_MODULE_PATH&lt;/span&gt; &lt;span class="o"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;CMAKE_CURRENT_LIST_DIR&lt;/span&gt;&lt;span class="o"&gt;}&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="err"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="err"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c"&gt;# Definition of CMAKE_PREFIX_PATH, CMAKE_XXXXX_PATH
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c"&gt;# The Conan local &amp;#34;generators&amp;#34; folder, where this toolchain is saved.
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nb"&gt;list&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;PREPEND&lt;/span&gt; &lt;span class="s"&gt;CMAKE_PREFIX_PATH&lt;/span&gt; &lt;span class="o"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;CMAKE_CURRENT_LIST_DIR&lt;/span&gt;&lt;span class="o"&gt;}&lt;/span&gt; &lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="err"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nb"&gt;list&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;PREPEND&lt;/span&gt; &lt;span class="s"&gt;CMAKE_LIBRARY_PATH&lt;/span&gt; &lt;span class="s2"&gt;&amp;#34;/home/kerolt/.conan2/p/b/spdlo964bc6492d317/p/lib&amp;#34;&lt;/span&gt; &lt;span class="s2"&gt;&amp;#34;/home/kerolt/.conan2/p/b/fmtc7b4bad61f66e/p/lib&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="err"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nb"&gt;list&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;PREPEND&lt;/span&gt; &lt;span class="s"&gt;CMAKE_INCLUDE_PATH&lt;/span&gt; &lt;span class="s2"&gt;&amp;#34;/home/kerolt/.conan2/p/cli115c29056d7e51f/p/include&amp;#34;&lt;/span&gt; &lt;span class="s2"&gt;&amp;#34;/home/kerolt/.conan2/p/b/spdlo964bc6492d317/p/include&amp;#34;&lt;/span&gt; &lt;span class="s2"&gt;&amp;#34;/home/kerolt/.conan2/p/b/fmtc7b4bad61f66e/p/include&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="err"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nb"&gt;set&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;CONAN_RUNTIME_LIB_DIRS&lt;/span&gt; &lt;span class="s2"&gt;&amp;#34;/home/kerolt/.conan2/p/b/spdlo964bc6492d317/p/lib&amp;#34;&lt;/span&gt; &lt;span class="s2"&gt;&amp;#34;/home/kerolt/.conan2/p/b/fmtc7b4bad61f66e/p/lib&amp;#34;&lt;/span&gt; &lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="err"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="err"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nb"&gt;endif&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;&lt;span class="err"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h2 id="cmake-工具链文件"&gt;CMake 工具链文件
+&lt;/h2&gt;&lt;p&gt;工具链文件是一个以 &lt;code&gt;.cmake&lt;/code&gt; 结尾的脚本，通过在配置阶段指定变量 &lt;code&gt;CMAKE_TOOLCHAIN_FILE&lt;/code&gt; 来加载：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-shell" data-lang="shell"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;cmake -DCMAKE_TOOLCHAIN_FILE&lt;span class="o"&gt;=&lt;/span&gt;my_toolchain.cmake ..
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;它通常在 &lt;code&gt;project()&lt;/code&gt; 指令执行 &lt;strong&gt;之前&lt;/strong&gt; 被加载，用于初始化编译器路径、目标平台信息等关键底层变量。&lt;/p&gt;
+&lt;p&gt;现在通过 Conan 的 &lt;code&gt;CMakeDeps&lt;/code&gt; 和 &lt;code&gt;CMakeToolchain&lt;/code&gt;，直接引入 Conan 自动生成的工具链文件，就能无感地使用下载的依赖了。&lt;/p&gt;
+&lt;p&gt;例如直接在命令里使用：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-sh" data-lang="sh"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;cmake -DCMAKE_TOOLCHAIN_FILE&lt;span class="o"&gt;=&lt;/span&gt;/home/kerolt/Workspace/profiler-cpp/build/Debug/generators/conan_toolchain.cmake ...
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;或者通过 CMakePresets（CMake &amp;gt;= 3.19）来使用：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt; 1
+&lt;/span&gt;&lt;span class="lnt"&gt; 2
+&lt;/span&gt;&lt;span class="lnt"&gt; 3
+&lt;/span&gt;&lt;span class="lnt"&gt; 4
+&lt;/span&gt;&lt;span class="lnt"&gt; 5
+&lt;/span&gt;&lt;span class="lnt"&gt; 6
+&lt;/span&gt;&lt;span class="lnt"&gt; 7
+&lt;/span&gt;&lt;span class="lnt"&gt; 8
+&lt;/span&gt;&lt;span class="lnt"&gt; 9
+&lt;/span&gt;&lt;span class="lnt"&gt;10
+&lt;/span&gt;&lt;span class="lnt"&gt;11
+&lt;/span&gt;&lt;span class="lnt"&gt;12
+&lt;/span&gt;&lt;span class="lnt"&gt;13
+&lt;/span&gt;&lt;span class="lnt"&gt;14
+&lt;/span&gt;&lt;span class="lnt"&gt;15
+&lt;/span&gt;&lt;span class="lnt"&gt;16
+&lt;/span&gt;&lt;span class="lnt"&gt;17
+&lt;/span&gt;&lt;span class="lnt"&gt;18
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-json" data-lang="json"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="p"&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="nt"&gt;&amp;#34;version&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;8&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="nt"&gt;&amp;#34;configurePresets&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="nt"&gt;&amp;#34;name&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;#34;debug&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="nt"&gt;&amp;#34;displayName&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;#34;Profiler Debug 构建&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="nt"&gt;&amp;#34;description&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;#34;正在使用编译器: C = /usr/bin/gcc, CXX = /usr/bin/g++&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="nt"&gt;&amp;#34;binaryDir&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;#34;${sourceDir}/build/Debug&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="c1"&gt;// 就是这个 toolchainFile ~
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="nt"&gt;&amp;#34;toolchainFile&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;#34;${sourceDir}/build/Debug/generators/conan_toolchain.cmake&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="nt"&gt;&amp;#34;cacheVariables&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="nt"&gt;&amp;#34;CMAKE_BUILD_TYPE&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;#34;Debug&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="nt"&gt;&amp;#34;CMAKE_CXX_STANDARD&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;#34;23&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="nt"&gt;&amp;#34;CMAKE_EXPORT_COMPILE_COMMANDS&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;#34;ON&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="p"&gt;]&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h2 id="总结"&gt;总结
+&lt;/h2&gt;&lt;p&gt;理解了 CMake 是如何查找依赖包后，二者的协同工作原理就明了了：Conan 通过自动生成的配置能告诉 CMake 在哪里找依赖包后，就能直接在 &lt;code&gt;CMakeLists.txt&lt;/code&gt; 中使用 &lt;code&gt;find_package&lt;/code&gt; 来查找对应的依赖了。&lt;/p&gt;</description></item><item><title>如何在CMake工程中使用Rust库blazesym</title><link>https://kerolt.github.io/p/%E5%A6%82%E4%BD%95%E5%9C%A8cmake%E5%B7%A5%E7%A8%8B%E4%B8%AD%E4%BD%BF%E7%94%A8rust%E5%BA%93blazesym/</link><pubDate>Thu, 22 Jan 2026 00:00:00 +0000</pubDate><guid>https://kerolt.github.io/p/%E5%A6%82%E4%BD%95%E5%9C%A8cmake%E5%B7%A5%E7%A8%8B%E4%B8%AD%E4%BD%BF%E7%94%A8rust%E5%BA%93blazesym/</guid><description>&lt;p&gt;在 &lt;a class="link" href="https://eunomia.dev/zh/tutorials/12-profile/" target="_blank" rel="noopener"
+ &gt;【eBPF 入门实践教程十二：使用 eBPF 程序 profile 进行性能分析】&lt;/a&gt; 这篇文章中， profiler 工具的实现是使用了 rust 编写的 &lt;code&gt;blazesym&lt;/code&gt; 库，而我现在打算使用 C++ 实现，还好这个库提供了 C API，但是需要我们将这个 Rust 库的构建集成到 CMake 中。&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;Corrosion&lt;/strong&gt; 可将 Rust 集成到现有 CMake 项目中，它是一个 CMake 工具链，旨在让 CMake 像对待原生 C++ 子项目一样对待 Rust 的 &lt;code&gt;Cargo&lt;/code&gt; 项目。Corrosion 将手动调用 &lt;code&gt;cargo build&lt;/code&gt;，处理复杂的跨平台路径、构建配置（Debug/Release）以及繁琐的链接参数这些过程完全自动化了。&lt;/p&gt;
-&lt;h2 id=&#34;corrosion-的核心功能&#34;&gt;Corrosion 的核心功能&lt;/h2&gt;
-&lt;p&gt;Corrosion 的工作原理是在 CMake 层面为 Cargo 包装了一层“外壳”，其主要功能包括：&lt;/p&gt;
+&lt;h2 id="corrosion-的核心功能"&gt;Corrosion 的核心功能
+&lt;/h2&gt;&lt;p&gt;Corrosion 的工作原理是在 CMake 层面为 Cargo 包装了一层“外壳”，其主要功能包括：&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;strong&gt;自动处理构建类型&lt;/strong&gt;：CMake 的 &lt;code&gt;Release&lt;/code&gt; 或 &lt;code&gt;Debug&lt;/code&gt; 模式会自动映射到 Cargo 的 &lt;code&gt;--release&lt;/code&gt; 或默认模式。&lt;/li&gt;
 &lt;li&gt;&lt;strong&gt;目标导入&lt;/strong&gt;：将 Rust 的 &lt;code&gt;staticlib&lt;/code&gt; 或 &lt;code&gt;cdylib&lt;/code&gt; 导入为标准的 CMake 目标（Targets），你可以直接对它们使用 &lt;code&gt;target_link_libraries&lt;/code&gt;。&lt;/li&gt;
 &lt;li&gt;&lt;strong&gt;跨平台交叉编译&lt;/strong&gt;：它能自动将 CMake 的交叉编译设置（如 Android, iOS, 嵌入式等）传递给 Rust 的目标三元组（Target Triple）。&lt;/li&gt;
 &lt;li&gt;&lt;strong&gt;多包支持&lt;/strong&gt;：支持 Cargo 工作区（Workspaces）和单个 Crate。&lt;/li&gt;
 &lt;/ul&gt;
-&lt;h2 id=&#34;项目结构&#34;&gt;项目结构&lt;/h2&gt;
-&lt;p&gt;在我的项目 &lt;a href=&#34;https://github.com/kerolt/profiler&#34;&gt;profiler&lt;/a&gt; 中使用 Corrosion 时，项目布局如下：&lt;/p&gt;</description>
-    </item>
-  </channel>
-</rss>
+&lt;h2 id="项目结构"&gt;项目结构
+&lt;/h2&gt;&lt;p&gt;在我的项目 &lt;a class="link" href="https://github.com/kerolt/profiler" target="_blank" rel="noopener"
+ &gt;profiler&lt;/a&gt; 中使用 Corrosion 时，项目布局如下：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;span class="lnt"&gt;4
+&lt;/span&gt;&lt;span class="lnt"&gt;5
+&lt;/span&gt;&lt;span class="lnt"&gt;6
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-plain" data-lang="plain"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;profiler/
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;├── CMakeLists.txt
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;├── src
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;├── third_party/
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;│ └── blazesym
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;└── cmake/ # 存放 Corrosion 脚本
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h2 id="如何在-cmake-中使用-corrosion"&gt;如何在 CMake 中使用 Corrosion
+&lt;/h2&gt;&lt;h3 id="1通过-fetchcontent-自动下载并集成"&gt;（1）通过 FetchContent 自动下载并集成
+&lt;/h3&gt;&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;span class="lnt"&gt;4
+&lt;/span&gt;&lt;span class="lnt"&gt;5
+&lt;/span&gt;&lt;span class="lnt"&gt;6
+&lt;/span&gt;&lt;span class="lnt"&gt;7
+&lt;/span&gt;&lt;span class="lnt"&gt;8
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-cmake" data-lang="cmake"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nb"&gt;include&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;FetchContent&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="err"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="err"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nb"&gt;FetchContent_Declare&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="s"&gt;Corrosion&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="s"&gt;GIT_REPOSITORY&lt;/span&gt; &lt;span class="s"&gt;https://github.com/corrosion-rs/corrosion.git&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="s"&gt;GIT_TAG&lt;/span&gt; &lt;span class="s"&gt;v0.6.0&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="err"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nb"&gt;FetchContent_MakeAvailable&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;Corrosion&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="err"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h3 id="2导入-rust-项目"&gt;（2）导入 Rust 项目
+&lt;/h3&gt;&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;span class="lnt"&gt;4
+&lt;/span&gt;&lt;span class="lnt"&gt;5
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-cmake" data-lang="cmake"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c"&gt;# 这里的路径指向包含 Cargo.toml 的目录
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nb"&gt;corrosion_import_crate&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="s"&gt;MANIFEST_PATH&lt;/span&gt; &lt;span class="o"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;CMAKE_CURRENT_SOURCE_DIR&lt;/span&gt;&lt;span class="o"&gt;}&lt;/span&gt;&lt;span class="s"&gt;/third_party/blazesym/Cargo.toml&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="s"&gt;NO_AUTO_EXE&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="err"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h3 id="3配置静态库"&gt;（3）配置静态库
+&lt;/h3&gt;&lt;p&gt;在 blazesym 的 C API 构建时，文档中说明了需要链接的 C 库：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-sh" data-lang="sh"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;-lrt -ldl -lpthread -lm
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;为了方便后面的构建目标使用 blazesym 库，我的做法是将其制作的静态库和头文件“打包”，方便构建目标通过 &lt;code&gt;target_link_libraries&lt;/code&gt; 使用：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt; 1
+&lt;/span&gt;&lt;span class="lnt"&gt; 2
+&lt;/span&gt;&lt;span class="lnt"&gt; 3
+&lt;/span&gt;&lt;span class="lnt"&gt; 4
+&lt;/span&gt;&lt;span class="lnt"&gt; 5
+&lt;/span&gt;&lt;span class="lnt"&gt; 6
+&lt;/span&gt;&lt;span class="lnt"&gt; 7
+&lt;/span&gt;&lt;span class="lnt"&gt; 8
+&lt;/span&gt;&lt;span class="lnt"&gt; 9
+&lt;/span&gt;&lt;span class="lnt"&gt;10
+&lt;/span&gt;&lt;span class="lnt"&gt;11
+&lt;/span&gt;&lt;span class="lnt"&gt;12
+&lt;/span&gt;&lt;span class="lnt"&gt;13
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-cmake" data-lang="cmake"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nb"&gt;find_package&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;Threads&lt;/span&gt; &lt;span class="s"&gt;REQUIRED&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="err"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nb"&gt;find_library&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;LIB_RT&lt;/span&gt; &lt;span class="s"&gt;rt&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="err"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nb"&gt;find_library&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;LIB_DL&lt;/span&gt; &lt;span class="s"&gt;dl&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="err"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nb"&gt;find_library&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;LIB_M&lt;/span&gt; &lt;span class="s"&gt;m&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="err"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="err"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c"&gt;# 定义并配置静态库目标
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nb"&gt;add_library&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;blazesym&lt;/span&gt; &lt;span class="s"&gt;STATIC&lt;/span&gt; &lt;span class="s"&gt;IMPORTED&lt;/span&gt; &lt;span class="s"&gt;GLOBAL&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="err"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="err"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nb"&gt;set_target_properties&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;blazesym&lt;/span&gt; &lt;span class="s"&gt;PROPERTIES&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="s"&gt;IMPORTED_LOCATION&lt;/span&gt; &lt;span class="s2"&gt;&amp;#34;${CMAKE_CURRENT_BINARY_DIR}/libblazesym_c.a&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="s"&gt;INTERFACE_INCLUDE_DIRECTORIES&lt;/span&gt; &lt;span class="s2"&gt;&amp;#34;${CMAKE_CURRENT_SOURCE_DIR}/third_party/blazesym/capi/include&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="s"&gt;INTERFACE_LINK_LIBRARIES&lt;/span&gt; &lt;span class="s2"&gt;&amp;#34;Threads::Threads;${LIB_RT};${LIB_DL};${LIB_M}&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="err"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h3 id="4使用静态库"&gt;（4）使用静态库
+&lt;/h3&gt;&lt;p&gt;可以将刚刚的三步的代码合并成一个 cmake 文件中放在项目根目录下的 cmake 目录中（例如我这里的 &lt;code&gt;cmake/SetupBlazesym.cmake&lt;/code&gt;），然后在项目的 &lt;code&gt;CMakelists.txt&lt;/code&gt; 中 通过 &lt;code&gt;include&lt;/code&gt; 使用：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;span class="lnt"&gt;4
+&lt;/span&gt;&lt;span class="lnt"&gt;5
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-cmake" data-lang="cmake"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nb"&gt;include&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;#34;${CMAKE_CURRENT_SOURCE_DIR}/cmake/SetupBlazesym.cmake&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="err"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="err"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nb"&gt;add_executable&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;profiler&lt;/span&gt; &lt;span class="s"&gt;src/...&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="err"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="err"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nb"&gt;target_link_libraries&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;profiler&lt;/span&gt; &lt;span class="s"&gt;PRIVATE&lt;/span&gt; &lt;span class="s"&gt;blazesym&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="err"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;</description></item></channel></rss>

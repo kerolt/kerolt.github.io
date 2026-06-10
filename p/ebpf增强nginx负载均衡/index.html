@@ -1,0 +1,209 @@
+<!doctype html><html lang=zh-cn dir=ltr><head><meta charset=utf-8><meta name=viewport content='width=device-width,initial-scale=1'><meta name=description content='Nginx 负载均衡基准测试 1 2 3 4 5 6 7 8 9 / # wrk -c100 "http://172.17.0.5" Running 10s test @ http://172.17.0.5 2 threads and 100 connections Thread Stats Avg Stdev Max +/- Stdev Latency 12.31ms 12.66ms 84.49ms 82.31% Req/Sec 5.71k 4.96k 12.98k 63.00% 113583 requests in 10.04s, 17.87MB read Requests/sec: 11313.86 Transfer/sec: 1.78MB Latency（延迟）\n'><title>eBPF增强Nginx负载均衡</title><link rel=canonical href=https://kerolt.github.io/p/ebpf%E5%A2%9E%E5%BC%BAnginx%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1/><link rel=preconnect href=https://fonts.googleapis.com><link rel=preconnect href=https://fonts.gstatic.com crossorigin><link rel=preload as=style href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap"><link rel=stylesheet href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap"><link rel=stylesheet href=/scss/style.min.e62e09c60ba428a627e03568fa3df938f6a8224f815b5846f00816c17d4a0be4.css><meta property='og:title' content="eBPF增强Nginx负载均衡"><meta property='og:description' content='Nginx 负载均衡基准测试 1 2 3 4 5 6 7 8 9 / # wrk -c100 "http://172.17.0.5" Running 10s test @ http://172.17.0.5 2 threads and 100 connections Thread Stats Avg Stdev Max +/- Stdev Latency 12.31ms 12.66ms 84.49ms 82.31% Req/Sec 5.71k 4.96k 12.98k 63.00% 113583 requests in 10.04s, 17.87MB read Requests/sec: 11313.86 Transfer/sec: 1.78MB Latency（延迟）\n'><meta property='og:url' content='https://kerolt.github.io/p/ebpf%E5%A2%9E%E5%BC%BAnginx%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1/'><meta property='og:site_name' content="Kerolt's Note"><meta property='og:type' content='article'><meta property='article:section' content='Post'><meta property='article:tag' content='eBPF'><meta property='article:tag' content='Nginx'><meta property='article:published_time' content='2025-10-21T00:00:00+00:00'><meta property='article:modified_time' content='2025-10-21T00:00:00+00:00'><meta name=twitter:title content="eBPF增强Nginx负载均衡"><meta name=twitter:description content='Nginx 负载均衡基准测试 1 2 3 4 5 6 7 8 9 / # wrk -c100 "http://172.17.0.5" Running 10s test @ http://172.17.0.5 2 threads and 100 connections Thread Stats Avg Stdev Max +/- Stdev Latency 12.31ms 12.66ms 84.49ms 82.31% Req/Sec 5.71k 4.96k 12.98k 63.00% 113583 requests in 10.04s, 17.87MB read Requests/sec: 11313.86 Transfer/sec: 1.78MB Latency（延迟）\n'><link rel="shortcut icon" href=/images/favicon.png></head><body class=article-page><script>(function(){const e="StackColorScheme";localStorage.getItem(e)||localStorage.setItem(e,"auto")})()</script><script>(function(){const t="StackColorScheme",e=localStorage.getItem(t),n=window.matchMedia("(prefers-color-scheme: dark)").matches===!0;e=="dark"||e==="auto"&&n?document.documentElement.dataset.scheme="dark":document.documentElement.dataset.scheme="light"})()</script><div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky"><button class="hamburger hamburger--spin" type=button id=toggle-menu aria-label=切换菜单>
+<span class=hamburger-box><span class=hamburger-inner></span></span></button><header><figure class=site-avatar><a href=/><img src=/images/avatar.jpg width=200 height=200 class=site-logo loading=lazy alt=Avatar>
+</a><span class=emoji>🏸</span></figure><div class=site-meta><h1 class=site-name><a href=/>Kerolt's Note</a></h1><h2 class=site-description>宇宙是秩序的，也是混乱的。</h2></div></header><ol class=menu-social><li><a href=https://github.com/kerolt title=GitHub rel=me><svg class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 19c-4.3 1.4-4.3-2.5-6-3m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6.0 00-1.3-3.2 4.2 4.2.0 00-.1-3.2s-1.1-.3-3.5 1.3a12.3 12.3.0 00-6.2.0C6.5 2.8 5.4 3.1 5.4 3.1a4.2 4.2.0 00-.1 3.2A4.6 4.6.0 004 9.5c0 4.6 2.7 5.7 5.5 6-.6.6-.6 1.2-.5 2V21"/></svg></a></li></ol><ol class=menu id=main-menu><li><a href=/><svg class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><polyline points="5 12 3 12 12 3 21 12 19 12"/><path d="M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"/><path d="M9 21v-6a2 2 0 012-2h2a2 2 0 012 2v6"/></svg>
+<span>首页</span></a></li><li><a href=/archives/><svg class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><rect x="3" y="4" width="18" height="4" rx="2"/><path d="M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
+<span>归档</span></a></li><li><a href=/categories/><svg class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><line x1="5" y1="9" x2="19" y2="9"/><line x1="5" y1="15" x2="19" y2="15"/><line x1="11" y1="4" x2="7" y2="20"/><line x1="17" y1="4" x2="13" y2="20"/></svg>
+<span>分类</span></a></li><li><a href=/tags/><svg class="icon icon-tabler icon-tabler-tag" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><path d="M11 3l9 9a1.5 1.5.0 010 2l-6 6a1.5 1.5.0 01-2 0L3 11V7a4 4 0 014-4h4"/><circle cx="9" cy="9" r="2"/></svg>
+<span>标签</span></a></li><li><a href=/about/><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-info-circle"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 12a9 9 0 1018 0A9 9 0 003 12"/><path d="M12 9h.01"/><path d="M11 12h1v4h1"/></svg>
+<span>关于我</span></a></li><li><a href=/search/><svg class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="10" cy="10" r="7"/><line x1="21" y1="21" x2="15" y2="15"/></svg>
+<span>搜索</span></a></li><li class=menu-bottom-section><ol class=menu><li id=dark-mode-toggle><svg class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="8" cy="12" r="2"/><rect x="2" y="6" width="20" height="12" rx="6"/></svg>
+<svg class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="16" cy="12" r="2"/><rect x="2" y="6" width="20" height="12" rx="6"/></svg>
+<span>暗色模式</span></li></ol></li></ol></aside><aside class="sidebar right-sidebar sticky"><section class="widget archives"><div class=widget-icon><svg class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><line x1="5" y1="9" x2="19" y2="9"/><line x1="5" y1="15" x2="19" y2="15"/><line x1="11" y1="4" x2="7" y2="20"/><line x1="17" y1="4" x2="13" y2="20"/></svg></div><h2 class="widget-title section-title">目录</h2><div class=widget--toc><nav class=toc-nav id=TableOfContents><ol><li><a href=#nginx-负载均衡基准测试>Nginx 负载均衡基准测试</a></li><li><a href=#理解-nginx-负载均衡的本质>理解 Nginx 负载均衡的本质</a></li><li><a href=#使用-socket-映射转发网络包>使用 socket 映射转发网络包</a></li><li><a href=#socket-映射>socket 映射</a></li><li><a href=#转发-socket>转发 socket</a></li><li><a href=#测试结果>测试结果</a></li></ol></nav></div></section></aside><main class="main full-width"><article class=main-article><header class=article-header><div class=article-details><header class=article-category><a href=/categories/ebpf/ style=background-color:#beceef;color:#0f1f3d>EBPF</a></header><div class=article-title-wrapper><h2 class=article-title><a href=/p/ebpf%E5%A2%9E%E5%BC%BAnginx%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1/>eBPF增强Nginx负载均衡</a></h2></div><footer class=article-meta><div class=inline-meta><svg class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><path d="M11.795 21H5a2 2 0 01-2-2V7a2 2 0 012-2h12a2 2 0 012 2v4"/><circle cx="18" cy="18" r="4"/><path d="M15 3v4"/><path d="M7 3v4"/><path d="M3 11h16"/><path d="M18 16.496V18l1 1"/></svg>
+<time class=article-time--published datetime=2025-10-21T00:00:00Z>2025年10月21日星期二</time>
+<svg class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg>
+<time class=article-time--reading>阅读时长: 5 分钟</time></div></footer></div></header><aside class=article-toc><details><summary><div class=article-toc-title><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-chevron-right"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 6l6 6-6 6"/></svg>
+<span>目录</span></div></summary><nav class=toc-nav><ol><li><a href=#nginx-负载均衡基准测试>Nginx 负载均衡基准测试</a></li><li><a href=#理解-nginx-负载均衡的本质>理解 Nginx 负载均衡的本质</a></li><li><a href=#使用-socket-映射转发网络包>使用 socket 映射转发网络包</a></li><li><a href=#socket-映射>socket 映射</a></li><li><a href=#转发-socket>转发 socket</a></li><li><a href=#测试结果>测试结果</a></li></ol></nav></details></aside><section class=article-content><h2 id=nginx-负载均衡基准测试>Nginx 负载均衡基准测试</h2><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span><span class=lnt>8
+</span><span class=lnt>9
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-sh data-lang=sh><span class=line><span class=cl>/ <span class=c1># wrk -c100 &#34;http://172.17.0.5&#34;</span>
+</span></span><span class=line><span class=cl>Running 10s <span class=nb>test</span> @ http://172.17.0.5
+</span></span><span class=line><span class=cl>  <span class=m>2</span> threads and <span class=m>100</span> connections
+</span></span><span class=line><span class=cl>  Thread Stats   Avg      Stdev     Max   +/- Stdev
+</span></span><span class=line><span class=cl>    Latency    12.31ms   12.66ms  84.49ms   82.31%
+</span></span><span class=line><span class=cl>    Req/Sec     5.71k     4.96k   12.98k    63.00%
+</span></span><span class=line><span class=cl>  <span class=m>113583</span> requests in 10.04s, 17.87MB <span class=nb>read</span>
+</span></span><span class=line><span class=cl>Requests/sec:  11313.86
+</span></span><span class=line><span class=cl>Transfer/sec:      1.78MB
+</span></span></code></pre></td></tr></table></div></div><blockquote><p><strong>Latency（延迟）</strong></p><ul><li><strong>Avg 12.31ms</strong>：平均每个请求的响应时间为 <strong>12.31 毫秒</strong></li><li><strong>Stdev 12.66ms</strong>：标准差说明响应时间波动较大</li><li><strong>Max 84.49ms</strong>：最长请求花了 84.49 毫秒</li><li><strong>82.31% +/- Stdev</strong>：82% 的请求延迟在 ±1 标准差范围内（说明大部分请求分布较广）</li></ul><p><strong>Req/Sec（每秒请求数）</strong></p><ul><li><strong>Avg 5.71k</strong>：平均每个线程每秒发出约 <strong>5710 个请求</strong></li><li><strong>Stdev 4.96k</strong>：标准差说明不同时间点吞吐波动较大</li><li><strong>Max 12.98k</strong>：单个线程的最高瞬时请求速率为 12.98k/s</li><li><strong>63.00% +/- Stdev</strong>：约 63% 的样本在这个范围内</li></ul></blockquote><p>接下来我们利用套接字 eBPF 程序优化</p><h2 id=理解-nginx-负载均衡的本质>理解 Nginx 负载均衡的本质</h2><p>Nginx 作为反向代理或负载均衡器，本质上是：</p><ol><li><strong>从客户端接收请求</strong>（通过 <code>accept()</code> 建立 TCP 连接）</li><li><strong>选择一个上游后端（upstream server）</strong></li><li><strong>在用户态发起一个新的 TCP 连接</strong> 到该后端</li><li><strong>在两个 socket 之间中转数据</strong>（前端 &lt;-> 后端）</li></ol><p>关键点：Nginx 的负载均衡策略（如 round robin、ip_hash）在<strong>用户态</strong>决定；而实际的数据流是<strong>两个独立的 socket</strong>，中间的数据转发也在用户态进行（效率上有损）。</p><p>当我们引入 <strong>eBPF（extended Berkeley Packet Filter）</strong> 时，目标往往是：</p><ul><li><strong>把负载均衡逻辑下放到内核态</strong></li><li><strong>减少 Nginx 用户态转发开销</strong></li><li><strong>实现更快的流量分发（零拷贝、低延迟）</strong></li></ul><p>例如：</p><ul><li>用 eBPF 程序在 <strong>XDP</strong> 或 <strong>TC ingress hook</strong> 阶段直接选择后端；</li><li>或者使用 <strong>sockmap/sockhash</strong> 在内核中直接“转发”两个 socket 之间的数据。</li></ul><h2 id=使用-socket-映射转发网络包>使用 socket 映射转发网络包</h2><p><strong>socket 映射</strong>（socket map）是 eBPF 中的一种 <strong>BPF map</strong> 类型，它可以在内核中保存 <strong>socket 的引用</strong>（即 TCP 连接对象）， 从而允许 eBPF 程序直接操作和转发这些连接上的数据。它有两种形式：</p><div class=table-wrapper><table><thead><tr><th>类型</th><th>名称</th><th>特点</th></tr></thead><tbody><tr><td><code>BPF_MAP_TYPE_SOCKMAP</code></td><td>sockmap</td><td>数组结构，按索引存 socket</td></tr><tr><td><code>BPF_MAP_TYPE_SOCKHASH</code></td><td>sockhash</td><td>哈希结构，可按 key 查找 socket</td></tr></tbody></table></div><p>可以理解为：<strong>sockmap/sockhash = 一个“连接路由表”，存放 <code>&lt;key, socket></code> 映射关系。 让 eBPF 程序在内核中知道“哪个 key 对应哪个 socket”</strong>。</p><hr><p>传统用户态转发的性能瓶颈，以 Nginx 为例：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>client socket → Nginx 用户态 → upstream socket
+</span></span></code></pre></td></tr></table></div></div><p>数据流需要经过：</p><ul><li>2 次系统调用（recv + send）</li><li>2 次上下文切换（内核↔用户态）</li><li>1 次数据拷贝（内核缓冲区↔用户缓冲区）</li></ul><p>当并发量很高（比如 wrk 10k QPS）时，这个过程就成为瓶颈。</p><p>于是 Linux 引入了 <strong>socket 映射 + SK_MSG eBPF 程序</strong>可以直接在内核中完成转发：</p><ol><li>把所有连接（client 和 upstream）的 socket 引用注册进 sockmap；</li><li>eBPF 程序在发送路径中（<code>BPF_PROG_TYPE_SK_MSG</code>）执行；</li><li>程序从 sockmap 中查找目标 socket；</li><li>内核直接把数据从一个 socket 发送到另一个 socket —— <strong>零拷贝转发</strong>。</li></ol><p>在 eBPF 优化体系中：</p><ul><li><strong>控制面（Control Plane）</strong>：决定怎么转发（谁转发给谁） → 用户态（Nginx）</li><li><strong>数据面（Data Plane）</strong>：实际执行转发 → 内核态（eBPF）</li></ul><p>socket 映射就是两者的“桥梁”：Nginx 负责把 socket 注册进 sockmap（告诉内核：client_fd 对应 upstream_fd），eBPF 程序负责从 sockmap 中查找目标并完成转发。</p><p>这种模式的好处是：</p><ul><li>eBPF 不需要自己维护连接；</li><li>用户态应用可以动态调整映射；</li><li>内核可以高性能地完成数据转发。</li></ul><hr><p>数据流简化示意图如下：</p><ol><li>传统 Nginx 转发</li></ol><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>[Client Socket]
+</span></span><span class=line><span class=cl>   ↓ recv()
+</span></span><span class=line><span class=cl>[用户态缓冲区]
+</span></span><span class=line><span class=cl>   ↓ send()
+</span></span><span class=line><span class=cl>[Upstream Socket]
+</span></span></code></pre></td></tr></table></div></div><ol start=2><li>eBPF + socket 映射优化后</li></ol><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>[Client Socket]
+</span></span><span class=line><span class=cl>   ↓  eBPF 程序 (SK_MSG)
+</span></span><span class=line><span class=cl>   ↘︎ 查找 sockmap[key]
+</span></span><span class=line><span class=cl>       ↓
+</span></span><span class=line><span class=cl>   [Upstream Socket]
+</span></span></code></pre></td></tr></table></div></div><p>整个转发在内核中完成，无需进入 Nginx 用户态。</p><hr><p>那优化的步骤如下：</p><ol><li>创建套接字映射；</li><li>在 <code>BPF_PROG_TYPE_SOCK_OPS</code> 类型的 eBPF 程序中，将新创建的套接字存入套接字映射中；</li><li>在流解析类的 eBPF 程序 (如 <code>BPF_PROG_TYPE_SK_SKB</code> 或 <code>BPF_PROG_TYPE_SK_MSG</code> ) 中，从套接字映射中提取套接字信息，并调用 BPF 辅助函数转发网络包;</li><li>加载并挂载 eBPF 程序到套接字事件。</li></ol><h2 id=socket-映射>socket 映射</h2><p>这里使用 <strong>socket 映射</strong>（socket map）中的一种 BPF Map 类型：<code>BPF_MAP_TYPE_SOCKHASH</code>，它的值总是套接字文件描述符，而键则需要我们去定义。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-c data-lang=c><span class=line><span class=cl><span class=k>typedef</span> <span class=k>struct</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=n>__u32</span> <span class=n>source_ip</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=n>__u32</span> <span class=n>dest_ip</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=n>__u16</span> <span class=n>source_port</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=n>__u16</span> <span class=n>dest_port</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=n>__u32</span> <span class=n>protocol</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span> <span class=n>SockKey</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>struct</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=nf>__uint</span><span class=p>(</span><span class=n>type</span><span class=p>,</span> <span class=n>BPF_MAP_TYPE_SOCKHASH</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=nf>__uint</span><span class=p>(</span><span class=n>key_size</span><span class=p>,</span> <span class=k>sizeof</span><span class=p>(</span><span class=n>SockKey</span><span class=p>));</span>
+</span></span><span class=line><span class=cl>    <span class=nf>__uint</span><span class=p>(</span><span class=n>value_size</span><span class=p>,</span> <span class=k>sizeof</span><span class=p>(</span><span class=kt>int</span><span class=p>));</span>
+</span></span><span class=line><span class=cl>    <span class=nf>__uint</span><span class=p>(</span><span class=n>max_entries</span><span class=p>,</span> <span class=mi>65535</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=nf>__uint</span><span class=p>(</span><span class=n>map_flags</span><span class=p>,</span> <span class=mi>0</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=p>}</span> <span class=n>sock_ops_map</span> <span class=nf>SEC</span><span class=p>(</span><span class=s>&#34;.maps&#34;</span><span class=p>);</span>
+</span></span></code></pre></td></tr></table></div></div><p><code>BPF_PROG_TYPE_SOCK_OPS</code> 是 <strong>内核套接字操作回调类型</strong>的 eBPF 程序，它能在 <strong>TCP 连接的生命周期事件</strong>被触发时执行，包括：</p><ul><li><code>BPF_SOCK_OPS_PASSIVE_ESTABLISHED_CB</code>：被动连接建立（如服务器 accept）</li><li><code>BPF_SOCK_OPS_ACTIVE_ESTABLISHED_CB</code>：主动连接建立（如客户端 connect）</li><li><code>BPF_SOCK_OPS_TCP_CLOSE_CB</code>：连接关闭</li><li><code>BPF_SOCK_OPS_STATE_CB</code>：状态变化</li></ul><p>也就是说，它可以跟踪 TCP socket 的整个生命周期，在<strong>连接建立/关闭时获取 socket 的五元组信息</strong>，并把 socket 存入 sockhash，从而让 <strong>内核态 eBPF 数据面程序（如 SK_MSG）可以直接高效地查找和转发 socket 数据</strong>。</p><p>需要注意的是，<code>BPF_PROG_TYPE_SOCK_OPS</code> 程序跟踪了所有类型的套接字操作，我们只需要把<strong>新创建</strong>的套接字更新到映射中。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-c data-lang=c><span class=line><span class=cl><span class=nf>SEC</span><span class=p>(</span><span class=s>&#34;sockops&#34;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=kt>int</span> <span class=nf>bpf_sockmap</span><span class=p>(</span><span class=k>struct</span> <span class=n>bpf_sock_ops</span><span class=o>*</span> <span class=n>sockops</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=c1>// 只处理 IPv4 连接
+</span></span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=p>(</span><span class=n>sockops</span><span class=o>-&gt;</span><span class=n>family</span> <span class=o>!=</span> <span class=n>AF_INET</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=n>BPF_OK</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=c1>// 只处理已建立的连接
+</span></span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=p>(</span><span class=n>sockops</span><span class=o>-&gt;</span><span class=n>op</span> <span class=o>!=</span> <span class=n>BPF_SOCK_OPS_PASSIVE_ESTABLISHED_CB</span> <span class=o>&amp;&amp;</span>
+</span></span><span class=line><span class=cl>        <span class=n>sockops</span><span class=o>-&gt;</span><span class=n>op</span> <span class=o>!=</span> <span class=n>BPF_SOCK_OPS_ACTIVE_ESTABLISHED_CB</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=n>BPF_OK</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=n>SockKey</span> <span class=n>key</span> <span class=o>=</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=p>.</span><span class=n>dest_ip</span> <span class=o>=</span> <span class=n>sockops</span><span class=o>-&gt;</span><span class=n>remote_ip4</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>        <span class=p>.</span><span class=n>source_ip</span> <span class=o>=</span> <span class=n>sockops</span><span class=o>-&gt;</span><span class=n>local_ip4</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>        <span class=p>.</span><span class=n>dest_port</span> <span class=o>=</span> <span class=n>sockops</span><span class=o>-&gt;</span><span class=n>remote_port</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>        <span class=p>.</span><span class=n>source_port</span> <span class=o>=</span> <span class=nf>bpf_htonl</span><span class=p>(</span><span class=n>sockops</span><span class=o>-&gt;</span><span class=n>local_port</span><span class=p>),</span>
+</span></span><span class=line><span class=cl>        <span class=p>.</span><span class=n>protocol</span> <span class=o>=</span> <span class=n>sockops</span><span class=o>-&gt;</span><span class=n>family</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>    <span class=p>};</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=nf>bpf_sock_hash_update</span><span class=p>(</span><span class=n>sockops</span><span class=p>,</span> <span class=o>&amp;</span><span class=n>sock_ops_map</span><span class=p>,</span> <span class=o>&amp;</span><span class=n>key</span><span class=p>,</span> <span class=n>BPF_NOEXIST</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=n>BPF_OK</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><h2 id=转发-socket>转发 socket</h2><p>转发 socket 可以使用 <code>BPF_PROG_TYPE_SK_MSG</code> 类型的 eBPF 程序，它在内核中的定义是这样的：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-c data-lang=c><span class=line><span class=cl><span class=nf>BPF_PROG_TYPE</span><span class=p>(</span><span class=n>BPF_PROG_TYPE_SK_MSG</span><span class=p>,</span> <span class=n>sk_msg</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>	      <span class=k>struct</span> <span class=n>sk_msg_md</span><span class=p>,</span> <span class=k>struct</span> <span class=n>sk_msg</span><span class=p>)</span>
+</span></span></code></pre></td></tr></table></div></div><p>捕获 socket 中的发送数据包，并根据之前的 socket 映射进行转发：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-c data-lang=c><span class=line><span class=cl><span class=nf>SEC</span><span class=p>(</span><span class=s>&#34;sk_msg&#34;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=kt>int</span> <span class=nf>bpf_sock_redirect</span><span class=p>(</span><span class=k>struct</span> <span class=n>sk_msg_md</span><span class=o>*</span> <span class=n>msg</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=n>SockKey</span> <span class=n>key</span> <span class=o>=</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=p>.</span><span class=n>source_ip</span> <span class=o>=</span> <span class=n>msg</span><span class=o>-&gt;</span><span class=n>remote_ip4</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>        <span class=p>.</span><span class=n>dest_ip</span> <span class=o>=</span> <span class=n>msg</span><span class=o>-&gt;</span><span class=n>local_ip4</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>        <span class=p>.</span><span class=n>source_port</span> <span class=o>=</span> <span class=n>msg</span><span class=o>-&gt;</span><span class=n>remote_port</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>        <span class=p>.</span><span class=n>dest_port</span> <span class=o>=</span> <span class=nf>bpf_htonl</span><span class=p>(</span><span class=n>msg</span><span class=o>-&gt;</span><span class=n>local_port</span><span class=p>),</span>
+</span></span><span class=line><span class=cl>        <span class=p>.</span><span class=n>protocol</span> <span class=o>=</span> <span class=n>msg</span><span class=o>-&gt;</span><span class=n>family</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>    <span class=p>};</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=nf>bpf_msg_redirect_hash</span><span class=p>(</span><span class=n>msg</span><span class=p>,</span> <span class=o>&amp;</span><span class=n>sock_ops_map</span><span class=p>,</span> <span class=o>&amp;</span><span class=n>key</span><span class=p>,</span> <span class=n>BPF_F_INGRESS</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=n>SK_PASS</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><h2 id=测试结果>测试结果</h2><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span><span class=lnt>8
+</span><span class=lnt>9
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-sh data-lang=sh><span class=line><span class=cl>/ <span class=c1># wrk -c100 &#34;http://172.17.0.5&#34;</span>
+</span></span><span class=line><span class=cl>Running 10s <span class=nb>test</span> @ http://172.17.0.5
+</span></span><span class=line><span class=cl>  <span class=m>2</span> threads and <span class=m>100</span> connections
+</span></span><span class=line><span class=cl>  Thread Stats   Avg      Stdev     Max   +/- Stdev
+</span></span><span class=line><span class=cl>    Latency     7.88ms    6.22ms  55.43ms   68.53%
+</span></span><span class=line><span class=cl>    Req/Sec     7.03k     4.99k   15.03k    69.00%
+</span></span><span class=line><span class=cl>  <span class=m>140073</span> requests in 10.05s, 22.04MB <span class=nb>read</span>
+</span></span><span class=line><span class=cl>Requests/sec:  13940.22
+</span></span><span class=line><span class=cl>Transfer/sec:      2.19MB
+</span></span></code></pre></td></tr></table></div></div><ul><li>吞吐提升 ≈ <strong>23.2%</strong>。</li><li>平均延迟下降 ≈ <strong>36.0%</strong>。</li></ul></section><footer class="article-meta article-footer"><section class=article-tags><a href=/tags/ebpf/>EBPF</a>
+<a href=/tags/nginx/>Nginx</a></section><section class="article-copyright inline-meta"><svg class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><path d="M14.5 9a3.5 4 0 100 6"/></svg>
+<span>Licensed under CC BY-NC-SA 4.0</span></section></footer></article><footer class=site-footer><section class=copyright>&copy;
+2025 -
+2026 Kerolt's Note</section><section class=powerby>使用 <a href=https://gohugo.io/ target=_blank rel=noopener>Hugo</a> 构建<br>主题 <b><a href=https://github.com/CaiJimmy/hugo-theme-stack target=_blank rel=noopener data-version=4.0.3>Stack</a></b> 由 <a href=https://jimmycai.com target=_blank rel=noopener>Jimmy</a> 设计</section></footer><script type=module>
+    import gallery from '\/ts\/gallery.js';
+
+    const articleContent = document.querySelector('.article-content');
+    const shouldLoad = articleContent && (articleContent.querySelectorAll('figure').length > 0 || articleContent.querySelectorAll('img.gallery-image').length > 0);
+    
+    if (shouldLoad) {
+        gallery(articleContent);
+
+        const PhotoSwipeLightbox = (await import("https:\/\/cdn.jsdelivr.net\/npm\/photoswipe@5.4.4\/dist\/photoswipe-lightbox.esm.min.js")).default;
+        const styleHref = "https:\/\/cdn.jsdelivr.net\/npm\/photoswipe@5.4.4\/dist\/photoswipe.css";
+
+        const styleTag = document.createElement('link');
+        styleTag.rel = 'stylesheet';
+        styleTag.href = styleHref;
+        document.head.appendChild(styleTag);
+
+        const lightbox = new PhotoSwipeLightbox({
+            gallerySelector: '.article-content',
+            childSelector: 'figure a.image-link',
+            pswpModule: () => import("https:\/\/cdn.jsdelivr.net\/npm\/photoswipe@5.4.4\/dist\/photoswipe.esm.min.js")
+        });
+        lightbox.init();
+    }
+</script></main></div><script type=text/javascript src=/ts/main.f856840516f7c2ad1769a8f5937e3d08d6cb386e2cd2dd025ae696e0ff207958.js defer></script></body></html>

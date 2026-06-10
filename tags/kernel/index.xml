@@ -1,25 +1,5 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?>
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
-  <channel>
-    <title>Kernel on Kerolt&#39;s Blog</title>
-    <link>https://kerolt.github.io/tags/kernel/</link>
-    <description>Recent content in Kernel on Kerolt&#39;s Blog</description>
-    <image>
-      <title>Kerolt&#39;s Blog</title>
-      <url>https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</url>
-      <link>https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</link>
-    </image>
-    <generator>Hugo -- 0.158.0</generator>
-    <language>en</language>
-    <lastBuildDate>Thu, 06 Nov 2025 00:00:00 +0000</lastBuildDate>
-    <atom:link href="https://kerolt.github.io/tags/kernel/index.xml" rel="self" type="application/rss+xml" />
-    <item>
-      <title>如何理解内核态与用户态切换的上下文开销</title>
-      <link>https://kerolt.github.io/posts/linux/%E5%A6%82%E4%BD%95%E7%90%86%E8%A7%A3%E5%86%85%E6%A0%B8%E6%80%81%E4%B8%8E%E7%94%A8%E6%88%B7%E6%80%81%E5%88%87%E6%8D%A2%E7%9A%84%E4%B8%8A%E4%B8%8B%E6%96%87%E5%BC%80%E9%94%80/</link>
-      <pubDate>Thu, 06 Nov 2025 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/linux/%E5%A6%82%E4%BD%95%E7%90%86%E8%A7%A3%E5%86%85%E6%A0%B8%E6%80%81%E4%B8%8E%E7%94%A8%E6%88%B7%E6%80%81%E5%88%87%E6%8D%A2%E7%9A%84%E4%B8%8A%E4%B8%8B%E6%96%87%E5%BC%80%E9%94%80/</guid>
-      <description>&lt;h2 id=&#34;一什么是用户态和内核态&#34;&gt;一、什么是“用户态”和“内核态”&lt;/h2&gt;
-&lt;p&gt;CPU 有不同的 &lt;strong&gt;特权级（Privilege Level）&lt;/strong&gt;：&lt;/p&gt;
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Kernel on Kerolt's Note</title><link>https://kerolt.github.io/tags/kernel/</link><description>Recent content in Kernel on Kerolt's Note</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><lastBuildDate>Thu, 06 Nov 2025 00:00:00 +0000</lastBuildDate><atom:link href="https://kerolt.github.io/tags/kernel/index.xml" rel="self" type="application/rss+xml"/><item><title>如何理解内核态与用户态切换的上下文开销</title><link>https://kerolt.github.io/p/%E5%A6%82%E4%BD%95%E7%90%86%E8%A7%A3%E5%86%85%E6%A0%B8%E6%80%81%E4%B8%8E%E7%94%A8%E6%88%B7%E6%80%81%E5%88%87%E6%8D%A2%E7%9A%84%E4%B8%8A%E4%B8%8B%E6%96%87%E5%BC%80%E9%94%80/</link><pubDate>Thu, 06 Nov 2025 00:00:00 +0000</pubDate><guid>https://kerolt.github.io/p/%E5%A6%82%E4%BD%95%E7%90%86%E8%A7%A3%E5%86%85%E6%A0%B8%E6%80%81%E4%B8%8E%E7%94%A8%E6%88%B7%E6%80%81%E5%88%87%E6%8D%A2%E7%9A%84%E4%B8%8A%E4%B8%8B%E6%96%87%E5%BC%80%E9%94%80/</guid><description>&lt;h2 id="一什么是用户态和内核态"&gt;一、什么是“用户态”和“内核态”
+&lt;/h2&gt;&lt;p&gt;CPU 有不同的 &lt;strong&gt;特权级（Privilege Level）&lt;/strong&gt;：&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;
 &lt;p&gt;&lt;strong&gt;用户态（User Mode）&lt;/strong&gt;：
@@ -30,8 +10,8 @@
 操作系统内核运行在这里，拥有完全的访问权限，可以管理内存、设备、中断等。&lt;/p&gt;
 &lt;/li&gt;
 &lt;/ul&gt;
-&lt;h2 id=&#34;二什么是上下文切换context-switch&#34;&gt;二、什么是“上下文切换（Context Switch）”&lt;/h2&gt;
-&lt;p&gt;“上下文”就是 CPU 当前正在执行的任务的所有状态，包括：&lt;/p&gt;
+&lt;h2 id="二什么是上下文切换context-switch"&gt;二、什么是“上下文切换（Context Switch）”
+&lt;/h2&gt;&lt;p&gt;“上下文”就是 CPU 当前正在执行的任务的所有状态，包括：&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;寄存器内容（RIP、RSP、RAX 等）&lt;/li&gt;
 &lt;li&gt;程序计数器（Program Counter）&lt;/li&gt;
@@ -40,39 +20,39 @@
 &lt;li&gt;调度信息（优先级、时间片等）&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;&lt;strong&gt;上下文切换&lt;/strong&gt;指的是 CPU 从一个执行上下文切换到另一个（比如进程 A → 进程 B）。&lt;/p&gt;
-&lt;h2 id=&#34;三内核态与用户态切换--进程切换但都属于上下文切换&#34;&gt;三、内核态与用户态切换 ≠ 进程切换，但都属于“上下文切换”&lt;/h2&gt;
-&lt;p&gt;这两种是不同层次的“切换”：&lt;/p&gt;
+&lt;h2 id="三内核态与用户态切换--进程切换但都属于上下文切换"&gt;三、内核态与用户态切换 ≠ 进程切换，但都属于“上下文切换”
+&lt;/h2&gt;&lt;p&gt;这两种是不同层次的“切换”：&lt;/p&gt;
 &lt;table&gt;
-  &lt;thead&gt;
-      &lt;tr&gt;
-          &lt;th&gt;类型&lt;/th&gt;
-          &lt;th&gt;示例&lt;/th&gt;
-          &lt;th&gt;是否涉及调度&lt;/th&gt;
-          &lt;th&gt;开销大小&lt;/th&gt;
-          &lt;th&gt;备注&lt;/th&gt;
-      &lt;/tr&gt;
-  &lt;/thead&gt;
-  &lt;tbody&gt;
-      &lt;tr&gt;
-          &lt;td&gt;&lt;strong&gt;用户态 → 内核态&lt;/strong&gt;&lt;/td&gt;
-          &lt;td&gt;系统调用、I/O、中断&lt;/td&gt;
-          &lt;td&gt;否&lt;/td&gt;
-          &lt;td&gt;小（几十到几百纳秒）&lt;/td&gt;
-          &lt;td&gt;同一线程，只是 CPU 特权级变化&lt;/td&gt;
-      &lt;/tr&gt;
-      &lt;tr&gt;
-          &lt;td&gt;&lt;strong&gt;进程上下文切换&lt;/strong&gt;&lt;/td&gt;
-          &lt;td&gt;从进程 A → 进程 B&lt;/td&gt;
-          &lt;td&gt;是&lt;/td&gt;
-          &lt;td&gt;大（微秒级）&lt;/td&gt;
-          &lt;td&gt;不仅换栈，还要换虚拟内存上下文&lt;/td&gt;
-      &lt;/tr&gt;
-  &lt;/tbody&gt;
+	&lt;thead&gt;
+			&lt;tr&gt;
+					&lt;th&gt;类型&lt;/th&gt;
+					&lt;th&gt;示例&lt;/th&gt;
+					&lt;th&gt;是否涉及调度&lt;/th&gt;
+					&lt;th&gt;开销大小&lt;/th&gt;
+					&lt;th&gt;备注&lt;/th&gt;
+			&lt;/tr&gt;
+	&lt;/thead&gt;
+	&lt;tbody&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;strong&gt;用户态 → 内核态&lt;/strong&gt;&lt;/td&gt;
+					&lt;td&gt;系统调用、I/O、中断&lt;/td&gt;
+					&lt;td&gt;否&lt;/td&gt;
+					&lt;td&gt;小（几十到几百纳秒）&lt;/td&gt;
+					&lt;td&gt;同一线程，只是 CPU 特权级变化&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;strong&gt;进程上下文切换&lt;/strong&gt;&lt;/td&gt;
+					&lt;td&gt;从进程 A → 进程 B&lt;/td&gt;
+					&lt;td&gt;是&lt;/td&gt;
+					&lt;td&gt;大（微秒级）&lt;/td&gt;
+					&lt;td&gt;不仅换栈，还要换虚拟内存上下文&lt;/td&gt;
+			&lt;/tr&gt;
+	&lt;/tbody&gt;
 &lt;/table&gt;
-&lt;h2 id=&#34;四为什么内核用户态切换有开销&#34;&gt;四、为什么内核/用户态切换有“开销”&lt;/h2&gt;
-&lt;p&gt;内核态切换的代价来自几个部分：&lt;/p&gt;
-&lt;h3 id=&#34;1-cpu-特权级变化&#34;&gt;1. CPU 特权级变化&lt;/h3&gt;
-&lt;p&gt;切换时 CPU 会：&lt;/p&gt;
+&lt;h2 id="四为什么内核用户态切换有开销"&gt;四、为什么内核/用户态切换有“开销”
+&lt;/h2&gt;&lt;p&gt;内核态切换的代价来自几个部分：&lt;/p&gt;
+&lt;h3 id="1-cpu-特权级变化"&gt;1. CPU 特权级变化
+&lt;/h3&gt;&lt;p&gt;切换时 CPU 会：&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;保存当前寄存器状态；&lt;/li&gt;
 &lt;li&gt;改变特权级（从 ring3 → ring0）；&lt;/li&gt;
@@ -80,7 +60,106 @@
 &lt;li&gt;执行系统调用入口代码（&lt;code&gt;syscall&lt;/code&gt;、&lt;code&gt;sysenter&lt;/code&gt; 指令）；&lt;/li&gt;
 &lt;li&gt;执行完后再反向恢复回用户态。&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;这些过程虽然不是“线程切换”，但都需要 CPU 做额外操作。&lt;/p&gt;</description>
-    </item>
-  </channel>
-</rss>
+&lt;p&gt;这些过程虽然不是“线程切换”，但都需要 CPU 做额外操作。&lt;/p&gt;
+&lt;h3 id="2-缓存污染cachetlb-flush"&gt;2. 缓存污染（Cache/TLB flush）
+&lt;/h3&gt;&lt;p&gt;在切换时，可能触发：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;指令缓存（I-Cache）和数据缓存（D-Cache）失效&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;TLB（页表缓存）失效&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;这会让下一次访问内存时性能下降。尤其是跨页表切换（进程切换）时，TLB 必须刷新。&lt;/p&gt;
+&lt;h3 id="3-管线冲刷pipeline-flush"&gt;3. 管线冲刷（Pipeline Flush）
+&lt;/h3&gt;&lt;p&gt;现代 CPU 使用深流水线和乱序执行，切换到内核态后，这些指令流需要被中断、清空、重新加载，浪费了几十个周期。&lt;/p&gt;
+&lt;h3 id="4-安全隔离检查比如-kpti"&gt;4. 安全隔离检查（比如 KPTI）
+&lt;/h3&gt;&lt;p&gt;在 Spectre/Meltdown 漏洞后，Linux 内核加了 &lt;strong&gt;KPTI（Kernel Page Table Isolation）&lt;/strong&gt;，在用户态和内核态之间切换时需要切换页表来隔离内核地址空间，进一步增加了 TLB flush 和页表切换开销。&lt;/p&gt;
+&lt;h2 id="五开销有多大"&gt;五、开销有多大？
+&lt;/h2&gt;&lt;p&gt;大致数量级（不同架构差异很大）：&lt;/p&gt;
+&lt;table&gt;
+	&lt;thead&gt;
+			&lt;tr&gt;
+					&lt;th&gt;操作&lt;/th&gt;
+					&lt;th&gt;典型开销&lt;/th&gt;
+			&lt;/tr&gt;
+	&lt;/thead&gt;
+	&lt;tbody&gt;
+			&lt;tr&gt;
+					&lt;td&gt;一次函数调用&lt;/td&gt;
+					&lt;td&gt;1~5 ns&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;一次系统调用（空）&lt;/td&gt;
+					&lt;td&gt;100~500 ns&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;一次进程上下文切换&lt;/td&gt;
+					&lt;td&gt;1~5 µs&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;一次磁盘 I/O 系统调用&lt;/td&gt;
+					&lt;td&gt;1 ms 以上&lt;/td&gt;
+			&lt;/tr&gt;
+	&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;比如：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;$ strace -c ls
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# 可以看到每个系统调用耗时几十到几百纳秒&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h2 id="六举个例子read-系统调用"&gt;六、举个例子：&lt;code&gt;read()&lt;/code&gt; 系统调用
+&lt;/h2&gt;&lt;p&gt;当用户调用：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-c" data-lang="c"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nf"&gt;read&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;fd&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;buf&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;size&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;实际发生的事：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;程序在 &lt;strong&gt;用户态&lt;/strong&gt; 调用 read；&lt;/li&gt;
+&lt;li&gt;CPU 执行 &lt;code&gt;syscall&lt;/code&gt; 指令，切到 &lt;strong&gt;内核态&lt;/strong&gt;；&lt;/li&gt;
+&lt;li&gt;内核检查参数、文件描述符合法性；&lt;/li&gt;
+&lt;li&gt;调用文件系统层 → 设备驱动；&lt;/li&gt;
+&lt;li&gt;如果是磁盘 I/O，线程可能被阻塞，调度其他任务；&lt;/li&gt;
+&lt;li&gt;数据准备好后再切回用户态。&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;这整个过程涉及 &lt;strong&gt;多次用户态 ↔ 内核态切换 + 潜在调度切换&lt;/strong&gt;。&lt;/p&gt;
+&lt;h2 id="七如何减少这种开销"&gt;七、如何减少这种开销
+&lt;/h2&gt;&lt;p&gt;性能优化中，常见的做法是&lt;strong&gt;减少切换频率&lt;/strong&gt;：&lt;/p&gt;
+&lt;table&gt;
+	&lt;thead&gt;
+			&lt;tr&gt;
+					&lt;th&gt;技术&lt;/th&gt;
+					&lt;th&gt;思路&lt;/th&gt;
+			&lt;/tr&gt;
+	&lt;/thead&gt;
+	&lt;tbody&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;strong&gt;批处理系统调用&lt;/strong&gt;&lt;/td&gt;
+					&lt;td&gt;一次调用处理多个请求（如 &lt;code&gt;readv&lt;/code&gt;, &lt;code&gt;writev&lt;/code&gt;）&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;strong&gt;零拷贝 I/O&lt;/strong&gt;&lt;/td&gt;
+					&lt;td&gt;减少数据在内核与用户空间之间的复制&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;strong&gt;IO_uring / eBPF / XDP&lt;/strong&gt;&lt;/td&gt;
+					&lt;td&gt;通过内核接口减少 syscalls 次数或在内核内直接处理&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;strong&gt;epoll / io_uring&lt;/strong&gt;&lt;/td&gt;
+					&lt;td&gt;异步 I/O，减少阻塞导致的频繁切换&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;strong&gt;用户态网络栈（DPDK）&lt;/strong&gt;&lt;/td&gt;
+					&lt;td&gt;完全绕过内核态，直接用户态驱动网卡&lt;/td&gt;
+			&lt;/tr&gt;
+	&lt;/tbody&gt;
+&lt;/table&gt;</description></item></channel></rss>

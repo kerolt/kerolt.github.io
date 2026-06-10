@@ -1,0 +1,157 @@
+<!doctype html><html lang=zh-cn dir=ltr><head><meta charset=utf-8><meta name=viewport content='width=device-width,initial-scale=1'><meta name=description content="为什么我们需要协程？ 为什么我们有了线程还需要协程呢？（其实这个问题不应该这么问，协程的出现在线程之前）在一个进程中虽然我们可以创建多个线程，但是在一个进程中能创建的线程数量是有限制的，并且线程的调度仍然受操作系统控制，也就是说线程何时抢占、何时被抢占对于开发者来说都是透明的，并且在调度的过程中还可能涉及到用户态和内核态的切换开销。\n"><title>【协程】C++20协程初体验</title><link rel=canonical href=https://kerolt.github.io/p/%E5%8D%8F%E7%A8%8Bc-20%E5%8D%8F%E7%A8%8B%E5%88%9D%E4%BD%93%E9%AA%8C/><link rel=preconnect href=https://fonts.googleapis.com><link rel=preconnect href=https://fonts.gstatic.com crossorigin><link rel=preload as=style href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap"><link rel=stylesheet href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap"><link rel=stylesheet href=/scss/style.min.e62e09c60ba428a627e03568fa3df938f6a8224f815b5846f00816c17d4a0be4.css><meta property='og:title' content="【协程】C++20协程初体验"><meta property='og:description' content="为什么我们需要协程？ 为什么我们有了线程还需要协程呢？（其实这个问题不应该这么问，协程的出现在线程之前）在一个进程中虽然我们可以创建多个线程，但是在一个进程中能创建的线程数量是有限制的，并且线程的调度仍然受操作系统控制，也就是说线程何时抢占、何时被抢占对于开发者来说都是透明的，并且在调度的过程中还可能涉及到用户态和内核态的切换开销。\n"><meta property='og:url' content='https://kerolt.github.io/p/%E5%8D%8F%E7%A8%8Bc-20%E5%8D%8F%E7%A8%8B%E5%88%9D%E4%BD%93%E9%AA%8C/'><meta property='og:site_name' content="Kerolt's Note"><meta property='og:type' content='article'><meta property='article:section' content='Post'><meta property='article:tag' content='Coroutine'><meta property='article:tag' content='CPlusPlus'><meta property='article:published_time' content='2024-08-18T00:00:00+00:00'><meta property='article:modified_time' content='2024-08-18T00:00:00+00:00'><meta name=twitter:title content="【协程】C++20协程初体验"><meta name=twitter:description content="为什么我们需要协程？ 为什么我们有了线程还需要协程呢？（其实这个问题不应该这么问，协程的出现在线程之前）在一个进程中虽然我们可以创建多个线程，但是在一个进程中能创建的线程数量是有限制的，并且线程的调度仍然受操作系统控制，也就是说线程何时抢占、何时被抢占对于开发者来说都是透明的，并且在调度的过程中还可能涉及到用户态和内核态的切换开销。\n"><link rel="shortcut icon" href=/images/favicon.png></head><body class=article-page><script>(function(){const e="StackColorScheme";localStorage.getItem(e)||localStorage.setItem(e,"auto")})()</script><script>(function(){const t="StackColorScheme",e=localStorage.getItem(t),n=window.matchMedia("(prefers-color-scheme: dark)").matches===!0;e=="dark"||e==="auto"&&n?document.documentElement.dataset.scheme="dark":document.documentElement.dataset.scheme="light"})()</script><div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky"><button class="hamburger hamburger--spin" type=button id=toggle-menu aria-label=切换菜单>
+<span class=hamburger-box><span class=hamburger-inner></span></span></button><header><figure class=site-avatar><a href=/><img src=/images/avatar.jpg width=200 height=200 class=site-logo loading=lazy alt=Avatar>
+</a><span class=emoji>🏸</span></figure><div class=site-meta><h1 class=site-name><a href=/>Kerolt's Note</a></h1><h2 class=site-description>宇宙是秩序的，也是混乱的。</h2></div></header><ol class=menu-social><li><a href=https://github.com/kerolt title=GitHub rel=me><svg class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 19c-4.3 1.4-4.3-2.5-6-3m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6.0 00-1.3-3.2 4.2 4.2.0 00-.1-3.2s-1.1-.3-3.5 1.3a12.3 12.3.0 00-6.2.0C6.5 2.8 5.4 3.1 5.4 3.1a4.2 4.2.0 00-.1 3.2A4.6 4.6.0 004 9.5c0 4.6 2.7 5.7 5.5 6-.6.6-.6 1.2-.5 2V21"/></svg></a></li></ol><ol class=menu id=main-menu><li><a href=/><svg class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><polyline points="5 12 3 12 12 3 21 12 19 12"/><path d="M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"/><path d="M9 21v-6a2 2 0 012-2h2a2 2 0 012 2v6"/></svg>
+<span>首页</span></a></li><li><a href=/archives/><svg class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><rect x="3" y="4" width="18" height="4" rx="2"/><path d="M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
+<span>归档</span></a></li><li><a href=/categories/><svg class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><line x1="5" y1="9" x2="19" y2="9"/><line x1="5" y1="15" x2="19" y2="15"/><line x1="11" y1="4" x2="7" y2="20"/><line x1="17" y1="4" x2="13" y2="20"/></svg>
+<span>分类</span></a></li><li><a href=/tags/><svg class="icon icon-tabler icon-tabler-tag" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><path d="M11 3l9 9a1.5 1.5.0 010 2l-6 6a1.5 1.5.0 01-2 0L3 11V7a4 4 0 014-4h4"/><circle cx="9" cy="9" r="2"/></svg>
+<span>标签</span></a></li><li><a href=/about/><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-info-circle"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 12a9 9 0 1018 0A9 9 0 003 12"/><path d="M12 9h.01"/><path d="M11 12h1v4h1"/></svg>
+<span>关于我</span></a></li><li><a href=/search/><svg class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="10" cy="10" r="7"/><line x1="21" y1="21" x2="15" y2="15"/></svg>
+<span>搜索</span></a></li><li class=menu-bottom-section><ol class=menu><li id=dark-mode-toggle><svg class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="8" cy="12" r="2"/><rect x="2" y="6" width="20" height="12" rx="6"/></svg>
+<svg class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="16" cy="12" r="2"/><rect x="2" y="6" width="20" height="12" rx="6"/></svg>
+<span>暗色模式</span></li></ol></li></ol></aside><aside class="sidebar right-sidebar sticky"><section class="widget archives"><div class=widget-icon><svg class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><line x1="5" y1="9" x2="19" y2="9"/><line x1="5" y1="15" x2="19" y2="15"/><line x1="11" y1="4" x2="7" y2="20"/><line x1="17" y1="4" x2="13" y2="20"/></svg></div><h2 class="widget-title section-title">目录</h2><div class=widget--toc><nav class=toc-nav id=TableOfContents><ol><li><a href=#为什么我们需要协程>为什么我们需要协程？</a></li><li><a href=#c20带来的协程>C++20带来的协程</a></li><li><a href=#promise>Promise</a></li><li><a href=#awaitable>Awaitable</a></li><li><a href=#coroutine-handle>Coroutine Handle</a></li><li><a href=#简单示例>简单示例</a></li><li><a href=#references>References</a></li></ol></nav></div></section></aside><main class="main full-width"><article class=main-article><header class=article-header><div class=article-details><header class=article-category><a href=/categories/c++/ style=background-color:#bebeef;color:#0f0f3d>C++</a></header><div class=article-title-wrapper><h2 class=article-title><a href=/p/%E5%8D%8F%E7%A8%8Bc-20%E5%8D%8F%E7%A8%8B%E5%88%9D%E4%BD%93%E9%AA%8C/>【协程】C++20协程初体验</a></h2></div><footer class=article-meta><div class=inline-meta><svg class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><path d="M11.795 21H5a2 2 0 01-2-2V7a2 2 0 012-2h12a2 2 0 012 2v4"/><circle cx="18" cy="18" r="4"/><path d="M15 3v4"/><path d="M7 3v4"/><path d="M3 11h16"/><path d="M18 16.496V18l1 1"/></svg>
+<time class=article-time--published datetime=2024-08-18T00:00:00Z>2024年8月18日星期日</time>
+<svg class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg>
+<time class=article-time--reading>阅读时长: 5 分钟</time></div></footer></div></header><aside class=article-toc><details><summary><div class=article-toc-title><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-chevron-right"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 6l6 6-6 6"/></svg>
+<span>目录</span></div></summary><nav class=toc-nav><ol><li><a href=#为什么我们需要协程>为什么我们需要协程？</a></li><li><a href=#c20带来的协程>C++20带来的协程</a></li><li><a href=#promise>Promise</a></li><li><a href=#awaitable>Awaitable</a></li><li><a href=#coroutine-handle>Coroutine Handle</a></li><li><a href=#简单示例>简单示例</a></li><li><a href=#references>References</a></li></ol></nav></details></aside><section class=article-content><h2 id=为什么我们需要协程>为什么我们需要协程？</h2><p>为什么我们有了线程还需要协程呢？（其实这个问题不应该这么问，协程的出现在线程之前）在一个进程中虽然我们可以创建多个线程，但是在一个进程中能创建的线程数量是有限制的，并且线程的调度仍然受操作系统控制，也就是说线程何时抢占、何时被抢占对于开发者来说都是透明的，并且在调度的过程中还可能涉及到用户态和内核态的切换开销。</p><p>当我们需要去处理一个非常耗时的IO操作时（假设使用的阻塞IO），为了不阻塞当前线程，我们可能会想到新建一个线程去执行这个操作，但是线程的创建和调度也是需要消耗资源的，我们希望有更加轻便的方法，例如：在当前线程中，一个任务遇到阻塞IO时，不要傻傻的停在这里，而是暂停这个任务，转而去执行其他任务，直到IO完成再恢复之前的任务来运行。</p><p><img class=gallery-image data-flex-basis=174px data-flex-grow=72 height=794 loading=lazy sizes="(max-width: 767px) calc(100vw - 30px), (max-width: 1023px) 700px, (max-width: 1279px) 950px, 1232px" src=https://gitee.com/kerolt/picture/raw/main/20241216-143810.png width=578></p><p>这里看起来是不是像两个函数之间的调用和被调用关系？确实有点像，但区别可大了，在任务1中我们并没有去显式地调用任务2！</p><p>协程的最本质的解释是“<strong>可以挂起和恢复的函数</strong>”。例如上图中我们遇到耗时的IO操作了，我们就可以<strong>主动</strong>将当前运行的函数挂起（suspend），让其等待（await）IO操作，让线程去运行其他的函数，直到IO操作完成后再恢复（resume）。上下文切换的时机是靠调用方（写代码的开发人员）自身去控制的，这样协程的调度掌握在我们自己手中，相比与线程减小了系统切换上下文和其他资源的开销。因此协程在需要处理大量I/O操作或者并发任务的情况下提高程序的性能和可维护性。</p><h2 id=c20带来的协程>C++20带来的协程</h2><p>C++20带来的协程并不像python或lua中的那么易用，相反，C++给我们提供的是更为底层的操作（不过C++23已经有<code>std::generator</code>这种更高级的抽象，之后也会有更多丰富的用法）。</p><p>C++协程中有很重要的三个概念：</p><ul><li><code>Promise</code></li><li><code>Awaitable</code></li><li><code>Coroutine Handle</code></li></ul><h2 id=promise>Promise</h2><p><code>promise_type</code> 是每个协程函数的幕后执行对象。它主要负责以下几个任务：</p><ul><li><strong>创建和初始化协程</strong>：当协程开始执行时，编译器会通过 <code>promise_type</code> 创建一个对象，并调用其 <code>get_return_object()</code> 方法来获取协程的返回对象。</li><li><strong>处理协程的暂停和恢复</strong>：协程在暂停时会调用 <code>yield_value()</code> 或 <code>await_suspend()</code> 等方法来处理协程的状态，并决定何时恢复。</li><li><strong>处理协程的结束</strong>：当协程执行结束时，<code>return_void()</code> 或 <code>return_value()</code> 会被调用，来处理协程的返回结果。</li></ul><p>以下是 <code>promise_type</code> 中一些常见的方法：</p><ul><li><code>get_return_object()</code>：用于创建和返回协程的返回对象，一般是协程返回类型的实例。</li><li><code>initial_suspend()</code>：返回一个 <code>std::suspend_always</code> 或 <code>std::suspend_never</code>，决定协程在启动时是否立即暂停。</li><li><code>final_suspend()</code>：返回一个 <code>std::suspend_always</code> 或 <code>std::suspend_never</code>，决定协程在结束时是否暂停，以允许调用方执行清理操作。</li><li><code>return_void()</code> 或 <code>return_value(T value)</code>：用于在协程完成时返回结果。<code>return_void()</code> 用于没有返回值的协程，而 <code>return_value(T)</code> 则用于有返回值的协程。</li><li><code>yield_value(T value)</code>：用于生成值并让协程暂停，等待下一次恢复时继续执行。</li></ul><h2 id=awaitable>Awaitable</h2><p><code>Awaitable</code> 是一个可以与 <code>co_await</code> 表达式一起使用的对象或类型。<code>Awaitable</code> 对象<strong>必须提供一组特定的方法</strong>，使协程可以暂停执行，并在某个条件满足时继续执行。</p><p><code>co_await</code> 是 C++ 协程中的一种<strong>操作符</strong>，用于暂停协程并等待某个条件的满足。当协程遇到 <code>co_await</code> 时，它会暂停，并返回控制权给调用者。协程可以通过调用 <code>co_await some_awaitable</code> 来等待 <code>some_awaitable</code> 完成。</p><p>一个 <code>Awaitable</code> 对象需要提供以下三个方法中的一个或多个：</p><ul><li><code>operator co_await</code>：返回一个 <code>Awaitable</code> 对象。<code>Awaitable</code> 对象是实际实现等待逻辑的对象。</li><li><code>await_ready()</code>：这是 <code>Awaitable</code> 对象上的方法。它返回一个 <code>bool</code>，用于指示是否需要等待。如果返回 <code>true</code>，协程将不会暂停。</li><li><code>await_suspend(std::coroutine_handle&lt;>)</code>：这是 <code>Awaitable</code> 对象上的方法。它接受一个 <code>std::coroutine_handle&lt;></code> 参数，并在协程暂停时调用。这个方法决定协程何时恢复执行。</li><li><code>await_resume()</code>：这是 <code>Awaitable</code> 对象上的方法。它在协程恢复时调用，并返回 <code>co_await</code> 表达式的结果。</li></ul><p>C++中提供了两个简单的Awaitable：<a class=link href=https://zh.cppreference.com/w/cpp/coroutine/suspend_never target=_blank rel=noopener><code>std::suspend_never</code></a>和<a class=link href=https://zh.cppreference.com/w/cpp/coroutine/suspend_always target=_blank rel=noopener><code>std::suspend_always</code></a>。</p><h2 id=coroutine-handle>Coroutine Handle</h2><p><code>std::coroutine_handle</code> 是 C++20 协程库中一个核心的工具类，用于表示和操作协程。它是一个模板类，通常用来指向协程的状态信息。它可以通过协程的 <code>promise_type</code> 访问和控制协程的状态。每个协程在创建时，都会生成一个 <code>std::coroutine_handle</code>，用于管理协程的生命周期。</p><p><code>std::coroutine_handle</code> 提供了一系列方法来控制协程的执行，包括以下几个主要功能：</p><ul><li><strong>创建和获取句柄</strong>：<ul><li><code>std::coroutine_handle&lt;>::from_address(void* ptr)</code>：通过指针获取一个句柄。</li><li><code>std::coroutine_handle&lt;promise_type>::from_promise(promise_type& promise)</code>：通过 <code>promise_type</code> 对象创建一个句柄。</li></ul></li><li><strong>控制协程的执行</strong>：<ul><li><code>void resume()</code>：恢复协程的执行。</li><li><code>void destroy()</code>：销毁协程并释放其占用的资源。</li><li><code>void operator()()</code>：等效于 <code>resume()</code>，恢复协程的执行。</li><li><code>void* address()</code>：返回协程句柄的地址，用于低级操作。</li></ul></li><li><strong>检查协程的状态</strong>：<ul><li><code>bool done()</code>：检查协程是否已经完成执行。</li></ul></li><li><strong>访问 <code>promise_type</code></strong>：<ul><li><code>promise_type& promise()</code>：获取与当前协程关联的 <code>promise_type</code> 对象，允许访问协程内部状态。</li></ul></li></ul><h2 id=简单示例>简单示例</h2><p>这里有一个使用C++20 coroutine来实现挂起和恢复函数的例子。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span><span class=lnt>34
+</span><span class=lnt>35
+</span><span class=lnt>36
+</span><span class=lnt>37
+</span><span class=lnt>38
+</span><span class=lnt>39
+</span><span class=lnt>40
+</span><span class=lnt>41
+</span><span class=lnt>42
+</span><span class=lnt>43
+</span><span class=lnt>44
+</span><span class=lnt>45
+</span><span class=lnt>46
+</span><span class=lnt>47
+</span><span class=lnt>48
+</span><span class=lnt>49
+</span><span class=lnt>50
+</span><span class=lnt>51
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=cl><span class=cp>#include</span> <span class=cpf>&lt;coroutine&gt;</span><span class=cp>
+</span></span></span><span class=line><span class=cl><span class=cp>#include</span> <span class=cpf>&lt;iostream&gt;</span><span class=cp>
+</span></span></span><span class=line><span class=cl><span class=cp>#include</span> <span class=cpf>&lt;thread&gt;</span><span class=cp>
+</span></span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>using</span> <span class=k>namespace</span> <span class=n>std</span><span class=o>::</span><span class=n>chrono_literals</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>struct</span> <span class=nc>Result</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=k>struct</span> <span class=nc>Promise</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=n>Result</span> <span class=nf>get_return_object</span><span class=p>()</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>            <span class=k>return</span> <span class=n>std</span><span class=o>::</span><span class=n>coroutine_handle</span><span class=o>&lt;</span><span class=n>Promise</span><span class=o>&gt;::</span><span class=n>from_promise</span><span class=p>(</span><span class=o>*</span><span class=k>this</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>        <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=n>std</span><span class=o>::</span><span class=n>suspend_never</span> <span class=n>initial_suspend</span><span class=p>()</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>            <span class=k>return</span> <span class=p>{};</span>
+</span></span><span class=line><span class=cl>        <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=n>std</span><span class=o>::</span><span class=n>suspend_always</span> <span class=n>final_suspend</span><span class=p>()</span> <span class=k>noexcept</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>            <span class=k>return</span> <span class=p>{};</span>
+</span></span><span class=line><span class=cl>        <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=kt>void</span> <span class=nf>unhandled_exception</span><span class=p>()</span> <span class=p>{}</span>
+</span></span><span class=line><span class=cl>    <span class=p>};</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>using</span> <span class=n>promise_type</span> <span class=o>=</span> <span class=n>Promise</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=n>Result</span><span class=p>(</span><span class=n>std</span><span class=o>::</span><span class=n>coroutine_handle</span><span class=o>&lt;</span><span class=n>Promise</span><span class=o>&gt;</span> <span class=n>h</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=o>:</span> <span class=n>handle</span><span class=p>(</span><span class=n>h</span><span class=p>)</span> <span class=p>{}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=n>std</span><span class=o>::</span><span class=n>coroutine_handle</span><span class=o>&lt;</span><span class=n>Promise</span><span class=o>&gt;</span> <span class=n>handle</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>};</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>Result</span> <span class=nf>hello</span><span class=p>()</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=n>std</span><span class=o>::</span><span class=n>cout</span> <span class=o>&lt;&lt;</span> <span class=s>&#34;Hello &#34;</span> <span class=o>&lt;&lt;</span> <span class=n>std</span><span class=o>::</span><span class=n>endl</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=k>co_await</span> <span class=n>std</span><span class=o>::</span><span class=n>suspend_always</span><span class=p>{};</span> <span class=c1>// 挂起hello
+</span></span></span><span class=line><span class=cl>    <span class=n>std</span><span class=o>::</span><span class=n>cout</span> <span class=o>&lt;&lt;</span> <span class=s>&#34;world!&#34;</span> <span class=o>&lt;&lt;</span> <span class=n>std</span><span class=o>::</span><span class=n>endl</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=n>std</span><span class=o>::</span><span class=n>cout</span> <span class=o>&lt;&lt;</span> <span class=s>&#34;hello one</span><span class=se>\n</span><span class=s>&#34;</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>Result</span> <span class=nf>hello2</span><span class=p>()</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=n>std</span><span class=o>::</span><span class=n>cout</span> <span class=o>&lt;&lt;</span> <span class=s>&#34;你好 &#34;</span> <span class=o>&lt;&lt;</span> <span class=n>std</span><span class=o>::</span><span class=n>endl</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=n>std</span><span class=o>::</span><span class=n>cout</span> <span class=o>&lt;&lt;</span> <span class=s>&#34;hello two two</span><span class=se>\n</span><span class=s>&#34;</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=k>co_await</span> <span class=n>std</span><span class=o>::</span><span class=n>suspend_always</span><span class=p>{};</span> <span class=c1>// 挂起hello2
+</span></span></span><span class=line><span class=cl>    <span class=n>std</span><span class=o>::</span><span class=n>cout</span> <span class=o>&lt;&lt;</span> <span class=s>&#34;世界!&#34;</span> <span class=o>&lt;&lt;</span> <span class=n>std</span><span class=o>::</span><span class=n>endl</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=kt>int</span> <span class=nf>main</span><span class=p>()</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=n>Result</span> <span class=n>coro</span> <span class=o>=</span> <span class=n>hello</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>    <span class=n>Result</span> <span class=n>coro2</span> <span class=o>=</span> <span class=n>hello2</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>    <span class=n>coro</span><span class=p>.</span><span class=n>handle</span><span class=p>.</span><span class=n>resume</span><span class=p>();</span>  <span class=c1>// 恢复hello
+</span></span></span><span class=line><span class=cl>    <span class=n>coro2</span><span class=p>.</span><span class=n>handle</span><span class=p>.</span><span class=n>resume</span><span class=p>();</span> <span class=c1>// 恢复hello2
+</span></span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p>在main函数中，一开始我们启动了协程<code>hello</code>，输出了“Hello”后被挂起；之后启动了协程<code>hello2</code>，其输出“你好\nhello two two\n”后也被挂起。紧接着我们通过coroutine_handle来依次恢复这两个协程，最终输出结果为：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-text data-lang=text><span class=line><span class=cl>Hello 
+</span></span><span class=line><span class=cl>你好 
+</span></span><span class=line><span class=cl>hello two two
+</span></span><span class=line><span class=cl>world!
+</span></span><span class=line><span class=cl>hello one
+</span></span><span class=line><span class=cl>世界!
+</span></span></code></pre></td></tr></table></div></div><h2 id=references>References</h2><ul><li><a class=link href=https://zplutor.github.io/2022/03/25/cpp-coroutine-beginner/ target=_blank rel=noopener>https://zplutor.github.io/2022/03/25/cpp-coroutine-beginner/</a></li><li><a class=link href=https://www.bluepuni.com/archives/stackless-coroutine-and-asio-coroutine target=_blank rel=noopener>https://www.bluepuni.com/archives/stackless-coroutine-and-asio-coroutine</a></li><li><a class=link href="https://zhuanlan.zhihu.com/p/355100152?utm_psn=1808059511308697600" target=_blank rel=noopener>https://zhuanlan.zhihu.com/p/355100152?utm_psn=1808059511308697600</a></li><li><a class=link href=https://itnext.io/c-20-coroutines-complete-guide-7c3fc08db89d target=_blank rel=noopener>https://itnext.io/c-20-coroutines-complete-guide-7c3fc08db89d</a></li><li><a class=link href=https://jasonkayzk.github.io/2022/06/03/%E6%B5%85%E8%B0%88%E5%8D%8F%E7%A8%8B/ target=_blank rel=noopener>https://jasonkayzk.github.io/2022/06/03/%E6%B5%85%E8%B0%88%E5%8D%8F%E7%A8%8B/</a></li><li><a class=link href=https://lewissbaker.github.io/2017/11/17/understanding-operator-co-await target=_blank rel=noopener>https://lewissbaker.github.io/2017/11/17/understanding-operator-co-await</a></li><li><a class=link href=https://juejin.cn/post/6844903715099377672 target=_blank rel=noopener>https://juejin.cn/post/6844903715099377672</a></li></ul></section><footer class="article-meta article-footer"><section class=article-tags><a href=/tags/coroutine/>Coroutine</a>
+<a href=/tags/cplusplus/>CPlusPlus</a></section><section class="article-copyright inline-meta"><svg class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><path d="M14.5 9a3.5 4 0 100 6"/></svg>
+<span>Licensed under CC BY-NC-SA 4.0</span></section></footer></article><footer class=site-footer><section class=copyright>&copy;
+2025 -
+2026 Kerolt's Note</section><section class=powerby>使用 <a href=https://gohugo.io/ target=_blank rel=noopener>Hugo</a> 构建<br>主题 <b><a href=https://github.com/CaiJimmy/hugo-theme-stack target=_blank rel=noopener data-version=4.0.3>Stack</a></b> 由 <a href=https://jimmycai.com target=_blank rel=noopener>Jimmy</a> 设计</section></footer><script type=module>
+    import gallery from '\/ts\/gallery.js';
+
+    const articleContent = document.querySelector('.article-content');
+    const shouldLoad = articleContent && (articleContent.querySelectorAll('figure').length > 0 || articleContent.querySelectorAll('img.gallery-image').length > 0);
+    
+    if (shouldLoad) {
+        gallery(articleContent);
+
+        const PhotoSwipeLightbox = (await import("https:\/\/cdn.jsdelivr.net\/npm\/photoswipe@5.4.4\/dist\/photoswipe-lightbox.esm.min.js")).default;
+        const styleHref = "https:\/\/cdn.jsdelivr.net\/npm\/photoswipe@5.4.4\/dist\/photoswipe.css";
+
+        const styleTag = document.createElement('link');
+        styleTag.rel = 'stylesheet';
+        styleTag.href = styleHref;
+        document.head.appendChild(styleTag);
+
+        const lightbox = new PhotoSwipeLightbox({
+            gallerySelector: '.article-content',
+            childSelector: 'figure a.image-link',
+            pswpModule: () => import("https:\/\/cdn.jsdelivr.net\/npm\/photoswipe@5.4.4\/dist\/photoswipe.esm.min.js")
+        });
+        lightbox.init();
+    }
+</script></main></div><script type=text/javascript src=/ts/main.f856840516f7c2ad1769a8f5937e3d08d6cb386e2cd2dd025ae696e0ff207958.js defer></script></body></html>

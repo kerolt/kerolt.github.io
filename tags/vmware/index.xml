@@ -1,24 +1,80 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?>
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
-  <channel>
-    <title>VMware on Kerolt&#39;s Blog</title>
-    <link>https://kerolt.github.io/tags/vmware/</link>
-    <description>Recent content in VMware on Kerolt&#39;s Blog</description>
-    <image>
-      <title>Kerolt&#39;s Blog</title>
-      <url>https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</url>
-      <link>https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</link>
-    </image>
-    <generator>Hugo -- 0.158.0</generator>
-    <language>en</language>
-    <lastBuildDate>Mon, 27 May 2024 00:00:00 +0000</lastBuildDate>
-    <atom:link href="https://kerolt.github.io/tags/vmware/index.xml" rel="self" type="application/rss+xml" />
-    <item>
-      <title>VMware17.5.2启动踩坑</title>
-      <link>https://kerolt.github.io/posts/dev-null/vmware17.5.2%E5%90%AF%E5%8A%A8%E8%B8%A9%E5%9D%91/</link>
-      <pubDate>Mon, 27 May 2024 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/dev-null/vmware17.5.2%E5%90%AF%E5%8A%A8%E8%B8%A9%E5%9D%91/</guid>
-      <description>&lt;p&gt;最近听说 VMware17.5.2 个人版可以免费使用了，故在 Linux 下安装用用，顺便记录一下踩的坑。&lt;/p&gt;</description>
-    </item>
-  </channel>
-</rss>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>VMware on Kerolt's Note</title><link>https://kerolt.github.io/tags/vmware/</link><description>Recent content in VMware on Kerolt's Note</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><lastBuildDate>Mon, 27 May 2024 00:00:00 +0000</lastBuildDate><atom:link href="https://kerolt.github.io/tags/vmware/index.xml" rel="self" type="application/rss+xml"/><item><title>VMware17.5.2启动踩坑</title><link>https://kerolt.github.io/p/vmware17.5.2%E5%90%AF%E5%8A%A8%E8%B8%A9%E5%9D%91/</link><pubDate>Mon, 27 May 2024 00:00:00 +0000</pubDate><guid>https://kerolt.github.io/p/vmware17.5.2%E5%90%AF%E5%8A%A8%E8%B8%A9%E5%9D%91/</guid><description>&lt;p&gt;最近听说 VMware17.5.2 个人版可以免费使用了，故在 Linux 下安装用用，顺便记录一下踩的坑。&lt;/p&gt;
+&lt;p&gt;我是想在 Linux 上想用 Uniapp，用 wine 的体验不是很好，故打算用虚拟机跑 Windows。安装好 VMware17.5.2 后，配置好 windows 镜像后，点击启动，却报了这样的错：&lt;/p&gt;
+
+ &lt;blockquote&gt;
+ &lt;p&gt;Could not open /dev/vmmon: ?????????. Please make sure that the kernel module `vmmon&amp;rsquo; is loaded.&lt;/p&gt;
+
+ &lt;/blockquote&gt;
+&lt;p&gt;搜了一下发现是原因为&lt;strong&gt;VMware 无法访问其必要的内核模块 vmmon&lt;/strong&gt;：&lt;/p&gt;
+&lt;p&gt;我首先是尝试了手动启用 VMware 模块，然后执行命令安装缺失的模块&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-sh" data-lang="sh"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;sudo /etc/init.d/vmware start
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;sudo vmware-modconfig --console --install-all
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;但是还是无效，在查看别人的 &lt;a class="link" href="https://segmentfault.com/a/1190000042268631" target="_blank" rel="noopener"
+ &gt;博客&lt;/a&gt; 后，我手动去编译安装缺失的 &lt;code&gt;vmmon&lt;/code&gt; 和 &lt;code&gt;vmnet&lt;/code&gt; 模块：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;span class="lnt"&gt;4
+&lt;/span&gt;&lt;span class="lnt"&gt;5
+&lt;/span&gt;&lt;span class="lnt"&gt;6
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-sh" data-lang="sh"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;git clone https://github.com/mkubecek/vmware-host-modules
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nb"&gt;cd&lt;/span&gt; vmware-host-modules
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;git checkout workstation-17.5.1
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;sudo make
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;sudo make install
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;执行完成后，这两个模块将会安装到 &lt;code&gt;/lib/modules/6.1.0-18-amd64/misc&lt;/code&gt; 下&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;span class="lnt"&gt;4
+&lt;/span&gt;&lt;span class="lnt"&gt;5
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-sh" data-lang="sh"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;kerolt  /usr/lib/modules/6.1.0-18-amd64/misc    
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;$ ls -l 
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;总计 &lt;span class="m"&gt;7164&lt;/span&gt; 
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;-rw-r--r-- &lt;span class="m"&gt;1&lt;/span&gt; root root &lt;span class="m"&gt;3996784&lt;/span&gt;  5月27日 18:48 vmmon.ko 
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;-rw-r--r-- &lt;span class="m"&gt;1&lt;/span&gt; root root &lt;span class="m"&gt;3337384&lt;/span&gt;  5月27日 18:48 vmnet.ko
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;本以为到现在已经结束，结果再次启动 VMware，还是不信，于是我想着可能是内核模块没有加载，采用如下命令查看：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-sh" data-lang="sh"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;lsmod &lt;span class="p"&gt;|&lt;/span&gt; grep vmmon
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;不出意外，没有输出，手动加载模块：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-sh" data-lang="sh"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;sudo modprobe vmmon
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# modprobe: ERROR: could not insert &amp;#39;vmmon&amp;#39;: Key was rejected by service&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;根据该错误询问 ChatGPT，其给出的答复为：&lt;strong&gt;启用了安全启动（Secure Boot），导致系统拒绝加载未签名或未正确签名的内核模块&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;重启计算机，进入 BIOS/UEFI 设置，将 &lt;code&gt;Secure Boot&lt;/code&gt; 设置为 &lt;code&gt;Disabled&lt;/code&gt;，之后再次启动 VMware 时就没有问题了～&lt;/p&gt;</description></item></channel></rss>

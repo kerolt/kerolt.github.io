@@ -1,55 +1,108 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?>
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
-  <channel>
-    <title>RustDesk on Kerolt&#39;s Blog</title>
-    <link>https://kerolt.github.io/tags/rustdesk/</link>
-    <description>Recent content in RustDesk on Kerolt&#39;s Blog</description>
-    <image>
-      <title>Kerolt&#39;s Blog</title>
-      <url>https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</url>
-      <link>https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</link>
-    </image>
-    <generator>Hugo -- 0.158.0</generator>
-    <language>en</language>
-    <lastBuildDate>Mon, 25 Aug 2025 00:00:00 +0000</lastBuildDate>
-    <atom:link href="https://kerolt.github.io/tags/rustdesk/index.xml" rel="self" type="application/rss+xml" />
-    <item>
-      <title>Rustdesk自建服务器</title>
-      <link>https://kerolt.github.io/posts/dev-null/rustdesk%E8%87%AA%E5%BB%BA%E6%9C%8D%E5%8A%A1%E5%99%A8/</link>
-      <pubDate>Mon, 25 Aug 2025 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/dev-null/rustdesk%E8%87%AA%E5%BB%BA%E6%9C%8D%E5%8A%A1%E5%99%A8/</guid>
-      <description>&lt;p&gt;对于现在常见的远程控制软件，例如 ToDesk、向日葵，其免费版本总有诸多限制（帧率低、分辨率低、控制时间有限制），而 RustDesk 的公共服务器现在在国内也不可用，因此我就想到了 RustDesk 的自建服务器。现在我们实验室有几台空闲的电脑，并且这些电脑都有 &lt;strong&gt;IPv6&lt;/strong&gt;，这就省去了我购买云服务器的花费，可以实现零成本搭建远程服务😁&lt;/p&gt;
-&lt;h2 id=&#34;安装-rustdesk-server&#34;&gt;安装 RustDesk Server&lt;/h2&gt;
-&lt;p&gt;我使用 &lt;a href=&#34;https://github.com/sshpc/rustdesktool&#34;&gt;https://github.com/sshpc/rustdesktool&lt;/a&gt; 这里的脚本来一键安装，安装完后，RustDesk Server 的默认安装目录为：&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-text&#34; data-lang=&#34;text&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;/usr/local/rustdesk-sever
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h2 id=&#34;开放端口&#34;&gt;开放端口&lt;/h2&gt;
-&lt;p&gt;我们需要放行防火墙 TCP &amp;amp; UDP 端口 21115-21119，其中&lt;/p&gt;
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>RustDesk on Kerolt's Note</title><link>https://kerolt.github.io/tags/rustdesk/</link><description>Recent content in RustDesk on Kerolt's Note</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><lastBuildDate>Mon, 25 Aug 2025 00:00:00 +0000</lastBuildDate><atom:link href="https://kerolt.github.io/tags/rustdesk/index.xml" rel="self" type="application/rss+xml"/><item><title>Rustdesk自建服务器</title><link>https://kerolt.github.io/p/rustdesk%E8%87%AA%E5%BB%BA%E6%9C%8D%E5%8A%A1%E5%99%A8/</link><pubDate>Mon, 25 Aug 2025 00:00:00 +0000</pubDate><guid>https://kerolt.github.io/p/rustdesk%E8%87%AA%E5%BB%BA%E6%9C%8D%E5%8A%A1%E5%99%A8/</guid><description>&lt;p&gt;对于现在常见的远程控制软件，例如 ToDesk、向日葵，其免费版本总有诸多限制（帧率低、分辨率低、控制时间有限制），而 RustDesk 的公共服务器现在在国内也不可用，因此我就想到了 RustDesk 的自建服务器。现在我们实验室有几台空闲的电脑，并且这些电脑都有 &lt;strong&gt;IPv6&lt;/strong&gt;，这就省去了我购买云服务器的花费，可以实现零成本搭建远程服务😁&lt;/p&gt;
+&lt;h2 id="安装-rustdesk-server"&gt;安装 RustDesk Server
+&lt;/h2&gt;&lt;p&gt;我使用 &lt;a class="link" href="https://github.com/sshpc/rustdesktool" target="_blank" rel="noopener"
+ &gt;https://github.com/sshpc/rustdesktool&lt;/a&gt; 这里的脚本来一键安装，安装完后，RustDesk Server 的默认安装目录为：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-text" data-lang="text"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;/usr/local/rustdesk-sever
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h2 id="开放端口"&gt;开放端口
+&lt;/h2&gt;&lt;p&gt;我们需要放行防火墙 TCP &amp;amp; UDP 端口 21115-21119，其中&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;21115 是 hbbs 用作 NAT 类型测试&lt;/li&gt;
 &lt;li&gt;21116/UDP 是 hbbs 用作 ID 注册与心跳服务&lt;/li&gt;
 &lt;li&gt;21116/TCP 是 hbbs 用作 TCP 打洞与连接服务&lt;/li&gt;
 &lt;li&gt;21117 是 hbbr 用作中继服务&lt;/li&gt;
 &lt;/ul&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-sh&#34; data-lang=&#34;sh&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;# 允许 TCP 端口 &lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;sudo ufw allow 21115:21119/tcp
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;# 允许 UDP 端口&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;sudo ufw allow 21115:21119/udp
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;sudo ufw &lt;span style=&#34;color:#366&#34;&gt;enable&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;然后执行&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-sh&#34; data-lang=&#34;sh&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;sudo ufw status
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;如果有如下类似输出，表明端口已经放行并且防火墙正在运行。&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-sh&#34; data-lang=&#34;sh&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;状态：活动
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;至              动作        来自
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;--              --          --
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;21115:21119/tcp ALLOW       Anywhere
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;21115:21119/udp ALLOW       Anywhere
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;21115:21119/tcp &lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;v6&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt; ALLOW  Anywhere &lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;v6&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;21115:21119/udp &lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;v6&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt; ALLOW  Anywhere &lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;v6&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h2 id=&#34;启动服务&#34;&gt;启动服务&lt;/h2&gt;
-&lt;p&gt;在我们用脚本一键安装后，服务安装目录为：&lt;/p&gt;</description>
-    </item>
-  </channel>
-</rss>
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;span class="lnt"&gt;4
+&lt;/span&gt;&lt;span class="lnt"&gt;5
+&lt;/span&gt;&lt;span class="lnt"&gt;6
+&lt;/span&gt;&lt;span class="lnt"&gt;7
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-sh" data-lang="sh"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# 允许 TCP 端口 &lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;sudo ufw allow 21115:21119/tcp
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# 允许 UDP 端口&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;sudo ufw allow 21115:21119/udp
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;sudo ufw &lt;span class="nb"&gt;enable&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;然后执行&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-sh" data-lang="sh"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;sudo ufw status
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;如果有如下类似输出，表明端口已经放行并且防火墙正在运行。&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;span class="lnt"&gt;4
+&lt;/span&gt;&lt;span class="lnt"&gt;5
+&lt;/span&gt;&lt;span class="lnt"&gt;6
+&lt;/span&gt;&lt;span class="lnt"&gt;7
+&lt;/span&gt;&lt;span class="lnt"&gt;8
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-sh" data-lang="sh"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;状态：活动
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;至 动作 来自
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;-- -- --
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;21115:21119/tcp ALLOW Anywhere
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;21115:21119/udp ALLOW Anywhere
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;21115:21119/tcp &lt;span class="o"&gt;(&lt;/span&gt;v6&lt;span class="o"&gt;)&lt;/span&gt; ALLOW Anywhere &lt;span class="o"&gt;(&lt;/span&gt;v6&lt;span class="o"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;21115:21119/udp &lt;span class="o"&gt;(&lt;/span&gt;v6&lt;span class="o"&gt;)&lt;/span&gt; ALLOW Anywhere &lt;span class="o"&gt;(&lt;/span&gt;v6&lt;span class="o"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h2 id="启动服务"&gt;启动服务
+&lt;/h2&gt;&lt;p&gt;在我们用脚本一键安装后，服务安装目录为：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-text" data-lang="text"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;/usr/lib/systemd/system/RustDeskHbbr.service
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;/usr/lib/systemd/system/RustDeskHbbs.service
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;可以通过 systemd 启动服务：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;span class="lnt"&gt;4
+&lt;/span&gt;&lt;span class="lnt"&gt;5
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-sh" data-lang="sh"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;sudo systemctl start RustDeskHbbs
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;sudo systemctl start RustDeskHbbr
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# 或者重载systemd配置&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# sudo systemctl daemon-reload&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h2 id="配置客户端"&gt;配置客户端
+&lt;/h2&gt;&lt;p&gt;在 RustDesk 的客户端的 &lt;code&gt;设置 -&amp;gt; 网络 -&amp;gt; ID/中继服务器&lt;/code&gt; 中：&lt;/p&gt;
+&lt;p&gt;&lt;img class="gallery-image" data-flex-basis="392px" data-flex-grow="163" height="329" loading="lazy" sizes="(max-width: 767px) calc(100vw - 30px), (max-width: 1023px) 700px, (max-width: 1279px) 950px, 1232px" src="https://obsidian-image-oss.oss-cn-shanghai.aliyuncs.com/Pasted%20image%2020250825131742.png" width="538"&gt;&lt;/p&gt;
+&lt;p&gt;第一第二栏中打马赛克的地方填入服务器的 ip，由于实验室电脑有 IPv6，因此我这里使用的是 IPv6；key 栏填入默认安装目录下的 &lt;code&gt;id_ed25519.pub&lt;/code&gt; 中的值。&lt;/p&gt;
+&lt;p&gt;确认后，左下角显示 &lt;code&gt;就绪&lt;/code&gt; 就说明配置完成了。&lt;/p&gt;
+&lt;p&gt;&lt;img class="gallery-image" data-flex-basis="252px" data-flex-grow="105" height="559" loading="lazy" sizes="(max-width: 767px) calc(100vw - 30px), (max-width: 1023px) 700px, (max-width: 1279px) 950px, 1232px" src="https://obsidian-image-oss.oss-cn-shanghai.aliyuncs.com/Pasted%20image%2020250825132013.png" width="588"&gt;&lt;/p&gt;
+&lt;p&gt;在自己所需的电脑上都进行这一步的客户端配置即可开连！尝试了一下分辨率比 ToDesk 高多了，延迟也还好。&lt;/p&gt;</description></item></channel></rss>

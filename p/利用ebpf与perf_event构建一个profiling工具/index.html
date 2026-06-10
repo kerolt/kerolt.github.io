@@ -1,0 +1,1121 @@
+<!doctype html><html lang=zh-cn dir=ltr><head><meta charset=utf-8><meta name=viewport content='width=device-width,initial-scale=1'><meta name=description content="引言 在性能分析和系统调优中，了解应用程序在运行时的调用栈信息至关重要。在 【eBPF 入门实践教程十二：使用 eBPF 程序 profile 进行性能分析】 这篇文章中，其利用 Rust + eBPF 构建了一个 profiler 工具，抱着学习的目的，我使用 C++ 实现了相同的功能，并将所学知识总结成本文。\n"><title>利用eBPF与perf_event构建一个profiling工具</title><link rel=canonical href=https://kerolt.github.io/p/%E5%88%A9%E7%94%A8ebpf%E4%B8%8Eperf_event%E6%9E%84%E5%BB%BA%E4%B8%80%E4%B8%AAprofiling%E5%B7%A5%E5%85%B7/><link rel=preconnect href=https://fonts.googleapis.com><link rel=preconnect href=https://fonts.gstatic.com crossorigin><link rel=preload as=style href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap"><link rel=stylesheet href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap"><link rel=stylesheet href=/scss/style.min.e62e09c60ba428a627e03568fa3df938f6a8224f815b5846f00816c17d4a0be4.css><meta property='og:title' content="利用eBPF与perf_event构建一个profiling工具"><meta property='og:description' content="引言 在性能分析和系统调优中，了解应用程序在运行时的调用栈信息至关重要。在 【eBPF 入门实践教程十二：使用 eBPF 程序 profile 进行性能分析】 这篇文章中，其利用 Rust + eBPF 构建了一个 profiler 工具，抱着学习的目的，我使用 C++ 实现了相同的功能，并将所学知识总结成本文。\n"><meta property='og:url' content='https://kerolt.github.io/p/%E5%88%A9%E7%94%A8ebpf%E4%B8%8Eperf_event%E6%9E%84%E5%BB%BA%E4%B8%80%E4%B8%AAprofiling%E5%B7%A5%E5%85%B7/'><meta property='og:site_name' content="Kerolt's Note"><meta property='og:type' content='article'><meta property='article:section' content='Post'><meta property='article:tag' content='perf'><meta property='article:tag' content='cpp'><meta property='article:tag' content='性能分析'><meta property='article:tag' content='系统调用'><meta property='article:tag' content='eBPF'><meta property='article:published_time' content='2026-01-29T00:00:00+00:00'><meta property='article:modified_time' content='2026-01-29T00:00:00+00:00'><meta name=twitter:title content="利用eBPF与perf_event构建一个profiling工具"><meta name=twitter:description content="引言 在性能分析和系统调优中，了解应用程序在运行时的调用栈信息至关重要。在 【eBPF 入门实践教程十二：使用 eBPF 程序 profile 进行性能分析】 这篇文章中，其利用 Rust + eBPF 构建了一个 profiler 工具，抱着学习的目的，我使用 C++ 实现了相同的功能，并将所学知识总结成本文。\n"><link rel="shortcut icon" href=/images/favicon.png></head><body class=article-page><script>(function(){const e="StackColorScheme";localStorage.getItem(e)||localStorage.setItem(e,"auto")})()</script><script>(function(){const t="StackColorScheme",e=localStorage.getItem(t),n=window.matchMedia("(prefers-color-scheme: dark)").matches===!0;e=="dark"||e==="auto"&&n?document.documentElement.dataset.scheme="dark":document.documentElement.dataset.scheme="light"})()</script><div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky"><button class="hamburger hamburger--spin" type=button id=toggle-menu aria-label=切换菜单>
+<span class=hamburger-box><span class=hamburger-inner></span></span></button><header><figure class=site-avatar><a href=/><img src=/images/avatar.jpg width=200 height=200 class=site-logo loading=lazy alt=Avatar>
+</a><span class=emoji>🏸</span></figure><div class=site-meta><h1 class=site-name><a href=/>Kerolt's Note</a></h1><h2 class=site-description>宇宙是秩序的，也是混乱的。</h2></div></header><ol class=menu-social><li><a href=https://github.com/kerolt title=GitHub rel=me><svg class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 19c-4.3 1.4-4.3-2.5-6-3m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6.0 00-1.3-3.2 4.2 4.2.0 00-.1-3.2s-1.1-.3-3.5 1.3a12.3 12.3.0 00-6.2.0C6.5 2.8 5.4 3.1 5.4 3.1a4.2 4.2.0 00-.1 3.2A4.6 4.6.0 004 9.5c0 4.6 2.7 5.7 5.5 6-.6.6-.6 1.2-.5 2V21"/></svg></a></li></ol><ol class=menu id=main-menu><li><a href=/><svg class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><polyline points="5 12 3 12 12 3 21 12 19 12"/><path d="M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"/><path d="M9 21v-6a2 2 0 012-2h2a2 2 0 012 2v6"/></svg>
+<span>首页</span></a></li><li><a href=/archives/><svg class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><rect x="3" y="4" width="18" height="4" rx="2"/><path d="M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
+<span>归档</span></a></li><li><a href=/categories/><svg class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><line x1="5" y1="9" x2="19" y2="9"/><line x1="5" y1="15" x2="19" y2="15"/><line x1="11" y1="4" x2="7" y2="20"/><line x1="17" y1="4" x2="13" y2="20"/></svg>
+<span>分类</span></a></li><li><a href=/tags/><svg class="icon icon-tabler icon-tabler-tag" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><path d="M11 3l9 9a1.5 1.5.0 010 2l-6 6a1.5 1.5.0 01-2 0L3 11V7a4 4 0 014-4h4"/><circle cx="9" cy="9" r="2"/></svg>
+<span>标签</span></a></li><li><a href=/about/><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-info-circle"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 12a9 9 0 1018 0A9 9 0 003 12"/><path d="M12 9h.01"/><path d="M11 12h1v4h1"/></svg>
+<span>关于我</span></a></li><li><a href=/search/><svg class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="10" cy="10" r="7"/><line x1="21" y1="21" x2="15" y2="15"/></svg>
+<span>搜索</span></a></li><li class=menu-bottom-section><ol class=menu><li id=dark-mode-toggle><svg class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="8" cy="12" r="2"/><rect x="2" y="6" width="20" height="12" rx="6"/></svg>
+<svg class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="16" cy="12" r="2"/><rect x="2" y="6" width="20" height="12" rx="6"/></svg>
+<span>暗色模式</span></li></ol></li></ol></aside><aside class="sidebar right-sidebar sticky"><section class="widget archives"><div class=widget-icon><svg class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><line x1="5" y1="9" x2="19" y2="9"/><line x1="5" y1="15" x2="19" y2="15"/><line x1="11" y1="4" x2="7" y2="20"/><line x1="17" y1="4" x2="13" y2="20"/></svg></div><h2 class="widget-title section-title">目录</h2><div class=widget--toc><nav class=toc-nav id=TableOfContents><ol><li><a href=#引言>引言</a></li><li><a href=#perf_event_open-机制解析>perf_event_open 机制解析</a><ol><li><a href=#以文件描述符为中心的监控单元>以文件描述符为中心的监控单元</a></li><li><a href=#事件状态控制ioctl-与-prctl>事件状态控制：ioctl 与 prctl</a></li></ol></li><li><a href=#两种工作模式计数-vs-采样>两种工作模式：计数 vs 采样</a><ol><li><a href=#计数模式-counting-mode>计数模式 (Counting Mode)</a></li><li><a href=#采样模式-sampling-mode>采样模式 (Sampling Mode)</a></li></ol></li><li><a href=#结合-ebpf-实现-profiling>结合 eBPF 实现 profiling</a></li><li><a href=#解析采集的栈回溯信息>解析采集的栈回溯信息</a><ol><li><a href=#api-设计>API 设计</a></li><li><a href=#符号化解析将地址转换为函数名>符号化解析：将地址转换为函数名</a></li><li><a href=#事件处理>事件处理</a></li><li><a href=#标准输出格式可读的逐帧展示>标准输出格式：可读的逐帧展示</a></li><li><a href=#火焰图格式机器可读的数据输出>火焰图格式：机器可读的数据输出</a></li><li><a href=#流程图>流程图</a></li></ol></li><li><a href=#启动与事件循环>启动与事件循环</a><ol><li><a href=#关键依赖与权限>关键依赖与权限</a></li><li><a href=#命令行与日志初始化>命令行与日志初始化</a></li><li><a href=#提升资源限制rlimit_memlock>提升资源限制（<code>RLIMIT_MEMLOCK</code>）</a></li><li><a href=#加载并管理-bpf-对象profilerskel>加载并管理 BPF 对象（<code>ProfilerSkel</code>）</a></li><li><a href=#初始化-perf-事件并-attach>初始化 perf 事件并 attach</a></li><li><a href=#ring-buffer-与事件回调>Ring Buffer 与事件回调</a></li><li><a href=#主循环轮询与优雅退出>主循环、轮询与优雅退出</a></li></ol></li><li><a href=#对-ebpf-程序挂载方式的思考>对 eBPF 程序挂载方式的思考</a><ol><li><a href=#skeleton-attach-是什么它解决了什么问题>skeleton attach 是什么，它解决了什么问题？</a></li><li><a href=#perf-场景下的不同>perf 场景下的不同</a></li><li><a href=#program-attach-挂载的好处>program attach 挂载的好处</a></li><li><a href=#对比小结>对比小结</a></li></ol></li><li><a href=#参考>参考</a></li></ol></nav></div></section></aside><main class="main full-width"><article class=main-article><header class=article-header><div class=article-details><header class=article-category><a href=/categories/ebpf/ style=background-color:#beceef;color:#0f1f3d>EBPF</a></header><div class=article-title-wrapper><h2 class=article-title><a href=/p/%E5%88%A9%E7%94%A8ebpf%E4%B8%8Eperf_event%E6%9E%84%E5%BB%BA%E4%B8%80%E4%B8%AAprofiling%E5%B7%A5%E5%85%B7/>利用eBPF与perf_event构建一个profiling工具</a></h2></div><footer class=article-meta><div class=inline-meta><svg class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><path d="M11.795 21H5a2 2 0 01-2-2V7a2 2 0 012-2h12a2 2 0 012 2v4"/><circle cx="18" cy="18" r="4"/><path d="M15 3v4"/><path d="M7 3v4"/><path d="M3 11h16"/><path d="M18 16.496V18l1 1"/></svg>
+<time class=article-time--published datetime=2026-01-29T00:00:00Z>2026年1月29日星期四</time>
+<svg class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg>
+<time class=article-time--reading>阅读时长: 15 分钟</time></div></footer></div></header><aside class=article-toc><details><summary><div class=article-toc-title><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-chevron-right"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 6l6 6-6 6"/></svg>
+<span>目录</span></div></summary><nav class=toc-nav><ol><li><a href=#引言>引言</a></li><li><a href=#perf_event_open-机制解析>perf_event_open 机制解析</a><ol><li><a href=#以文件描述符为中心的监控单元>以文件描述符为中心的监控单元</a></li><li><a href=#事件状态控制ioctl-与-prctl>事件状态控制：ioctl 与 prctl</a></li></ol></li><li><a href=#两种工作模式计数-vs-采样>两种工作模式：计数 vs 采样</a><ol><li><a href=#计数模式-counting-mode>计数模式 (Counting Mode)</a></li><li><a href=#采样模式-sampling-mode>采样模式 (Sampling Mode)</a></li></ol></li><li><a href=#结合-ebpf-实现-profiling>结合 eBPF 实现 profiling</a></li><li><a href=#解析采集的栈回溯信息>解析采集的栈回溯信息</a><ol><li><a href=#api-设计>API 设计</a></li><li><a href=#符号化解析将地址转换为函数名>符号化解析：将地址转换为函数名</a></li><li><a href=#事件处理>事件处理</a></li><li><a href=#标准输出格式可读的逐帧展示>标准输出格式：可读的逐帧展示</a></li><li><a href=#火焰图格式机器可读的数据输出>火焰图格式：机器可读的数据输出</a></li><li><a href=#流程图>流程图</a></li></ol></li><li><a href=#启动与事件循环>启动与事件循环</a><ol><li><a href=#关键依赖与权限>关键依赖与权限</a></li><li><a href=#命令行与日志初始化>命令行与日志初始化</a></li><li><a href=#提升资源限制rlimit_memlock>提升资源限制（<code>RLIMIT_MEMLOCK</code>）</a></li><li><a href=#加载并管理-bpf-对象profilerskel>加载并管理 BPF 对象（<code>ProfilerSkel</code>）</a></li><li><a href=#初始化-perf-事件并-attach>初始化 perf 事件并 attach</a></li><li><a href=#ring-buffer-与事件回调>Ring Buffer 与事件回调</a></li><li><a href=#主循环轮询与优雅退出>主循环、轮询与优雅退出</a></li></ol></li><li><a href=#对-ebpf-程序挂载方式的思考>对 eBPF 程序挂载方式的思考</a><ol><li><a href=#skeleton-attach-是什么它解决了什么问题>skeleton attach 是什么，它解决了什么问题？</a></li><li><a href=#perf-场景下的不同>perf 场景下的不同</a></li><li><a href=#program-attach-挂载的好处>program attach 挂载的好处</a></li><li><a href=#对比小结>对比小结</a></li></ol></li><li><a href=#参考>参考</a></li></ol></nav></details></aside><section class=article-content><h2 id=引言>引言</h2><p>在性能分析和系统调优中，了解应用程序在运行时的调用栈信息至关重要。在 <a class=link href=https://eunomia.dev/zh/tutorials/12-profile/ target=_blank rel=noopener>【eBPF 入门实践教程十二：使用 eBPF 程序 profile 进行性能分析】</a> 这篇文章中，其利用 Rust + eBPF 构建了一个 profiler 工具，抱着学习的目的，我使用 C++ 实现了相同的功能，并将所学知识总结成本文。</p><h2 id=perf_event_open-机制解析>perf_event_open 机制解析</h2><p><img class=gallery-image data-flex-basis=523px data-flex-grow=218 height=930 loading=lazy sizes="(max-width: 767px) calc(100vw - 30px), (max-width: 1023px) 700px, (max-width: 1279px) 950px, 1232px" src=https://plantegg.github.io/images/951413iMgBlog/5edebc74-f8ac-483c-8bcd-24e09abfd06b.png srcset="/5edebc74-f8ac-483c-8bcd-24e09abfd06b_15753810344916385651_hu_b2694a23b0e1c354.png 800w, /5edebc74-f8ac-483c-8bcd-24e09abfd06b_15753810344916385651_hu_90ddc5a9df799573.png 1600w, https://plantegg.github.io/images/951413iMgBlog/5edebc74-f8ac-483c-8bcd-24e09abfd06b.png 2030w" width=2030></p><blockquote><p>perf 原理图：https://plantegg.github.io/2021/05/16/Perf_IPC%E4%BB%A5%E5%8F%8ACPU%E5%88%A9%E7%94%A8%E7%8E%87/</p></blockquote><p><code>perf_event_open</code> 是 Linux 内核提供的性能监控接口，允许用户空间程序创建性能事件计数器。当用户态程序调用 <code>sys_perf_event_open</code> 系统调用时，内核会创建相应的性能监控实例。以下是基本的使用方式：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span><span class=lnt>8
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-c data-lang=c><span class=line><span class=cl><span class=cp>#include</span> <span class=cpf>&lt;linux/perf_event.h&gt;</span><span class=cp>
+</span></span></span><span class=line><span class=cl><span class=cp>#include</span> <span class=cpf>&lt;sys/syscall.h&gt;</span><span class=cp>
+</span></span></span><span class=line><span class=cl><span class=cp>#include</span> <span class=cpf>&lt;unistd.h&gt;</span><span class=cp>
+</span></span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=kt>int64_t</span> <span class=nf>perf_event_open</span><span class=p>(</span><span class=k>struct</span> <span class=n>perf_event_attr</span><span class=o>*</span> <span class=n>hw_event</span><span class=p>,</span> <span class=kt>pid_t</span> <span class=n>pid</span><span class=p>,</span> <span class=kt>int</span> <span class=n>cpu</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>                     <span class=kt>int</span> <span class=n>group_fd</span><span class=p>,</span> <span class=kt>unsigned</span> <span class=kt>long</span> <span class=n>flags</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=nf>syscall</span><span class=p>(</span><span class=n>SYS_perf_event_open</span><span class=p>,</span> <span class=n>hw_event</span><span class=p>,</span> <span class=n>pid</span><span class=p>,</span> <span class=n>cpu</span><span class=p>,</span> <span class=n>group_fd</span><span class=p>,</span> <span class=n>flags</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><h3 id=以文件描述符为中心的监控单元>以文件描述符为中心的监控单元</h3><p>Linux 遵循 " 一切皆文件 " 的设计哲学，<code>perf_event_open</code> 也不例外。每次调用该函数，内核都会创建一个独立的性能监控实例，并返回一个文件描述符。</p><p><strong>核心概念</strong>：</p><ul><li><strong>1 fd = 1 Event</strong>：每个文件描述符对应一个具体的监控任务，例如 " 监控 CPU 0 的指令执行数 "</li><li><strong>事件分组 (Group)</strong>：多个文件描述符可以绑定在一起形成事件组</li></ul><p><strong>分组的重要性</strong>：
+假设需要计算 " 每条指令的缓存未命中率 &ldquo;，需要同时监控 " 指令数 " 和 " 缓存未命中数 &ldquo;。将它们放入同一事件组可以确保：</p><ol><li>两个事件<strong>同时开始、同时结束</strong>计数</li><li>硬件计数器同步采样，保证计算比例的准确性</li><li>减少系统调用开销</li></ol><h3 id=事件状态控制ioctl-与-prctl>事件状态控制：ioctl 与 prctl</h3><p>创建事件后，可以通过以下方式控制其运行状态：</p><ul><li><strong>ioctl (Input/Output Control)</strong>：针对单个文件描述符的操作<ul><li><code>ioctl(fd, PERF_EVENT_IOC_ENABLE)</code>：启用事件监控</li><li><code>ioctl(fd, PERF_EVENT_IOC_DISABLE)</code>：暂停事件监控</li></ul></li><li><strong>prctl (Process Control)</strong>：针对当前进程所有事件的批量操作<ul><li>适用于管理多个监控事件的场景，避免频繁的 <code>ioctl</code> 调用</li></ul></li></ul><p><strong>设计优势</strong>：事件被禁用时，计数器暂停但数据保留。这种设计允许在程序特定阶段（如关键算法执行期间）精确开启监控，实现细粒度的性能分析。</p><h2 id=两种工作模式计数-vs-采样>两种工作模式：计数 vs 采样</h2><p><code>perf_event</code> 支持两种基本工作模式，满足不同的性能分析需求：</p><h3 id=计数模式-counting-mode>计数模式 (Counting Mode)</h3><p>内核维护一个简单的计数器（通常是 <code>u64</code> 类型整数）。计数事件的结果通过 <code>read</code> 系统调用收集。</p><p><strong>特点</strong>：</p><ul><li>低开销：仅维护计数器，不记录详细上下文</li><li>结果简单：返回事件发生的总次数</li><li><strong>应用场景</strong>：基准测试、性能统计<ul><li>例如：&rdquo; 这段代码执行消耗了多少 CPU 周期 "</li><li>" 函数调用发生了多少次缓存未命中 "</li></ul></li></ul><h3 id=采样模式-sampling-mode>采样模式 (Sampling Mode)</h3><p>设置采样阈值（如每 1000 次缓存未命中采样一次）。当事件计数器溢出时，内核会捕获当前的执行上下文（包括指令指针、进程 ID、调用栈等）。</p><p><strong>工作原理</strong>：</p><ol><li>内核分配环形缓冲区用于存储采样数据</li><li>采样数据通过内存映射 (<code>mmap</code>) 暴露给用户空间</li><li>用户程序从缓冲区 " 消费 " 采样数据</li></ol><p><strong>优势</strong>：</p><ul><li>记录详细的执行上下文信息</li><li>支持调用栈回溯</li><li><strong>应用场景</strong>：性能热点分析、火焰图生成、函数调用频率统计</li></ul><h2 id=结合-ebpf-实现-profiling>结合 eBPF 实现 profiling</h2><p>传统 <code>perf</code> 工具虽然功能强大，但在某些场景下存在局限性。eBPF 提供了更灵活、更低开销的性能监控方案。通过将 eBPF 程序挂载到 <code>perf_event</code> 上，我们可以在内核空间直接处理性能事件，实现高效的调用栈采集。</p><p><strong>核心思路</strong>：</p><ol><li>利用 <code>perf_event</code> 触发采样事件</li><li>eBPF 程序在内核中捕获事件并采集调用栈信息</li><li>通过 Ring Buffer 高效传输数据到用户空间</li><li>用户空间程序解析并展示结果</li></ol><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span><span class=lnt>34
+</span><span class=lnt>35
+</span><span class=lnt>36
+</span><span class=lnt>37
+</span><span class=lnt>38
+</span><span class=lnt>39
+</span><span class=lnt>40
+</span><span class=lnt>41
+</span><span class=lnt>42
+</span><span class=lnt>43
+</span><span class=lnt>44
+</span><span class=lnt>45
+</span><span class=lnt>46
+</span><span class=lnt>47
+</span><span class=lnt>48
+</span><span class=lnt>49
+</span><span class=lnt>50
+</span><span class=lnt>51
+</span><span class=lnt>52
+</span><span class=lnt>53
+</span><span class=lnt>54
+</span><span class=lnt>55
+</span><span class=lnt>56
+</span><span class=lnt>57
+</span><span class=lnt>58
+</span><span class=lnt>59
+</span><span class=lnt>60
+</span><span class=lnt>61
+</span><span class=lnt>62
+</span><span class=lnt>63
+</span><span class=lnt>64
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-c data-lang=c><span class=line><span class=cl><span class=cp>#include</span> <span class=cpf>&#34;vmlinux.h&#34;</span><span class=cp>
+</span></span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=cp>#include</span> <span class=cpf>&lt;bpf/bpf_helpers.h&gt;</span><span class=cp>
+</span></span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=kt>char</span> <span class=n>LICENSE</span><span class=p>[]</span> <span class=nf>SEC</span><span class=p>(</span><span class=s>&#34;license&#34;</span><span class=p>)</span> <span class=o>=</span> <span class=s>&#34;Dual BSD/GPL&#34;</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=cp>#ifndef TASK_COMM_LEN
+</span></span></span><span class=line><span class=cl><span class=cp>#define TASK_COMM_LEN 16
+</span></span></span><span class=line><span class=cl><span class=cp>#endif
+</span></span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=cp>#ifndef MAX_STACK_DEPTH
+</span></span></span><span class=line><span class=cl><span class=cp>#define MAX_STACK_DEPTH 128
+</span></span></span><span class=line><span class=cl><span class=cp>#endif
+</span></span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>typedef</span> <span class=n>__u64</span> <span class=kt>stack_trace_t</span><span class=p>[</span><span class=n>MAX_STACK_DEPTH</span><span class=p>];</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>struct</span> <span class=n>stack_trace_event</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=n>__u32</span> <span class=n>pid</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=n>__u32</span> <span class=n>cpu_id</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=n>__u64</span> <span class=n>timestamp</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=kt>char</span> <span class=n>comm</span><span class=p>[</span><span class=n>TASK_COMM_LEN</span><span class=p>];</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=n>__s32</span> <span class=n>kstack_sz</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=n>__s32</span> <span class=n>ustack_sz</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=kt>stack_trace_t</span> <span class=n>kstack</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=kt>stack_trace_t</span> <span class=n>ustack</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>};</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>struct</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=nf>__uint</span><span class=p>(</span><span class=n>type</span><span class=p>,</span> <span class=n>BPF_MAP_TYPE_RINGBUF</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=nf>__uint</span><span class=p>(</span><span class=n>max_entries</span><span class=p>,</span> <span class=mi>256</span> <span class=o>*</span> <span class=mi>1024</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=p>}</span> <span class=n>events</span> <span class=nf>SEC</span><span class=p>(</span><span class=s>&#34;.maps&#34;</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=nf>SEC</span><span class=p>(</span><span class=s>&#34;perf_event&#34;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=kt>int</span> <span class=nf>profile</span><span class=p>(</span><span class=kt>void</span><span class=o>*</span> <span class=n>ctx</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=k>struct</span> <span class=n>stack_trace_event</span><span class=o>*</span> <span class=n>event</span> <span class=o>=</span>
+</span></span><span class=line><span class=cl>        <span class=nf>bpf_ringbuf_reserve</span><span class=p>(</span><span class=o>&amp;</span><span class=n>events</span><span class=p>,</span> <span class=k>sizeof</span><span class=p>(</span><span class=k>struct</span> <span class=n>stack_trace_event</span><span class=p>),</span> <span class=mi>0</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=p>(</span><span class=o>!</span><span class=n>event</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=mi>1</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=kt>int</span> <span class=n>pid</span> <span class=o>=</span> <span class=nf>bpf_get_current_pid_tgid</span><span class=p>()</span> <span class=o>&gt;&gt;</span> <span class=mi>32</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=kt>int</span> <span class=n>cpu_id</span> <span class=o>=</span> <span class=nf>bpf_get_smp_processor_id</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=n>event</span><span class=o>-&gt;</span><span class=n>pid</span> <span class=o>=</span> <span class=n>pid</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=n>event</span><span class=o>-&gt;</span><span class=n>cpu_id</span> <span class=o>=</span> <span class=n>cpu_id</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=n>event</span><span class=o>-&gt;</span><span class=n>timestamp</span> <span class=o>=</span> <span class=nf>bpf_ktime_get_ns</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=c1>// 获取当前进程名
+</span></span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=p>(</span><span class=nf>bpf_get_current_comm</span><span class=p>(</span><span class=n>event</span><span class=o>-&gt;</span><span class=n>comm</span><span class=p>,</span> <span class=k>sizeof</span><span class=p>(</span><span class=n>event</span><span class=o>-&gt;</span><span class=n>comm</span><span class=p>)))</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=n>event</span><span class=o>-&gt;</span><span class=n>comm</span><span class=p>[</span><span class=mi>0</span><span class=p>]</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=c1>// 获取内核栈、用户栈信息
+</span></span></span><span class=line><span class=cl>    <span class=n>event</span><span class=o>-&gt;</span><span class=n>kstack_sz</span> <span class=o>=</span>
+</span></span><span class=line><span class=cl>        <span class=nf>bpf_get_stack</span><span class=p>(</span><span class=n>ctx</span><span class=p>,</span> <span class=n>event</span><span class=o>-&gt;</span><span class=n>kstack</span><span class=p>,</span> <span class=k>sizeof</span><span class=p>(</span><span class=n>event</span><span class=o>-&gt;</span><span class=n>kstack</span><span class=p>),</span> <span class=mi>0</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=n>event</span><span class=o>-&gt;</span><span class=n>ustack_sz</span> <span class=o>=</span> <span class=nf>bpf_get_stack</span><span class=p>(</span>
+</span></span><span class=line><span class=cl>        <span class=n>ctx</span><span class=p>,</span> <span class=n>event</span><span class=o>-&gt;</span><span class=n>ustack</span><span class=p>,</span> <span class=k>sizeof</span><span class=p>(</span><span class=n>event</span><span class=o>-&gt;</span><span class=n>ustack</span><span class=p>),</span> <span class=n>BPF_F_USER_STACK</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=nf>bpf_ringbuf_submit</span><span class=p>(</span><span class=n>event</span><span class=p>,</span> <span class=mi>0</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p><strong>eBPF 程序执行流程</strong>：</p><ol><li>程序挂载到 <code>perf_event</code>，随性能计数器（CPU 周期、指令数等）或定时器触发</li><li>每次触发时，eBPF 程序在内核空间执行一次</li><li>采集关键性能数据并通过 Ring Buffer 传输到用户空间</li></ol><p><strong>采集的关键信息</strong>：</p><ol><li><strong>进程标识</strong>：当前运行进程的 PID</li><li><strong>CPU 信息</strong>：执行任务的 CPU 核心编号</li><li><strong>时间戳</strong>：事件发生的精确时间（纳秒级）</li><li><strong>进程名</strong>：可执行文件名称</li><li><strong>栈回溯</strong>：内核栈和用户栈的完整调用链</li></ol><p><strong>数据结构设计</strong>：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-c data-lang=c><span class=line><span class=cl><span class=k>struct</span> <span class=n>stack_trace_event</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=n>__u32</span> <span class=n>pid</span><span class=p>;</span>           <span class=c1>// 进程 ID
+</span></span></span><span class=line><span class=cl>    <span class=n>__u32</span> <span class=n>cpu_id</span><span class=p>;</span>        <span class=c1>// CPU 核心编号
+</span></span></span><span class=line><span class=cl>    <span class=n>__u64</span> <span class=n>timestamp</span><span class=p>;</span>     <span class=c1>// 时间戳（纳秒）
+</span></span></span><span class=line><span class=cl>    <span class=kt>char</span> <span class=n>comm</span><span class=p>[</span><span class=n>TASK_COMM_LEN</span><span class=p>];</span>  <span class=c1>// 进程名
+</span></span></span><span class=line><span class=cl>    <span class=n>__s32</span> <span class=n>kstack_sz</span><span class=p>;</span>     <span class=c1>// 内核栈大小
+</span></span></span><span class=line><span class=cl>    <span class=n>__s32</span> <span class=n>ustack_sz</span><span class=p>;</span>     <span class=c1>// 用户栈大小
+</span></span></span><span class=line><span class=cl>    <span class=kt>stack_trace_t</span> <span class=n>kstack</span><span class=p>;</span> <span class=c1>// 内核栈地址数组
+</span></span></span><span class=line><span class=cl>    <span class=kt>stack_trace_t</span> <span class=n>ustack</span><span class=p>;</span> <span class=c1>// 用户栈地址数组
+</span></span></span><span class=line><span class=cl><span class=p>};</span>
+</span></span></code></pre></td></tr></table></div></div><p><strong>应用价值</strong>：
+采集的数据经过处理后，可以生成 <strong>火焰图 (Flame Graphs)</strong>，直观展示：</p><ol><li><strong>CPU 消耗分布</strong>：哪个进程/函数占用最多 CPU 时间</li><li><strong>调用链分析</strong>：热点函数的完整调用路径</li><li><strong>内核/用户态比例</strong>：系统调用与业务逻辑的时间分配</li><li><strong>性能瓶颈定位</strong>：快速识别性能热点和优化机会</li></ol><h2 id=解析采集的栈回溯信息>解析采集的栈回溯信息</h2><h3 id=api-设计>API 设计</h3><p>定义内核返回的 event 结构体：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=cl><span class=k>struct</span> <span class=nc>StacktraceEvent</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=kt>uint32_t</span> <span class=n>pid</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=kt>uint32_t</span> <span class=n>cpu_id</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=kt>uint64_t</span> <span class=n>timestamp</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=kt>char</span> <span class=n>comm</span><span class=p>[</span><span class=n>TASK_COMM_LEN</span><span class=p>];</span>
+</span></span><span class=line><span class=cl>    <span class=kt>int32_t</span> <span class=n>kstack_size</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=kt>int32_t</span> <span class=n>ustack_size</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=kt>uint64_t</span> <span class=n>kstack</span><span class=p>[</span><span class=n>MAX_STACK_DEPTH</span><span class=p>];</span>
+</span></span><span class=line><span class=cl>    <span class=kt>uint64_t</span> <span class=n>ustack</span><span class=p>[</span><span class=n>MAX_STACK_DEPTH</span><span class=p>];</span>
+</span></span><span class=line><span class=cl><span class=p>};</span>
+</span></span></code></pre></td></tr></table></div></div><p>定义事件处理器：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=cl><span class=k>enum</span> <span class=k>class</span> <span class=nc>OutputFormat</span> <span class=o>:</span> <span class=kt>uint8_t</span> <span class=p>{</span> <span class=n>Standard</span><span class=p>,</span> <span class=n>FoldExtend</span> <span class=p>};</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>class</span> <span class=nc>EventHandler</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl><span class=k>public</span><span class=o>:</span>
+</span></span><span class=line><span class=cl>    <span class=n>EventHandler</span><span class=p>(</span><span class=n>OutputFormat</span> <span class=n>fmt</span><span class=p>)</span> <span class=o>:</span> <span class=n>format</span><span class=p>(</span><span class=n>fmt</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=n>boot_time_ns</span> <span class=o>=</span> <span class=n>get_boot_time_ns</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=o>~</span><span class=n>EventHandler</span><span class=p>()</span> <span class=o>=</span> <span class=k>default</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>auto</span> <span class=nf>handle</span><span class=p>(</span><span class=k>const</span> <span class=kt>uint8_t</span><span class=o>*</span> <span class=n>data</span><span class=p>,</span> <span class=n>size_t</span> <span class=n>len</span><span class=p>)</span> <span class=o>-&gt;</span> <span class=kt>int</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=kt>void</span> <span class=nf>show_stack_trace</span><span class=p>(</span><span class=k>const</span> <span class=kt>uint64_t</span><span class=o>*</span> <span class=n>stack</span><span class=p>,</span> <span class=kt>uint32_t</span> <span class=n>size</span><span class=p>,</span> <span class=kt>uint32_t</span> <span class=n>pid</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>private</span><span class=o>:</span>
+</span></span><span class=line><span class=cl>    <span class=n>blaze</span><span class=o>::</span><span class=n>Symbolizer</span> <span class=n>symbolizer_</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=n>OutputFormat</span> <span class=n>format</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=kt>uint64_t</span> <span class=n>boot_time_ns</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>static</span> <span class=k>auto</span> <span class=nf>get_boot_time_ns</span><span class=p>()</span> <span class=o>-&gt;</span> <span class=kt>uint64_t</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=c1>// 符号化堆栈并返回字符串向量
+</span></span></span><span class=line><span class=cl>    <span class=k>auto</span> <span class=nf>symbolize_stack_to_vec</span><span class=p>(</span><span class=k>const</span> <span class=kt>uint64_t</span><span class=o>*</span> <span class=n>stack</span><span class=p>,</span> <span class=kt>uint32_t</span> <span class=n>stack_sz</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>                                <span class=kt>uint32_t</span> <span class=n>pid</span><span class=p>)</span> <span class=o>-&gt;</span> <span class=n>std</span><span class=o>::</span><span class=n>vector</span><span class=o>&lt;</span><span class=n>std</span><span class=o>::</span><span class=n>string</span><span class=o>&gt;</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=kt>void</span> <span class=nf>handle_standard</span><span class=p>(</span><span class=k>const</span> <span class=n>StacktraceEvent</span><span class=o>*</span> <span class=n>event</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=kt>void</span> <span class=nf>handle_fold_extend</span><span class=p>(</span><span class=k>const</span> <span class=n>StacktraceEvent</span><span class=o>*</span> <span class=n>event</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=p>};</span>
+</span></span></code></pre></td></tr></table></div></div><h3 id=符号化解析将地址转换为函数名>符号化解析：将地址转换为函数名</h3><p>eBPF 采集的调用栈信息是内存地址数组，需要转换为可读的函数名和源代码位置。这里使用 <code>blazesym</code> 库进行符号化解析，并封装为易用的 C++ 接口。</p><p><strong>符号化的重要性</strong>：</p><ul><li>原始地址（如 <code>0xffffffff81000000</code>）对人类不友好</li><li>需要转换为函数名（如 <code>do_syscall_64</code>）和源代码位置</li><li>支持内核符号和用户空间符号的差异化处理</li></ul><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span><span class=lnt>34
+</span><span class=lnt>35
+</span><span class=lnt>36
+</span><span class=lnt>37
+</span><span class=lnt>38
+</span><span class=lnt>39
+</span><span class=lnt>40
+</span><span class=lnt>41
+</span><span class=lnt>42
+</span><span class=lnt>43
+</span><span class=lnt>44
+</span><span class=lnt>45
+</span><span class=lnt>46
+</span><span class=lnt>47
+</span><span class=lnt>48
+</span><span class=lnt>49
+</span><span class=lnt>50
+</span><span class=lnt>51
+</span><span class=lnt>52
+</span><span class=lnt>53
+</span><span class=lnt>54
+</span><span class=lnt>55
+</span><span class=lnt>56
+</span><span class=lnt>57
+</span><span class=lnt>58
+</span><span class=lnt>59
+</span><span class=lnt>60
+</span><span class=lnt>61
+</span><span class=lnt>62
+</span><span class=lnt>63
+</span><span class=lnt>64
+</span><span class=lnt>65
+</span><span class=lnt>66
+</span><span class=lnt>67
+</span><span class=lnt>68
+</span><span class=lnt>69
+</span><span class=lnt>70
+</span><span class=lnt>71
+</span><span class=lnt>72
+</span><span class=lnt>73
+</span><span class=lnt>74
+</span><span class=lnt>75
+</span><span class=lnt>76
+</span><span class=lnt>77
+</span><span class=lnt>78
+</span><span class=lnt>79
+</span><span class=lnt>80
+</span><span class=lnt>81
+</span><span class=lnt>82
+</span><span class=lnt>83
+</span><span class=lnt>84
+</span><span class=lnt>85
+</span><span class=lnt>86
+</span><span class=lnt>87
+</span><span class=lnt>88
+</span><span class=lnt>89
+</span><span class=lnt>90
+</span><span class=lnt>91
+</span><span class=lnt>92
+</span><span class=lnt>93
+</span><span class=lnt>94
+</span><span class=lnt>95
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=cl><span class=cp>#ifndef BLAZE_H_
+</span></span></span><span class=line><span class=cl><span class=cp>#define BLAZE_H_
+</span></span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=cp>#include</span> <span class=cpf>&lt;cstdint&gt;</span><span class=cp>
+</span></span></span><span class=line><span class=cl><span class=cp>#include</span> <span class=cpf>&lt;format&gt;</span><span class=cp>
+</span></span></span><span class=line><span class=cl><span class=cp>#include</span> <span class=cpf>&lt;variant&gt;</span><span class=cp>
+</span></span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=cp>#include</span> <span class=cpf>&lt;blazesym.h&gt;</span><span class=cp>
+</span></span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=cp>#include</span> <span class=cpf>&#34;utils.h&#34;</span><span class=cp>
+</span></span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>namespace</span> <span class=n>blaze</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>struct</span> <span class=nc>CodeInfo</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=k>const</span> <span class=n>blaze_symbolize_code_info</span><span class=o>*</span> <span class=n>info_</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=n>CodeInfo</span><span class=p>(</span><span class=k>const</span> <span class=n>blaze_symbolize_code_info</span><span class=o>*</span> <span class=n>info</span><span class=p>)</span> <span class=o>:</span> <span class=n>info_</span><span class=p>(</span><span class=n>info</span><span class=p>)</span> <span class=p>{}</span>
+</span></span><span class=line><span class=cl><span class=p>};</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>struct</span> <span class=nc>Syms</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=k>const</span> <span class=n>blaze_syms</span><span class=o>*</span> <span class=n>syms_</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=n>Syms</span><span class=p>(</span><span class=k>const</span> <span class=n>blaze_syms</span><span class=o>*</span> <span class=n>syms</span><span class=p>)</span> <span class=o>:</span> <span class=n>syms_</span><span class=p>(</span><span class=n>syms</span><span class=p>)</span> <span class=p>{}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=o>~</span><span class=n>Syms</span><span class=p>()</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=k>if</span> <span class=p>(</span><span class=n>syms_</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>            <span class=n>blaze_syms_free</span><span class=p>(</span><span class=n>syms_</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>        <span class=p>}</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=c1>// 禁止拷贝，防止双重释放
+</span></span></span><span class=line><span class=cl>    <span class=n>Syms</span><span class=p>(</span><span class=k>const</span> <span class=n>Syms</span><span class=o>&amp;</span><span class=p>)</span> <span class=o>=</span> <span class=k>delete</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=k>auto</span> <span class=k>operator</span><span class=o>=</span><span class=p>(</span><span class=k>const</span> <span class=n>Syms</span><span class=o>&amp;</span><span class=p>)</span> <span class=o>-&gt;</span> <span class=n>Syms</span><span class=o>&amp;</span> <span class=o>=</span> <span class=k>delete</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>};</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1>// 符号源
+</span></span></span><span class=line><span class=cl><span class=k>using</span> <span class=n>Source</span> <span class=o>=</span>
+</span></span><span class=line><span class=cl>    <span class=n>std</span><span class=o>::</span><span class=n>variant</span><span class=o>&lt;</span><span class=n>blaze_symbolize_src_process</span><span class=p>,</span> <span class=n>blaze_symbolize_src_kernel</span><span class=o>&gt;</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>struct</span> <span class=nc>Input</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=k>const</span> <span class=kt>uint64_t</span><span class=o>*</span> <span class=n>addrs_</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=n>size_t</span> <span class=n>cnt_</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>};</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>struct</span> <span class=nc>Symbolizer</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=n>blaze_symbolizer</span><span class=o>*</span> <span class=n>symbolizer_</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=n>Symbolizer</span><span class=p>()</span> <span class=p>{</span> <span class=n>symbolizer_</span> <span class=o>=</span> <span class=n>blaze_symbolizer_new</span><span class=p>();</span> <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=o>~</span><span class=n>Symbolizer</span><span class=p>()</span> <span class=p>{</span> <span class=n>blaze_symbolizer_free</span><span class=p>(</span><span class=n>symbolizer_</span><span class=p>);</span> <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=na>[[nodiscard]]</span>
+</span></span><span class=line><span class=cl>    <span class=k>auto</span> <span class=n>symbolize</span><span class=p>(</span><span class=n>Source</span> <span class=n>src</span><span class=p>,</span> <span class=k>const</span> <span class=n>Input</span><span class=o>&amp;</span> <span class=n>input</span><span class=p>)</span> <span class=k>const</span> <span class=o>-&gt;</span> <span class=n>Result</span><span class=o>&lt;</span><span class=n>Syms</span><span class=o>&gt;</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=k>if</span> <span class=p>(</span><span class=o>!</span><span class=n>input</span><span class=p>.</span><span class=n>addrs_</span> <span class=o>||</span> <span class=n>input</span><span class=p>.</span><span class=n>cnt_</span> <span class=o>==</span> <span class=mi>0</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>            <span class=k>return</span> <span class=n>Err</span><span class=o>&lt;&gt;</span><span class=p>{</span><span class=s>&#34;Empty input addresses&#34;</span><span class=p>};</span>
+</span></span><span class=line><span class=cl>        <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=k>const</span> <span class=n>blaze_syms</span><span class=o>*</span> <span class=n>syms</span> <span class=o>=</span> <span class=k>nullptr</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=n>std</span><span class=o>::</span><span class=n>visit</span><span class=p>(</span>
+</span></span><span class=line><span class=cl>            <span class=n>Overloaded</span><span class=p>{</span>
+</span></span><span class=line><span class=cl>                <span class=p>[</span><span class=o>&amp;</span><span class=p>](</span><span class=n>blaze_symbolize_src_kernel</span><span class=o>&amp;</span> <span class=n>kern_src</span><span class=p>)</span> <span class=o>-&gt;</span> <span class=kt>void</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>                    <span class=n>syms</span> <span class=o>=</span> <span class=n>blaze_symbolize_kernel_abs_addrs</span><span class=p>(</span>
+</span></span><span class=line><span class=cl>                        <span class=n>symbolizer_</span><span class=p>,</span> <span class=o>&amp;</span><span class=n>kern_src</span><span class=p>,</span> <span class=n>input</span><span class=p>.</span><span class=n>addrs_</span><span class=p>,</span> <span class=n>input</span><span class=p>.</span><span class=n>cnt_</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>                <span class=p>},</span>
+</span></span><span class=line><span class=cl>                <span class=p>[</span><span class=o>&amp;</span><span class=p>](</span><span class=n>blaze_symbolize_src_process</span><span class=o>&amp;</span> <span class=n>proc_src</span><span class=p>)</span> <span class=o>-&gt;</span> <span class=kt>void</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>                    <span class=n>syms</span> <span class=o>=</span> <span class=n>blaze_symbolize_process_abs_addrs</span><span class=p>(</span>
+</span></span><span class=line><span class=cl>                        <span class=n>symbolizer_</span><span class=p>,</span> <span class=o>&amp;</span><span class=n>proc_src</span><span class=p>,</span> <span class=n>input</span><span class=p>.</span><span class=n>addrs_</span><span class=p>,</span> <span class=n>input</span><span class=p>.</span><span class=n>cnt_</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>                <span class=p>},</span>
+</span></span><span class=line><span class=cl>            <span class=p>},</span>
+</span></span><span class=line><span class=cl>            <span class=n>src</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=n>syms</span>
+</span></span><span class=line><span class=cl>                   <span class=o>?</span> <span class=n>Result</span><span class=o>&lt;</span><span class=n>Syms</span><span class=o>&gt;</span><span class=p>{</span><span class=n>syms</span><span class=p>}</span>
+</span></span><span class=line><span class=cl>                   <span class=o>:</span> <span class=n>Err</span><span class=o>&lt;&gt;</span><span class=p>{</span><span class=n>std</span><span class=o>::</span><span class=n>format</span><span class=p>(</span><span class=s>&#34;Symbolization failed, errno is: {}&#34;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>                                       <span class=k>static_cast</span><span class=o>&lt;</span><span class=kt>int16_t</span><span class=o>&gt;</span><span class=p>(</span><span class=n>blaze_err_last</span><span class=p>()))};</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl><span class=p>};</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=kr>inline</span> <span class=k>auto</span> <span class=nf>get_symbolize_source</span><span class=p>(</span><span class=kt>uint32_t</span> <span class=n>pid</span><span class=p>)</span> <span class=o>-&gt;</span> <span class=n>blaze</span><span class=o>::</span><span class=n>Source</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=p>(</span><span class=n>pid</span> <span class=o>==</span> <span class=mi>0</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=n>blaze_symbolize_src_kernel</span> <span class=n>src</span><span class=p>{</span>
+</span></span><span class=line><span class=cl>            <span class=p>.</span><span class=n>type_size</span> <span class=o>=</span> <span class=k>sizeof</span><span class=p>(</span><span class=n>src</span><span class=p>),</span>
+</span></span><span class=line><span class=cl>        <span class=p>};</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=n>blaze</span><span class=o>::</span><span class=n>Source</span><span class=p>{</span><span class=n>src</span><span class=p>};</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span> <span class=k>else</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=n>blaze_symbolize_src_process</span> <span class=n>src</span><span class=p>{</span>
+</span></span><span class=line><span class=cl>            <span class=p>.</span><span class=n>type_size</span> <span class=o>=</span> <span class=k>sizeof</span><span class=p>(</span><span class=n>src</span><span class=p>),</span>
+</span></span><span class=line><span class=cl>            <span class=p>.</span><span class=n>pid</span> <span class=o>=</span> <span class=n>pid</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>        <span class=p>};</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=n>blaze</span><span class=o>::</span><span class=n>Source</span><span class=p>{</span><span class=n>src</span><span class=p>};</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=p>}</span>  <span class=c1>// namespace blaze
+</span></span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=cp>#endif </span><span class=cm>/* BLAZE_H_ */</span><span class=cp>
+</span></span></span></code></pre></td></tr></table></div></div><p>其中的 <code>Result</code>、<code>Err</code>、<code>Overloaded</code> 分别借鉴了 Rust 中的 <code>Result</code>、<code>Err</code> 和 <code>match</code>。</p><p><strong><code>Symbolizer::symbolize</code> 用于把绝对地址数组符号化（转成符号/调试信息）</strong>：</p><ul><li>如果 <code>input.addrs_</code> 为 null 或 <code>input.cnt_ == 0</code>，返回错误 <code>Err&lt;>{"Empty input addresses"}</code>。</li><li>根据参数 <code>src</code>（<code>Source</code> 是 <code>blaze_symbolize_src_process</code> 或 <code>blaze_symbolize_src_kernel</code> 的 <code>std::variant</code>）调用不同的符号化接口：<ul><li>内核源时调用 <code>blaze_symbolize_kernel_abs_addrs(symbolizer_, &amp;kern_src, input.addrs_, input.cnt_)</code>；</li><li>进程源时调用 <code>blaze_symbolize_process_abs_addrs(symbolizer_, &amp;proc_src, input.addrs_, input.cnt_)</code>。
+使用 <code>std::visit</code> + <code>Overloaded</code> 选择分支。</li></ul></li><li>结果处理：把返回的 <code>const blaze_syms* syms</code> 封装进 <code>Syms</code>（RAII，析构时会调用 <code>blaze_syms_free</code>）。若 <code>syms</code> 非空则返回 <code>Result&lt;Syms>{syms}</code>；否则返回带有 <code>blaze_err_last()</code>（转换为整数）的错误信息。</li></ul><h3 id=事件处理>事件处理</h3><p><code>EventHandler::handle</code> 接收的是一块“原始二进制缓冲区”（raw bytes）而不是已经解析好的结构体，所以用 <code>const uint8_t* data, size_t len</code> 更通用、安全，并且允许在用户态从 ring/payload、socket 或 perf buffer 等来源直接读取数据并检查长度后再解析（在这个项目中，数据从 ringbuf 中获取）。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=cl><span class=k>auto</span> <span class=n>EventHandler</span><span class=o>::</span><span class=n>handle</span><span class=p>(</span><span class=k>const</span> <span class=kt>uint8_t</span><span class=o>*</span> <span class=n>data</span><span class=p>,</span> <span class=n>size_t</span> <span class=n>len</span><span class=p>)</span> <span class=o>-&gt;</span> <span class=kt>int</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=p>(</span><span class=n>len</span> <span class=o>!=</span> <span class=k>sizeof</span><span class=p>(</span><span class=n>StacktraceEvent</span><span class=p>))</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=n>std</span><span class=o>::</span><span class=n>println</span><span class=p>(</span><span class=s>&#34;Data length mismatch: expected {}, got {}&#34;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>                     <span class=k>sizeof</span><span class=p>(</span><span class=n>StacktraceEvent</span><span class=p>),</span>
+</span></span><span class=line><span class=cl>                     <span class=n>len</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=mi>1</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>const</span> <span class=k>auto</span><span class=o>*</span> <span class=k>const</span> <span class=n>event</span> <span class=o>=</span> <span class=k>reinterpret_cast</span><span class=o>&lt;</span><span class=k>const</span> <span class=n>StacktraceEvent</span><span class=o>*&gt;</span><span class=p>(</span><span class=n>data</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=p>(</span><span class=n>event</span><span class=o>-&gt;</span><span class=n>kstack_size</span> <span class=o>&lt;=</span> <span class=mi>0</span> <span class=o>&amp;&amp;</span> <span class=n>event</span><span class=o>-&gt;</span><span class=n>ustack_size</span> <span class=o>&lt;=</span> <span class=mi>0</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=mi>1</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=p>(</span><span class=n>format</span> <span class=o>==</span> <span class=n>OutputFormat</span><span class=o>::</span><span class=n>Standard</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=n>handle_standard</span><span class=p>(</span><span class=n>event</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span> <span class=k>else</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=n>handle_fold_extend</span><span class=p>(</span><span class=n>event</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><h3 id=标准输出格式可读的逐帧展示>标准输出格式：可读的逐帧展示</h3><p><code>handle_standard</code> 方法生成人类可读的调用栈输出，包含完整的时间戳、进程信息和源代码位置。这种格式适合直接查看和分析：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span><span class=lnt>34
+</span><span class=lnt>35
+</span><span class=lnt>36
+</span><span class=lnt>37
+</span><span class=lnt>38
+</span><span class=lnt>39
+</span><span class=lnt>40
+</span><span class=lnt>41
+</span><span class=lnt>42
+</span><span class=lnt>43
+</span><span class=lnt>44
+</span><span class=lnt>45
+</span><span class=lnt>46
+</span><span class=lnt>47
+</span><span class=lnt>48
+</span><span class=lnt>49
+</span><span class=lnt>50
+</span><span class=lnt>51
+</span><span class=lnt>52
+</span><span class=lnt>53
+</span><span class=lnt>54
+</span><span class=lnt>55
+</span><span class=lnt>56
+</span><span class=lnt>57
+</span><span class=lnt>58
+</span><span class=lnt>59
+</span><span class=lnt>60
+</span><span class=lnt>61
+</span><span class=lnt>62
+</span><span class=lnt>63
+</span><span class=lnt>64
+</span><span class=lnt>65
+</span><span class=lnt>66
+</span><span class=lnt>67
+</span><span class=lnt>68
+</span><span class=lnt>69
+</span><span class=lnt>70
+</span><span class=lnt>71
+</span><span class=lnt>72
+</span><span class=lnt>73
+</span><span class=lnt>74
+</span><span class=lnt>75
+</span><span class=lnt>76
+</span><span class=lnt>77
+</span><span class=lnt>78
+</span><span class=lnt>79
+</span><span class=lnt>80
+</span><span class=lnt>81
+</span><span class=lnt>82
+</span><span class=lnt>83
+</span><span class=lnt>84
+</span><span class=lnt>85
+</span><span class=lnt>86
+</span><span class=lnt>87
+</span><span class=lnt>88
+</span><span class=lnt>89
+</span><span class=lnt>90
+</span><span class=lnt>91
+</span><span class=lnt>92
+</span><span class=lnt>93
+</span><span class=lnt>94
+</span><span class=lnt>95
+</span><span class=lnt>96
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=cl><span class=k>static</span> <span class=kt>void</span> <span class=nf>print_frame</span><span class=p>(</span><span class=k>const</span> <span class=kt>char</span><span class=o>*</span> <span class=n>name</span><span class=p>,</span> <span class=n>Option</span><span class=o>&lt;</span><span class=n>AddrInfo</span><span class=o>&gt;</span> <span class=n>addr_info</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>                        <span class=k>const</span> <span class=n>blaze_symbolize_code_info</span><span class=o>*</span> <span class=n>code_info</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=n>std</span><span class=o>::</span><span class=n>string</span> <span class=n>code_str</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=p>(</span><span class=n>code_info</span> <span class=o>!=</span> <span class=k>nullptr</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=c1>// path
+</span></span></span><span class=line><span class=cl>        <span class=k>if</span> <span class=p>((</span><span class=n>code_info</span><span class=o>-&gt;</span><span class=n>dir</span> <span class=o>!=</span> <span class=k>nullptr</span><span class=p>)</span> <span class=o>&amp;&amp;</span> <span class=p>(</span><span class=n>code_info</span><span class=o>-&gt;</span><span class=n>file</span> <span class=o>!=</span> <span class=k>nullptr</span><span class=p>))</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>            <span class=n>code_str</span> <span class=o>=</span> <span class=n>std</span><span class=o>::</span><span class=n>format</span><span class=p>(</span><span class=s>&#34; {}/{})&#34;</span><span class=p>,</span> <span class=n>code_info</span><span class=o>-&gt;</span><span class=n>dir</span><span class=p>,</span> <span class=n>code_info</span><span class=o>-&gt;</span><span class=n>file</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>        <span class=p>}</span> <span class=k>else</span> <span class=k>if</span> <span class=p>(</span><span class=n>code_info</span><span class=o>-&gt;</span><span class=n>file</span> <span class=o>!=</span> <span class=k>nullptr</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>            <span class=n>code_str</span> <span class=o>=</span> <span class=n>code_info</span><span class=o>-&gt;</span><span class=n>file</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=c1>// line and column
+</span></span></span><span class=line><span class=cl>        <span class=k>if</span> <span class=p>(</span><span class=n>code_info</span><span class=o>-&gt;</span><span class=n>line</span> <span class=o>&gt;</span> <span class=mi>0</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>            <span class=n>code_str</span> <span class=o>+=</span> <span class=n>std</span><span class=o>::</span><span class=n>format</span><span class=p>(</span><span class=s>&#34;:{}&#34;</span><span class=p>,</span> <span class=n>code_info</span><span class=o>-&gt;</span><span class=n>line</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>            <span class=k>if</span> <span class=p>(</span><span class=n>code_info</span><span class=o>-&gt;</span><span class=n>column</span> <span class=o>&gt;</span> <span class=mi>0</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>                <span class=n>code_str</span> <span class=o>+=</span> <span class=n>std</span><span class=o>::</span><span class=n>format</span><span class=p>(</span><span class=s>&#34;:{}&#34;</span><span class=p>,</span> <span class=n>code_info</span><span class=o>-&gt;</span><span class=n>column</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>            <span class=p>}</span>
+</span></span><span class=line><span class=cl>        <span class=p>}</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=p>(</span><span class=n>addr_info</span><span class=p>.</span><span class=n>has_value</span><span class=p>())</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=k>auto</span> <span class=p>[</span><span class=n>input_addr</span><span class=p>,</span> <span class=n>addr</span><span class=p>,</span> <span class=n>offset</span><span class=p>]</span> <span class=o>=</span> <span class=o>*</span><span class=n>addr_info</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=n>std</span><span class=o>::</span><span class=n>println</span><span class=p>(</span><span class=s>&#34;0x{:0&gt;{}}: {} @ {:#x} + {:#x}{}&#34;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>                     <span class=n>input_addr</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>                     <span class=n>ADDR_WIDTH</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>                     <span class=p>(</span><span class=n>name</span> <span class=o>!=</span> <span class=k>nullptr</span><span class=p>)</span> <span class=o>?</span> <span class=nl>name</span> <span class=p>:</span> <span class=s>&#34;&lt;unknown&gt;&#34;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>                     <span class=n>addr</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>                     <span class=n>offset</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>                     <span class=n>code_str</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span> <span class=k>else</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=n>std</span><span class=o>::</span><span class=n>println</span><span class=p>(</span><span class=s>&#34;{:&gt;{}} {}{} [inlined]&#34;</span><span class=p>,</span> <span class=s>&#34;&#34;</span><span class=p>,</span> <span class=n>ADDR_WIDTH</span><span class=p>,</span> <span class=n>name</span><span class=p>,</span> <span class=n>code_str</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=kt>void</span> <span class=n>EventHandler</span><span class=o>::</span><span class=n>show_stack_trace</span><span class=p>(</span><span class=k>const</span> <span class=kt>uint64_t</span><span class=o>*</span> <span class=n>stack</span><span class=p>,</span> <span class=kt>uint32_t</span> <span class=n>size</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>                                    <span class=kt>uint32_t</span> <span class=n>pid</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=n>blaze</span><span class=o>::</span><span class=n>Source</span> <span class=n>src</span> <span class=o>=</span> <span class=n>blaze</span><span class=o>::</span><span class=n>get_symbolize_source</span><span class=p>(</span><span class=n>pid</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=n>size_t</span> <span class=n>count</span> <span class=o>=</span> <span class=k>static_cast</span><span class=o>&lt;</span><span class=n>size_t</span><span class=o>&gt;</span><span class=p>(</span><span class=n>size</span><span class=p>)</span> <span class=o>/</span> <span class=k>sizeof</span><span class=p>(</span><span class=kt>uint64_t</span><span class=p>);</span>  <span class=c1>// 栈帧数量
+</span></span></span><span class=line><span class=cl>    <span class=k>auto</span> <span class=n>result</span> <span class=o>=</span> <span class=n>symbolizer_</span><span class=p>.</span><span class=n>symbolize</span><span class=p>(</span>
+</span></span><span class=line><span class=cl>        <span class=n>src</span><span class=p>,</span> <span class=n>blaze</span><span class=o>::</span><span class=n>Input</span><span class=p>{.</span><span class=n>addrs_</span> <span class=o>=</span> <span class=n>stack</span><span class=p>,</span> <span class=p>.</span><span class=n>cnt_</span> <span class=o>=</span> <span class=n>count</span><span class=p>});</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=p>(</span><span class=o>!</span><span class=n>result</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=n>std</span><span class=o>::</span><span class=n>println</span><span class=p>(</span><span class=n>stderr</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>                     <span class=s>&#34;  Failed to symbolize stack trace. err: {}&#34;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>                     <span class=n>result</span><span class=p>.</span><span class=n>error</span><span class=p>());</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>const</span> <span class=k>auto</span><span class=o>*</span> <span class=n>syms</span> <span class=o>=</span> <span class=n>result</span><span class=o>-&gt;</span><span class=n>syms_</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=k>for</span> <span class=p>(</span><span class=n>size_t</span> <span class=n>i</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span> <span class=n>i</span> <span class=o>&lt;</span> <span class=n>count</span><span class=p>;</span> <span class=o>++</span><span class=n>i</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=k>if</span> <span class=p>(</span><span class=n>i</span> <span class=o>&lt;</span> <span class=n>syms</span><span class=o>-&gt;</span><span class=n>cnt</span> <span class=o>&amp;&amp;</span> <span class=p>(</span><span class=n>syms</span><span class=o>-&gt;</span><span class=n>syms</span><span class=p>[</span><span class=n>i</span><span class=p>].</span><span class=n>name</span> <span class=o>!=</span> <span class=k>nullptr</span><span class=p>))</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>            <span class=n>print_frame</span><span class=p>(</span>
+</span></span><span class=line><span class=cl>                <span class=n>syms</span><span class=o>-&gt;</span><span class=n>syms</span><span class=p>[</span><span class=n>i</span><span class=p>].</span><span class=n>name</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>                <span class=n>Option</span><span class=o>&lt;</span><span class=n>AddrInfo</span><span class=o>&gt;</span><span class=p>(</span><span class=n>std</span><span class=o>::</span><span class=n>make_tuple</span><span class=p>(</span>
+</span></span><span class=line><span class=cl>                    <span class=n>stack</span><span class=p>[</span><span class=n>i</span><span class=p>],</span> <span class=n>syms</span><span class=o>-&gt;</span><span class=n>syms</span><span class=p>[</span><span class=n>i</span><span class=p>].</span><span class=n>addr</span><span class=p>,</span> <span class=n>syms</span><span class=o>-&gt;</span><span class=n>syms</span><span class=p>[</span><span class=n>i</span><span class=p>].</span><span class=n>offset</span><span class=p>)),</span>
+</span></span><span class=line><span class=cl>                <span class=o>&amp;</span><span class=n>syms</span><span class=o>-&gt;</span><span class=n>syms</span><span class=p>[</span><span class=n>i</span><span class=p>].</span><span class=n>code_info</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>            <span class=c1>// 打印内联函数信息
+</span></span></span><span class=line><span class=cl>            <span class=k>for</span> <span class=p>(</span><span class=n>size_t</span> <span class=n>j</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span> <span class=n>j</span> <span class=o>&lt;</span> <span class=n>syms</span><span class=o>-&gt;</span><span class=n>syms</span><span class=p>[</span><span class=n>i</span><span class=p>].</span><span class=n>inlined_cnt</span><span class=p>;</span> <span class=o>++</span><span class=n>j</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>                <span class=n>print_frame</span><span class=p>(</span><span class=n>syms</span><span class=o>-&gt;</span><span class=n>syms</span><span class=p>[</span><span class=n>i</span><span class=p>].</span><span class=n>inlined</span><span class=p>[</span><span class=n>j</span><span class=p>].</span><span class=n>name</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>                            <span class=n>std</span><span class=o>::</span><span class=n>nullopt</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>                            <span class=o>&amp;</span><span class=n>syms</span><span class=o>-&gt;</span><span class=n>syms</span><span class=p>[</span><span class=n>i</span><span class=p>].</span><span class=n>inlined</span><span class=p>[</span><span class=n>j</span><span class=p>].</span><span class=n>code_info</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>            <span class=p>}</span>
+</span></span><span class=line><span class=cl>        <span class=p>}</span> <span class=k>else</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>            <span class=n>std</span><span class=o>::</span><span class=n>println</span><span class=p>(</span><span class=s>&#34;{:&gt;0{}}: &lt;no-symbol&gt;&#34;</span><span class=p>,</span> <span class=n>stack</span><span class=p>[</span><span class=n>i</span><span class=p>],</span> <span class=n>ADDR_WIDTH</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>        <span class=p>}</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=kt>void</span> <span class=n>EventHandler</span><span class=o>::</span><span class=n>handle_standard</span><span class=p>(</span><span class=k>const</span> <span class=n>StacktraceEvent</span><span class=o>*</span> <span class=n>event</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=kt>uint64_t</span> <span class=n>unix_ns</span> <span class=o>=</span> <span class=n>event</span><span class=o>-&gt;</span><span class=n>timestamp</span> <span class=o>+</span> <span class=n>boot_time_ns</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=n>std</span><span class=o>::</span><span class=n>println</span><span class=p>(</span><span class=s>&#34;[{}.{:09} COMM: {} (pid={}) @ CPU {}]&#34;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>                 <span class=n>unix_ns</span> <span class=o>/</span> <span class=mi>1&#39;000&#39;000&#39;000</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>                 <span class=n>unix_ns</span> <span class=o>%</span> <span class=mi>1&#39;000&#39;000&#39;000</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>                 <span class=n>event</span><span class=o>-&gt;</span><span class=n>comm</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>                 <span class=n>event</span><span class=o>-&gt;</span><span class=n>pid</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>                 <span class=n>event</span><span class=o>-&gt;</span><span class=n>cpu_id</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=c1>// 打印内核栈
+</span></span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=p>(</span><span class=n>event</span><span class=o>-&gt;</span><span class=n>kstack_size</span> <span class=o>&gt;</span> <span class=mi>0</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=n>std</span><span class=o>::</span><span class=n>println</span><span class=p>(</span><span class=s>&#34;Kernel:&#34;</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>        <span class=n>show_stack_trace</span><span class=p>(</span><span class=n>event</span><span class=o>-&gt;</span><span class=n>kstack</span><span class=p>,</span> <span class=n>event</span><span class=o>-&gt;</span><span class=n>kstack_size</span><span class=p>,</span> <span class=mi>0</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span> <span class=k>else</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=n>std</span><span class=o>::</span><span class=n>println</span><span class=p>(</span><span class=s>&#34;Kernel: &lt;no stack&gt;&#34;</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=c1>// 打印用户栈
+</span></span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=p>(</span><span class=n>event</span><span class=o>-&gt;</span><span class=n>ustack_size</span> <span class=o>&gt;</span> <span class=mi>0</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=n>std</span><span class=o>::</span><span class=n>println</span><span class=p>(</span><span class=s>&#34;Userspace:&#34;</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>        <span class=n>show_stack_trace</span><span class=p>(</span><span class=n>event</span><span class=o>-&gt;</span><span class=n>ustack</span><span class=p>,</span> <span class=n>event</span><span class=o>-&gt;</span><span class=n>ustack_size</span><span class=p>,</span> <span class=n>event</span><span class=o>-&gt;</span><span class=n>pid</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span> <span class=k>else</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=n>std</span><span class=o>::</span><span class=n>println</span><span class=p>(</span><span class=s>&#34;Userspace: &lt;no stack&gt;&#34;</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=n>std</span><span class=o>::</span><span class=n>println</span><span class=p>();</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><h3 id=火焰图格式机器可读的数据输出>火焰图格式：机器可读的数据输出</h3><p><code>handle_fold_extend</code> 生成折叠行（<code>comm-pid;frame;... 1</code>），用于生成火焰图（FlameGraph）。<code>handle_fold_extend</code> 对每个栈结果做 <code>reverse</code>，把栈从“根”（程序入口）到“叶”（当前帧）排列，符合火焰图期望的父到子顺序。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span><span class=lnt>34
+</span><span class=lnt>35
+</span><span class=lnt>36
+</span><span class=lnt>37
+</span><span class=lnt>38
+</span><span class=lnt>39
+</span><span class=lnt>40
+</span><span class=lnt>41
+</span><span class=lnt>42
+</span><span class=lnt>43
+</span><span class=lnt>44
+</span><span class=lnt>45
+</span><span class=lnt>46
+</span><span class=lnt>47
+</span><span class=lnt>48
+</span><span class=lnt>49
+</span><span class=lnt>50
+</span><span class=lnt>51
+</span><span class=lnt>52
+</span><span class=lnt>53
+</span><span class=lnt>54
+</span><span class=lnt>55
+</span><span class=lnt>56
+</span><span class=lnt>57
+</span><span class=lnt>58
+</span><span class=lnt>59
+</span><span class=lnt>60
+</span><span class=lnt>61
+</span><span class=lnt>62
+</span><span class=lnt>63
+</span><span class=lnt>64
+</span><span class=lnt>65
+</span><span class=lnt>66
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=cl><span class=k>auto</span> <span class=n>EventHandler</span><span class=o>::</span><span class=n>symbolize_stack_to_vec</span><span class=p>(</span><span class=k>const</span> <span class=kt>uint64_t</span><span class=o>*</span> <span class=n>stack</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>                                          <span class=kt>uint32_t</span> <span class=n>stack_sz</span><span class=p>,</span> <span class=kt>uint32_t</span> <span class=n>pid</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=o>-&gt;</span> <span class=n>std</span><span class=o>::</span><span class=n>vector</span><span class=o>&lt;</span><span class=n>std</span><span class=o>::</span><span class=n>string</span><span class=o>&gt;</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=p>(</span><span class=n>stack_sz</span> <span class=o>&lt;=</span> <span class=mi>0</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=p>{};</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=n>blaze</span><span class=o>::</span><span class=n>Source</span> <span class=n>src</span> <span class=o>=</span> <span class=n>blaze</span><span class=o>::</span><span class=n>get_symbolize_source</span><span class=p>(</span><span class=n>pid</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=n>size_t</span> <span class=n>count</span> <span class=o>=</span> <span class=n>stack_sz</span> <span class=o>/</span> <span class=k>sizeof</span><span class=p>(</span><span class=kt>uint64_t</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=k>auto</span> <span class=n>result</span> <span class=o>=</span> <span class=n>symbolizer_</span><span class=p>.</span><span class=n>symbolize</span><span class=p>(</span>
+</span></span><span class=line><span class=cl>        <span class=n>src</span><span class=p>,</span> <span class=n>blaze</span><span class=o>::</span><span class=n>Input</span><span class=p>{.</span><span class=n>addrs_</span> <span class=o>=</span> <span class=n>stack</span><span class=p>,</span> <span class=p>.</span><span class=n>cnt_</span> <span class=o>=</span> <span class=n>count</span><span class=p>});</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=p>(</span><span class=o>!</span><span class=n>result</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=p>{};</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>const</span> <span class=k>auto</span><span class=o>*</span> <span class=n>syms</span> <span class=o>=</span> <span class=n>result</span><span class=o>-&gt;</span><span class=n>syms_</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=n>std</span><span class=o>::</span><span class=n>vector</span><span class=o>&lt;</span><span class=n>std</span><span class=o>::</span><span class=n>string</span><span class=o>&gt;</span> <span class=n>vec</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=p>(</span><span class=n>syms</span> <span class=o>==</span> <span class=k>nullptr</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=k>for</span> <span class=p>(</span><span class=n>size_t</span> <span class=n>i</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span> <span class=n>i</span> <span class=o>&lt;</span> <span class=n>count</span><span class=p>;</span> <span class=o>++</span><span class=n>i</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>            <span class=n>vec</span><span class=p>.</span><span class=n>push_back</span><span class=p>(</span><span class=n>std</span><span class=o>::</span><span class=n>format</span><span class=p>(</span><span class=s>&#34;0x{:x}&#34;</span><span class=p>,</span> <span class=n>stack</span><span class=p>[</span><span class=n>i</span><span class=p>]));</span>
+</span></span><span class=line><span class=cl>        <span class=p>}</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=n>vec</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>for</span> <span class=p>(</span><span class=n>size_t</span> <span class=n>i</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span> <span class=n>i</span> <span class=o>&lt;</span> <span class=n>syms</span><span class=o>-&gt;</span><span class=n>cnt</span><span class=p>;</span> <span class=o>++</span><span class=n>i</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=k>if</span> <span class=p>(</span><span class=n>syms</span><span class=o>-&gt;</span><span class=n>syms</span><span class=p>[</span><span class=n>i</span><span class=p>].</span><span class=n>name</span> <span class=o>!=</span> <span class=k>nullptr</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>            <span class=n>vec</span><span class=p>.</span><span class=n>emplace_back</span><span class=p>(</span><span class=n>syms</span><span class=o>-&gt;</span><span class=n>syms</span><span class=p>[</span><span class=n>i</span><span class=p>].</span><span class=n>name</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>        <span class=p>}</span> <span class=k>else</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>            <span class=n>vec</span><span class=p>.</span><span class=n>push_back</span><span class=p>(</span><span class=n>std</span><span class=o>::</span><span class=n>format</span><span class=p>(</span><span class=s>&#34;0x{:x}&#34;</span><span class=p>,</span> <span class=n>stack</span><span class=p>[</span><span class=n>i</span><span class=p>]));</span>
+</span></span><span class=line><span class=cl>        <span class=p>}</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=n>vec</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=kt>void</span> <span class=n>EventHandler</span><span class=o>::</span><span class=n>handle_fold_extend</span><span class=p>(</span><span class=k>const</span> <span class=n>StacktraceEvent</span><span class=o>*</span> <span class=n>event</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=n>std</span><span class=o>::</span><span class=n>vector</span><span class=o>&lt;</span><span class=n>std</span><span class=o>::</span><span class=n>string</span><span class=o>&gt;</span> <span class=n>stack_frames</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=c1>// 为了让火焰图能够按进程聚合，将 &#34;comm-pid&#34; 作为栈底
+</span></span></span><span class=line><span class=cl>    <span class=n>stack_frames</span><span class=p>.</span><span class=n>push_back</span><span class=p>(</span><span class=n>std</span><span class=o>::</span><span class=n>format</span><span class=p>(</span><span class=s>&#34;{}-{}&#34;</span><span class=p>,</span> <span class=n>event</span><span class=o>-&gt;</span><span class=n>comm</span><span class=p>,</span> <span class=n>event</span><span class=o>-&gt;</span><span class=n>pid</span><span class=p>));</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=c1>// 处理用户态
+</span></span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=p>(</span><span class=n>event</span><span class=o>-&gt;</span><span class=n>ustack_size</span> <span class=o>&gt;</span> <span class=mi>0</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=k>auto</span> <span class=n>user_frames</span> <span class=o>=</span> <span class=n>symbolize_stack_to_vec</span><span class=p>(</span>
+</span></span><span class=line><span class=cl>            <span class=n>event</span><span class=o>-&gt;</span><span class=n>ustack</span><span class=p>,</span> <span class=n>event</span><span class=o>-&gt;</span><span class=n>ustack_size</span><span class=p>,</span> <span class=n>event</span><span class=o>-&gt;</span><span class=n>pid</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>        <span class=k>for</span> <span class=p>(</span><span class=k>const</span> <span class=k>auto</span><span class=o>&amp;</span> <span class=nl>frame</span> <span class=p>:</span> <span class=n>user_frames</span> <span class=o>|</span> <span class=n>std</span><span class=o>::</span><span class=n>views</span><span class=o>::</span><span class=n>reverse</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>            <span class=n>stack_frames</span><span class=p>.</span><span class=n>push_back</span><span class=p>(</span><span class=n>frame</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>        <span class=p>}</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=c1>// 处理内核态
+</span></span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=p>(</span><span class=n>event</span><span class=o>-&gt;</span><span class=n>kstack_size</span> <span class=o>&gt;</span> <span class=mi>0</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=k>auto</span> <span class=n>kern_frames</span> <span class=o>=</span>
+</span></span><span class=line><span class=cl>            <span class=n>symbolize_stack_to_vec</span><span class=p>(</span><span class=n>event</span><span class=o>-&gt;</span><span class=n>kstack</span><span class=p>,</span> <span class=n>event</span><span class=o>-&gt;</span><span class=n>kstack_size</span><span class=p>,</span> <span class=mi>0</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>        <span class=k>for</span> <span class=p>(</span><span class=k>const</span> <span class=k>auto</span><span class=o>&amp;</span> <span class=nl>frame</span> <span class=p>:</span> <span class=n>kern_frames</span> <span class=o>|</span> <span class=n>std</span><span class=o>::</span><span class=n>views</span><span class=o>::</span><span class=n>reverse</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>            <span class=n>stack_frames</span><span class=p>.</span><span class=n>push_back</span><span class=p>(</span><span class=n>frame</span> <span class=o>+</span> <span class=s>&#34;_[k]&#34;</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>        <span class=p>}</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>auto</span> <span class=n>temp</span> <span class=o>=</span> <span class=n>stack_frames</span> <span class=o>|</span> <span class=n>std</span><span class=o>::</span><span class=n>views</span><span class=o>::</span><span class=n>join_with</span><span class=p>(</span><span class=sc>&#39;;&#39;</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=c1>// 输出格式：stack;frames 1
+</span></span></span><span class=line><span class=cl>    <span class=c1>// FlameGraph 工具期望每行以空格和数字结尾
+</span></span></span><span class=line><span class=cl>    <span class=n>std</span><span class=o>::</span><span class=n>println</span><span class=p>(</span><span class=s>&#34;{} 1&#34;</span><span class=p>,</span> <span class=n>temp</span> <span class=o>|</span> <span class=n>std</span><span class=o>::</span><span class=n>ranges</span><span class=o>::</span><span class=n>to</span><span class=o>&lt;</span><span class=n>std</span><span class=o>::</span><span class=n>string</span><span class=o>&gt;</span><span class=p>());</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><h3 id=流程图>流程图</h3><pre class=mermaid style=visibility:hidden>flowchart TD
+  A[eBPF 程序（内核）
+    采集 stacktrace
+  ] --> B[Userspace reader
+    接收 StacktraceEvent]
+  B --> C[EventHandler::handle
+    校验 & 选择输出格式]
+  C --> D{有 ustack?}
+  C --> E{有 kstack?}
+  D -- yes --> U1["构造 blaze::Source (process)
+    构造 blaze::Input(addrs,cnt)"]
+  E -- yes --> K1["构造 blaze::Source (kernel)
+    构造 blaze::Input(addrs,cnt)"]
+  U1 --> S1["Symbolizer::symbolize
+    (std::visit -> process API)"]
+  K1 --> S2["Symbolizer::symbolize
+    (std::visit -> kernel API)"]
+  S1 --> F{symbolize 成功?}
+  S2 --> F
+  F -- yes --> G[返回 Syms（RAII）]
+  F -- no --> H["返回 Err
+    记录 blaze_err_last() -> fallback: 打印原始地址"]
+  G --> P1[show_stack_trace
+    逐帧打印（含内联）]
+  G --> P2[symbolize_stack_to_vec
+            生成折叠帧向量]
+  P2 --> M[组装折叠行 -> 输出给 FlameGraph]
+  P1 --> O[标准可读输出]
+  H --> O2[打印原始地址 / 记录错误日志]
+  style U1 fill:#e6ffed,stroke:#2d9a3b
+  style K1 fill:#e6f0ff,stroke:#2176d2
+  style H fill:#fff1f0,stroke:#d9534f</pre><h2 id=启动与事件循环>启动与事件循环</h2><p>这一节描述用户态程序如何完成启动准备并进入事件轮询：解析命令行与日志级别、提升必要的资源限制、加载并 attach eBPF 程序、通过 ring buffer 接收内核事件、调用 <code>EventHandler</code> 进行解析输出，以及在接收到信号时优雅退出。</p><h3 id=关键依赖与权限>关键依赖与权限</h3><p>依赖项：<code>libbpf</code>（加载 BPF 对象与 maps）、<code>spdlog</code>（日志）、<code>CLI11</code>（命令行解析）、可选的内核 BTF / <code>vmlinux</code>（用于内核符号化）。</p><p>运行权限：通常需要 root 或至少 <code>CAP_BPF</code>/<code>CAP_SYS_ADMIN</code>。另外必须提升 <code>RLIMIT_MEMLOCK</code>，否则内核会因为无法锁定内存而拒绝加载 BPF 对象。</p><p>建议在启动前做最基本的环境检查：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>uname -r
+</span></span><span class=line><span class=cl>which bpftool
+</span></span></code></pre></td></tr></table></div></div><h3 id=命令行与日志初始化>命令行与日志初始化</h3><p>使用 <code>CLI11</code> 解析采样频率（<code>-f</code>）、PID 过滤（<code>-p</code>）、输出格式（<code>-E</code>）等选项，并使用 <code>spdlog</code> 配置默认日志器与日志等级。示例代码：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=cl><span class=n>CLI</span><span class=o>::</span><span class=n>App</span> <span class=n>app</span><span class=p>{</span><span class=s>&#34;A simple profiler using eBPF&#34;</span><span class=p>};</span>
+</span></span><span class=line><span class=cl><span class=n>Args</span> <span class=n>args</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=n>app</span><span class=p>.</span><span class=n>add_option</span><span class=p>(</span><span class=s>&#34;-f,--freq&#34;</span><span class=p>,</span> <span class=n>args</span><span class=p>.</span><span class=n>freq</span><span class=p>,</span> <span class=s>&#34;Sampling frequency&#34;</span><span class=p>)</span><span class=o>-&gt;</span><span class=n>default_val</span><span class=p>(</span><span class=mi>10</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=n>app</span><span class=p>.</span><span class=n>add_flag</span><span class=p>(</span><span class=s>&#34;-E,--fold-extend&#34;</span><span class=p>,</span> <span class=n>args</span><span class=p>.</span><span class=n>fold_extend</span><span class=p>,</span> <span class=s>&#34;Output in extended folded format&#34;</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=n>CLI11_PARSE</span><span class=p>(</span><span class=n>app</span><span class=p>,</span> <span class=n>argc</span><span class=p>,</span> <span class=n>argv</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>using</span> <span class=n>Level</span> <span class=o>=</span> <span class=n>spdlog</span><span class=o>::</span><span class=n>level</span><span class=o>::</span><span class=n>level_enum</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=n>Level</span> <span class=n>level</span> <span class=o>=</span> <span class=p>(</span><span class=n>args</span><span class=p>.</span><span class=n>verbosity</span> <span class=o>==</span> <span class=mi>0</span><span class=p>)</span> <span class=o>?</span> <span class=n>Level</span><span class=o>::</span><span class=nl>warn</span> <span class=p>:</span> <span class=p>(</span><span class=n>args</span><span class=p>.</span><span class=n>verbosity</span><span class=o>==</span><span class=mi>1</span> <span class=o>?</span> <span class=n>Level</span><span class=o>::</span><span class=nl>info</span> <span class=p>:</span> <span class=n>Level</span><span class=o>::</span><span class=n>debug</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=k>auto</span> <span class=n>console</span> <span class=o>=</span> <span class=n>spdlog</span><span class=o>::</span><span class=n>stdout_color_mt</span><span class=p>(</span><span class=s>&#34;console&#34;</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=n>spdlog</span><span class=o>::</span><span class=n>set_default_logger</span><span class=p>(</span><span class=n>console</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=n>spdlog</span><span class=o>::</span><span class=n>set_level</span><span class=p>(</span><span class=n>level</span><span class=p>);</span>
+</span></span></code></pre></td></tr></table></div></div><p>将日志级别与命令行绑定，便于在调试时查看详细符号化错误或在生产时降低输出噪音。</p><h3 id=提升资源限制rlimit_memlock>提升资源限制（<code>RLIMIT_MEMLOCK</code>）</h3><p>BPF 对象和 ring buffer 需要被内核锁定在内存。推荐将 <code>RLIMIT_MEMLOCK</code> 设为无限以避免加载失败：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=cl><span class=n>rlimit</span> <span class=n>rl</span> <span class=o>=</span> <span class=p>{.</span><span class=n>rlim_cur</span> <span class=o>=</span> <span class=n>RLIM_INFINITY</span><span class=p>,</span> <span class=p>.</span><span class=n>rlim_max</span> <span class=o>=</span> <span class=n>RLIM_INFINITY</span><span class=p>};</span>
+</span></span><span class=line><span class=cl><span class=n>setrlimit</span><span class=p>(</span><span class=n>RLIMIT_MEMLOCK</span><span class=p>,</span> <span class=o>&amp;</span><span class=n>rl</span><span class=p>);</span>
+</span></span></code></pre></td></tr></table></div></div><p>在受限环境下（容器、受限用户）应提前确认是否允许修改该限制。</p><h3 id=加载并管理-bpf-对象profilerskel>加载并管理 BPF 对象（<code>ProfilerSkel</code>）</h3><p>通过 bpf 的 skeleton（例如 <code>profiler_bpf</code>）生成的封装，使用 RAII 管理生命周期：open/load 在构造时完成，资源在析构时释放。若加载失败，应立即记录错误并退出。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span><span class=lnt>8
+</span><span class=lnt>9
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=cl><span class=k>struct</span> <span class=nc>ProfilerSkel</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=n>profiler_bpf</span><span class=o>*</span> <span class=n>obj</span><span class=p>{</span><span class=k>nullptr</span><span class=p>};</span>
+</span></span><span class=line><span class=cl>    
+</span></span><span class=line><span class=cl>    <span class=n>ProfilerSkel</span><span class=p>()</span> <span class=p>{</span> <span class=n>obj</span> <span class=o>=</span> <span class=n>profiler_bpf</span><span class=o>::</span><span class=n>open_and_load</span><span class=p>();</span> <span class=k>if</span> <span class=p>(</span><span class=n>obj</span> <span class=o>==</span> <span class=k>nullptr</span><span class=p>)</span> <span class=n>spdlog</span><span class=o>::</span><span class=n>error</span><span class=p>(</span><span class=s>&#34;Failed to open and load BPF object&#34;</span><span class=p>);</span> <span class=p>}</span>
+</span></span><span class=line><span class=cl>    <span class=o>~</span><span class=n>ProfilerSkel</span><span class=p>()</span> <span class=p>{</span> <span class=k>if</span> <span class=p>(</span><span class=n>obj</span><span class=p>)</span> <span class=n>profiler_bpf__destroy</span><span class=p>(</span><span class=n>obj</span><span class=p>);</span> <span class=p>}</span>
+</span></span><span class=line><span class=cl>    
+</span></span><span class=line><span class=cl>    <span class=k>operator</span> <span class=nf>bool</span><span class=p>()</span> <span class=k>const</span> <span class=p>{</span> <span class=k>return</span> <span class=n>obj</span> <span class=o>!=</span> <span class=k>nullptr</span><span class=p>;</span> <span class=p>}</span>
+</span></span><span class=line><span class=cl>    <span class=k>auto</span> <span class=k>operator</span><span class=o>-&gt;</span><span class=p>()</span> <span class=k>const</span> <span class=o>-&gt;</span> <span class=n>profiler_bpf</span><span class=o>*</span> <span class=p>{</span> <span class=k>return</span> <span class=n>obj</span><span class=p>;</span> <span class=p>}</span>
+</span></span><span class=line><span class=cl><span class=p>};</span>
+</span></span></code></pre></td></tr></table></div></div><p>在加载成功后，还可能需要对 map 进行预初始化（例如设置 PID 过滤器）或为 symbolization 提供 vmlinux 路径。</p><h3 id=初始化-perf-事件并-attach>初始化 perf 事件并 attach</h3><p>根据配置（采样频率、是否使用软件事件、是否按 PID 过滤等）创建 perf event 文件描述符并返回给调用方；随后将这些 fd attach 到 eBPF 程序的 entry（例如 <code>profile</code>）上。初始化失败时应当记录并退出。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span><span class=lnt>34
+</span><span class=lnt>35
+</span><span class=lnt>36
+</span><span class=lnt>37
+</span><span class=lnt>38
+</span><span class=lnt>39
+</span><span class=lnt>40
+</span><span class=lnt>41
+</span><span class=lnt>42
+</span><span class=lnt>43
+</span><span class=lnt>44
+</span><span class=lnt>45
+</span><span class=lnt>46
+</span><span class=lnt>47
+</span><span class=lnt>48
+</span><span class=lnt>49
+</span><span class=lnt>50
+</span><span class=lnt>51
+</span><span class=lnt>52
+</span><span class=lnt>53
+</span><span class=lnt>54
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=cl><span class=c1>// perf.cpp
+</span></span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>auto</span> <span class=nf>init_perf_monitor</span><span class=p>(</span><span class=kt>uint64_t</span> <span class=n>freq</span><span class=p>,</span> <span class=kt>bool</span> <span class=n>sw_event</span><span class=p>,</span> <span class=n>pid_t</span> <span class=n>pid</span> <span class=o>=</span> <span class=o>-</span><span class=mi>1</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=o>-&gt;</span> <span class=n>Result</span><span class=o>&lt;</span><span class=n>std</span><span class=o>::</span><span class=n>vector</span><span class=o>&lt;</span><span class=kt>int</span><span class=o>&gt;</span><span class=p>,</span> <span class=n>libbpf_errno</span><span class=o>&gt;</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=kt>int</span> <span class=n>cpus</span> <span class=o>=</span> <span class=n>libbpf_num_possible_cpus</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=p>(</span><span class=n>cpus</span> <span class=o>&lt;</span> <span class=mi>0</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=n>Err</span><span class=p>(</span><span class=n>libbpf_errno</span><span class=o>::</span><span class=n>LIBBPF_ERRNO__INTERNAL</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=n>perf_event_attr</span> <span class=n>attr</span> <span class=o>=</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=p>.</span><span class=n>type</span> <span class=o>=</span> <span class=n>sw_event</span> <span class=o>?</span> <span class=nl>PERF_TYPE_SOFTWARE</span> <span class=p>:</span> <span class=n>PERF_TYPE_HARDWARE</span><span class=p>,</span>  <span class=c1>// 采样类型
+</span></span></span><span class=line><span class=cl>        <span class=p>.</span><span class=n>size</span> <span class=o>=</span> <span class=k>sizeof</span><span class=p>(</span><span class=n>perf_event_attr</span><span class=p>),</span>
+</span></span><span class=line><span class=cl>        <span class=p>.</span><span class=n>config</span> <span class=o>=</span> <span class=p>(</span><span class=n>sw_event</span> <span class=o>?</span> <span class=k>static_cast</span><span class=o>&lt;</span><span class=kt>uint64_t</span><span class=o>&gt;</span><span class=p>(</span><span class=n>PERF_COUNT_SW_CPU_CLOCK</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>                            <span class=o>:</span> <span class=k>static_cast</span><span class=o>&lt;</span><span class=kt>uint64_t</span><span class=o>&gt;</span><span class=p>(</span><span class=n>PERF_COUNT_HW_CPU_CYCLES</span><span class=p>)),</span>
+</span></span><span class=line><span class=cl>        <span class=p>.</span><span class=n>sample_freq</span> <span class=o>=</span> <span class=n>freq</span><span class=p>,</span>  <span class=c1>// 设置频率，每秒 freq 次采样
+</span></span></span><span class=line><span class=cl>        <span class=p>.</span><span class=n>freq</span> <span class=o>=</span> <span class=mi>1</span><span class=p>,</span>            <span class=c1>// 标志位：设为 1 表示使用 sample_freq
+</span></span></span><span class=line><span class=cl>    <span class=p>};</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=n>std</span><span class=o>::</span><span class=n>vector</span><span class=o>&lt;</span><span class=kt>int</span><span class=o>&gt;</span> <span class=n>fds</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=k>for</span> <span class=p>(</span><span class=kt>int</span> <span class=n>cpu</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span> <span class=n>cpu</span> <span class=o>&lt;</span> <span class=n>cpus</span><span class=p>;</span> <span class=o>++</span><span class=n>cpu</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=kt>int</span> <span class=n>fd</span> <span class=o>=</span> <span class=k>static_cast</span><span class=o>&lt;</span><span class=kt>int</span><span class=o>&gt;</span><span class=p>(</span><span class=n>perf_event_open</span><span class=p>(</span><span class=o>&amp;</span><span class=n>attr</span><span class=p>,</span> <span class=n>pid</span><span class=p>,</span> <span class=n>cpu</span><span class=p>,</span> <span class=o>-</span><span class=mi>1</span><span class=p>,</span> <span class=mi>0</span><span class=p>));</span>
+</span></span><span class=line><span class=cl>        <span class=k>if</span> <span class=p>(</span><span class=n>fd</span> <span class=o>&lt;</span> <span class=mi>0</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>            <span class=k>return</span> <span class=n>Err</span><span class=p>(</span><span class=n>libbpf_errno</span><span class=o>::</span><span class=n>LIBBPF_ERRNO__INTERNAL</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>        <span class=p>}</span>
+</span></span><span class=line><span class=cl>        <span class=n>fds</span><span class=p>.</span><span class=n>push_back</span><span class=p>(</span><span class=n>fd</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=n>fds</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>auto</span> <span class=nf>attach_perf_events</span><span class=p>(</span><span class=k>const</span> <span class=n>std</span><span class=o>::</span><span class=n>vector</span><span class=o>&lt;</span><span class=kt>int</span><span class=o>&gt;&amp;</span> <span class=n>fds</span><span class=p>,</span> <span class=n>bpf_program</span><span class=o>*</span> <span class=n>prog</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=o>-&gt;</span> <span class=n>std</span><span class=o>::</span><span class=n>vector</span><span class=o>&lt;</span><span class=n>Result</span><span class=o>&lt;</span><span class=n>bpf_link</span><span class=o>*</span><span class=p>,</span> <span class=n>libbpf_errno</span><span class=o>&gt;&gt;</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=n>std</span><span class=o>::</span><span class=n>vector</span><span class=o>&lt;</span><span class=n>Result</span><span class=o>&lt;</span><span class=n>bpf_link</span><span class=o>*</span><span class=p>,</span> <span class=n>libbpf_errno</span><span class=o>&gt;&gt;</span> <span class=n>links</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=k>for</span> <span class=p>(</span><span class=kt>int</span> <span class=nl>fd</span> <span class=p>:</span> <span class=n>fds</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=k>auto</span><span class=o>*</span> <span class=n>link</span> <span class=o>=</span> <span class=n>bpf_program__attach_perf_event</span><span class=p>(</span><span class=n>prog</span><span class=p>,</span> <span class=n>fd</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>        <span class=k>if</span> <span class=p>(</span><span class=n>libbpf_get_error</span><span class=p>(</span><span class=n>link</span><span class=p>)</span> <span class=o>!=</span> <span class=mi>0</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>            <span class=n>links</span><span class=p>.</span><span class=n>emplace_back</span><span class=p>(</span><span class=n>Err</span><span class=p>(</span><span class=n>libbpf_errno</span><span class=o>::</span><span class=n>LIBBPF_ERRNO__INTERNAL</span><span class=p>));</span>
+</span></span><span class=line><span class=cl>        <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=n>links</span><span class=p>.</span><span class=n>emplace_back</span><span class=p>(</span><span class=n>link</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=n>links</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1>// ---------------------------------------------------------------
+</span></span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1>// main.cpp
+</span></span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>auto</span> <span class=n>perf_fds</span> <span class=o>=</span> <span class=n>init_perf_monitor</span><span class=p>(</span><span class=n>freq</span><span class=p>,</span> <span class=n>args</span><span class=p>.</span><span class=n>sw_event</span><span class=p>,</span> <span class=n>args</span><span class=p>.</span><span class=n>pid</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=k>if</span> <span class=p>(</span><span class=o>!</span><span class=n>perf_fds</span><span class=p>)</span> <span class=p>{</span> 
+</span></span><span class=line><span class=cl>    <span class=n>spdlog</span><span class=o>::</span><span class=n>error</span><span class=p>(</span><span class=s>&#34;Failed to initialize perf monitor&#34;</span><span class=p>);</span> 
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=mi>1</span><span class=p>;</span> 
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=cl><span class=n>attach_perf_events</span><span class=p>(</span><span class=n>perf_fds</span><span class=p>.</span><span class=n>value</span><span class=p>(),</span> <span class=n>obj</span><span class=o>-&gt;</span><span class=n>progs</span><span class=p>.</span><span class=n>profile</span><span class=p>);</span>
+</span></span></code></pre></td></tr></table></div></div><p>attach 成功后，内核采样事件触发时会进入 eBPF 程序，程序会把数据写入之前声明的 ring buffer map。</p><h3 id=ring-buffer-与事件回调>Ring Buffer 与事件回调</h3><p>用户态通过 ring buffer 从内核读取事件样本。回调函数负责类型安全地把原始字节传递给 <code>EventHandler::handle</code>，由其完成长度检查、解析与输出。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=cl><span class=k>static</span> <span class=k>auto</span> <span class=nf>handle_event_wrapper</span><span class=p>(</span><span class=kt>void</span><span class=o>*</span> <span class=n>ctx</span><span class=p>,</span> <span class=kt>void</span><span class=o>*</span> <span class=n>data</span><span class=p>,</span> <span class=n>size_t</span> <span class=n>data_sz</span><span class=p>)</span> <span class=o>-&gt;</span> <span class=kt>int</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=k>auto</span><span class=o>*</span> <span class=n>handler</span> <span class=o>=</span> <span class=k>static_cast</span><span class=o>&lt;</span><span class=n>EventHandler</span><span class=o>*&gt;</span><span class=p>(</span><span class=n>ctx</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=n>handler</span><span class=o>-&gt;</span><span class=n>handle</span><span class=p>(</span><span class=k>static_cast</span><span class=o>&lt;</span><span class=k>const</span> <span class=kt>uint8_t</span><span class=o>*&gt;</span><span class=p>(</span><span class=n>data</span><span class=p>),</span> <span class=n>data_sz</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>RingBuffer</span> <span class=n>rb</span><span class=p>{</span><span class=n>bpf_map__fd</span><span class=p>(</span><span class=n>obj</span><span class=o>-&gt;</span><span class=n>maps</span><span class=p>.</span><span class=n>events</span><span class=p>),</span> <span class=n>handle_event_wrapper</span><span class=p>,</span> <span class=o>&amp;</span><span class=n>event_handler</span><span class=p>,</span> <span class=k>nullptr</span><span class=p>};</span>
+</span></span><span class=line><span class=cl><span class=k>if</span> <span class=p>(</span><span class=o>!</span><span class=n>rb</span><span class=p>)</span> <span class=p>{</span> 
+</span></span><span class=line><span class=cl>    <span class=n>spdlog</span><span class=o>::</span><span class=n>error</span><span class=p>(</span><span class=s>&#34;Failed to create ring buffer&#34;</span><span class=p>);</span> 
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=mi>1</span><span class=p>;</span> 
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p>要点：</p><ul><li>回调签名使用 <code>const uint8_t* data, size_t data_sz</code>，有利于在用户态对来自不同来源（ringbuf、perf buffer、socket 等）的原始字节流做统一处理和边界校验；</li><li>ring buffer 的容量应根据采样频率与处理速率调整，避免丢失样本。</li></ul><h3 id=主循环轮询与优雅退出>主循环、轮询与优雅退出</h3><p>主循环负责轮询 ring buffer，并在接收到中断信号时优雅退出：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=cl><span class=k>static</span> <span class=k>volatile</span> <span class=kt>bool</span> <span class=n>exiting</span> <span class=o>=</span> <span class=nb>false</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=k>static</span> <span class=kt>void</span> <span class=nf>sig_handler</span><span class=p>(</span><span class=kt>int</span> <span class=n>sig</span><span class=p>)</span> <span class=p>{</span> <span class=n>exiting</span> <span class=o>=</span> <span class=nb>true</span><span class=p>;</span> <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=p>...</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>signal</span><span class=p>(</span><span class=n>SIGINT</span><span class=p>,</span> <span class=n>sig_handler</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=k>while</span> <span class=p>(</span><span class=o>!</span><span class=n>exiting</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=kt>int</span> <span class=n>err</span> <span class=o>=</span> <span class=n>rb</span><span class=p>.</span><span class=n>poll</span><span class=p>(</span><span class=mi>100</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=p>(</span><span class=n>err</span> <span class=o>==</span> <span class=o>-</span><span class=n>EINTR</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=c1>// Interrupted by signal, continue to check exiting flag
+</span></span></span><span class=line><span class=cl>        <span class=k>continue</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=p>(</span><span class=n>err</span> <span class=o>&lt;</span> <span class=mi>0</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=n>spdlog</span><span class=o>::</span><span class=n>error</span><span class=p>(</span><span class=s>&#34;Error polling ring buffer: {}&#34;</span><span class=p>,</span> <span class=n>err</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>        <span class=k>break</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>auto</span> <span class=n>r</span> <span class=o>=</span> <span class=n>close_perf_events</span><span class=p>(</span><span class=n>perf_fds</span><span class=p>.</span><span class=n>value</span><span class=p>());</span>
+</span></span><span class=line><span class=cl><span class=k>if</span> <span class=p>(</span><span class=o>!</span><span class=n>r</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=n>spdlog</span><span class=o>::</span><span class=n>error</span><span class=p>(</span><span class=s>&#34;Failed to close perf events, error message is: {}&#34;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>                  <span class=k>static_cast</span><span class=o>&lt;</span><span class=kt>int</span><span class=o>&gt;</span><span class=p>(</span><span class=n>r</span><span class=p>.</span><span class=n>error</span><span class=p>()));</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=mi>1</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p>退出流程要点：</p><ul><li>signal handler 仅设置原子/易变标志，实际清理在主线程完成；</li><li>调用 <code>close_perf_events</code> 关闭 perf fds，确保內核计数器停止并释放资源；</li><li>依赖 RAII 的 BPF skeleton 在作用域结束时销毁 BPF 对象和 maps。</li></ul><p>这样可以保证在收到 SIGINT / SIGTERM 时，程序能够尽量把已经到达的样本处理完并正确释放所有内核资源。</p><h2 id=对-ebpf-程序挂载方式的思考>对 eBPF 程序挂载方式的思考</h2><blockquote class="alert alert-question"><div class=alert-header><span class=alert-icon></span>
+<span class=alert-title>为什么不用 bpf skeleton 中的 bpf_object__attach_skeleton 来挂载，而是使用 bpf_program__attach_perf_event ？</span></div><div class=alert-body></div></blockquote><p>在使用 libbpf 开发 BPF 程序时，通常 <strong>skeleton 会提供的自动 attach 机制 <code>bpf_object__attach_skeleton</code></strong>，但在实际实现 perf 采样监控（例如 <code>init_perf_monitor</code> 这类逻辑）的过程中，最终选择的是<strong>手动创建 perf_event fd，并使用 <code>bpf_program__attach_perf_event</code> 进行挂载</strong>。这并不是因为 skeleton 不好，而是两者适用的层级和场景并不相同。</p><h3 id=skeleton-attach-是什么它解决了什么问题>skeleton attach 是什么，它解决了什么问题？</h3><p><code>skeleton attach</code>（本质是 <code>bpf_object__attach_skeleton</code> 或生成代码中的 <code>xxx__attach()</code>）是一种<strong>高层抽象</strong>：</p><ul><li>在 BPF ELF 中通过 section 描述程序的 attach 类型</li><li>libbpf 根据这些元信息，自动把所有 program 挂载到对应的 hook 点</li><li>用户态几乎不需要关心 attach 的细节</li></ul><p>它非常适合下面这些场景：</p><ul><li>attach 类型是 <strong>静态的、编译期就确定的</strong></li><li>比如 tracepoint、kprobe、raw_tp 等</li><li>希望<strong>快速把程序跑起来</strong>，而不是写大量样板代码</li></ul><p>在这些情况下，skeleton attach 是几乎没有理由拒绝的。但当 attach 对象变成 <strong>perf event</strong> 时，情况就不太一样了。</p><h3 id=perf-场景下的不同>perf 场景下的不同</h3><p>perf 事件并不是一个“天然存在的 hook 点”，而是需要用户态显式创建的：</p><ul><li>需要调用 <code>perf_event_open</code></li><li>需要构造 <code>perf_event_attr</code></li><li>需要决定：<ul><li>是按 CPU 还是按 PID</li><li>采样频率 / period</li><li>是否 per-CPU 创建多个 fd</li></ul></li></ul><p>这些信息<strong>天然属于运行时配置</strong>，而不是 ELF 元信息的一部分。</p><p>而 skeleton attach 的设计假设是：</p><blockquote><p>attach 行为已经在 BPF 程序中声明好，用户态只负责“一次性挂上去”。</p></blockquote><p>因而这里选择了另一条路径：</p><ol><li>在用户态显式创建 perf_event fd</li><li>将单个 <code>bpf_program</code> 附加到指定的 perf fd 上</li></ol><p>也就是使用：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-c data-lang=c><span class=line><span class=cl><span class=nf>bpf_program__attach_perf_event</span><span class=p>(</span><span class=n>prog</span><span class=p>,</span> <span class=n>perf_fd</span><span class=p>);</span>
+</span></span></code></pre></td></tr></table></div></div><p>这种方式带来的好处，主要体现在<strong>控制权完全回到用户态</strong>。</p><h3 id=program-attach-挂载的好处>program attach 挂载的好处</h3><p><strong>（1）attach 粒度更细</strong></p><ul><li>skeleton attach：<ul><li>以整个 skeleton 为单位</li><li>自动 attach 多个 program / link</li></ul></li><li>program attach：<ul><li>明确地控制“哪个 program → 哪个 perf fd”</li></ul></li></ul><p>这在 perf 场景下非常重要，因为 <strong>fd 本身就是策略的一部分</strong>。</p><p><strong>（2）perf 参数可以在运行时自由配置</strong></p><p>通过手动创建 perf fd，可以在用户态精确控制：</p><ul><li>采样频率（freq / period）</li><li>perf event 类型</li><li>绑定到哪个 CPU 或 PID</li><li>是否为每个 CPU 创建独立 fd</li></ul><p>这些配置很难优雅地放进 skeleton 的自动 attach 流程中，但却是 perf 采样中最核心的部分。</p><p><strong>（3）天然支持 per-CPU / 多 fd 模型</strong></p><p>一个很典型的模式是：</p><ul><li>为每个 CPU 创建一个 perf fd</li><li>把同一个 BPF 程序附加到所有这些 fd 上</li></ul><p>这在 program attach 模型下是顺理成章的事情：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-c data-lang=c><span class=line><span class=cl><span class=nf>for_each_cpu</span><span class=p>(</span><span class=n>cpu</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=n>perf_fd</span> <span class=o>=</span> <span class=nf>perf_event_open</span><span class=p>(...,</span> <span class=n>cpu</span><span class=p>,</span> <span class=p>...);</span>
+</span></span><span class=line><span class=cl>    <span class=n>link</span><span class=p>[</span><span class=n>cpu</span><span class=p>]</span> <span class=o>=</span> <span class=nf>bpf_program__attach_perf_event</span><span class=p>(</span><span class=n>prog</span><span class=p>,</span> <span class=n>perf_fd</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p>而 skeleton attach 并不擅长表达这种 <strong>“一对多、运行时生成”的 attach 关系</strong>。</p><p><strong>（4）错误处理逻辑更清晰</strong></p><p>手动管理 perf fd 和 link，也意味着：</p><ul><li>perf_event_open 失败时可以：<ul><li>跳过某些 CPU</li><li>降级采样策略</li><li>做重试或 fallback</li></ul></li><li>attach 失败时可以单独处理，而不是整体失败</li></ul><h3 id=对比小结>对比小结</h3><p>需要强调的一点是，底层其实并没有“谁更高级”：</p><blockquote><p>无论是 skeleton attach 还是 <code>bpf_program__attach_perf_event</code>，最终内核里做的事情本质上是一样的——建立 <code>bpf_link</code>，把程序绑定到事件上。</p></blockquote><p>对当前的 perf 采样监控场景来说：</p><ul><li>采样频率、CPU 绑定、fd 数量都是<strong>运行时决策</strong></li><li>需要 per-CPU 创建 perf fd</li><li>需要清晰的错误处理和资源管理路径</li></ul><p>因此在用户态创建 perf_event fd，并使用 <code>bpf_program__attach_perf_event</code> 逐个 attach，是更自然、也更可控的做法。</p><h2 id=参考>参考</h2><ol><li><a class=link href=https://eunomia.dev/zh/tutorials/12-profile/ target=_blank rel=noopener>eBPF 入门实践教程十二：使用 eBPF 程序 profile 进行性能分析</a></li><li><a class=link href=https://zhuanlan.zhihu.com/p/623578927 target=_blank rel=noopener>eBPF 性能分析实战</a> - eBPF 在性能分析中的应用</li><li><a class=link href=https://plantegg.github.io/2021/05/16/Perf_IPC%E4%BB%A5%E5%8F%8ACPU%E5%88%A9%E7%94%A8%E7%8E%87 target=_blank rel=noopener>Perf IPC 与 CPU 利用率</a> - perf 原理深入解析</li><li><a class=link href=https://man7.org/linux/man-pages/man2/perf_event_open.2.html target=_blank rel=noopener>perf_event_open 手册页</a> - 官方文档参考</li><li><a class=link href=https://github.com/brendangregg/FlameGraph target=_blank rel=noopener>FlameGraph 工具</a> - 火焰图生成工具</li><li><a class=link href=https://github.com/libbpf/blazesym target=_blank rel=noopener>blazesym 符号化库</a> - 高性能符号化库</li></ol></section><footer class="article-meta article-footer"><section class=article-tags><a href=/tags/perf/>Perf</a>
+<a href=/tags/cpp/>Cpp</a>
+<a href=/tags/%E6%80%A7%E8%83%BD%E5%88%86%E6%9E%90/>性能分析</a>
+<a href=/tags/%E7%B3%BB%E7%BB%9F%E8%B0%83%E7%94%A8/>系统调用</a>
+<a href=/tags/ebpf/>EBPF</a></section><section class="article-copyright inline-meta"><svg class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><path d="M14.5 9a3.5 4 0 100 6"/></svg>
+<span>Licensed under CC BY-NC-SA 4.0</span></section></footer></article><footer class=site-footer><section class=copyright>&copy;
+2025 -
+2026 Kerolt's Note</section><section class=powerby>使用 <a href=https://gohugo.io/ target=_blank rel=noopener>Hugo</a> 构建<br>主题 <b><a href=https://github.com/CaiJimmy/hugo-theme-stack target=_blank rel=noopener data-version=4.0.3>Stack</a></b> 由 <a href=https://jimmycai.com target=_blank rel=noopener>Jimmy</a> 设计</section></footer><script type=module>
+    import gallery from '\/ts\/gallery.js';
+
+    const articleContent = document.querySelector('.article-content');
+    const shouldLoad = articleContent && (articleContent.querySelectorAll('figure').length > 0 || articleContent.querySelectorAll('img.gallery-image').length > 0);
+    
+    if (shouldLoad) {
+        gallery(articleContent);
+
+        const PhotoSwipeLightbox = (await import("https:\/\/cdn.jsdelivr.net\/npm\/photoswipe@5.4.4\/dist\/photoswipe-lightbox.esm.min.js")).default;
+        const styleHref = "https:\/\/cdn.jsdelivr.net\/npm\/photoswipe@5.4.4\/dist\/photoswipe.css";
+
+        const styleTag = document.createElement('link');
+        styleTag.rel = 'stylesheet';
+        styleTag.href = styleHref;
+        document.head.appendChild(styleTag);
+
+        const lightbox = new PhotoSwipeLightbox({
+            gallerySelector: '.article-content',
+            childSelector: 'figure a.image-link',
+            pswpModule: () => import("https:\/\/cdn.jsdelivr.net\/npm\/photoswipe@5.4.4\/dist\/photoswipe.esm.min.js")
+        });
+        lightbox.init();
+    }
+</script><div class=mermaid-modal id=mermaid-modal><div class=mermaid-modal-header><div class=mermaid-modal-controls><button data-zoom=-1>− Zoom Out</button>
+<button data-zoom=0>Reset (100%)</button>
+<button data-zoom=1>+ Zoom In</button>
+<button data-zoom=fit>Fit to Screen</button></div><button class=mermaid-modal-close id=mermaid-modal-close>✕ Close (Esc)</button></div><div class=mermaid-modal-body id=mermaid-modal-body><div class=mermaid-modal-content id=mermaid-modal-content></div></div></div><script src=https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js></script><script type=module>
+import { initMermaidPage } from '\/ts\/mermaid.js';
+initMermaidPage({"darkTheme":"dark","darkThemeVariables":{},"htmlLabels":true,"lightTheme":"default","lightThemeVariables":{},"look":"classic","securityLevel":"strict","transparentBackground":false});
+</script></main></div><script type=text/javascript src=/ts/main.f856840516f7c2ad1769a8f5937e3d08d6cb386e2cd2dd025ae696e0ff207958.js defer></script></body></html>

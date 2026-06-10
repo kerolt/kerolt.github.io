@@ -1,0 +1,246 @@
+<!doctype html><html lang=zh-cn dir=ltr><head><meta charset=utf-8><meta name=viewport content='width=device-width,initial-scale=1'><meta name=description content="前言 页表是最常用的机制，操作系统通过它为每个进程提供自己的私有地址空间和内存。页表决定了内存地址的含义，以及可以访问物理内存的哪些部分。在本文中，记录了Lab: page tables的前两个实验：加速系统调用和打印页表。\n"><title>【MIT6.S081】Lab3 page tables（上）</title><link rel=canonical href=https://kerolt.github.io/p/mit6.s081lab3-page-tables%E4%B8%8A/><link rel=preconnect href=https://fonts.googleapis.com><link rel=preconnect href=https://fonts.gstatic.com crossorigin><link rel=preload as=style href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap"><link rel=stylesheet href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap"><link rel=stylesheet href=/scss/style.min.e62e09c60ba428a627e03568fa3df938f6a8224f815b5846f00816c17d4a0be4.css><meta property='og:title' content="【MIT6.S081】Lab3 page tables（上）"><meta property='og:description' content="前言 页表是最常用的机制，操作系统通过它为每个进程提供自己的私有地址空间和内存。页表决定了内存地址的含义，以及可以访问物理内存的哪些部分。在本文中，记录了Lab: page tables的前两个实验：加速系统调用和打印页表。\n"><meta property='og:url' content='https://kerolt.github.io/p/mit6.s081lab3-page-tables%E4%B8%8A/'><meta property='og:site_name' content="Kerolt's Note"><meta property='og:type' content='article'><meta property='article:section' content='Post'><meta property='article:tag' content='MIT6-S081'><meta property='article:tag' content='OS'><meta property='article:tag' content='xv6'><meta property='article:published_time' content='2024-11-05T00:00:00+00:00'><meta property='article:modified_time' content='2024-11-05T00:00:00+00:00'><meta name=twitter:title content="【MIT6.S081】Lab3 page tables（上）"><meta name=twitter:description content="前言 页表是最常用的机制，操作系统通过它为每个进程提供自己的私有地址空间和内存。页表决定了内存地址的含义，以及可以访问物理内存的哪些部分。在本文中，记录了Lab: page tables的前两个实验：加速系统调用和打印页表。\n"><link rel="shortcut icon" href=/images/favicon.png></head><body class=article-page><script>(function(){const e="StackColorScheme";localStorage.getItem(e)||localStorage.setItem(e,"auto")})()</script><script>(function(){const t="StackColorScheme",e=localStorage.getItem(t),n=window.matchMedia("(prefers-color-scheme: dark)").matches===!0;e=="dark"||e==="auto"&&n?document.documentElement.dataset.scheme="dark":document.documentElement.dataset.scheme="light"})()</script><div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky"><button class="hamburger hamburger--spin" type=button id=toggle-menu aria-label=切换菜单>
+<span class=hamburger-box><span class=hamburger-inner></span></span></button><header><figure class=site-avatar><a href=/><img src=/images/avatar.jpg width=200 height=200 class=site-logo loading=lazy alt=Avatar>
+</a><span class=emoji>🏸</span></figure><div class=site-meta><h1 class=site-name><a href=/>Kerolt's Note</a></h1><h2 class=site-description>宇宙是秩序的，也是混乱的。</h2></div></header><ol class=menu-social><li><a href=https://github.com/kerolt title=GitHub rel=me><svg class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 19c-4.3 1.4-4.3-2.5-6-3m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6.0 00-1.3-3.2 4.2 4.2.0 00-.1-3.2s-1.1-.3-3.5 1.3a12.3 12.3.0 00-6.2.0C6.5 2.8 5.4 3.1 5.4 3.1a4.2 4.2.0 00-.1 3.2A4.6 4.6.0 004 9.5c0 4.6 2.7 5.7 5.5 6-.6.6-.6 1.2-.5 2V21"/></svg></a></li></ol><ol class=menu id=main-menu><li><a href=/><svg class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><polyline points="5 12 3 12 12 3 21 12 19 12"/><path d="M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"/><path d="M9 21v-6a2 2 0 012-2h2a2 2 0 012 2v6"/></svg>
+<span>首页</span></a></li><li><a href=/archives/><svg class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><rect x="3" y="4" width="18" height="4" rx="2"/><path d="M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
+<span>归档</span></a></li><li><a href=/categories/><svg class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><line x1="5" y1="9" x2="19" y2="9"/><line x1="5" y1="15" x2="19" y2="15"/><line x1="11" y1="4" x2="7" y2="20"/><line x1="17" y1="4" x2="13" y2="20"/></svg>
+<span>分类</span></a></li><li><a href=/tags/><svg class="icon icon-tabler icon-tabler-tag" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><path d="M11 3l9 9a1.5 1.5.0 010 2l-6 6a1.5 1.5.0 01-2 0L3 11V7a4 4 0 014-4h4"/><circle cx="9" cy="9" r="2"/></svg>
+<span>标签</span></a></li><li><a href=/about/><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-info-circle"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 12a9 9 0 1018 0A9 9 0 003 12"/><path d="M12 9h.01"/><path d="M11 12h1v4h1"/></svg>
+<span>关于我</span></a></li><li><a href=/search/><svg class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="10" cy="10" r="7"/><line x1="21" y1="21" x2="15" y2="15"/></svg>
+<span>搜索</span></a></li><li class=menu-bottom-section><ol class=menu><li id=dark-mode-toggle><svg class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="8" cy="12" r="2"/><rect x="2" y="6" width="20" height="12" rx="6"/></svg>
+<svg class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="16" cy="12" r="2"/><rect x="2" y="6" width="20" height="12" rx="6"/></svg>
+<span>暗色模式</span></li></ol></li></ol></aside><aside class="sidebar right-sidebar sticky"><section class="widget archives"><div class=widget-icon><svg class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><line x1="5" y1="9" x2="19" y2="9"/><line x1="5" y1="15" x2="19" y2="15"/><line x1="11" y1="4" x2="7" y2="20"/><line x1="17" y1="4" x2="13" y2="20"/></svg></div><h2 class="widget-title section-title">目录</h2><div class=widget--toc><nav class=toc-nav id=TableOfContents><ol><li><a href=#前言>前言</a></li><li><a href=#speed-up-system-callseasy>Speed up system calls (easy)</a></li><li><a href=#print-a-page-tableeasy>Print a page table (easy)</a></li></ol></nav></div></section></aside><main class="main full-width"><article class=main-article><header class=article-header><div class=article-details><header class=article-category><a href=/categories/mit6.s081/ style=background-color:#beefec;color:#0f3d3b>MIT6.s081</a></header><div class=article-title-wrapper><h2 class=article-title><a href=/p/mit6.s081lab3-page-tables%E4%B8%8A/>【MIT6.S081】Lab3 page tables（上）</a></h2></div><footer class=article-meta><div class=inline-meta><svg class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><path d="M11.795 21H5a2 2 0 01-2-2V7a2 2 0 012-2h12a2 2 0 012 2v4"/><circle cx="18" cy="18" r="4"/><path d="M15 3v4"/><path d="M7 3v4"/><path d="M3 11h16"/><path d="M18 16.496V18l1 1"/></svg>
+<time class=article-time--published datetime=2024-11-05T00:00:00Z>2024年11月5日星期二</time>
+<svg class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg>
+<time class=article-time--reading>阅读时长: 4 分钟</time></div></footer></div></header><aside class=article-toc><details><summary><div class=article-toc-title><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-chevron-right"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 6l6 6-6 6"/></svg>
+<span>目录</span></div></summary><nav class=toc-nav><ol><li><a href=#前言>前言</a></li><li><a href=#speed-up-system-callseasy>Speed up system calls (easy)</a></li><li><a href=#print-a-page-tableeasy>Print a page table (easy)</a></li></ol></nav></details></aside><section class=article-content><h2 id=前言>前言</h2><p>页表是最常用的机制，操作系统通过它为每个进程提供自己的私有地址空间和内存。页表决定了内存地址的含义，以及可以访问物理内存的哪些部分。在本文中，记录了<code>Lab: page tables</code>的前两个实验：加速系统调用和打印页表。</p><h2 id=speed-up-system-callseasy>Speed up system calls (easy)</h2><p>通常我们在需要执行系统调用时，在操作系统中会发生从用户态到内核态的切换，这是因为这些核心的操作只能交给内核去完成。在这个实验中，xv6要求我们通过在用户空间和内核之间<strong>共享只读区域中的数据</strong>来加快某些系统调用。</p><p>由于现在只是入门如何将映射添加至页表中，这个实验只需要为xv6中的<code>getpid()</code>系统调用进行优化。</p><p>在xv6的实验指导书中：</p><blockquote><p>创建每个进程时，在USYSCALL（memlayout.h中定义的虚拟地址）映射一个只读页。在该页面的开头，存储一个usyscall结构体（也在memlayout.h中定义），并对其进行初始化以存储当前进程的PID。</p></blockquote><p>既然如此，进程结构体中也应当有一个usyscall结构体：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-c data-lang=c><span class=line><span class=cl><span class=c1>// kernel/proc.h
+</span></span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>struct</span> <span class=n>proc</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>	<span class=p>...</span>
+</span></span><span class=line><span class=cl>	<span class=kt>pagetable_t</span> <span class=n>pagetable</span><span class=p>;</span>       <span class=c1>// User page table
+</span></span></span><span class=line><span class=cl>	<span class=k>struct</span> <span class=n>trapframe</span> <span class=o>*</span><span class=n>trapframe</span><span class=p>;</span> <span class=c1>// data page for trampoline.S
+</span></span></span><span class=line><span class=cl>	<span class=k>struct</span> <span class=n>usyscall</span> <span class=o>*</span><span class=n>usyscall</span><span class=p>;</span>   <span class=c1>// data page for USYSCALL
+</span></span></span><span class=line><span class=cl>	<span class=k>struct</span> <span class=n>context</span> <span class=n>context</span><span class=p>;</span>      <span class=c1>// swtch() here to run process
+</span></span></span><span class=line><span class=cl>	<span class=p>...</span>
+</span></span><span class=line><span class=cl><span class=p>};</span>
+</span></span></code></pre></td></tr></table></div></div><p>这样就可以通过<code>p->usyscall</code>来获取了。</p><p>在<code>memlayout.h</code>中我们可以看到用户态空间内存布局：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span><span class=lnt>8
+</span><span class=lnt>9
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-text data-lang=text><span class=line><span class=cl> Address zero first:
+</span></span><span class=line><span class=cl>   text
+</span></span><span class=line><span class=cl>   original data and bss
+</span></span><span class=line><span class=cl>   fixed-size stack
+</span></span><span class=line><span class=cl>   expandable heap
+</span></span><span class=line><span class=cl>   ...
+</span></span><span class=line><span class=cl>   USYSCALL (shared with kernel)
+</span></span><span class=line><span class=cl>   TRAPFRAME (p-&gt;trapframe, used by the trampoline)
+</span></span><span class=line><span class=cl>   TRAMPOLINE (the same page as in the kernel)
+</span></span></code></pre></td></tr></table></div></div><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-text data-lang=text><span class=line><span class=cl>MAXVA-&gt; -------------------------------------
+</span></span><span class=line><span class=cl>        | TRAMPOLINE (与内核相同的页面)        |
+</span></span><span class=line><span class=cl>        -------------------------------------
+</span></span><span class=line><span class=cl>        | TRAPFRAME (p-&gt;trapframe, 由跳板使用)|
+</span></span><span class=line><span class=cl>        -------------------------------------
+</span></span><span class=line><span class=cl>        | USYSCALL (与内核共享)               |
+</span></span><span class=line><span class=cl>        -------------------------------------
+</span></span><span class=line><span class=cl>        | ...                               |
+</span></span><span class=line><span class=cl>        -------------------------------------
+</span></span><span class=line><span class=cl>        | 可扩展堆                           |
+</span></span><span class=line><span class=cl>        -------------------------------------
+</span></span><span class=line><span class=cl>        | 固定大小的栈                        |
+</span></span><span class=line><span class=cl>        -------------------------------------
+</span></span><span class=line><span class=cl>        | 原始数据和BSS                       |
+</span></span><span class=line><span class=cl>        -------------------------------------
+</span></span><span class=line><span class=cl>        | text                              |
+</span></span><span class=line><span class=cl>0 -&gt;    -------------------------------------
+</span></span></code></pre></td></tr></table></div></div><p>我们需要做的就是仿照<code>TRAPFRAME</code>将<code>USYSCALL</code>也做一层映射。</p><p>在<code>allocproc()</code>为进程分配物理页时，使用<code>kalloc()</code>对usyscall的分配（kalloc每次从空闲页表中取出一个项，其大小为4KB）：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-c data-lang=c><span class=line><span class=cl><span class=c1>// Allocate a usyscall page.
+</span></span></span><span class=line><span class=cl><span class=k>if</span><span class=p>((</span><span class=n>p</span><span class=o>-&gt;</span><span class=n>usyscall</span> <span class=o>=</span> <span class=p>(</span><span class=k>struct</span> <span class=n>usyscall</span> <span class=o>*</span><span class=p>)</span><span class=nf>kalloc</span><span class=p>())</span> <span class=o>==</span> <span class=mi>0</span><span class=p>){</span>
+</span></span><span class=line><span class=cl>	<span class=nf>freeproc</span><span class=p>(</span><span class=n>p</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>	<span class=nf>release</span><span class=p>(</span><span class=o>&amp;</span><span class=n>p</span><span class=o>-&gt;</span><span class=n>lock</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>	<span class=k>return</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p>在<code>proc_pagetable()</code>函数中，其为指定进程创建用户页表，不含用户内存，但有trampoline 和 trapframe页。以下代码是对trampoline 和 trapframe进行映射。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-c data-lang=c><span class=line><span class=cl><span class=c1>// map the trampoline code (for system call return)
+</span></span></span><span class=line><span class=cl><span class=c1>// at the highest user virtual address.
+</span></span></span><span class=line><span class=cl><span class=c1>// only the supervisor uses it, on the way
+</span></span></span><span class=line><span class=cl><span class=c1>// to/from user space, so not PTE_U.
+</span></span></span><span class=line><span class=cl><span class=k>if</span><span class=p>(</span><span class=nf>mappages</span><span class=p>(</span><span class=n>pagetable</span><span class=p>,</span> <span class=n>TRAMPOLINE</span><span class=p>,</span> <span class=n>PGSIZE</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>		  <span class=p>(</span><span class=n>uint64</span><span class=p>)</span><span class=n>trampoline</span><span class=p>,</span> <span class=n>PTE_R</span> <span class=o>|</span> <span class=n>PTE_X</span><span class=p>)</span> <span class=o>&lt;</span> <span class=mi>0</span><span class=p>){</span>
+</span></span><span class=line><span class=cl>	<span class=nf>uvmfree</span><span class=p>(</span><span class=n>pagetable</span><span class=p>,</span> <span class=mi>0</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>	<span class=k>return</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1>// map the trapframe page just below the trampoline page, for
+</span></span></span><span class=line><span class=cl><span class=c1>// trampoline.S.
+</span></span></span><span class=line><span class=cl><span class=k>if</span><span class=p>(</span><span class=nf>mappages</span><span class=p>(</span><span class=n>pagetable</span><span class=p>,</span> <span class=n>TRAPFRAME</span><span class=p>,</span> <span class=n>PGSIZE</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>		  <span class=p>(</span><span class=n>uint64</span><span class=p>)(</span><span class=n>p</span><span class=o>-&gt;</span><span class=n>trapframe</span><span class=p>),</span> <span class=n>PTE_R</span> <span class=o>|</span> <span class=n>PTE_W</span><span class=p>)</span> <span class=o>&lt;</span> <span class=mi>0</span><span class=p>){</span>
+</span></span><span class=line><span class=cl>	<span class=nf>uvmunmap</span><span class=p>(</span><span class=n>pagetable</span><span class=p>,</span> <span class=n>TRAMPOLINE</span><span class=p>,</span> <span class=mi>1</span><span class=p>,</span> <span class=mi>0</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>	<span class=nf>uvmfree</span><span class=p>(</span><span class=n>pagetable</span><span class=p>,</span> <span class=mi>0</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>	<span class=k>return</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p>如此，我们照猫画虎，也可以写出usyscall的映射。需要注意的是，该页是read-only的，并且允许用户态访问，因此其权限应该为<code>PTE_R</code>和<code>PTE_U</code>。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span><span class=lnt>8
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-c data-lang=c><span class=line><span class=cl><span class=c1>// map the usyscall page
+</span></span></span><span class=line><span class=cl><span class=k>if</span><span class=p>(</span><span class=nf>mappages</span><span class=p>(</span><span class=n>pagetable</span><span class=p>,</span> <span class=n>USYSCALL</span><span class=p>,</span> <span class=n>PGSIZE</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>		   <span class=p>(</span><span class=n>uint64</span><span class=p>)(</span><span class=n>p</span><span class=o>-&gt;</span><span class=n>usyscall</span><span class=p>),</span> <span class=n>PTE_R</span> <span class=o>|</span> <span class=n>PTE_U</span><span class=p>)</span> <span class=o>&lt;</span> <span class=mi>0</span><span class=p>){</span>
+</span></span><span class=line><span class=cl>	<span class=nf>uvmunmap</span><span class=p>(</span><span class=n>pagetable</span><span class=p>,</span> <span class=n>USYSCALL</span><span class=p>,</span> <span class=mi>1</span><span class=p>,</span> <span class=mi>0</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>	<span class=nf>uvmunmap</span><span class=p>(</span><span class=n>pagetable</span><span class=p>,</span> <span class=n>TRAMPOLINE</span><span class=p>,</span> <span class=mi>1</span><span class=p>,</span> <span class=mi>0</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>	<span class=nf>uvmfree</span><span class=p>(</span><span class=n>pagetable</span><span class=p>,</span> <span class=mi>0</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>	<span class=k>return</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p>在结束进程时，即<code>freeproc</code>函数中，也需要对usyscall的空间进行释放：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-c data-lang=c><span class=line><span class=cl><span class=k>if</span><span class=p>(</span><span class=n>p</span><span class=o>-&gt;</span><span class=n>usyscall</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>	<span class=nf>kfree</span><span class=p>((</span><span class=kt>void</span><span class=o>*</span><span class=p>)</span><span class=n>p</span><span class=o>-&gt;</span><span class=n>usyscall</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=n>p</span><span class=o>-&gt;</span><span class=n>usyscall</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
+</span></span></code></pre></td></tr></table></div></div><p>同时还应当在<code>proc_freepagetable</code>函数中解除之前对usyscall的映射：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-c data-lang=c><span class=line><span class=cl><span class=nf>uvmunmap</span><span class=p>(</span><span class=n>pagetable</span><span class=p>,</span> <span class=n>USYSCALL</span><span class=p>,</span> <span class=mi>1</span><span class=p>,</span> <span class=mi>0</span><span class=p>);</span>
+</span></span></code></pre></td></tr></table></div></div><h2 id=print-a-page-tableeasy>Print a page table (easy)</h2><p>这个实验要求我们将页表打印出来。在实验开始前，让我们先看看xv6中的页表。</p><p><img class=gallery-image data-flex-basis=423px data-flex-grow=176 height=423 loading=lazy sizes="(max-width: 767px) calc(100vw - 30px), (max-width: 1023px) 700px, (max-width: 1279px) 950px, 1232px" src=https://s2.loli.net/2024/12/16/KOPxA9rZzUbfpGI.png width=747></p><p>xv6中的页表为三级页表，在VA转换为PA的过程中，处理单元会通过<code>satp</code>寄存器找到当前进程的页表基地址，然后取出VA中的L2部分找到一级页表的项，一级页表中的项（PTE）保存二级页表的地址，再通过L1可获取二级页表中的项，依次类推即可将VA转换为PA。</p><p>这样看来，想要打印页表，有点类似于DFS算法，需要使用递归。按照实验指导书所说，我们可以从<code>freewalk</code>函数中获取灵感，查看其源码可以知道如何去遍历页表项。那么按照要求所实现打印页表就比较容易了：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-c data-lang=c><span class=line><span class=cl><span class=k>static</span> <span class=kt>void</span> <span class=nf>print_pgtbl</span><span class=p>(</span><span class=kt>pagetable_t</span> <span class=n>pagetable</span><span class=p>,</span> <span class=kt>int</span> <span class=n>depth</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>  <span class=k>if</span> <span class=p>(</span><span class=n>depth</span> <span class=o>&gt;</span> <span class=mi>2</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=p>}</span>
+</span></span><span class=line><span class=cl>  <span class=k>for</span><span class=p>(</span><span class=kt>int</span> <span class=n>i</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span> <span class=n>i</span> <span class=o>&lt;</span> <span class=mi>512</span><span class=p>;</span> <span class=n>i</span><span class=o>++</span><span class=p>){</span>
+</span></span><span class=line><span class=cl>    <span class=kt>pte_t</span> <span class=n>pte</span> <span class=o>=</span> <span class=n>pagetable</span><span class=p>[</span><span class=n>i</span><span class=p>];</span>
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=p>(</span><span class=n>pte</span> <span class=o>&amp;</span> <span class=n>PTE_V</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>      <span class=k>if</span> <span class=p>(</span><span class=n>depth</span> <span class=o>==</span> <span class=mi>0</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=nf>printf</span><span class=p>(</span><span class=s>&#34;..&#34;</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>      <span class=p>}</span> <span class=k>else</span> <span class=k>if</span> <span class=p>(</span><span class=n>depth</span> <span class=o>==</span> <span class=mi>1</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=nf>printf</span><span class=p>(</span><span class=s>&#34;.. ..&#34;</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>      <span class=p>}</span> <span class=k>else</span> <span class=k>if</span> <span class=p>(</span><span class=n>depth</span> <span class=o>==</span> <span class=mi>2</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=nf>printf</span><span class=p>(</span><span class=s>&#34;.. .. ..&#34;</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>      <span class=p>}</span>
+</span></span><span class=line><span class=cl>      <span class=n>uint64</span> <span class=n>child</span> <span class=o>=</span> <span class=nf>PTE2PA</span><span class=p>(</span><span class=n>pte</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>      <span class=nf>printf</span><span class=p>(</span><span class=s>&#34;%d: pte %p pa %p</span><span class=se>\n</span><span class=s>&#34;</span><span class=p>,</span> <span class=n>i</span><span class=p>,</span> <span class=n>pte</span><span class=p>,</span> <span class=nf>PTE2PA</span><span class=p>(</span><span class=n>pte</span><span class=p>));</span>
+</span></span><span class=line><span class=cl>      <span class=nf>print_pgtbl</span><span class=p>((</span><span class=kt>pagetable_t</span><span class=p>)</span><span class=n>child</span><span class=p>,</span> <span class=n>depth</span> <span class=o>+</span> <span class=mi>1</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>  <span class=p>}</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=kt>void</span> <span class=nf>vmprint</span><span class=p>(</span><span class=kt>pagetable_t</span> <span class=n>pagetable</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>  <span class=nf>printf</span><span class=p>(</span><span class=s>&#34;page table %p</span><span class=se>\n</span><span class=s>&#34;</span><span class=p>,</span> <span class=n>pagetable</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>  <span class=nf>print_pgtbl</span><span class=p>(</span><span class=n>pagetable</span><span class=p>,</span> <span class=mi>0</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p>由于打印页表这个操作是进程号为1的<code>init</code>进程做的，所以不要忘记在<code>kernel/exec.c</code>的<code>exec</code>函数中添加：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-c data-lang=c><span class=line><span class=cl><span class=k>if</span> <span class=p>(</span><span class=n>p</span><span class=o>-&gt;</span><span class=n>pid</span> <span class=o>==</span> <span class=mi>1</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>  <span class=nf>vmprint</span><span class=p>(</span><span class=n>p</span><span class=o>-&gt;</span><span class=n>pagetable</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p>并且在<code>kernel/defs.h</code>中添加<code>vmprint</code>的函数声明：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-c data-lang=c><span class=line><span class=cl><span class=kt>void</span> <span class=nf>vmprint</span><span class=p>(</span><span class=kt>pagetable_t</span><span class=p>);</span>
+</span></span></code></pre></td></tr></table></div></div></section><footer class="article-meta article-footer"><section class=article-tags><a href=/tags/mit6-s081/>MIT6-S081</a>
+<a href=/tags/os/>OS</a>
+<a href=/tags/xv6/>Xv6</a></section><section class="article-copyright inline-meta"><svg class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><path d="M14.5 9a3.5 4 0 100 6"/></svg>
+<span>Licensed under CC BY-NC-SA 4.0</span></section></footer></article><footer class=site-footer><section class=copyright>&copy;
+2025 -
+2026 Kerolt's Note</section><section class=powerby>使用 <a href=https://gohugo.io/ target=_blank rel=noopener>Hugo</a> 构建<br>主题 <b><a href=https://github.com/CaiJimmy/hugo-theme-stack target=_blank rel=noopener data-version=4.0.3>Stack</a></b> 由 <a href=https://jimmycai.com target=_blank rel=noopener>Jimmy</a> 设计</section></footer><script type=module>
+    import gallery from '\/ts\/gallery.js';
+
+    const articleContent = document.querySelector('.article-content');
+    const shouldLoad = articleContent && (articleContent.querySelectorAll('figure').length > 0 || articleContent.querySelectorAll('img.gallery-image').length > 0);
+    
+    if (shouldLoad) {
+        gallery(articleContent);
+
+        const PhotoSwipeLightbox = (await import("https:\/\/cdn.jsdelivr.net\/npm\/photoswipe@5.4.4\/dist\/photoswipe-lightbox.esm.min.js")).default;
+        const styleHref = "https:\/\/cdn.jsdelivr.net\/npm\/photoswipe@5.4.4\/dist\/photoswipe.css";
+
+        const styleTag = document.createElement('link');
+        styleTag.rel = 'stylesheet';
+        styleTag.href = styleHref;
+        document.head.appendChild(styleTag);
+
+        const lightbox = new PhotoSwipeLightbox({
+            gallerySelector: '.article-content',
+            childSelector: 'figure a.image-link',
+            pswpModule: () => import("https:\/\/cdn.jsdelivr.net\/npm\/photoswipe@5.4.4\/dist\/photoswipe.esm.min.js")
+        });
+        lightbox.init();
+    }
+</script></main></div><script type=text/javascript src=/ts/main.f856840516f7c2ad1769a8f5937e3d08d6cb386e2cd2dd025ae696e0ff207958.js defer></script></body></html>

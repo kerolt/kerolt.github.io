@@ -1,0 +1,411 @@
+<!doctype html><html lang=zh-cn dir=ltr><head><meta charset=utf-8><meta name=viewport content='width=device-width,initial-scale=1'><meta name=description content=" 【动手写协程库】系列笔记是学习 sylar 的协程库时的记录，参考了 从零开始重写sylar C++高性能分布式服务器框架 和代码随想录中的 文档。文章并不是对所有代码的详细解释，而是为了自己理解一些片段所做的笔记。\nScheduler 类中其他函数的定义可以在这里查看：Github: src/scheduler.cpp\nSylar 的协程调度器是一个 N-M 模型，意味着 N 个线程可以运行 M 个协程，协程能够在线程之间进行切换，也可以被绑定到特定的线程上执行。\n调度器可以由应用程序中的任何线程创建，但创建它的线程（称为 caller 线程）可以选择是否参与协程的调度。如果 caller 线程参与调度，那么调度器的线程数会相应减少一个，因为 caller 线程本身也会作为一个调度线程。\n"><title>【动手写协程库 2】协程调度器</title><link rel=canonical href=https://kerolt.github.io/p/%E5%8A%A8%E6%89%8B%E5%86%99%E5%8D%8F%E7%A8%8B%E5%BA%93-2%E5%8D%8F%E7%A8%8B%E8%B0%83%E5%BA%A6%E5%99%A8/><link rel=preconnect href=https://fonts.googleapis.com><link rel=preconnect href=https://fonts.gstatic.com crossorigin><link rel=preload as=style href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap"><link rel=stylesheet href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap"><link rel=stylesheet href=/scss/style.min.e62e09c60ba428a627e03568fa3df938f6a8224f815b5846f00816c17d4a0be4.css><meta property='og:title' content="【动手写协程库 2】协程调度器"><meta property='og:description' content=" 【动手写协程库】系列笔记是学习 sylar 的协程库时的记录，参考了 从零开始重写sylar C++高性能分布式服务器框架 和代码随想录中的 文档。文章并不是对所有代码的详细解释，而是为了自己理解一些片段所做的笔记。\nScheduler 类中其他函数的定义可以在这里查看：Github: src/scheduler.cpp\nSylar 的协程调度器是一个 N-M 模型，意味着 N 个线程可以运行 M 个协程，协程能够在线程之间进行切换，也可以被绑定到特定的线程上执行。\n调度器可以由应用程序中的任何线程创建，但创建它的线程（称为 caller 线程）可以选择是否参与协程的调度。如果 caller 线程参与调度，那么调度器的线程数会相应减少一个，因为 caller 线程本身也会作为一个调度线程。\n"><meta property='og:url' content='https://kerolt.github.io/p/%E5%8A%A8%E6%89%8B%E5%86%99%E5%8D%8F%E7%A8%8B%E5%BA%93-2%E5%8D%8F%E7%A8%8B%E8%B0%83%E5%BA%A6%E5%99%A8/'><meta property='og:site_name' content="Kerolt's Note"><meta property='og:type' content='article'><meta property='article:section' content='Post'><meta property='article:tag' content='CPlusPlus'><meta property='article:tag' content='Coroutine'><meta property='article:published_time' content='2024-09-11T00:00:00+00:00'><meta property='article:modified_time' content='2026-03-18T00:00:00+00:00'><meta name=twitter:title content="【动手写协程库 2】协程调度器"><meta name=twitter:description content=" 【动手写协程库】系列笔记是学习 sylar 的协程库时的记录，参考了 从零开始重写sylar C++高性能分布式服务器框架 和代码随想录中的 文档。文章并不是对所有代码的详细解释，而是为了自己理解一些片段所做的笔记。\nScheduler 类中其他函数的定义可以在这里查看：Github: src/scheduler.cpp\nSylar 的协程调度器是一个 N-M 模型，意味着 N 个线程可以运行 M 个协程，协程能够在线程之间进行切换，也可以被绑定到特定的线程上执行。\n调度器可以由应用程序中的任何线程创建，但创建它的线程（称为 caller 线程）可以选择是否参与协程的调度。如果 caller 线程参与调度，那么调度器的线程数会相应减少一个，因为 caller 线程本身也会作为一个调度线程。\n"><link rel="shortcut icon" href=/images/favicon.png></head><body class=article-page><script>(function(){const e="StackColorScheme";localStorage.getItem(e)||localStorage.setItem(e,"auto")})()</script><script>(function(){const t="StackColorScheme",e=localStorage.getItem(t),n=window.matchMedia("(prefers-color-scheme: dark)").matches===!0;e=="dark"||e==="auto"&&n?document.documentElement.dataset.scheme="dark":document.documentElement.dataset.scheme="light"})()</script><div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky"><button class="hamburger hamburger--spin" type=button id=toggle-menu aria-label=切换菜单>
+<span class=hamburger-box><span class=hamburger-inner></span></span></button><header><figure class=site-avatar><a href=/><img src=/images/avatar.jpg width=200 height=200 class=site-logo loading=lazy alt=Avatar>
+</a><span class=emoji>🏸</span></figure><div class=site-meta><h1 class=site-name><a href=/>Kerolt's Note</a></h1><h2 class=site-description>宇宙是秩序的，也是混乱的。</h2></div></header><ol class=menu-social><li><a href=https://github.com/kerolt title=GitHub rel=me><svg class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 19c-4.3 1.4-4.3-2.5-6-3m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6.0 00-1.3-3.2 4.2 4.2.0 00-.1-3.2s-1.1-.3-3.5 1.3a12.3 12.3.0 00-6.2.0C6.5 2.8 5.4 3.1 5.4 3.1a4.2 4.2.0 00-.1 3.2A4.6 4.6.0 004 9.5c0 4.6 2.7 5.7 5.5 6-.6.6-.6 1.2-.5 2V21"/></svg></a></li></ol><ol class=menu id=main-menu><li><a href=/><svg class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><polyline points="5 12 3 12 12 3 21 12 19 12"/><path d="M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"/><path d="M9 21v-6a2 2 0 012-2h2a2 2 0 012 2v6"/></svg>
+<span>首页</span></a></li><li><a href=/archives/><svg class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><rect x="3" y="4" width="18" height="4" rx="2"/><path d="M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
+<span>归档</span></a></li><li><a href=/categories/><svg class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><line x1="5" y1="9" x2="19" y2="9"/><line x1="5" y1="15" x2="19" y2="15"/><line x1="11" y1="4" x2="7" y2="20"/><line x1="17" y1="4" x2="13" y2="20"/></svg>
+<span>分类</span></a></li><li><a href=/tags/><svg class="icon icon-tabler icon-tabler-tag" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><path d="M11 3l9 9a1.5 1.5.0 010 2l-6 6a1.5 1.5.0 01-2 0L3 11V7a4 4 0 014-4h4"/><circle cx="9" cy="9" r="2"/></svg>
+<span>标签</span></a></li><li><a href=/about/><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-info-circle"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 12a9 9 0 1018 0A9 9 0 003 12"/><path d="M12 9h.01"/><path d="M11 12h1v4h1"/></svg>
+<span>关于我</span></a></li><li><a href=/search/><svg class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="10" cy="10" r="7"/><line x1="21" y1="21" x2="15" y2="15"/></svg>
+<span>搜索</span></a></li><li class=menu-bottom-section><ol class=menu><li id=dark-mode-toggle><svg class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="8" cy="12" r="2"/><rect x="2" y="6" width="20" height="12" rx="6"/></svg>
+<svg class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="16" cy="12" r="2"/><rect x="2" y="6" width="20" height="12" rx="6"/></svg>
+<span>暗色模式</span></li></ol></li></ol></aside><main class="main full-width"><article class=main-article><header class=article-header><div class=article-details><header class=article-category><a href=/categories/%E5%8D%8F%E7%A8%8B%E5%BA%93/ style=background-color:#d8beef;color:#280f3d>协程库</a></header><div class=article-title-wrapper><h2 class=article-title><a href=/p/%E5%8A%A8%E6%89%8B%E5%86%99%E5%8D%8F%E7%A8%8B%E5%BA%93-2%E5%8D%8F%E7%A8%8B%E8%B0%83%E5%BA%A6%E5%99%A8/>【动手写协程库 2】协程调度器</a></h2></div><footer class=article-meta><div class=inline-meta><svg class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><path d="M11.795 21H5a2 2 0 01-2-2V7a2 2 0 012-2h12a2 2 0 012 2v4"/><circle cx="18" cy="18" r="4"/><path d="M15 3v4"/><path d="M7 3v4"/><path d="M3 11h16"/><path d="M18 16.496V18l1 1"/></svg>
+<time class=article-time--published datetime=2024-09-11T00:00:00Z>2024年9月11日星期三</time>
+<svg class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg>
+<time class=article-time--reading>阅读时长: 5 分钟</time></div></footer></div></header><section class=article-content><blockquote><p>【动手写协程库】系列笔记是学习 sylar 的协程库时的记录，参考了 <a class=link href="https://www.midlane.top/wiki/pages/viewpage.action?pageId=10060952" target=_blank rel=noopener>从零开始重写sylar C++高性能分布式服务器框架</a> 和代码随想录中的 <a class=link href=https://www.programmercarl.com/other/project_coroutine.html#%E4%B8%8B%E8%BD%BD%E6%96%B9%E5%BC%8F target=_blank rel=noopener>文档</a>。文章并不是对所有代码的详细解释，而是为了自己理解一些片段所做的笔记。</p><p><code>Scheduler</code> 类中其他函数的定义可以在这里查看：<a class=link href=https://github.com/kerolt/coroutine-lib/blob/master/src/scheduler.cpp target=_blank rel=noopener>Github: src/scheduler.cpp</a></p></blockquote><p>Sylar 的协程调度器是一个 N-M 模型，意味着 N 个线程可以运行 M 个协程，协程能够在线程之间进行切换，也可以被绑定到特定的线程上执行。</p><p>调度器可以由应用程序中的任何线程创建，但创建它的线程（称为 caller 线程）可以选择是否参与协程的调度。如果 caller 线程参与调度，那么调度器的线程数会相应减少一个，因为 caller 线程本身也会作为一个调度线程。</p><p>Scheduler 相关 API 如下：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>  1
+</span><span class=lnt>  2
+</span><span class=lnt>  3
+</span><span class=lnt>  4
+</span><span class=lnt>  5
+</span><span class=lnt>  6
+</span><span class=lnt>  7
+</span><span class=lnt>  8
+</span><span class=lnt>  9
+</span><span class=lnt> 10
+</span><span class=lnt> 11
+</span><span class=lnt> 12
+</span><span class=lnt> 13
+</span><span class=lnt> 14
+</span><span class=lnt> 15
+</span><span class=lnt> 16
+</span><span class=lnt> 17
+</span><span class=lnt> 18
+</span><span class=lnt> 19
+</span><span class=lnt> 20
+</span><span class=lnt> 21
+</span><span class=lnt> 22
+</span><span class=lnt> 23
+</span><span class=lnt> 24
+</span><span class=lnt> 25
+</span><span class=lnt> 26
+</span><span class=lnt> 27
+</span><span class=lnt> 28
+</span><span class=lnt> 29
+</span><span class=lnt> 30
+</span><span class=lnt> 31
+</span><span class=lnt> 32
+</span><span class=lnt> 33
+</span><span class=lnt> 34
+</span><span class=lnt> 35
+</span><span class=lnt> 36
+</span><span class=lnt> 37
+</span><span class=lnt> 38
+</span><span class=lnt> 39
+</span><span class=lnt> 40
+</span><span class=lnt> 41
+</span><span class=lnt> 42
+</span><span class=lnt> 43
+</span><span class=lnt> 44
+</span><span class=lnt> 45
+</span><span class=lnt> 46
+</span><span class=lnt> 47
+</span><span class=lnt> 48
+</span><span class=lnt> 49
+</span><span class=lnt> 50
+</span><span class=lnt> 51
+</span><span class=lnt> 52
+</span><span class=lnt> 53
+</span><span class=lnt> 54
+</span><span class=lnt> 55
+</span><span class=lnt> 56
+</span><span class=lnt> 57
+</span><span class=lnt> 58
+</span><span class=lnt> 59
+</span><span class=lnt> 60
+</span><span class=lnt> 61
+</span><span class=lnt> 62
+</span><span class=lnt> 63
+</span><span class=lnt> 64
+</span><span class=lnt> 65
+</span><span class=lnt> 66
+</span><span class=lnt> 67
+</span><span class=lnt> 68
+</span><span class=lnt> 69
+</span><span class=lnt> 70
+</span><span class=lnt> 71
+</span><span class=lnt> 72
+</span><span class=lnt> 73
+</span><span class=lnt> 74
+</span><span class=lnt> 75
+</span><span class=lnt> 76
+</span><span class=lnt> 77
+</span><span class=lnt> 78
+</span><span class=lnt> 79
+</span><span class=lnt> 80
+</span><span class=lnt> 81
+</span><span class=lnt> 82
+</span><span class=lnt> 83
+</span><span class=lnt> 84
+</span><span class=lnt> 85
+</span><span class=lnt> 86
+</span><span class=lnt> 87
+</span><span class=lnt> 88
+</span><span class=lnt> 89
+</span><span class=lnt> 90
+</span><span class=lnt> 91
+</span><span class=lnt> 92
+</span><span class=lnt> 93
+</span><span class=lnt> 94
+</span><span class=lnt> 95
+</span><span class=lnt> 96
+</span><span class=lnt> 97
+</span><span class=lnt> 98
+</span><span class=lnt> 99
+</span><span class=lnt>100
+</span><span class=lnt>101
+</span><span class=lnt>102
+</span><span class=lnt>103
+</span><span class=lnt>104
+</span><span class=lnt>105
+</span><span class=lnt>106
+</span><span class=lnt>107
+</span><span class=lnt>108
+</span><span class=lnt>109
+</span><span class=lnt>110
+</span><span class=lnt>111
+</span><span class=lnt>112
+</span><span class=lnt>113
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=cl><span class=cp>#ifndef SCHEDULER_H_
+</span></span></span><span class=line><span class=cl><span class=cp>#define SCHEDULER_H_
+</span></span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=cp>#include</span> <span class=cpf>&lt;atomic&gt;</span><span class=cp>
+</span></span></span><span class=line><span class=cl><span class=cp>#include</span> <span class=cpf>&lt;cstddef&gt;</span><span class=cp>
+</span></span></span><span class=line><span class=cl><span class=cp>#include</span> <span class=cpf>&lt;functional&gt;</span><span class=cp>
+</span></span></span><span class=line><span class=cl><span class=cp>#include</span> <span class=cpf>&lt;iostream&gt;</span><span class=cp>
+</span></span></span><span class=line><span class=cl><span class=cp>#include</span> <span class=cpf>&lt;list&gt;</span><span class=cp>
+</span></span></span><span class=line><span class=cl><span class=cp>#include</span> <span class=cpf>&lt;memory&gt;</span><span class=cp>
+</span></span></span><span class=line><span class=cl><span class=cp>#include</span> <span class=cpf>&lt;mutex&gt;</span><span class=cp>
+</span></span></span><span class=line><span class=cl><span class=cp>#include</span> <span class=cpf>&lt;thread&gt;</span><span class=cp>
+</span></span></span><span class=line><span class=cl><span class=cp>#include</span> <span class=cpf>&lt;utility&gt;</span><span class=cp>
+</span></span></span><span class=line><span class=cl><span class=cp>#include</span> <span class=cpf>&lt;vector&gt;</span><span class=cp>
+</span></span></span><span class=line><span class=cl><span class=cp>#include</span> <span class=cpf>&#34;coroutine.h&#34;</span><span class=cp>
+</span></span></span><span class=line><span class=cl><span class=cp>#include</span> <span class=cpf>&#34;util.h&#34;</span><span class=cp>
+</span></span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1>// 协程调度器
+</span></span></span><span class=line><span class=cl><span class=k>class</span> <span class=nc>Scheduler</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl><span class=k>private</span><span class=o>:</span>
+</span></span><span class=line><span class=cl>    <span class=c1>// 调度任务，任务类型可以是协程/函数二选一，并且可指定调度线程
+</span></span></span><span class=line><span class=cl>    <span class=k>using</span> <span class=n>ThreadIdPtr</span> <span class=o>=</span> <span class=n>std</span><span class=o>::</span><span class=n>shared_ptr</span><span class=o>&lt;</span><span class=n>std</span><span class=o>::</span><span class=kr>thread</span><span class=o>::</span><span class=n>id</span><span class=o>&gt;</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>struct</span> <span class=nc>SchedulerTask</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=n>ThreadIdPtr</span> <span class=n>thread_id_</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=n>Coroutine</span><span class=o>::</span><span class=n>Ptr</span> <span class=n>coroutine_</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=n>std</span><span class=o>::</span><span class=n>function</span><span class=o>&lt;</span><span class=kt>void</span><span class=p>()</span><span class=o>&gt;</span> <span class=n>callback_</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=n>SchedulerTask</span><span class=p>()</span> <span class=p>{}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=n>SchedulerTask</span><span class=p>(</span><span class=n>Coroutine</span><span class=o>::</span><span class=n>Ptr</span> <span class=n>co</span><span class=p>,</span> <span class=n>ThreadIdPtr</span> <span class=n>id</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>            <span class=o>:</span> <span class=n>coroutine_</span><span class=p>(</span><span class=n>co</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>            <span class=p>,</span> <span class=n>thread_id_</span><span class=p>(</span><span class=n>std</span><span class=o>::</span><span class=n>move</span><span class=p>(</span><span class=n>id</span><span class=p>))</span> <span class=p>{}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=n>SchedulerTask</span><span class=p>(</span><span class=n>std</span><span class=o>::</span><span class=n>function</span><span class=o>&lt;</span><span class=kt>void</span><span class=p>()</span><span class=o>&gt;</span> <span class=n>callback</span><span class=p>,</span> <span class=n>ThreadIdPtr</span> <span class=n>id</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>            <span class=o>:</span> <span class=n>callback_</span><span class=p>(</span><span class=n>callback</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>            <span class=p>,</span> <span class=n>thread_id_</span><span class=p>(</span><span class=n>std</span><span class=o>::</span><span class=n>move</span><span class=p>(</span><span class=n>id</span><span class=p>))</span> <span class=p>{}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=kt>void</span> <span class=nf>Reset</span><span class=p>()</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>            <span class=n>thread_id_</span><span class=p>.</span><span class=n>reset</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>            <span class=n>callback_</span> <span class=o>=</span> <span class=k>nullptr</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>            <span class=n>coroutine_</span> <span class=o>=</span> <span class=k>nullptr</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=p>}</span>
+</span></span><span class=line><span class=cl>    <span class=p>};</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>public</span><span class=o>:</span>
+</span></span><span class=line><span class=cl>    <span class=n>Scheduler</span><span class=p>(</span><span class=n>size_t</span> <span class=n>threads</span> <span class=o>=</span> <span class=mi>1</span><span class=p>,</span> <span class=kt>bool</span> <span class=n>use_caller</span> <span class=o>=</span> <span class=nb>true</span><span class=p>,</span> <span class=k>const</span> <span class=n>std</span><span class=o>::</span><span class=n>string</span><span class=o>&amp;</span> <span class=n>name</span> <span class=o>=</span> <span class=s>&#34;scheduler&#34;</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>virtual</span> <span class=o>~</span><span class=n>Scheduler</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=n>std</span><span class=o>::</span><span class=n>string</span> <span class=n>GetName</span><span class=p>()</span> <span class=k>const</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=n>name_</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=kt>void</span> <span class=nf>Start</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=kt>void</span> <span class=nf>Stop</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>template</span> <span class=o>&lt;</span><span class=k>typename</span> <span class=n>TaskType</span><span class=o>&gt;</span>
+</span></span><span class=line><span class=cl>    <span class=kt>void</span> <span class=n>Sched</span><span class=p>(</span><span class=n>TaskType</span> <span class=n>t</span><span class=p>,</span> <span class=n>ThreadIdPtr</span> <span class=n>id</span> <span class=o>=</span> <span class=k>nullptr</span><span class=p>)</span> <span class=k>requires</span><span class=p>(</span><span class=n>std</span><span class=o>::</span><span class=n>invocable</span><span class=o>&lt;</span><span class=n>TaskType</span><span class=o>&gt;</span> <span class=o>||</span> <span class=n>std</span><span class=o>::</span><span class=n>same_as</span><span class=o>&lt;</span><span class=n>TaskType</span><span class=p>,</span> <span class=n>Coroutine</span><span class=o>::</span><span class=n>Ptr</span><span class=o>&gt;</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=kt>bool</span> <span class=n>is_need_tick</span> <span class=o>=</span> <span class=nb>false</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=p>{</span>
+</span></span><span class=line><span class=cl>            <span class=n>std</span><span class=o>::</span><span class=n>lock_guard</span> <span class=n>lock</span><span class=p>(</span><span class=n>mutex_</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>            <span class=n>is_need_tick</span> <span class=o>=</span> <span class=n>tasks_</span><span class=p>.</span><span class=n>empty</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>            <span class=n>SchedulerTask</span> <span class=nf>task</span><span class=p>(</span><span class=n>t</span><span class=p>,</span> <span class=n>id</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>            <span class=k>if</span> <span class=p>(</span><span class=n>task</span><span class=p>.</span><span class=n>callback_</span> <span class=o>||</span> <span class=n>task</span><span class=p>.</span><span class=n>coroutine_</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>                <span class=n>tasks_</span><span class=p>.</span><span class=n>push_back</span><span class=p>(</span><span class=n>task</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>            <span class=p>}</span>
+</span></span><span class=line><span class=cl>        <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=k>if</span> <span class=p>(</span><span class=n>is_need_tick</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>            <span class=n>Tickle</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>        <span class=p>}</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>public</span><span class=o>:</span>
+</span></span><span class=line><span class=cl>    <span class=k>static</span> <span class=n>Scheduler</span><span class=o>*</span> <span class=n>GetScheduler</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>static</span> <span class=n>Coroutine</span><span class=o>*</span> <span class=nf>GetSchedCoroutine</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>protected</span><span class=o>:</span>
+</span></span><span class=line><span class=cl>    <span class=k>virtual</span> <span class=kt>void</span> <span class=n>Tickle</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=kt>void</span> <span class=nf>Run</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=kt>void</span> <span class=nf>SetThisAsScheduler</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>virtual</span> <span class=kt>void</span> <span class=nf>Idle</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>virtual</span> <span class=kt>bool</span> <span class=nf>IsStop</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=kt>bool</span> <span class=nf>HasIdleThreads</span><span class=p>()</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=n>idle_threads_</span> <span class=o>&gt;</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>private</span><span class=o>:</span>
+</span></span><span class=line><span class=cl>    <span class=n>std</span><span class=o>::</span><span class=n>string</span> <span class=n>name_</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=n>std</span><span class=o>::</span><span class=n>mutex</span> <span class=n>mutex_</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=n>std</span><span class=o>::</span><span class=n>vector</span><span class=o>&lt;</span><span class=n>std</span><span class=o>::</span><span class=kr>thread</span><span class=o>&gt;</span> <span class=n>thread_pool_</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=n>std</span><span class=o>::</span><span class=n>vector</span><span class=o>&lt;</span><span class=n>std</span><span class=o>::</span><span class=kr>thread</span><span class=o>::</span><span class=n>id</span><span class=o>&gt;</span> <span class=n>thread_ids_</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=n>std</span><span class=o>::</span><span class=n>list</span><span class=o>&lt;</span><span class=n>SchedulerTask</span><span class=o>&gt;</span> <span class=n>tasks_</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=n>size_t</span> <span class=n>threads_size_</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=n>std</span><span class=o>::</span><span class=n>atomic_size_t</span> <span class=n>active_threads_</span><span class=p>{</span><span class=mi>0</span><span class=p>};</span>
+</span></span><span class=line><span class=cl>    <span class=n>std</span><span class=o>::</span><span class=n>atomic_size_t</span> <span class=n>idle_threads_</span><span class=p>{</span><span class=mi>0</span><span class=p>};</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=n>std</span><span class=o>::</span><span class=kr>thread</span><span class=o>::</span><span class=n>id</span> <span class=n>sched_id_</span><span class=p>;</span> <span class=c1>// use_caller为true时，调度器所在的线程id
+</span></span></span><span class=line><span class=cl>    <span class=n>Coroutine</span><span class=o>::</span><span class=n>Ptr</span> <span class=n>sched_co_</span><span class=p>;</span>  <span class=c1>// use_caller为true时调度器所在线程的调度协程
+</span></span></span><span class=line><span class=cl>    <span class=kt>bool</span> <span class=n>is_stop_</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=kt>bool</span> <span class=n>is_use_caller_</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>};</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=cp>#endif </span><span class=cm>/* SCHEDULER_H_ */</span><span class=cp>
+</span></span></span></code></pre></td></tr></table></div></div><p>调度器的工作流大致为：</p><ul><li><strong>协程调度器在初始化时</strong>可传入线程数和一个布尔型的 <code>use_caller</code> 参数，表示是否使用 caller 线程。在使用 caller 线程的情况下，线程数自动减一，并且调度器内部会初始化一个属于 caller 线程的调度协程并保存起来（比如，在 main 函数中创建的调度器，如果 use_caller 为 true，那调度器会初始化一个属于 main 函数线程的调度协程）。</li><li><strong>调度器创建好后</strong> ，即可调用调度器的 <code>Sched</code> 函数向调度器添加调度任务，但此时调度器并不会立刻执行这些任务，而是将它们保存到内部的一个任务队列中。</li><li><strong>调用 <code>Scheduler::Start()</code> 函数启动调度</strong> 。调用 Start 会创建调度线程池，线程数量由初始化时的线程数和 use_caller 确定。调度线程一旦创建，就会<strong>立刻</strong>从任务队列里取任务执行。比较特殊的一点是，如果初始化时指定线程数为 1 且 use_caller 为 true，那么 Start 方法什么也不做，因为不需要创建新线程用于调度。并且，由于没有创建新的调度线程，那只能由 caller 线程的调度协程来负责调度协程（这里有点绕），而 caller 线程的调度协程的执行时机与 Start 函数并不在同一个地方。caller 线程的调度协程的执行时机在 Stop 函数中。</li><li><strong>接下来是调度协程，对应 <code>Scheduler::Run()</code></strong> 。调度协程负责从调度器的任务队列中取任务执行。取出的任务即子协程，每个子协程执行完后都必须返回调度协程，由调度协程重新从任务队列中取新的协程并执行。如果任务队列空了，那么调度协程会切换到一个 idle 协程，等有新任务进来时，idle 协程才会退出并回到调度协程，重新开始下一轮调度。（在 Scheduler 中，idle 函数的定义十分简单粗暴，因为实际使用协程库时并不是直接使用 Scheduler 类，而是使用它的派生类，在派生类中将会实现更为完善的调度）</li><li><strong>接下来是添加调度任务，对应 <code>Scheduler::Sched()</code></strong> ，这个方法支持传入协程或函数，并且支持一个线程 id 参数，表示是否将这个协程或函数绑定到一个具体的线程上执行。如果任务队列为空，那么在添加任务之后，要调用一次 tickle 方法以通知各调度线程的调度协程有新任务来了。在执行调度任务时，还可以通过调度器的 <code>GetScheduler()</code> 获取到当前调度器，再通过 <code>Sched</code> 函数继续添加新的任务，这就变相实现了在子协程中创建并运行新的子协程的功能。</li><li><strong>接下来是调度器的停止</strong>。调度器的停止行为要分两种情况讨论，首先是 use_caller 为 false 的情况，这种情况下，由于没有使用 caller 线程进行调度，那么只需要简单地等各个调度线程的调度协程退出就行了。如果 use_caller 为 true，表示 caller 线程也要参于调度，这时，调度器初始化时记录的属于 caller 线程的调度协程就要起作用了，在调度器停止前，应该让这个 caller 线程的调度协程也运行一次，让 caller 线程完成调度工作后再退出。如果调度器只使用了 caller 线程进行调度，那么所有的调度任务要在调度器停止时才会被调度。</li></ul><p>调度器中最重要的一个函数我认为就是 <code>Run()</code> 函数了，这个函数用于协程的调度，或者，你可以将他理解为是一个调度协程（名词）。</p><p>创建 Scheduler 时会为每一个内部线程池中的每一个线程都绑定一个调度协程，线程数量默认为 1，此时也默认会使用 caller 线程，也就是使用的主线程。调度协程 <code>Scheduler::Run()</code> 会从任务队列 Task Queue 中不断去取任务去执行。如果有任务可执行，那就切换至任务协程执行，任务协程执行完毕后又切换回调度协程；无任务执行时，调度协程切换至 Idle 协程进行等待。</p><p><img class=gallery-image data-flex-basis=401px data-flex-grow=167 height=730 loading=lazy sizes="(max-width: 767px) calc(100vw - 30px), (max-width: 1023px) 700px, (max-width: 1279px) 950px, 1232px" src=https://gitee.com/kerolt/picture/raw/main/20241216-143744.png srcset="/'20241216-143744_13013154973165091284_hu_34a279a05b8876bf.png 800w, https://gitee.com/kerolt/picture/raw/main/20241216-143744.png 1220w" width=1220></p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span><span class=lnt>34
+</span><span class=lnt>35
+</span><span class=lnt>36
+</span><span class=lnt>37
+</span><span class=lnt>38
+</span><span class=lnt>39
+</span><span class=lnt>40
+</span><span class=lnt>41
+</span><span class=lnt>42
+</span><span class=lnt>43
+</span><span class=lnt>44
+</span><span class=lnt>45
+</span><span class=lnt>46
+</span><span class=lnt>47
+</span><span class=lnt>48
+</span><span class=lnt>49
+</span><span class=lnt>50
+</span><span class=lnt>51
+</span><span class=lnt>52
+</span><span class=lnt>53
+</span><span class=lnt>54
+</span><span class=lnt>55
+</span><span class=lnt>56
+</span><span class=lnt>57
+</span><span class=lnt>58
+</span><span class=lnt>59
+</span><span class=lnt>60
+</span><span class=lnt>61
+</span><span class=lnt>62
+</span><span class=lnt>63
+</span><span class=lnt>64
+</span><span class=lnt>65
+</span><span class=lnt>66
+</span><span class=lnt>67
+</span><span class=lnt>68
+</span><span class=lnt>69
+</span><span class=lnt>70
+</span><span class=lnt>71
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=cl><span class=c1>// 用于协程的调度
+</span></span></span><span class=line><span class=cl><span class=kt>void</span> <span class=n>Scheduler</span><span class=o>::</span><span class=n>Run</span><span class=p>()</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=n>LOG</span> <span class=o>&lt;&lt;</span> <span class=s>&#34;Scheduler running...</span><span class=se>\n</span><span class=s>&#34;</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=n>SetThisAsScheduler</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=c1>// 如果当前线程不是调度器所在线程，设置调度的协程为当前线程运行的协程
+</span></span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=p>(</span><span class=n>std</span><span class=o>::</span><span class=n>this_thread</span><span class=o>::</span><span class=n>get_id</span><span class=p>()</span> <span class=o>!=</span> <span class=n>sched_id_</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=n>sched_coroutine</span> <span class=o>=</span> <span class=n>Coroutine</span><span class=o>::</span><span class=n>GetNowCoroutine</span><span class=p>().</span><span class=n>get</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=n>Coroutine</span><span class=o>::</span><span class=n>Ptr</span> <span class=n>idle_co</span> <span class=o>=</span> <span class=n>std</span><span class=o>::</span><span class=n>make_shared</span><span class=o>&lt;</span><span class=n>Coroutine</span><span class=o>&gt;</span><span class=p>([</span><span class=k>this</span><span class=p>]</span> <span class=p>{</span> <span class=k>this</span><span class=o>-&gt;</span><span class=n>Idle</span><span class=p>();</span> <span class=p>});</span>
+</span></span><span class=line><span class=cl>    <span class=n>Coroutine</span><span class=o>::</span><span class=n>Ptr</span> <span class=n>callback_co</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=n>SchedulerTask</span> <span class=n>task</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>while</span> <span class=p>(</span><span class=nb>true</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=n>task</span><span class=p>.</span><span class=n>Reset</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>        <span class=kt>bool</span> <span class=n>tickle</span> <span class=o>=</span> <span class=nb>false</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=p>{</span>
+</span></span><span class=line><span class=cl>            <span class=n>std</span><span class=o>::</span><span class=n>lock_guard</span> <span class=n>lock</span><span class=p>(</span><span class=n>mutex_</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>            <span class=k>auto</span> <span class=n>iter</span> <span class=o>=</span> <span class=n>tasks_</span><span class=p>.</span><span class=n>begin</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>            <span class=k>while</span> <span class=p>(</span><span class=n>iter</span> <span class=o>!=</span> <span class=n>tasks_</span><span class=p>.</span><span class=n>end</span><span class=p>())</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>                <span class=c1>// 当前遍历的task已经分配了线程去执行且这个线程不是当前线程，则不用管
+</span></span></span><span class=line><span class=cl>                <span class=k>if</span> <span class=p>(</span><span class=n>iter</span><span class=o>-&gt;</span><span class=n>thread_id_</span> <span class=o>&amp;&amp;</span> <span class=o>*</span><span class=n>iter</span><span class=o>-&gt;</span><span class=n>thread_id_</span> <span class=o>!=</span> <span class=n>std</span><span class=o>::</span><span class=n>this_thread</span><span class=o>::</span><span class=n>get_id</span><span class=p>())</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>                    <span class=o>++</span><span class=n>iter</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>                    <span class=n>tickle</span> <span class=o>=</span> <span class=nb>true</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>                    <span class=k>continue</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>                <span class=p>}</span>
+</span></span><span class=line><span class=cl>                <span class=k>if</span> <span class=p>(</span><span class=n>iter</span><span class=o>-&gt;</span><span class=n>coroutine_</span> <span class=o>&amp;&amp;</span> <span class=n>iter</span><span class=o>-&gt;</span><span class=n>coroutine_</span><span class=o>-&gt;</span><span class=n>GetState</span><span class=p>()</span> <span class=o>!=</span> <span class=n>Coroutine</span><span class=o>::</span><span class=n>READY</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>                    <span class=n>LOG</span> <span class=o>&lt;&lt;</span> <span class=s>&#34;Coroutine task&#39;s state should be READY!</span><span class=se>\n</span><span class=s>&#34;</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>                    <span class=n>assert</span><span class=p>(</span><span class=nb>false</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>                <span class=p>}</span>
+</span></span><span class=line><span class=cl>                <span class=n>task</span> <span class=o>=</span> <span class=o>*</span><span class=n>iter</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>                <span class=n>tasks_</span><span class=p>.</span><span class=n>erase</span><span class=p>(</span><span class=n>iter</span><span class=o>++</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>                <span class=n>active_threads_</span><span class=o>++</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>                <span class=k>break</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>            <span class=p>}</span>
+</span></span><span class=line><span class=cl>            <span class=c1>// 有任务可以去执行，需要tickle一下
+</span></span></span><span class=line><span class=cl>            <span class=n>tickle</span> <span class=o>|=</span> <span class=p>(</span><span class=n>iter</span> <span class=o>!=</span> <span class=n>tasks_</span><span class=p>.</span><span class=n>end</span><span class=p>());</span>
+</span></span><span class=line><span class=cl>        <span class=p>}</span>
+</span></span><span class=line><span class=cl>        <span class=k>if</span> <span class=p>(</span><span class=n>tickle</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>            <span class=n>Tickle</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>        <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=c1>// 子协程执行完毕后yield会回到Run()中
+</span></span></span><span class=line><span class=cl>        <span class=k>if</span> <span class=p>(</span><span class=n>task</span><span class=p>.</span><span class=n>coroutine_</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>            <span class=c1>// 任务类型为协程
+</span></span></span><span class=line><span class=cl>            <span class=n>task</span><span class=p>.</span><span class=n>coroutine_</span><span class=o>-&gt;</span><span class=n>Resume</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>            <span class=n>active_threads_</span><span class=o>--</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=p>}</span> <span class=k>else</span> <span class=nf>if</span> <span class=p>(</span><span class=n>task</span><span class=p>.</span><span class=n>callback_</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>            <span class=c1>// 任务类型为回调函数
+</span></span></span><span class=line><span class=cl>            <span class=k>if</span> <span class=p>(</span><span class=n>callback_co</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>                <span class=n>callback_co</span><span class=o>-&gt;</span><span class=n>Reset</span><span class=p>(</span><span class=n>task</span><span class=p>.</span><span class=n>callback_</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>            <span class=p>}</span> <span class=k>else</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>                <span class=n>callback_co</span> <span class=o>=</span> <span class=n>std</span><span class=o>::</span><span class=n>make_shared</span><span class=o>&lt;</span><span class=n>Coroutine</span><span class=o>&gt;</span><span class=p>(</span><span class=n>task</span><span class=p>.</span><span class=n>callback_</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>            <span class=p>}</span>
+</span></span><span class=line><span class=cl>            <span class=n>callback_co</span><span class=o>-&gt;</span><span class=n>Resume</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>            <span class=n>active_threads_</span><span class=o>--</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=p>}</span> <span class=k>else</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>            <span class=c1>// 无任务，任务队列为空
+</span></span></span><span class=line><span class=cl>            <span class=k>if</span> <span class=p>(</span><span class=n>idle_co</span><span class=o>-&gt;</span><span class=n>GetState</span><span class=p>()</span> <span class=o>==</span> <span class=n>Coroutine</span><span class=o>::</span><span class=n>FINISH</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>                <span class=n>LOG</span> <span class=o>&lt;&lt;</span> <span class=s>&#34;Idle coroutine finish</span><span class=se>\n</span><span class=s>&#34;</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>                <span class=k>break</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>            <span class=p>}</span>
+</span></span><span class=line><span class=cl>            <span class=n>idle_threads_</span><span class=o>++</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>            <span class=n>idle_co</span><span class=o>-&gt;</span><span class=n>Resume</span><span class=p>();</span> <span class=c1>// Idle最后Yeild时回到这里
+</span></span></span><span class=line><span class=cl>            <span class=n>idle_threads_</span><span class=o>--</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=p>}</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>    <span class=n>LOG</span> <span class=o>&lt;&lt;</span> <span class=s>&#34;Scheduler Run() exit</span><span class=se>\n</span><span class=s>&#34;</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p>这个 Scheduler 是一个很简单的调度器，要对任务做更好的调度，少不了 Idle 协程的帮助。Idle 协程的具体实现要在之后的 IOManager 中，其继承自 Scheduler，重写了 <code>Tickle()</code>、<code>Idle()</code> 等函数，并且使用 epoll 来实现在不同的 I/O 事件发生时，触发相应的处理逻辑。这使得程序可以以非阻塞的方式处理多个 I/O 操作，而不必等待每个操作完成后再进行下一个操作。</p></section><footer class="article-meta article-footer"><section class=article-tags><a href=/tags/cplusplus/>CPlusPlus</a>
+<a href=/tags/coroutine/>Coroutine</a></section><section class="article-copyright inline-meta"><svg class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><path d="M14.5 9a3.5 4 0 100 6"/></svg>
+<span>Licensed under CC BY-NC-SA 4.0</span></section><section class="article-lastmod inline-meta"><svg class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg>
+<span>最后更新于 2026年3月18日星期三</span></section></footer></article><footer class=site-footer><section class=copyright>&copy;
+2025 -
+2026 Kerolt's Note</section><section class=powerby>使用 <a href=https://gohugo.io/ target=_blank rel=noopener>Hugo</a> 构建<br>主题 <b><a href=https://github.com/CaiJimmy/hugo-theme-stack target=_blank rel=noopener data-version=4.0.3>Stack</a></b> 由 <a href=https://jimmycai.com target=_blank rel=noopener>Jimmy</a> 设计</section></footer><script type=module>
+    import gallery from '\/ts\/gallery.js';
+
+    const articleContent = document.querySelector('.article-content');
+    const shouldLoad = articleContent && (articleContent.querySelectorAll('figure').length > 0 || articleContent.querySelectorAll('img.gallery-image').length > 0);
+    
+    if (shouldLoad) {
+        gallery(articleContent);
+
+        const PhotoSwipeLightbox = (await import("https:\/\/cdn.jsdelivr.net\/npm\/photoswipe@5.4.4\/dist\/photoswipe-lightbox.esm.min.js")).default;
+        const styleHref = "https:\/\/cdn.jsdelivr.net\/npm\/photoswipe@5.4.4\/dist\/photoswipe.css";
+
+        const styleTag = document.createElement('link');
+        styleTag.rel = 'stylesheet';
+        styleTag.href = styleHref;
+        document.head.appendChild(styleTag);
+
+        const lightbox = new PhotoSwipeLightbox({
+            gallerySelector: '.article-content',
+            childSelector: 'figure a.image-link',
+            pswpModule: () => import("https:\/\/cdn.jsdelivr.net\/npm\/photoswipe@5.4.4\/dist\/photoswipe.esm.min.js")
+        });
+        lightbox.init();
+    }
+</script></main></div><script type=text/javascript src=/ts/main.f856840516f7c2ad1769a8f5937e3d08d6cb386e2cd2dd025ae696e0ff207958.js defer></script></body></html>

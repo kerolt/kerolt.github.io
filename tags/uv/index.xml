@@ -1,34 +1,50 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?>
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
-  <channel>
-    <title>Uv on Kerolt&#39;s Blog</title>
-    <link>https://kerolt.github.io/tags/uv/</link>
-    <description>Recent content in Uv on Kerolt&#39;s Blog</description>
-    <image>
-      <title>Kerolt&#39;s Blog</title>
-      <url>https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</url>
-      <link>https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</link>
-    </image>
-    <generator>Hugo -- 0.158.0</generator>
-    <language>en</language>
-    <lastBuildDate>Fri, 12 Dec 2025 00:00:00 +0000</lastBuildDate>
-    <atom:link href="https://kerolt.github.io/tags/uv/index.xml" rel="self" type="application/rss+xml" />
-    <item>
-      <title>uv包安装网络超时解决</title>
-      <link>https://kerolt.github.io/posts/dev-null/uv%E5%8C%85%E5%AE%89%E8%A3%85%E7%BD%91%E7%BB%9C%E8%B6%85%E6%97%B6%E8%A7%A3%E5%86%B3/</link>
-      <pubDate>Fri, 12 Dec 2025 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/dev-null/uv%E5%8C%85%E5%AE%89%E8%A3%85%E7%BD%91%E7%BB%9C%E8%B6%85%E6%97%B6%E8%A7%A3%E5%86%B3/</guid>
-      <description>&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;$ uv add numpy pandas torch scikit-learn matplotlib
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Resolved &lt;span style=&#34;color:#f60&#34;&gt;45&lt;/span&gt; packages in 21ms
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  × Failed to download &lt;span style=&#34;color:#c30&#34;&gt;`&lt;/span&gt;nvidia-cufft-cu12&lt;span style=&#34;color:#555&#34;&gt;==&lt;/span&gt;11.3.3.83&lt;span style=&#34;color:#c30&#34;&gt;`&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  ├─▶ Failed to fetch:
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  │   &lt;span style=&#34;color:#c30&#34;&gt;`&lt;/span&gt;https://files.pythonhosted.org/packages/1f/13/ee4e00f30e676b66ae65b4f08cb5bcbb8392c03f54f2d5413ea99a5d1c80/nvidia_cufft_cu12-11.3.3.83-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl&lt;span style=&#34;color:#c30&#34;&gt;`&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  ├─▶ Request failed after &lt;span style=&#34;color:#f60&#34;&gt;3&lt;/span&gt; retries
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  ├─▶ error sending request &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;for&lt;/span&gt; url
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  │   &lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;https://files.pythonhosted.org/packages/1f/13/ee4e00f30e676b66ae65b4f08cb5bcbb8392c03f54f2d5413ea99a5d1c80/nvidia_cufft_cu12-11.3.3.83-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  ╰─▶ operation timed out
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  help: If you want to add the package regardless of the failed resolution, provide the &lt;span style=&#34;color:#c30&#34;&gt;`&lt;/span&gt;--frozen&lt;span style=&#34;color:#c30&#34;&gt;`&lt;/span&gt; flag to skip locking and syncing.
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;这个错误是因为 &lt;code&gt;uv&lt;/code&gt; 在尝试从官方源下载 NVIDIA 的 CUDA 组件包（&lt;code&gt;nvidia-cufft-cu12&lt;/code&gt;）时&lt;strong&gt;网络超时&lt;/strong&gt;了。&lt;/p&gt;</description>
-    </item>
-  </channel>
-</rss>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Uv on Kerolt's Note</title><link>https://kerolt.github.io/tags/uv/</link><description>Recent content in Uv on Kerolt's Note</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><lastBuildDate>Fri, 12 Dec 2025 00:00:00 +0000</lastBuildDate><atom:link href="https://kerolt.github.io/tags/uv/index.xml" rel="self" type="application/rss+xml"/><item><title>uv包安装网络超时解决</title><link>https://kerolt.github.io/p/uv%E5%8C%85%E5%AE%89%E8%A3%85%E7%BD%91%E7%BB%9C%E8%B6%85%E6%97%B6%E8%A7%A3%E5%86%B3/</link><pubDate>Fri, 12 Dec 2025 00:00:00 +0000</pubDate><guid>https://kerolt.github.io/p/uv%E5%8C%85%E5%AE%89%E8%A3%85%E7%BD%91%E7%BB%9C%E8%B6%85%E6%97%B6%E8%A7%A3%E5%86%B3/</guid><description>&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt; 1
+&lt;/span&gt;&lt;span class="lnt"&gt; 2
+&lt;/span&gt;&lt;span class="lnt"&gt; 3
+&lt;/span&gt;&lt;span class="lnt"&gt; 4
+&lt;/span&gt;&lt;span class="lnt"&gt; 5
+&lt;/span&gt;&lt;span class="lnt"&gt; 6
+&lt;/span&gt;&lt;span class="lnt"&gt; 7
+&lt;/span&gt;&lt;span class="lnt"&gt; 8
+&lt;/span&gt;&lt;span class="lnt"&gt; 9
+&lt;/span&gt;&lt;span class="lnt"&gt;10
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-shell" data-lang="shell"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;$ uv add numpy pandas torch scikit-learn matplotlib
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;Resolved &lt;span class="m"&gt;45&lt;/span&gt; packages in 21ms
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;  × Failed to download &lt;span class="sb"&gt;`&lt;/span&gt;nvidia-cufft-cu12&lt;span class="o"&gt;==&lt;/span&gt;11.3.3.83&lt;span class="sb"&gt;`&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;  ├─▶ Failed to fetch:
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;  │   &lt;span class="sb"&gt;`&lt;/span&gt;https://files.pythonhosted.org/packages/1f/13/ee4e00f30e676b66ae65b4f08cb5bcbb8392c03f54f2d5413ea99a5d1c80/nvidia_cufft_cu12-11.3.3.83-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl&lt;span class="sb"&gt;`&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;  ├─▶ Request failed after &lt;span class="m"&gt;3&lt;/span&gt; retries
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;  ├─▶ error sending request &lt;span class="k"&gt;for&lt;/span&gt; url
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;  │   &lt;span class="o"&gt;(&lt;/span&gt;https://files.pythonhosted.org/packages/1f/13/ee4e00f30e676b66ae65b4f08cb5bcbb8392c03f54f2d5413ea99a5d1c80/nvidia_cufft_cu12-11.3.3.83-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl&lt;span class="o"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;  ╰─▶ operation timed out
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;  help: If you want to add the package regardless of the failed resolution, provide the &lt;span class="sb"&gt;`&lt;/span&gt;--frozen&lt;span class="sb"&gt;`&lt;/span&gt; flag to skip locking and syncing.
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;这个错误是因为 &lt;code&gt;uv&lt;/code&gt; 在尝试从官方源下载 NVIDIA 的 CUDA 组件包（&lt;code&gt;nvidia-cufft-cu12&lt;/code&gt;）时&lt;strong&gt;网络超时&lt;/strong&gt;了。&lt;/p&gt;
+&lt;p&gt;这些 NVIDIA 的包通常非常大（几百 MB），如果网络环境不够快或者连接 PyPI 官方源不稳定（在国内很常见），就会导致下载失败。&lt;/p&gt;
+&lt;p&gt;可以通过设置环境变量 &lt;code&gt;UV_INDEX_URL&lt;/code&gt; 来让 &lt;code&gt;uv&lt;/code&gt; 使用清华大学或阿里云的镜像源：&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Linux / macOS:&lt;/strong&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nv"&gt;UV_INDEX_URL&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;https://pypi.tuna.tsinghua.edu.cn/simple uv add numpy pandas torch scikit-learn matplotlib
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;&lt;strong&gt;Windows (PowerShell):&lt;/strong&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-powershell" data-lang="powershell"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nv"&gt;$env:UV_INDEX_URL&lt;/span&gt;&lt;span class="p"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;&amp;#34;https://pypi.tuna.tsinghua.edu.cn/simple&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;uv&lt;/span&gt; &lt;span class="n"&gt;add&lt;/span&gt; &lt;span class="n"&gt;numpy&lt;/span&gt; &lt;span class="n"&gt;pandas&lt;/span&gt; &lt;span class="n"&gt;torch&lt;/span&gt; &lt;span class="nb"&gt;scikit-learn&lt;/span&gt; &lt;span class="n"&gt;matplotlib&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;</description></item></channel></rss>

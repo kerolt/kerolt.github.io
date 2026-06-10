@@ -1,0 +1,225 @@
+<!doctype html><html lang=zh-cn dir=ltr><head><meta charset=utf-8><meta name=viewport content='width=device-width,initial-scale=1'><meta name=description content="backtrace这个lab非常有意思，虽然实现的代码量不多，但是能让我们更好地理解栈、栈帧、指针、gdb的一些知识。\n该实验的代码实现见：仓库commit\n"><title>【MIT6.S081】Lab4 trap backtrace</title><link rel=canonical href=https://kerolt.github.io/p/mit6.s081lab4-trap-backtrace/><link rel=preconnect href=https://fonts.googleapis.com><link rel=preconnect href=https://fonts.gstatic.com crossorigin><link rel=preload as=style href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap"><link rel=stylesheet href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap"><link rel=stylesheet href=/scss/style.min.e62e09c60ba428a627e03568fa3df938f6a8224f815b5846f00816c17d4a0be4.css><meta property='og:title' content="【MIT6.S081】Lab4 trap backtrace"><meta property='og:description' content="backtrace这个lab非常有意思，虽然实现的代码量不多，但是能让我们更好地理解栈、栈帧、指针、gdb的一些知识。\n该实验的代码实现见：仓库commit\n"><meta property='og:url' content='https://kerolt.github.io/p/mit6.s081lab4-trap-backtrace/'><meta property='og:site_name' content="Kerolt's Note"><meta property='og:type' content='article'><meta property='article:section' content='Post'><meta property='article:tag' content='MIT6-S081'><meta property='article:tag' content='OS'><meta property='article:tag' content='xv6'><meta property='article:published_time' content='2024-11-10T00:00:00+00:00'><meta property='article:modified_time' content='2024-11-10T00:00:00+00:00'><meta name=twitter:title content="【MIT6.S081】Lab4 trap backtrace"><meta name=twitter:description content="backtrace这个lab非常有意思，虽然实现的代码量不多，但是能让我们更好地理解栈、栈帧、指针、gdb的一些知识。\n该实验的代码实现见：仓库commit\n"><link rel="shortcut icon" href=/images/favicon.png></head><body class=article-page><script>(function(){const e="StackColorScheme";localStorage.getItem(e)||localStorage.setItem(e,"auto")})()</script><script>(function(){const t="StackColorScheme",e=localStorage.getItem(t),n=window.matchMedia("(prefers-color-scheme: dark)").matches===!0;e=="dark"||e==="auto"&&n?document.documentElement.dataset.scheme="dark":document.documentElement.dataset.scheme="light"})()</script><div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky"><button class="hamburger hamburger--spin" type=button id=toggle-menu aria-label=切换菜单>
+<span class=hamburger-box><span class=hamburger-inner></span></span></button><header><figure class=site-avatar><a href=/><img src=/images/avatar.jpg width=200 height=200 class=site-logo loading=lazy alt=Avatar>
+</a><span class=emoji>🏸</span></figure><div class=site-meta><h1 class=site-name><a href=/>Kerolt's Note</a></h1><h2 class=site-description>宇宙是秩序的，也是混乱的。</h2></div></header><ol class=menu-social><li><a href=https://github.com/kerolt title=GitHub rel=me><svg class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 19c-4.3 1.4-4.3-2.5-6-3m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6.0 00-1.3-3.2 4.2 4.2.0 00-.1-3.2s-1.1-.3-3.5 1.3a12.3 12.3.0 00-6.2.0C6.5 2.8 5.4 3.1 5.4 3.1a4.2 4.2.0 00-.1 3.2A4.6 4.6.0 004 9.5c0 4.6 2.7 5.7 5.5 6-.6.6-.6 1.2-.5 2V21"/></svg></a></li></ol><ol class=menu id=main-menu><li><a href=/><svg class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><polyline points="5 12 3 12 12 3 21 12 19 12"/><path d="M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"/><path d="M9 21v-6a2 2 0 012-2h2a2 2 0 012 2v6"/></svg>
+<span>首页</span></a></li><li><a href=/archives/><svg class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><rect x="3" y="4" width="18" height="4" rx="2"/><path d="M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
+<span>归档</span></a></li><li><a href=/categories/><svg class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><line x1="5" y1="9" x2="19" y2="9"/><line x1="5" y1="15" x2="19" y2="15"/><line x1="11" y1="4" x2="7" y2="20"/><line x1="17" y1="4" x2="13" y2="20"/></svg>
+<span>分类</span></a></li><li><a href=/tags/><svg class="icon icon-tabler icon-tabler-tag" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><path d="M11 3l9 9a1.5 1.5.0 010 2l-6 6a1.5 1.5.0 01-2 0L3 11V7a4 4 0 014-4h4"/><circle cx="9" cy="9" r="2"/></svg>
+<span>标签</span></a></li><li><a href=/about/><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-info-circle"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 12a9 9 0 1018 0A9 9 0 003 12"/><path d="M12 9h.01"/><path d="M11 12h1v4h1"/></svg>
+<span>关于我</span></a></li><li><a href=/search/><svg class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="10" cy="10" r="7"/><line x1="21" y1="21" x2="15" y2="15"/></svg>
+<span>搜索</span></a></li><li class=menu-bottom-section><ol class=menu><li id=dark-mode-toggle><svg class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="8" cy="12" r="2"/><rect x="2" y="6" width="20" height="12" rx="6"/></svg>
+<svg class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="16" cy="12" r="2"/><rect x="2" y="6" width="20" height="12" rx="6"/></svg>
+<span>暗色模式</span></li></ol></li></ol></aside><main class="main full-width"><article class=main-article><header class=article-header><div class=article-details><header class=article-category><a href=/categories/mit6.s081/ style=background-color:#beefec;color:#0f3d3b>MIT6.s081</a></header><div class=article-title-wrapper><h2 class=article-title><a href=/p/mit6.s081lab4-trap-backtrace/>【MIT6.S081】Lab4 trap backtrace</a></h2></div><footer class=article-meta><div class=inline-meta><svg class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><path d="M11.795 21H5a2 2 0 01-2-2V7a2 2 0 012-2h12a2 2 0 012 2v4"/><circle cx="18" cy="18" r="4"/><path d="M15 3v4"/><path d="M7 3v4"/><path d="M3 11h16"/><path d="M18 16.496V18l1 1"/></svg>
+<time class=article-time--published datetime=2024-11-10T00:00:00Z>2024年11月10日星期日</time>
+<svg class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg>
+<time class=article-time--reading>阅读时长: 4 分钟</time></div></footer></div></header><section class=article-content><p>backtrace这个lab非常有意思，虽然实现的代码量不多，但是能让我们更好地理解栈、栈帧、指针、gdb的一些知识。</p><blockquote><p>该实验的代码实现见：<a class=link href=https://github.com/kerolt/xv6-labs-2023/commit/d1dba8ae4a1a71604e8bb6df5238f8cac1771683 target=_blank rel=noopener>仓库commit</a></p></blockquote><p>首先先解答一下【RISC-V assembly】中的一些问题：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-text data-lang=text><span class=line><span class=cl>Q: Which registers contain arguments to functions? For example, which register holds 13 in main&#39;s call to printf?
+</span></span><span class=line><span class=cl>A: a0-a7, a2保存了13
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>Q: Where is the call to function f in the assembly code for main? Where is the call to g? (Hint: the compiler may inline functions.)
+</span></span><span class=line><span class=cl>A: 函数f和g被内联优化了
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>Q: At what address is the function printf located?
+</span></span><span class=line><span class=cl>A: 0x000000000000064a
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>Q: What value is in the register ra just after the jalr to printf in main?
+</span></span><span class=line><span class=cl>A: jalr指令的后一条指令的地址，也是当前pc寄存器中的地址
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>Q: Run the following code.
+</span></span><span class=line><span class=cl>	 unsigned int i = 0x00646c72;
+</span></span><span class=line><span class=cl>	 printf(&#34;H%x Wo%s&#34;, 57616, &amp;i);
+</span></span><span class=line><span class=cl>  What is the output? Here&#39;s an ASCII table that maps bytes to characters.
+</span></span><span class=line><span class=cl>  The output depends on that fact that the RISC-V is little-endian. If the RISC-V were instead big-endian what would you set i to in order to yield the same output? Would you need to change 57616 to a different value?
+</span></span><span class=line><span class=cl>  Here&#39;s a description of little- and big-endian and a more whimsical description.
+</span></span><span class=line><span class=cl>---
+</span></span><span class=line><span class=cl>A: output: He110 World 若risc-v为大端序，则i应该设置成0x726c6400；57616不需要变，因为无论是大端序还是小端序，其十六进制都为E110
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>Q: In the following code, what is going to be printed after &#39;y=&#39;? (note: the answer is not a specific value.) Why does this happen?
+</span></span><span class=line><span class=cl> 	printf(&#34;x=%d y=%d&#34;, 3);
+</span></span><span class=line><span class=cl>---
+</span></span><span class=line><span class=cl>A: x=3 y=1403684968 y的值是一个随机值，因为本该传入printf的第三个参数并没有传入，而其对应的寄存器为a2，故y会使用a2中残存的值
+</span></span></code></pre></td></tr></table></div></div><p>这里的几个问题不是很难，涉及到了一些汇编、寄存器的知识，在接下来学习backtrace的时候将会有详细讨论。</p><p>backtrace需要我们做的事情可以概括为：<strong>在发生错误的点之上的堆栈上的函数调用列表，并在每个堆栈帧中打印保存的返回地址</strong>。</p><p>什么意思呢？就是例如在gdb调试中使用bt查看函数调用栈时，需要我们打印途中红色框中的地址。</p><p><img class=gallery-image data-flex-basis=1102px data-flex-grow=459 height=141 loading=lazy sizes="(max-width: 767px) calc(100vw - 30px), (max-width: 1023px) 700px, (max-width: 1279px) 950px, 1232px" src=https://gitee.com/kerolt/picture/raw/main/20241215-103100.png width=648></p><p>该lab让我们在kernel/printf.c中实现一个backtrace函数。在sys_sleep中插入对此函数的调用，然后运行bttest这个测试程序将调用sleep（也就是会执行sys_sleep）。</p><p>首先，让我们来看看xv6中栈的结构：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-text data-lang=text><span class=line><span class=cl>                   .
+</span></span><span class=line><span class=cl>                   .
+</span></span><span class=line><span class=cl>      +-&gt;          .
+</span></span><span class=line><span class=cl>      |   +-----------------+   |
+</span></span><span class=line><span class=cl>      |   | return address  |   |
+</span></span><span class=line><span class=cl>      |   |   previous fp ------+
+</span></span><span class=line><span class=cl>      |   | saved registers |
+</span></span><span class=line><span class=cl>      |   | local variables |
+</span></span><span class=line><span class=cl>      |   |       ...       | &lt;-+
+</span></span><span class=line><span class=cl>      |   +-----------------+   |
+</span></span><span class=line><span class=cl>      |   | return address  |   |
+</span></span><span class=line><span class=cl>      +------ previous fp   |   |
+</span></span><span class=line><span class=cl>          | saved registers |   |
+</span></span><span class=line><span class=cl>          | local variables |   |
+</span></span><span class=line><span class=cl>      +-&gt; |       ...       |   |
+</span></span><span class=line><span class=cl>      |   +-----------------+   |
+</span></span><span class=line><span class=cl>      |   | return address  |   |
+</span></span><span class=line><span class=cl>      |   |   previous fp ------+
+</span></span><span class=line><span class=cl>      |   | saved registers |
+</span></span><span class=line><span class=cl>      |   | local variables |
+</span></span><span class=line><span class=cl>      |   |       ...       | &lt;-+
+</span></span><span class=line><span class=cl>      |   +-----------------+   |
+</span></span><span class=line><span class=cl>      |   | return address  |   |
+</span></span><span class=line><span class=cl>      +------ previous fp   |   |
+</span></span><span class=line><span class=cl>          | saved registers |   |
+</span></span><span class=line><span class=cl>          | local variables |   |
+</span></span><span class=line><span class=cl>  $fp --&gt; |       ...       |   |
+</span></span><span class=line><span class=cl>          +-----------------+   |
+</span></span><span class=line><span class=cl>          | return address  |   |
+</span></span><span class=line><span class=cl>          |   previous fp ------+
+</span></span><span class=line><span class=cl>          | saved registers |
+</span></span><span class=line><span class=cl>  $sp --&gt; | local variables |
+</span></span><span class=line><span class=cl>          +-----------------+
+</span></span></code></pre></td></tr></table></div></div><p>栈是由高地址向低地址增长的，risc-v中<code>sp</code>寄存器代表“stack pointer”，即栈顶指针，<code>fp</code>寄存器代表“frame pointer”，为当前栈帧的指针。</p><p>假设有一个这样的程序：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-c data-lang=c><span class=line><span class=cl><span class=cp>#include</span> <span class=cpf>&lt;stdio.h&gt;</span><span class=cp>
+</span></span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=kt>void</span> <span class=nf>g</span><span class=p>()</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>	<span class=nf>printf</span><span class=p>(</span><span class=s>&#34;g()</span><span class=se>\n</span><span class=s>&#34;</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=kt>void</span> <span class=nf>f</span><span class=p>()</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>	<span class=nf>g</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>	<span class=nf>printf</span><span class=p>(</span><span class=s>&#34;f()</span><span class=se>\n</span><span class=s>&#34;</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=kt>int</span> <span class=nf>main</span><span class=p>()</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>	<span class=nf>f</span><span class=p>();</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p>假设程序中的main函数里，函数f调用了函数g，那么在函数调用栈中从高地址到低地址三个函数的顺序为：main、f、g；当g函数执行完成后，其栈帧将会从栈中弹出，并且通过栈帧中的数据回到调用自身的下一条指令，即f中g的调用发生在第8行，当g执行完毕后，应该继续执行第9行的指令，这也就是“return address”。</p><p>我们可以通过内联汇编获取当前栈帧的的指针：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span><span class=lnt>8
+</span><span class=lnt>9
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-c data-lang=c><span class=line><span class=cl><span class=c1>// kernel/riscv.h
+</span></span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>static</span> <span class=kr>inline</span> <span class=n>uint64</span>
+</span></span><span class=line><span class=cl><span class=nf>r_fp</span><span class=p>()</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>  <span class=n>uint64</span> <span class=n>x</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=k>asm</span> <span class=k>volatile</span><span class=p>(</span><span class=s>&#34;mv %0, s0&#34;</span> <span class=o>:</span> <span class=s>&#34;=r&#34;</span> <span class=p>(</span><span class=n>x</span><span class=p>)</span> <span class=p>);</span>
+</span></span><span class=line><span class=cl>  <span class=k>return</span> <span class=n>x</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p>然后不断遍历栈中的栈帧，打印其return address，直到遍历到最后一个栈帧。xv6在给栈分配内存时确保了每一个栈帧都在同一页中，这样的话可以通过<code>PGROUNDDOWN(fp)</code>宏来判断fp是否超出栈空间：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-c data-lang=c><span class=line><span class=cl><span class=cp>#define PGROUNDDOWN(a) (((a)) &amp; ~(PGSIZE - 1))
+</span></span></span></code></pre></td></tr></table></div></div><p>xv6中页的大小为4096B，故<code>PGROUNDDOWN(a)</code>可以获取a地址所在的页号，或者说这一页的最高地址，只要我们的fp不等于它，就说明我们还没有遍历到栈底。</p><p><code>fp - 8</code>获取到<code>return address</code>的地址，<code>fp - 16</code>获取到当前栈帧的前一个栈帧的地址。由于xv6中获取的地址是用<code>uint64</code>来表示的，那么可将其强转为<code>uint64*</code>来<strong>将一个值解释为内存地址</strong>，之后便可以解引用这个地址获取其中的值了。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span><span class=lnt>8
+</span><span class=lnt>9
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-c data-lang=c><span class=line><span class=cl><span class=kt>void</span> <span class=nf>backtrace</span><span class=p>()</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>  <span class=n>uint64</span> <span class=n>fp</span> <span class=o>=</span> <span class=nf>r_fp</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>  <span class=nf>printf</span><span class=p>(</span><span class=s>&#34;backtrace:</span><span class=se>\n</span><span class=s>&#34;</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>  <span class=k>while</span> <span class=p>(</span><span class=n>fp</span> <span class=o>!=</span> <span class=nf>PGROUNDDOWN</span><span class=p>(</span><span class=n>fp</span><span class=p>))</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=n>uint64</span> <span class=o>*</span><span class=n>return_addr</span> <span class=o>=</span> <span class=p>(</span><span class=n>uint64</span> <span class=o>*</span><span class=p>)(</span><span class=n>fp</span> <span class=o>-</span> <span class=mi>8</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=n>fp</span> <span class=o>=</span> <span class=o>*</span><span class=p>(</span><span class=n>uint64</span> <span class=o>*</span><span class=p>)(</span><span class=n>fp</span> <span class=o>-</span> <span class=mi>16</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=nf>printf</span><span class=p>(</span><span class=s>&#34;%p</span><span class=se>\n</span><span class=s>&#34;</span><span class=p>,</span> <span class=o>*</span><span class=n>return_addr</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>  <span class=p>}</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p>当然，也不要忘记在<code>kernel/def.h</code>中声明<code>backtrace</code>，还有在<code>sys_sleep</code>中调用<code>backtrace</code>。</p></section><footer class="article-meta article-footer"><section class=article-tags><a href=/tags/mit6-s081/>MIT6-S081</a>
+<a href=/tags/os/>OS</a>
+<a href=/tags/xv6/>Xv6</a></section><section class="article-copyright inline-meta"><svg class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><path d="M14.5 9a3.5 4 0 100 6"/></svg>
+<span>Licensed under CC BY-NC-SA 4.0</span></section></footer></article><footer class=site-footer><section class=copyright>&copy;
+2025 -
+2026 Kerolt's Note</section><section class=powerby>使用 <a href=https://gohugo.io/ target=_blank rel=noopener>Hugo</a> 构建<br>主题 <b><a href=https://github.com/CaiJimmy/hugo-theme-stack target=_blank rel=noopener data-version=4.0.3>Stack</a></b> 由 <a href=https://jimmycai.com target=_blank rel=noopener>Jimmy</a> 设计</section></footer><script type=module>
+    import gallery from '\/ts\/gallery.js';
+
+    const articleContent = document.querySelector('.article-content');
+    const shouldLoad = articleContent && (articleContent.querySelectorAll('figure').length > 0 || articleContent.querySelectorAll('img.gallery-image').length > 0);
+    
+    if (shouldLoad) {
+        gallery(articleContent);
+
+        const PhotoSwipeLightbox = (await import("https:\/\/cdn.jsdelivr.net\/npm\/photoswipe@5.4.4\/dist\/photoswipe-lightbox.esm.min.js")).default;
+        const styleHref = "https:\/\/cdn.jsdelivr.net\/npm\/photoswipe@5.4.4\/dist\/photoswipe.css";
+
+        const styleTag = document.createElement('link');
+        styleTag.rel = 'stylesheet';
+        styleTag.href = styleHref;
+        document.head.appendChild(styleTag);
+
+        const lightbox = new PhotoSwipeLightbox({
+            gallerySelector: '.article-content',
+            childSelector: 'figure a.image-link',
+            pswpModule: () => import("https:\/\/cdn.jsdelivr.net\/npm\/photoswipe@5.4.4\/dist\/photoswipe.esm.min.js")
+        });
+        lightbox.init();
+    }
+</script></main></div><script type=text/javascript src=/ts/main.f856840516f7c2ad1769a8f5937e3d08d6cb386e2cd2dd025ae696e0ff207958.js defer></script></body></html>

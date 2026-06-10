@@ -1,0 +1,474 @@
+<!doctype html><html lang=zh-cn dir=ltr><head><meta charset=utf-8><meta name=viewport content='width=device-width,initial-scale=1'><meta name=description content="为什么我们需要copy on write 通过xv6的实验指导书，我们可以知道：\nxv6中的fork()系统调用将父进程的所有用户空间内存复制到子进程中。如果父进程所使用的页数很大，复制可能需要很长时间，而这样的复制操作经常是没有用的：fork()之后通常是子进程中的exec()，这会丢弃复制的内存而不是使用它们。\n那么，我们是不是可以在子进程刚创建时将其页表的映射到父进程的物理页，而在其需要对内存进行写操作时再重新分配内存呢？没错，这就是通过copy on write（写时复制）技术来进行优化。\n该实验的代码实现见：仓库commit\n"><title>【MIT6.S081】Lab5 copy-on-write fork</title><link rel=canonical href=https://kerolt.github.io/p/mit6.s081lab5-copy-on-write-fork/><link rel=preconnect href=https://fonts.googleapis.com><link rel=preconnect href=https://fonts.gstatic.com crossorigin><link rel=preload as=style href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap"><link rel=stylesheet href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap"><link rel=stylesheet href=/scss/style.min.e62e09c60ba428a627e03568fa3df938f6a8224f815b5846f00816c17d4a0be4.css><meta property='og:title' content="【MIT6.S081】Lab5 copy-on-write fork"><meta property='og:description' content="为什么我们需要copy on write 通过xv6的实验指导书，我们可以知道：\nxv6中的fork()系统调用将父进程的所有用户空间内存复制到子进程中。如果父进程所使用的页数很大，复制可能需要很长时间，而这样的复制操作经常是没有用的：fork()之后通常是子进程中的exec()，这会丢弃复制的内存而不是使用它们。\n那么，我们是不是可以在子进程刚创建时将其页表的映射到父进程的物理页，而在其需要对内存进行写操作时再重新分配内存呢？没错，这就是通过copy on write（写时复制）技术来进行优化。\n该实验的代码实现见：仓库commit\n"><meta property='og:url' content='https://kerolt.github.io/p/mit6.s081lab5-copy-on-write-fork/'><meta property='og:site_name' content="Kerolt's Note"><meta property='og:type' content='article'><meta property='article:section' content='Post'><meta property='article:tag' content='MIT6-S081'><meta property='article:tag' content='OS'><meta property='article:tag' content='xv6'><meta property='article:published_time' content='2024-11-12T00:00:00+00:00'><meta property='article:modified_time' content='2024-11-12T00:00:00+00:00'><meta name=twitter:title content="【MIT6.S081】Lab5 copy-on-write fork"><meta name=twitter:description content="为什么我们需要copy on write 通过xv6的实验指导书，我们可以知道：\nxv6中的fork()系统调用将父进程的所有用户空间内存复制到子进程中。如果父进程所使用的页数很大，复制可能需要很长时间，而这样的复制操作经常是没有用的：fork()之后通常是子进程中的exec()，这会丢弃复制的内存而不是使用它们。\n那么，我们是不是可以在子进程刚创建时将其页表的映射到父进程的物理页，而在其需要对内存进行写操作时再重新分配内存呢？没错，这就是通过copy on write（写时复制）技术来进行优化。\n该实验的代码实现见：仓库commit\n"><link rel="shortcut icon" href=/images/favicon.png></head><body class=article-page><script>(function(){const e="StackColorScheme";localStorage.getItem(e)||localStorage.setItem(e,"auto")})()</script><script>(function(){const t="StackColorScheme",e=localStorage.getItem(t),n=window.matchMedia("(prefers-color-scheme: dark)").matches===!0;e=="dark"||e==="auto"&&n?document.documentElement.dataset.scheme="dark":document.documentElement.dataset.scheme="light"})()</script><div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky"><button class="hamburger hamburger--spin" type=button id=toggle-menu aria-label=切换菜单>
+<span class=hamburger-box><span class=hamburger-inner></span></span></button><header><figure class=site-avatar><a href=/><img src=/images/avatar.jpg width=200 height=200 class=site-logo loading=lazy alt=Avatar>
+</a><span class=emoji>🏸</span></figure><div class=site-meta><h1 class=site-name><a href=/>Kerolt's Note</a></h1><h2 class=site-description>宇宙是秩序的，也是混乱的。</h2></div></header><ol class=menu-social><li><a href=https://github.com/kerolt title=GitHub rel=me><svg class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 19c-4.3 1.4-4.3-2.5-6-3m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6.0 00-1.3-3.2 4.2 4.2.0 00-.1-3.2s-1.1-.3-3.5 1.3a12.3 12.3.0 00-6.2.0C6.5 2.8 5.4 3.1 5.4 3.1a4.2 4.2.0 00-.1 3.2A4.6 4.6.0 004 9.5c0 4.6 2.7 5.7 5.5 6-.6.6-.6 1.2-.5 2V21"/></svg></a></li></ol><ol class=menu id=main-menu><li><a href=/><svg class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><polyline points="5 12 3 12 12 3 21 12 19 12"/><path d="M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"/><path d="M9 21v-6a2 2 0 012-2h2a2 2 0 012 2v6"/></svg>
+<span>首页</span></a></li><li><a href=/archives/><svg class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><rect x="3" y="4" width="18" height="4" rx="2"/><path d="M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
+<span>归档</span></a></li><li><a href=/categories/><svg class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><line x1="5" y1="9" x2="19" y2="9"/><line x1="5" y1="15" x2="19" y2="15"/><line x1="11" y1="4" x2="7" y2="20"/><line x1="17" y1="4" x2="13" y2="20"/></svg>
+<span>分类</span></a></li><li><a href=/tags/><svg class="icon icon-tabler icon-tabler-tag" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><path d="M11 3l9 9a1.5 1.5.0 010 2l-6 6a1.5 1.5.0 01-2 0L3 11V7a4 4 0 014-4h4"/><circle cx="9" cy="9" r="2"/></svg>
+<span>标签</span></a></li><li><a href=/about/><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-info-circle"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 12a9 9 0 1018 0A9 9 0 003 12"/><path d="M12 9h.01"/><path d="M11 12h1v4h1"/></svg>
+<span>关于我</span></a></li><li><a href=/search/><svg class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="10" cy="10" r="7"/><line x1="21" y1="21" x2="15" y2="15"/></svg>
+<span>搜索</span></a></li><li class=menu-bottom-section><ol class=menu><li id=dark-mode-toggle><svg class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="8" cy="12" r="2"/><rect x="2" y="6" width="20" height="12" rx="6"/></svg>
+<svg class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="16" cy="12" r="2"/><rect x="2" y="6" width="20" height="12" rx="6"/></svg>
+<span>暗色模式</span></li></ol></li></ol></aside><aside class="sidebar right-sidebar sticky"><section class="widget archives"><div class=widget-icon><svg class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><line x1="5" y1="9" x2="19" y2="9"/><line x1="5" y1="15" x2="19" y2="15"/><line x1="11" y1="4" x2="7" y2="20"/><line x1="17" y1="4" x2="13" y2="20"/></svg></div><h2 class="widget-title section-title">目录</h2><div class=widget--toc><nav class=toc-nav id=TableOfContents><ol><li><a href=#为什么我们需要copy-on-write>为什么我们需要copy on write</a></li><li><a href=#大致思路>大致思路</a></li><li><a href=#具体实现>具体实现</a><ol><li><a href=#cow标志位>COW标志位</a></li><li><a href=#修改uvmcopy>修改uvmcopy</a></li><li><a href=#引用计数>引用计数</a></li><li><a href=#page-fault时分配新内存>page fault时分配新内存</a></li><li><a href=#usertrap中触发page-fault>usertrap中触发page fault</a></li></ol></li></ol></nav></div></section></aside><main class="main full-width"><article class=main-article><header class=article-header><div class=article-details><header class=article-category><a href=/categories/mit6.s081/ style=background-color:#beefec;color:#0f3d3b>MIT6.s081</a></header><div class=article-title-wrapper><h2 class=article-title><a href=/p/mit6.s081lab5-copy-on-write-fork/>【MIT6.S081】Lab5 copy-on-write fork</a></h2></div><footer class=article-meta><div class=inline-meta><svg class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><path d="M11.795 21H5a2 2 0 01-2-2V7a2 2 0 012-2h12a2 2 0 012 2v4"/><circle cx="18" cy="18" r="4"/><path d="M15 3v4"/><path d="M7 3v4"/><path d="M3 11h16"/><path d="M18 16.496V18l1 1"/></svg>
+<time class=article-time--published datetime=2024-11-12T00:00:00Z>2024年11月12日星期二</time>
+<svg class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg>
+<time class=article-time--reading>阅读时长: 7 分钟</time></div></footer></div></header><aside class=article-toc><details><summary><div class=article-toc-title><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-chevron-right"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 6l6 6-6 6"/></svg>
+<span>目录</span></div></summary><nav class=toc-nav><ol><li><a href=#为什么我们需要copy-on-write>为什么我们需要copy on write</a></li><li><a href=#大致思路>大致思路</a></li><li><a href=#具体实现>具体实现</a><ol><li><a href=#cow标志位>COW标志位</a></li><li><a href=#修改uvmcopy>修改uvmcopy</a></li><li><a href=#引用计数>引用计数</a></li><li><a href=#page-fault时分配新内存>page fault时分配新内存</a></li><li><a href=#usertrap中触发page-fault>usertrap中触发page fault</a></li></ol></li></ol></nav></details></aside><section class=article-content><h2 id=为什么我们需要copy-on-write>为什么我们需要copy on write</h2><p>通过xv6的实验指导书，我们可以知道：</p><p>xv6中的<code>fork()</code>系统调用将父进程的所有用户空间内存复制到子进程中。如果父进程所使用的页数很大，复制可能需要很长时间，而这样的复制操作经常是没有用的：<code>fork()</code>之后通常是子进程中的<code>exec()</code>，这会丢弃复制的内存而不是使用它们。</p><p>那么，我们是不是可以在子进程刚创建时将其页表的映射到父进程的物理页，而在其需要对内存进行写操作时再重新分配内存呢？没错，这就是通过copy on write（写时复制）技术来进行优化。</p><blockquote><p>该实验的代码实现见：<a class=link href=https://github.com/kerolt/xv6-labs-2023/commit/68fd833dc03a681c04a647ed6aae2108a1e43fbb target=_blank rel=noopener>仓库commit</a></p></blockquote><h2 id=大致思路>大致思路</h2><p>首先说一下大致思路：</p><p>在使用fork系统调用创建子进程时，我们不用去额外拷贝父进程的内存，而是将子进程的虚拟内存映射到和父进程相同的物理内存，并且此时应该将父子进程对这块内存的<strong>访问权限设置为只读，并且添加一个用于识别<code>COW（copy on write）</code>的标志</strong>：</p><p><img class=gallery-image data-flex-basis=249px data-flex-grow=104 height=582 loading=lazy sizes="(max-width: 767px) calc(100vw - 30px), (max-width: 1023px) 700px, (max-width: 1279px) 950px, 1232px" src=https://gitee.com/kerolt/picture/raw/main/20241215-103350.png width=606></p><p>当子进程需要对内存进行写操作时，<strong>RISC-V会检测到这一块物理地址的权限为只写，触发Page Fault</strong>，这时我们可以为子进程重新分配一块内存空间（取消之前的映射，分配内存后重新映射至新内存），并将父子进程的对应物理页的识别标志位进行修改，<strong>去除cow标志<code>PTE_COW</code>，添加写权限标志<code>PTE_W</code></strong>：</p><p><img class=gallery-image data-flex-basis=246px data-flex-grow=102 height=592 loading=lazy sizes="(max-width: 767px) calc(100vw - 30px), (max-width: 1023px) 700px, (max-width: 1279px) 950px, 1232px" src=https://gitee.com/kerolt/picture/raw/main/20241215-103350-1.png width=607></p><h2 id=具体实现>具体实现</h2><h3 id=cow标志位>COW标志位</h3><p><img class=gallery-image data-flex-basis=676px data-flex-grow=281 height=505 loading=lazy sizes="(max-width: 767px) calc(100vw - 30px), (max-width: 1023px) 700px, (max-width: 1279px) 950px, 1232px" src=https://gitee.com/kerolt/picture/raw/main/20241215-103350-2.png srcset="/'20241215-103350-2_2693859986388424408_hu_b4d27a7507f75286.png 800w, https://gitee.com/kerolt/picture/raw/main/20241215-103350-2.png 1424w" width=1424></p><p>首先我们需要为PTE添加一个用于识别COW的标志位，上图展示了PTE的后10位也就是其flags的情况，可以看到第8、9位是保留没有被使用的，那么我们可以用第8位来作为COW的标志位：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-c data-lang=c><span class=line><span class=cl><span class=c1>// riscv.h
+</span></span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=cp>#define PTE_COW (1L &lt;&lt; 8)
+</span></span></span></code></pre></td></tr></table></div></div><h3 id=修改uvmcopy>修改uvmcopy</h3><p>在xv6的fork系统调用中，子进程拷贝父进程的物理页使用了<code>uvmcopy()</code>函数：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-c data-lang=c><span class=line><span class=cl><span class=kt>int</span>
+</span></span><span class=line><span class=cl><span class=nf>fork</span><span class=p>(</span><span class=kt>void</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>  <span class=kt>int</span> <span class=n>i</span><span class=p>,</span> <span class=n>pid</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=k>struct</span> <span class=n>proc</span> <span class=o>*</span><span class=n>np</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=k>struct</span> <span class=n>proc</span> <span class=o>*</span><span class=n>p</span> <span class=o>=</span> <span class=nf>myproc</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>  <span class=c1>// Allocate process.
+</span></span></span><span class=line><span class=cl>  <span class=k>if</span><span class=p>((</span><span class=n>np</span> <span class=o>=</span> <span class=nf>allocproc</span><span class=p>())</span> <span class=o>==</span> <span class=mi>0</span><span class=p>){</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=o>-</span><span class=mi>1</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>  <span class=c1>// Copy user memory from parent to child.
+</span></span></span><span class=line><span class=cl>  <span class=k>if</span><span class=p>(</span><span class=nf>uvmcopy</span><span class=p>(</span><span class=n>p</span><span class=o>-&gt;</span><span class=n>pagetable</span><span class=p>,</span> <span class=n>np</span><span class=o>-&gt;</span><span class=n>pagetable</span><span class=p>,</span> <span class=n>p</span><span class=o>-&gt;</span><span class=n>sz</span><span class=p>)</span> <span class=o>&lt;</span> <span class=mi>0</span><span class=p>){</span>
+</span></span><span class=line><span class=cl>    <span class=nf>freeproc</span><span class=p>(</span><span class=n>np</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=nf>release</span><span class=p>(</span><span class=o>&amp;</span><span class=n>np</span><span class=o>-&gt;</span><span class=n>lock</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=o>-</span><span class=mi>1</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=p>}</span>
+</span></span><span class=line><span class=cl>  <span class=p>...</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p>那么我们需要修改uvmcopy中的代码，将原先的拷贝内存的操作去掉，并将PTE的只读标志位去除、添加cow标记位：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span><span class=lnt>34
+</span><span class=lnt>35
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-c data-lang=c><span class=line><span class=cl><span class=kt>int</span>
+</span></span><span class=line><span class=cl><span class=nf>uvmcopy</span><span class=p>(</span><span class=kt>pagetable_t</span> <span class=n>old</span><span class=p>,</span> <span class=kt>pagetable_t</span> <span class=n>new</span><span class=p>,</span> <span class=n>uint64</span> <span class=n>sz</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>  <span class=kt>pte_t</span> <span class=o>*</span><span class=n>pte</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=n>uint64</span> <span class=n>pa</span><span class=p>,</span> <span class=n>i</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=n>uint</span> <span class=n>flags</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>  <span class=k>for</span><span class=p>(</span><span class=n>i</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span> <span class=n>i</span> <span class=o>&lt;</span> <span class=n>sz</span><span class=p>;</span> <span class=n>i</span> <span class=o>+=</span> <span class=n>PGSIZE</span><span class=p>){</span>
+</span></span><span class=line><span class=cl>    <span class=k>if</span><span class=p>((</span><span class=n>pte</span> <span class=o>=</span> <span class=nf>walk</span><span class=p>(</span><span class=n>old</span><span class=p>,</span> <span class=n>i</span><span class=p>,</span> <span class=mi>0</span><span class=p>))</span> <span class=o>==</span> <span class=mi>0</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>      <span class=nf>panic</span><span class=p>(</span><span class=s>&#34;uvmcopy: pte should exist&#34;</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=k>if</span><span class=p>((</span><span class=o>*</span><span class=n>pte</span> <span class=o>&amp;</span> <span class=n>PTE_V</span><span class=p>)</span> <span class=o>==</span> <span class=mi>0</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>      <span class=nf>panic</span><span class=p>(</span><span class=s>&#34;uvmcopy: page not present&#34;</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=n>pa</span> <span class=o>=</span> <span class=nf>PTE2PA</span><span class=p>(</span><span class=o>*</span><span class=n>pte</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=n>flags</span> <span class=o>=</span> <span class=nf>PTE_FLAGS</span><span class=p>(</span><span class=o>*</span><span class=n>pte</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>	<span class=c1>// 这里移除了拷贝的代码，并设置了父进程相应的标志位
+</span></span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=p>(</span><span class=n>flags</span> <span class=o>&amp;</span> <span class=n>PTE_W</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>      <span class=o>*</span><span class=n>pte</span> <span class=o>=</span> <span class=p>(</span><span class=o>*</span><span class=n>pte</span> <span class=o>&amp;</span> <span class=o>~</span><span class=n>PTE_W</span><span class=p>)</span> <span class=o>|</span> <span class=n>PTE_COW</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>      <span class=n>flags</span> <span class=o>=</span> <span class=p>(</span><span class=n>flags</span> <span class=o>&amp;</span> <span class=o>~</span><span class=n>PTE_W</span><span class=p>)</span> <span class=o>|</span> <span class=n>PTE_COW</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>	<span class=c1>// 将子进程的虚拟页映射至父进程的物理页，同时设置了子进程相应的标志位
+</span></span></span><span class=line><span class=cl>    <span class=k>if</span><span class=p>(</span><span class=nf>mappages</span><span class=p>(</span><span class=n>new</span><span class=p>,</span> <span class=n>i</span><span class=p>,</span> <span class=n>PGSIZE</span><span class=p>,</span> <span class=p>(</span><span class=n>uint64</span><span class=p>)</span><span class=n>pa</span><span class=p>,</span> <span class=n>flags</span><span class=p>)</span> <span class=o>!=</span> <span class=mi>0</span><span class=p>){</span>
+</span></span><span class=line><span class=cl>      <span class=k>goto</span> <span class=n>err</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>	<span class=c1>// 这里是对物理页的引用计数进行+1，后文会说明
+</span></span></span><span class=line><span class=cl>    <span class=nf>kref_inc</span><span class=p>((</span><span class=kt>void</span><span class=o>*</span><span class=p>)</span><span class=n>pa</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>  <span class=p>}</span>
+</span></span><span class=line><span class=cl>  <span class=k>return</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl> <span class=nl>err</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>  <span class=nf>uvmunmap</span><span class=p>(</span><span class=n>new</span><span class=p>,</span> <span class=mi>0</span><span class=p>,</span> <span class=n>i</span> <span class=o>/</span> <span class=n>PGSIZE</span><span class=p>,</span> <span class=mi>1</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>  <span class=k>return</span> <span class=o>-</span><span class=mi>1</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><h3 id=引用计数>引用计数</h3><blockquote><p>Ensure that each physical page is freed when the last PTE reference to it goes away &ndash; but not before. A good way to do this is to keep, for each physical page, a &ldquo;reference count&rdquo; of the number of user page tables that refer to that page. Set a page&rsquo;s reference count to one when kalloc() allocates it. Increment a page&rsquo;s reference count when fork causes a child to share the page, and decrement a page&rsquo;s count each time any process drops the page from its page table. kfree() should only place a page back on the free list if its reference count is zero. It&rsquo;s OK to to keep these counts in a fixed-size array of integers.</p></blockquote><p>当我们采取了cow后，只有当所有虚拟页都没有引用某一物理页时这个物理页才能被释放，那么我们可以使用一个数组来对每一个物理页进行引用计数，当fork导致子进程共享物理页时，对应的物理页的引用计数+1，当有进程不再使用物理页时，对应的物理页的引用计数-1，回收物理页的<code>kfree()</code>函数只有当物理页的引用计数为0时才会将其放回空闲列表。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-c data-lang=c><span class=line><span class=cl><span class=c1>// kalloc.c
+</span></span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>struct</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>  <span class=k>struct</span> <span class=n>spinlock</span> <span class=n>lock</span><span class=p>;</span> <span class=c1>// 保证操作的原子性
+</span></span></span><span class=line><span class=cl>  <span class=kt>int</span> <span class=n>ref_count</span><span class=p>[(</span><span class=nf>PGROUNDUP</span><span class=p>(</span><span class=n>PHYSTOP</span><span class=p>))</span> <span class=o>/</span> <span class=n>PGSIZE</span><span class=p>];</span> <span class=c1>// KERNBASE～PHYSTOP是物理内存的大小，因为xv6的内核地址采用了直接映射，为了方便，这里直接使用PHYSTOP。PHYSTOP / PGSIZE则表示有多少个物理页
+</span></span></span><span class=line><span class=cl><span class=p>}</span> <span class=n>kref</span><span class=p>;</span>
+</span></span></code></pre></td></tr></table></div></div><p>内核在使用<code>kinit()</code>进行初始化时，需要初始化kref的锁，并设置引用计数数组的值：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-c data-lang=c><span class=line><span class=cl><span class=kt>void</span>
+</span></span><span class=line><span class=cl><span class=nf>kinit</span><span class=p>()</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>  <span class=nf>initlock</span><span class=p>(</span><span class=o>&amp;</span><span class=n>kmem</span><span class=p>.</span><span class=n>lock</span><span class=p>,</span> <span class=s>&#34;kmem&#34;</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>  <span class=nf>initlock</span><span class=p>(</span><span class=o>&amp;</span><span class=n>kmem</span><span class=p>.</span><span class=n>lock</span><span class=p>,</span> <span class=s>&#34;kref&#34;</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>  <span class=c1>// 这里初始化时置为1是为了接下来的freerange在调用kfree时不会触发panic
+</span></span></span><span class=line><span class=cl>  <span class=k>for</span> <span class=p>(</span><span class=kt>int</span> <span class=n>i</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span> <span class=n>i</span> <span class=o>&lt;</span> <span class=nf>PGROUNDUP</span><span class=p>(</span><span class=n>PHYSTOP</span><span class=p>)</span> <span class=o>/</span> <span class=n>PGSIZE</span><span class=p>;</span> <span class=n>i</span><span class=o>++</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=n>kref</span><span class=p>.</span><span class=n>ref_count</span><span class=p>[</span><span class=n>i</span><span class=p>]</span> <span class=o>=</span> <span class=mi>1</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=p>}</span>
+</span></span><span class=line><span class=cl>  <span class=nf>freerange</span><span class=p>(</span><span class=n>end</span><span class=p>,</span> <span class=p>(</span><span class=kt>void</span><span class=o>*</span><span class=p>)</span><span class=n>PHYSTOP</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p>在<code>kfree()</code>中对物理页的引用计数来判断是否应该释放物理内存：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-c data-lang=c><span class=line><span class=cl><span class=kt>void</span>
+</span></span><span class=line><span class=cl><span class=nf>kfree</span><span class=p>(</span><span class=kt>void</span> <span class=o>*</span><span class=n>pa</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>  <span class=k>struct</span> <span class=n>run</span> <span class=o>*</span><span class=n>r</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>  <span class=k>if</span><span class=p>(((</span><span class=n>uint64</span><span class=p>)</span><span class=n>pa</span> <span class=o>%</span> <span class=n>PGSIZE</span><span class=p>)</span> <span class=o>!=</span> <span class=mi>0</span> <span class=o>||</span> <span class=p>(</span><span class=kt>char</span><span class=o>*</span><span class=p>)</span><span class=n>pa</span> <span class=o>&lt;</span> <span class=n>end</span> <span class=o>||</span> <span class=p>(</span><span class=n>uint64</span><span class=p>)</span><span class=n>pa</span> <span class=o>&gt;=</span> <span class=n>PHYSTOP</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=nf>panic</span><span class=p>(</span><span class=s>&#34;kfree&#34;</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>  <span class=c1>// 如果在还未对ref count操作前其值已经小于等于0，说明已有问题
+</span></span></span><span class=line><span class=cl>  <span class=k>if</span> <span class=p>(</span><span class=n>kref</span><span class=p>.</span><span class=n>ref_count</span><span class=p>[(</span><span class=n>uint64</span><span class=p>)</span><span class=n>pa</span> <span class=o>/</span> <span class=n>PGSIZE</span><span class=p>]</span> <span class=o>&lt;=</span> <span class=mi>0</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=nf>panic</span><span class=p>(</span><span class=s>&#34;kref&#34;</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>  <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>  <span class=c1>// 每次free一个page时，先将这个page的引用计数-1
+</span></span></span><span class=line><span class=cl>  <span class=nf>kref_dec</span><span class=p>(</span><span class=n>pa</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>  <span class=c1>// ref count - 1，如果结果还大于0，说明这个物理页还被其他进程引用，暂时不需要释放
+</span></span></span><span class=line><span class=cl>  <span class=k>if</span> <span class=p>(</span><span class=n>kref</span><span class=p>.</span><span class=n>ref_count</span><span class=p>[(</span><span class=n>uint64</span><span class=p>)</span><span class=n>pa</span> <span class=o>/</span> <span class=n>PGSIZE</span><span class=p>]</span> <span class=o>&gt;</span> <span class=mi>0</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>  <span class=c1>// Fill with junk to catch dangling refs.
+</span></span></span><span class=line><span class=cl>  <span class=nf>memset</span><span class=p>(</span><span class=n>pa</span><span class=p>,</span> <span class=mi>1</span><span class=p>,</span> <span class=n>PGSIZE</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>  <span class=n>r</span> <span class=o>=</span> <span class=p>(</span><span class=k>struct</span> <span class=n>run</span><span class=o>*</span><span class=p>)</span><span class=n>pa</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>  <span class=nf>acquire</span><span class=p>(</span><span class=o>&amp;</span><span class=n>kmem</span><span class=p>.</span><span class=n>lock</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>  <span class=n>r</span><span class=o>-&gt;</span><span class=n>next</span> <span class=o>=</span> <span class=n>kmem</span><span class=p>.</span><span class=n>freelist</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=n>kmem</span><span class=p>.</span><span class=n>freelist</span> <span class=o>=</span> <span class=n>r</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=nf>release</span><span class=p>(</span><span class=o>&amp;</span><span class=n>kmem</span><span class=p>.</span><span class=n>lock</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p>每分配一个物理页时，该物理页的引用计数初始为1：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-c data-lang=c><span class=line><span class=cl><span class=kt>void</span> <span class=o>*</span>
+</span></span><span class=line><span class=cl><span class=nf>kalloc</span><span class=p>(</span><span class=kt>void</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>  <span class=k>struct</span> <span class=n>run</span> <span class=o>*</span><span class=n>r</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>  <span class=nf>acquire</span><span class=p>(</span><span class=o>&amp;</span><span class=n>kmem</span><span class=p>.</span><span class=n>lock</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>  <span class=n>r</span> <span class=o>=</span> <span class=n>kmem</span><span class=p>.</span><span class=n>freelist</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=k>if</span><span class=p>(</span><span class=n>r</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=n>kmem</span><span class=p>.</span><span class=n>freelist</span> <span class=o>=</span> <span class=n>r</span><span class=o>-&gt;</span><span class=n>next</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=nf>release</span><span class=p>(</span><span class=o>&amp;</span><span class=n>kmem</span><span class=p>.</span><span class=n>lock</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>  <span class=k>if</span> <span class=p>(</span><span class=n>r</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=nf>memset</span><span class=p>((</span><span class=kt>char</span><span class=o>*</span><span class=p>)</span><span class=n>r</span><span class=p>,</span> <span class=mi>5</span><span class=p>,</span> <span class=n>PGSIZE</span><span class=p>);</span> <span class=c1>// fill with junk
+</span></span></span><span class=line><span class=cl>    <span class=c1>// 这里赋值为1一定要在设置垃圾数值之后，否则会造成污染
+</span></span></span><span class=line><span class=cl>    <span class=nf>acquire</span><span class=p>(</span><span class=o>&amp;</span><span class=n>kref</span><span class=p>.</span><span class=n>lock</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=n>kref</span><span class=p>.</span><span class=n>ref_count</span><span class=p>[(</span><span class=n>uint64</span><span class=p>)</span><span class=n>r</span> <span class=o>/</span> <span class=n>PGSIZE</span><span class=p>]</span> <span class=o>=</span> <span class=mi>1</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=nf>release</span><span class=p>(</span><span class=o>&amp;</span><span class=n>kref</span><span class=p>.</span><span class=n>lock</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>  <span class=p>}</span>
+</span></span><span class=line><span class=cl>  <span class=k>return</span> <span class=p>(</span><span class=kt>void</span><span class=o>*</span><span class=p>)</span><span class=n>r</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p>将引用计数的操作封装一下：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-c data-lang=c><span class=line><span class=cl><span class=c1>// kalloc.c
+</span></span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1>// 为pa所在的page的引用+1
+</span></span></span><span class=line><span class=cl><span class=kt>void</span> <span class=nf>kref_inc</span><span class=p>(</span><span class=kt>void</span><span class=o>*</span> <span class=n>pa</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>  <span class=nf>acquire</span><span class=p>(</span><span class=o>&amp;</span><span class=n>kref</span><span class=p>.</span><span class=n>lock</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>  <span class=o>++</span><span class=n>kref</span><span class=p>.</span><span class=n>ref_count</span><span class=p>[(</span><span class=n>uint64</span><span class=p>)</span><span class=n>pa</span> <span class=o>/</span> <span class=n>PGSIZE</span><span class=p>];</span>
+</span></span><span class=line><span class=cl>  <span class=nf>release</span><span class=p>(</span><span class=o>&amp;</span><span class=n>kref</span><span class=p>.</span><span class=n>lock</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1>// 为pa所在的page的引用-1
+</span></span></span><span class=line><span class=cl><span class=kt>void</span> <span class=nf>kref_dec</span><span class=p>(</span><span class=kt>void</span><span class=o>*</span> <span class=n>pa</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>  <span class=nf>acquire</span><span class=p>(</span><span class=o>&amp;</span><span class=n>kref</span><span class=p>.</span><span class=n>lock</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>  <span class=o>--</span><span class=n>kref</span><span class=p>.</span><span class=n>ref_count</span><span class=p>[(</span><span class=n>uint64</span><span class=p>)</span><span class=n>pa</span> <span class=o>/</span> <span class=n>PGSIZE</span><span class=p>];</span>
+</span></span><span class=line><span class=cl>  <span class=nf>release</span><span class=p>(</span><span class=o>&amp;</span><span class=n>kref</span><span class=p>.</span><span class=n>lock</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><h3 id=page-fault时分配新内存>page fault时分配新内存</h3><p>当需要分配新内存时，要检测虚拟页的cow标志位是否有效。在分配了内存后，拷贝原来的物理页中的数据到新的物理页，并将虚拟页的标志位中的cow去除、添加写标志，最后取消虚拟页与原来物理页的映射关系，同时在解除时对引用计数-1，然后将虚拟页映射至新的物理页：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span><span class=lnt>34
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-c data-lang=c><span class=line><span class=cl><span class=c1>// 当出现page fault时，进行cow操作
+</span></span></span><span class=line><span class=cl><span class=kt>int</span> <span class=nf>cow_alloc</span><span class=p>(</span><span class=kt>pagetable_t</span> <span class=n>pagetable</span><span class=p>,</span> <span class=n>uint64</span> <span class=n>va</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>  <span class=k>if</span> <span class=p>(</span><span class=n>va</span> <span class=o>&gt;=</span> <span class=n>MAXVA</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=o>-</span><span class=mi>1</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>  <span class=k>if</span> <span class=p>((</span><span class=n>va</span> <span class=o>%</span> <span class=n>PGSIZE</span><span class=p>)</span> <span class=o>!=</span> <span class=mi>0</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=o>-</span><span class=mi>1</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>  <span class=kt>pte_t</span> <span class=o>*</span><span class=n>pte</span> <span class=o>=</span> <span class=nf>walk</span><span class=p>(</span><span class=n>pagetable</span><span class=p>,</span> <span class=n>va</span><span class=p>,</span> <span class=mi>0</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>  <span class=k>if</span> <span class=p>(</span><span class=n>pte</span> <span class=o>==</span> <span class=mi>0</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=o>-</span><span class=mi>1</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>  <span class=n>uint64</span> <span class=n>pa</span> <span class=o>=</span> <span class=nf>PTE2PA</span><span class=p>(</span><span class=o>*</span><span class=n>pte</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>  <span class=k>if</span> <span class=p>(</span><span class=n>pa</span> <span class=o>==</span> <span class=mi>0</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=o>-</span><span class=mi>1</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>  <span class=c1>// 当page的cow标志位有效时才会重新分配内存
+</span></span></span><span class=line><span class=cl>  <span class=k>if</span> <span class=p>((</span><span class=o>*</span><span class=n>pte</span> <span class=o>&amp;</span> <span class=n>PTE_COW</span><span class=p>)</span> <span class=o>&amp;&amp;</span> <span class=p>(</span><span class=o>*</span><span class=n>pte</span> <span class=o>&amp;</span> <span class=n>PTE_V</span><span class=p>))</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=kt>char</span><span class=o>*</span> <span class=n>mem</span> <span class=o>=</span> <span class=nf>kalloc</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=p>(</span><span class=n>mem</span> <span class=o>==</span> <span class=mi>0</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>      <span class=k>return</span> <span class=o>-</span><span class=mi>1</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>    <span class=n>uint64</span> <span class=n>flags</span> <span class=o>=</span> <span class=nf>PTE_FLAGS</span><span class=p>(</span><span class=o>*</span><span class=n>pte</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=n>flags</span> <span class=o>=</span> <span class=p>(</span><span class=n>flags</span> <span class=o>&amp;</span> <span class=o>~</span><span class=n>PTE_COW</span><span class=p>)</span> <span class=o>|</span> <span class=n>PTE_W</span><span class=p>;</span> <span class=c1>// 去除COW标记，加上写权限标记
+</span></span></span><span class=line><span class=cl>    <span class=nf>memmove</span><span class=p>(</span><span class=n>mem</span><span class=p>,</span> <span class=p>(</span><span class=kt>char</span> <span class=o>*</span><span class=p>)</span><span class=n>pa</span><span class=p>,</span> <span class=n>PGSIZE</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=nf>uvmunmap</span><span class=p>(</span><span class=n>pagetable</span><span class=p>,</span> <span class=nf>PGROUNDDOWN</span><span class=p>(</span><span class=n>va</span><span class=p>),</span> <span class=mi>1</span><span class=p>,</span> <span class=mi>1</span><span class=p>);</span> <span class=c1>// 解除之前的映射，并设置do_free为1，这样在kfree中可来将引用计数-1
+</span></span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=p>(</span><span class=nf>mappages</span><span class=p>(</span><span class=n>pagetable</span><span class=p>,</span> <span class=n>va</span><span class=p>,</span> <span class=n>PGSIZE</span><span class=p>,</span> <span class=p>(</span><span class=n>uint64</span><span class=p>)</span><span class=n>mem</span><span class=p>,</span> <span class=n>flags</span><span class=p>)</span> <span class=o>&lt;</span> <span class=mi>0</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>      <span class=nf>panic</span><span class=p>(</span><span class=s>&#34;cow_alloc&#34;</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>  <span class=p>}</span>
+</span></span><span class=line><span class=cl>  <span class=k>return</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p>实验指导书提醒我们在<code>copyout()</code>中也要执行cow操作，但这里为何要这么做呢？</p><p>这是因为需要内核将数据通过copyout拷贝到用户态时，<strong>如果需要拷贝的目标位置是用户进程与其父进程共享的，那么这时应该会有page fault产生，但是copyout中是通过walk遍历页表来获取地址的，不会触发page fault，因此需要我们手动执行cow</strong>。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-c data-lang=c><span class=line><span class=cl><span class=kt>int</span>
+</span></span><span class=line><span class=cl><span class=nf>copyout</span><span class=p>(</span><span class=kt>pagetable_t</span> <span class=n>pagetable</span><span class=p>,</span> <span class=n>uint64</span> <span class=n>dstva</span><span class=p>,</span> <span class=kt>char</span> <span class=o>*</span><span class=n>src</span><span class=p>,</span> <span class=n>uint64</span> <span class=n>len</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>  <span class=n>uint64</span> <span class=n>n</span><span class=p>,</span> <span class=n>va0</span><span class=p>,</span> <span class=n>pa0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=kt>pte_t</span> <span class=o>*</span><span class=n>pte</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>  <span class=k>while</span><span class=p>(</span><span class=n>len</span> <span class=o>&gt;</span> <span class=mi>0</span><span class=p>){</span>
+</span></span><span class=line><span class=cl>    <span class=n>va0</span> <span class=o>=</span> <span class=nf>PGROUNDDOWN</span><span class=p>(</span><span class=n>dstva</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=k>if</span><span class=p>(</span><span class=n>va0</span> <span class=o>&gt;=</span> <span class=n>MAXVA</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>      <span class=k>return</span> <span class=o>-</span><span class=mi>1</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=p>(</span><span class=nf>cow_alloc</span><span class=p>(</span><span class=n>pagetable</span><span class=p>,</span> <span class=n>va0</span><span class=p>)</span> <span class=o>&lt;</span> <span class=mi>0</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>      <span class=k>return</span> <span class=o>-</span><span class=mi>1</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>    <span class=p>...</span>
+</span></span><span class=line><span class=cl>  <span class=p>}</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><h3 id=usertrap中触发page-fault>usertrap中触发page fault</h3><p>在之前fork操作时我们去除了物理页的write操作，那么在之后需要对该物理页进行写操作时，risc-v就会触发page fault了。</p><p>查看risc-v的手册可以发现：</p><p><img class=gallery-image data-flex-basis=238px data-flex-grow=99 height=719 loading=lazy sizes="(max-width: 767px) calc(100vw - 30px), (max-width: 1023px) 700px, (max-width: 1279px) 950px, 1232px" src=https://gitee.com/kerolt/picture/raw/main/20241215-103350-3.png width=715></p><p>我们需要使用excepton code 13和15（读写），当发生page fault时，这个code会保存在<code>scause</code>寄存器中，那么我们只需要在usertrap中对scause进行相应的处理即可：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-c data-lang=c><span class=line><span class=cl><span class=kt>void</span>
+</span></span><span class=line><span class=cl><span class=nf>usertrap</span><span class=p>(</span><span class=kt>void</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>  <span class=p>...</span>
+</span></span><span class=line><span class=cl>  <span class=p>}</span> <span class=k>else</span> <span class=nf>if</span> <span class=p>(</span><span class=nf>r_scause</span><span class=p>()</span> <span class=o>==</span> <span class=mi>13</span> <span class=o>||</span> <span class=nf>r_scause</span><span class=p>()</span> <span class=o>==</span> <span class=mi>15</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=c1>// 这里的stval寄存器，我的理解是保存了触发page fault时的虚拟地址
+</span></span></span><span class=line><span class=cl>    <span class=n>uint64</span> <span class=n>fault_va</span> <span class=o>=</span> <span class=nf>r_stval</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>    <span class=c1>// 判断地址是否不合法
+</span></span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=p>(</span><span class=n>fault_va</span> <span class=o>&gt;=</span> <span class=n>MAXVA</span> <span class=o>||</span>
+</span></span><span class=line><span class=cl>        <span class=p>(</span><span class=n>fault_va</span> <span class=o>&lt;</span> <span class=n>p</span><span class=o>-&gt;</span><span class=n>trapframe</span><span class=o>-&gt;</span><span class=n>sp</span> <span class=o>&amp;&amp;</span>
+</span></span><span class=line><span class=cl>         <span class=n>fault_va</span> <span class=o>&gt;=</span> <span class=p>(</span><span class=n>p</span><span class=o>-&gt;</span><span class=n>trapframe</span><span class=o>-&gt;</span><span class=n>sp</span> <span class=o>-</span> <span class=n>PGSIZE</span><span class=p>))</span> <span class=o>||</span>
+</span></span><span class=line><span class=cl>        <span class=n>fault_va</span> <span class=o>&lt;=</span> <span class=mi>0</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>      <span class=n>p</span><span class=o>-&gt;</span><span class=n>killed</span> <span class=o>=</span> <span class=mi>1</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>    <span class=c1>// 尝试进行cow操作
+</span></span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=p>(</span><span class=nf>cow_alloc</span><span class=p>(</span><span class=n>p</span><span class=o>-&gt;</span><span class=n>pagetable</span><span class=p>,</span> <span class=nf>PGROUNDDOWN</span><span class=p>(</span><span class=n>fault_va</span><span class=p>))</span> <span class=o>&lt;</span> <span class=mi>0</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>      <span class=n>p</span><span class=o>-&gt;</span><span class=n>killed</span> <span class=o>=</span> <span class=mi>1</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>  <span class=p>}</span> <span class=k>else</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=nf>printf</span><span class=p>(</span><span class=s>&#34;usertrap(): unexpected scause %p pid=%d</span><span class=se>\n</span><span class=s>&#34;</span><span class=p>,</span> <span class=nf>r_scause</span><span class=p>(),</span> <span class=n>p</span><span class=o>-&gt;</span><span class=n>pid</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=nf>printf</span><span class=p>(</span><span class=s>&#34;            sepc=%p stval=%p</span><span class=se>\n</span><span class=s>&#34;</span><span class=p>,</span> <span class=nf>r_sepc</span><span class=p>(),</span> <span class=nf>r_stval</span><span class=p>());</span>
+</span></span><span class=line><span class=cl>    <span class=nf>setkilled</span><span class=p>(</span><span class=n>p</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>  <span class=p>}</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p>值得注意的是，在进行cow操作之前，一定要对地址的范围进行合法性判断，因为<code>usertests</code>中会有非常多的测试函数，其中有一部分会检测地址合法性，不合法的地址应该直接让进程死亡。</p></section><footer class="article-meta article-footer"><section class=article-tags><a href=/tags/mit6-s081/>MIT6-S081</a>
+<a href=/tags/os/>OS</a>
+<a href=/tags/xv6/>Xv6</a></section><section class="article-copyright inline-meta"><svg class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><path d="M14.5 9a3.5 4 0 100 6"/></svg>
+<span>Licensed under CC BY-NC-SA 4.0</span></section></footer></article><footer class=site-footer><section class=copyright>&copy;
+2025 -
+2026 Kerolt's Note</section><section class=powerby>使用 <a href=https://gohugo.io/ target=_blank rel=noopener>Hugo</a> 构建<br>主题 <b><a href=https://github.com/CaiJimmy/hugo-theme-stack target=_blank rel=noopener data-version=4.0.3>Stack</a></b> 由 <a href=https://jimmycai.com target=_blank rel=noopener>Jimmy</a> 设计</section></footer><script type=module>
+    import gallery from '\/ts\/gallery.js';
+
+    const articleContent = document.querySelector('.article-content');
+    const shouldLoad = articleContent && (articleContent.querySelectorAll('figure').length > 0 || articleContent.querySelectorAll('img.gallery-image').length > 0);
+    
+    if (shouldLoad) {
+        gallery(articleContent);
+
+        const PhotoSwipeLightbox = (await import("https:\/\/cdn.jsdelivr.net\/npm\/photoswipe@5.4.4\/dist\/photoswipe-lightbox.esm.min.js")).default;
+        const styleHref = "https:\/\/cdn.jsdelivr.net\/npm\/photoswipe@5.4.4\/dist\/photoswipe.css";
+
+        const styleTag = document.createElement('link');
+        styleTag.rel = 'stylesheet';
+        styleTag.href = styleHref;
+        document.head.appendChild(styleTag);
+
+        const lightbox = new PhotoSwipeLightbox({
+            gallerySelector: '.article-content',
+            childSelector: 'figure a.image-link',
+            pswpModule: () => import("https:\/\/cdn.jsdelivr.net\/npm\/photoswipe@5.4.4\/dist\/photoswipe.esm.min.js")
+        });
+        lightbox.init();
+    }
+</script></main></div><script type=text/javascript src=/ts/main.f856840516f7c2ad1769a8f5937e3d08d6cb386e2cd2dd025ae696e0ff207958.js defer></script></body></html>

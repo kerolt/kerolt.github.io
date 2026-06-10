@@ -1,26 +1,82 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?>
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
-  <channel>
-    <title>TypeScript on Kerolt&#39;s Blog</title>
-    <link>https://kerolt.github.io/tags/typescript/</link>
-    <description>Recent content in TypeScript on Kerolt&#39;s Blog</description>
-    <image>
-      <title>Kerolt&#39;s Blog</title>
-      <url>https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</url>
-      <link>https://kerolt.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</link>
-    </image>
-    <generator>Hugo -- 0.158.0</generator>
-    <language>en</language>
-    <lastBuildDate>Fri, 30 Aug 2024 00:00:00 +0000</lastBuildDate>
-    <atom:link href="https://kerolt.github.io/tags/typescript/index.xml" rel="self" type="application/rss+xml" />
-    <item>
-      <title>记一次项目构建部署的总结</title>
-      <link>https://kerolt.github.io/posts/%E5%89%8D%E7%AB%AF/%E8%AE%B0%E4%B8%80%E6%AC%A1%E9%A1%B9%E7%9B%AE%E6%9E%84%E5%BB%BA%E9%83%A8%E7%BD%B2%E7%9A%84%E6%80%BB%E7%BB%93/</link>
-      <pubDate>Fri, 30 Aug 2024 00:00:00 +0000</pubDate>
-      <guid>https://kerolt.github.io/posts/%E5%89%8D%E7%AB%AF/%E8%AE%B0%E4%B8%80%E6%AC%A1%E9%A1%B9%E7%9B%AE%E6%9E%84%E5%BB%BA%E9%83%A8%E7%BD%B2%E7%9A%84%E6%80%BB%E7%BB%93/</guid>
-      <description>&lt;h2 id=&#34;前言&#34;&gt;前言&lt;/h2&gt;
-&lt;p&gt;暑假里跟着鱼皮的&lt;code&gt;yuindex&lt;/code&gt;项目写了个web终端的小玩具，完成的终端命令不多，但是大体上成型了。由于我打算做一个纯前端的项目，并没有写后端api，这样也方便我最终直接部署到&lt;strong&gt;Github Pages&lt;/strong&gt;上（这样就不用花钱了hh）。&lt;/p&gt;
-&lt;p&gt;项目使用vite构建，并使用了ts。在构建部署时遇到了一些问题，由于是第一次将前端项目发布到github pages上，这里记录下。&lt;/p&gt;</description>
-    </item>
-  </channel>
-</rss>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>TypeScript on Kerolt's Note</title><link>https://kerolt.github.io/tags/typescript/</link><description>Recent content in TypeScript on Kerolt's Note</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><lastBuildDate>Fri, 30 Aug 2024 00:00:00 +0000</lastBuildDate><atom:link href="https://kerolt.github.io/tags/typescript/index.xml" rel="self" type="application/rss+xml"/><item><title>记一次项目构建部署的总结</title><link>https://kerolt.github.io/p/%E8%AE%B0%E4%B8%80%E6%AC%A1%E9%A1%B9%E7%9B%AE%E6%9E%84%E5%BB%BA%E9%83%A8%E7%BD%B2%E7%9A%84%E6%80%BB%E7%BB%93/</link><pubDate>Fri, 30 Aug 2024 00:00:00 +0000</pubDate><guid>https://kerolt.github.io/p/%E8%AE%B0%E4%B8%80%E6%AC%A1%E9%A1%B9%E7%9B%AE%E6%9E%84%E5%BB%BA%E9%83%A8%E7%BD%B2%E7%9A%84%E6%80%BB%E7%BB%93/</guid><description>&lt;h2 id="前言"&gt;前言
+&lt;/h2&gt;&lt;p&gt;暑假里跟着鱼皮的&lt;code&gt;yuindex&lt;/code&gt;项目写了个web终端的小玩具，完成的终端命令不多，但是大体上成型了。由于我打算做一个纯前端的项目，并没有写后端api，这样也方便我最终直接部署到&lt;strong&gt;Github Pages&lt;/strong&gt;上（这样就不用花钱了hh）。&lt;/p&gt;
+&lt;p&gt;项目使用vite构建，并使用了ts。在构建部署时遇到了一些问题，由于是第一次将前端项目发布到github pages上，这里记录下。&lt;/p&gt;
+&lt;h2 id="生成了额外的源映射文件"&gt;生成了额外的源映射文件
+&lt;/h2&gt;&lt;p&gt;例如在执行了&lt;code&gt;pnpm run build&lt;/code&gt;后，虽然生成了dist文件夹和其中的内容，但是源文件中的&lt;code&gt;.ts&lt;/code&gt;文件会额外生成&lt;code&gt;.js&lt;/code&gt;和&lt;code&gt;.js.map&lt;/code&gt;文件，&lt;code&gt;.vue&lt;/code&gt;文件会额外生成&lt;code&gt;.vue.js&lt;/code&gt;和&lt;code&gt;.vue.js.map&lt;/code&gt;文件：&lt;/p&gt;
+&lt;p&gt;&lt;img class="gallery-image" data-flex-basis="228px" data-flex-grow="95" height="327" loading="lazy" sizes="(max-width: 767px) calc(100vw - 30px), (max-width: 1023px) 700px, (max-width: 1279px) 950px, 1232px" src="https://gitee.com/kerolt/picture/raw/main/20241216-143623.png" width="311"&gt;&lt;/p&gt;
+&lt;p&gt;很明显这些额外生成的文件我们在发布部署项目时用不上，而且也无需提交到git上。摸索一番后，知道了这是TypeScript编译器生成的，我们需要修改项目的&lt;code&gt;tsconfig.json&lt;/code&gt;文件。&lt;/p&gt;
+&lt;p&gt;对于&lt;code&gt;.map&lt;/code&gt;文件：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;span class="lnt"&gt;4
+&lt;/span&gt;&lt;span class="lnt"&gt;5
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-json" data-lang="json"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="p"&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="nt"&gt;&amp;#34;compilerOptions&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="nt"&gt;&amp;#34;sourceMap&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="kc"&gt;false&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;对于ts生成的对应的js文件：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;span class="lnt"&gt;4
+&lt;/span&gt;&lt;span class="lnt"&gt;5
+&lt;/span&gt;&lt;span class="lnt"&gt;6
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-json" data-lang="json"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="p"&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="nt"&gt;&amp;#34;compilerOptions&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="nt"&gt;&amp;#34;allowJs&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="kc"&gt;false&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="c1"&gt;// 禁止编译JS文件
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="nt"&gt;&amp;#34;noEmit&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="kc"&gt;true&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="c1"&gt;// 仅进行类型检查，而不输出任何文件
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h2 id="如何部署到github-pages"&gt;如何部署到Github Pages
+&lt;/h2&gt;&lt;p&gt;在解决完前面的问题后，我们就可以将dist目录提交到github上了（记住要在.gitignore文件中排除dist目录），这里我们可以使用：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-sh" data-lang="sh"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;git subtree push --prefix dist origin gh-pages
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;这会将项目的子目录dist推送到远程仓库的gh-pages分支，如果远程仓库没有gh-pages分支，Git 会自动创建它并推送内容。&lt;/p&gt;
+&lt;p&gt;&lt;img class="gallery-image" data-flex-basis="631px" data-flex-grow="263" height="245" loading="lazy" sizes="(max-width: 767px) calc(100vw - 30px), (max-width: 1023px) 700px, (max-width: 1279px) 950px, 1232px" src="https://gitee.com/kerolt/picture/raw/main/20241216-143623-1.png" width="645"&gt;&lt;/p&gt;
+&lt;p&gt;接着在Github仓库的Settings中设置部署的位置：&lt;/p&gt;
+&lt;p&gt;&lt;img class="gallery-image" data-flex-basis="530px" data-flex-grow="220" height="530" loading="lazy" sizes="(max-width: 767px) calc(100vw - 30px), (max-width: 1023px) 700px, (max-width: 1279px) 950px, 1232px" src="https://gitee.com/kerolt/picture/raw/main/20241216-143623-2.png" srcset="https://kerolt.github.io/'20241216-143623-2_2569679765079340514_hu_c93a5208a693ba9b.png 800w, https://gitee.com/kerolt/picture/raw/main/20241216-143623-2.png 1171w" width="1171"&gt;&lt;/p&gt;
+&lt;h2 id="github-pages项目路径错误"&gt;Github Pages项目路径错误
+&lt;/h2&gt;&lt;p&gt;由于&lt;code&gt;kerolt.github.io&lt;/code&gt;用作了我的博客，这个项目只能作为子项来部署，也就是通过&lt;code&gt;kerolt.github.io/web-terminal&lt;/code&gt;来访问。完成前面的步骤后，我虽然能访问，但是其中的内容无法显示，其原因为无法正确获取对应的文件。&lt;/p&gt;
+&lt;p&gt;这是因为相当于是在嵌套的公共路径下部署项目，在vite中需指定 &lt;a class="link" href="https://cn.vitejs.dev/config/shared-options.html#base" target="_blank" rel="noopener"
+ &gt;&lt;code&gt;base&lt;/code&gt; 配置项&lt;/a&gt;：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;span class="lnt"&gt;4
+&lt;/span&gt;&lt;span class="lnt"&gt;5
+&lt;/span&gt;&lt;span class="lnt"&gt;6
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-ts" data-lang="ts"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;// vite.config.ts
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="kr"&gt;export&lt;/span&gt; &lt;span class="k"&gt;default&lt;/span&gt; &lt;span class="nx"&gt;defineConfig&lt;/span&gt;&lt;span class="p"&gt;({&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="nx"&gt;base&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;#34;/web-terminal/&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="c1"&gt;// ...
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="p"&gt;});&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;hr&gt;
+&lt;p&gt;至此，项目已经可以通过&lt;a class="link" href="https://kerolt.github.io/web-terminal/" target="_blank" rel="noopener"
+ &gt;https://kerolt.github.io/web-terminal/&lt;/a&gt;来访问。&lt;/p&gt;</description></item></channel></rss>

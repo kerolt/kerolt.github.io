@@ -1,0 +1,115 @@
+<!doctype html><html lang=zh-cn dir=ltr><head><meta charset=utf-8><meta name=viewport content='width=device-width,initial-scale=1'><meta name=description content=' 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 --- # 1. 扩大匹配范围，确保头文件也能享受 BPF 配置 If: PathMatch: [.*\\.bpf\\.c, .*/bpf/.*\\.c, .*\\.h] # 增加对 .h 的支持 CompileFlags: Add: - "-target" - "bpf" - "-x" - "c" - "-std=gnu11" - "-D__BPF_TRACING__" - "-D__TARGET_ARCH_x86" # 必须指定架构，否则 vmlinux.h 内部的部分条件编译会失效 - "-I." # 确保当前目录的头文件优先级最高 - "-I/usr/include/bpf" # 指向 libbpf 头文件路径 - "-Wno-unknown-attributes" # 忽略不认识的属性 - "-ferror-limit=0" # 即使错误再多也不要停止解析，这对补全很重要 Remove: - "-std=c++*" - "-fexceptions" Diagnostics: # 2. 针对 vmlinux.h 的重定义问题进行精准打击 Suppress: - "redefinition" # 抑制所有的符号重定义 - "typedef_redefinition" # 特别针对 typedef 的冲突 - "too_many_errors" # 彻底关掉那个烦人的警告 - "err_expected_identifer" # 针对 vmlinux 内部属性解析失败的补救 --- # 3. 针对特定的 vmlinux.h 文件彻底关闭检查 If: PathMatch: .*vmlinux\\.h Diagnostics: Suppress: ["*"] '><title>更适合eBPF程序宝宝体质的clangd配置</title><link rel=canonical href=https://kerolt.github.io/p/%E6%9B%B4%E9%80%82%E5%90%88ebpf%E7%A8%8B%E5%BA%8F%E5%AE%9D%E5%AE%9D%E4%BD%93%E8%B4%A8%E7%9A%84clangd%E9%85%8D%E7%BD%AE/><link rel=preconnect href=https://fonts.googleapis.com><link rel=preconnect href=https://fonts.gstatic.com crossorigin><link rel=preload as=style href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap"><link rel=stylesheet href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap"><link rel=stylesheet href=/scss/style.min.e62e09c60ba428a627e03568fa3df938f6a8224f815b5846f00816c17d4a0be4.css><meta property='og:title' content="更适合eBPF程序宝宝体质的clangd配置"><meta property='og:description' content=' 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 --- # 1. 扩大匹配范围，确保头文件也能享受 BPF 配置 If: PathMatch: [.*\\.bpf\\.c, .*/bpf/.*\\.c, .*\\.h] # 增加对 .h 的支持 CompileFlags: Add: - "-target" - "bpf" - "-x" - "c" - "-std=gnu11" - "-D__BPF_TRACING__" - "-D__TARGET_ARCH_x86" # 必须指定架构，否则 vmlinux.h 内部的部分条件编译会失效 - "-I." # 确保当前目录的头文件优先级最高 - "-I/usr/include/bpf" # 指向 libbpf 头文件路径 - "-Wno-unknown-attributes" # 忽略不认识的属性 - "-ferror-limit=0" # 即使错误再多也不要停止解析，这对补全很重要 Remove: - "-std=c++*" - "-fexceptions" Diagnostics: # 2. 针对 vmlinux.h 的重定义问题进行精准打击 Suppress: - "redefinition" # 抑制所有的符号重定义 - "typedef_redefinition" # 特别针对 typedef 的冲突 - "too_many_errors" # 彻底关掉那个烦人的警告 - "err_expected_identifer" # 针对 vmlinux 内部属性解析失败的补救 --- # 3. 针对特定的 vmlinux.h 文件彻底关闭检查 If: PathMatch: .*vmlinux\\.h Diagnostics: Suppress: ["*"] '><meta property='og:url' content='https://kerolt.github.io/p/%E6%9B%B4%E9%80%82%E5%90%88ebpf%E7%A8%8B%E5%BA%8F%E5%AE%9D%E5%AE%9D%E4%BD%93%E8%B4%A8%E7%9A%84clangd%E9%85%8D%E7%BD%AE/'><meta property='og:site_name' content="Kerolt's Note"><meta property='og:type' content='article'><meta property='article:section' content='Post'><meta property='article:tag' content='clangd'><meta property='article:published_time' content='2026-02-15T00:00:00+00:00'><meta property='article:modified_time' content='2026-02-15T00:00:00+00:00'><meta name=twitter:title content="更适合eBPF程序宝宝体质的clangd配置"><meta name=twitter:description content=' 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 --- # 1. 扩大匹配范围，确保头文件也能享受 BPF 配置 If: PathMatch: [.*\\.bpf\\.c, .*/bpf/.*\\.c, .*\\.h] # 增加对 .h 的支持 CompileFlags: Add: - "-target" - "bpf" - "-x" - "c" - "-std=gnu11" - "-D__BPF_TRACING__" - "-D__TARGET_ARCH_x86" # 必须指定架构，否则 vmlinux.h 内部的部分条件编译会失效 - "-I." # 确保当前目录的头文件优先级最高 - "-I/usr/include/bpf" # 指向 libbpf 头文件路径 - "-Wno-unknown-attributes" # 忽略不认识的属性 - "-ferror-limit=0" # 即使错误再多也不要停止解析，这对补全很重要 Remove: - "-std=c++*" - "-fexceptions" Diagnostics: # 2. 针对 vmlinux.h 的重定义问题进行精准打击 Suppress: - "redefinition" # 抑制所有的符号重定义 - "typedef_redefinition" # 特别针对 typedef 的冲突 - "too_many_errors" # 彻底关掉那个烦人的警告 - "err_expected_identifer" # 针对 vmlinux 内部属性解析失败的补救 --- # 3. 针对特定的 vmlinux.h 文件彻底关闭检查 If: PathMatch: .*vmlinux\\.h Diagnostics: Suppress: ["*"] '><link rel="shortcut icon" href=/images/favicon.png></head><body class=article-page><script>(function(){const e="StackColorScheme";localStorage.getItem(e)||localStorage.setItem(e,"auto")})()</script><script>(function(){const t="StackColorScheme",e=localStorage.getItem(t),n=window.matchMedia("(prefers-color-scheme: dark)").matches===!0;e=="dark"||e==="auto"&&n?document.documentElement.dataset.scheme="dark":document.documentElement.dataset.scheme="light"})()</script><div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky"><button class="hamburger hamburger--spin" type=button id=toggle-menu aria-label=切换菜单>
+<span class=hamburger-box><span class=hamburger-inner></span></span></button><header><figure class=site-avatar><a href=/><img src=/images/avatar.jpg width=200 height=200 class=site-logo loading=lazy alt=Avatar>
+</a><span class=emoji>🏸</span></figure><div class=site-meta><h1 class=site-name><a href=/>Kerolt's Note</a></h1><h2 class=site-description>宇宙是秩序的，也是混乱的。</h2></div></header><ol class=menu-social><li><a href=https://github.com/kerolt title=GitHub rel=me><svg class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 19c-4.3 1.4-4.3-2.5-6-3m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6.0 00-1.3-3.2 4.2 4.2.0 00-.1-3.2s-1.1-.3-3.5 1.3a12.3 12.3.0 00-6.2.0C6.5 2.8 5.4 3.1 5.4 3.1a4.2 4.2.0 00-.1 3.2A4.6 4.6.0 004 9.5c0 4.6 2.7 5.7 5.5 6-.6.6-.6 1.2-.5 2V21"/></svg></a></li></ol><ol class=menu id=main-menu><li><a href=/><svg class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><polyline points="5 12 3 12 12 3 21 12 19 12"/><path d="M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"/><path d="M9 21v-6a2 2 0 012-2h2a2 2 0 012 2v6"/></svg>
+<span>首页</span></a></li><li><a href=/archives/><svg class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><rect x="3" y="4" width="18" height="4" rx="2"/><path d="M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
+<span>归档</span></a></li><li><a href=/categories/><svg class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><line x1="5" y1="9" x2="19" y2="9"/><line x1="5" y1="15" x2="19" y2="15"/><line x1="11" y1="4" x2="7" y2="20"/><line x1="17" y1="4" x2="13" y2="20"/></svg>
+<span>分类</span></a></li><li><a href=/tags/><svg class="icon icon-tabler icon-tabler-tag" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><path d="M11 3l9 9a1.5 1.5.0 010 2l-6 6a1.5 1.5.0 01-2 0L3 11V7a4 4 0 014-4h4"/><circle cx="9" cy="9" r="2"/></svg>
+<span>标签</span></a></li><li><a href=/about/><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-info-circle"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 12a9 9 0 1018 0A9 9 0 003 12"/><path d="M12 9h.01"/><path d="M11 12h1v4h1"/></svg>
+<span>关于我</span></a></li><li><a href=/search/><svg class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="10" cy="10" r="7"/><line x1="21" y1="21" x2="15" y2="15"/></svg>
+<span>搜索</span></a></li><li class=menu-bottom-section><ol class=menu><li id=dark-mode-toggle><svg class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="8" cy="12" r="2"/><rect x="2" y="6" width="20" height="12" rx="6"/></svg>
+<svg class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="16" cy="12" r="2"/><rect x="2" y="6" width="20" height="12" rx="6"/></svg>
+<span>暗色模式</span></li></ol></li></ol></aside><main class="main full-width"><article class=main-article><header class=article-header><div class=article-details><header class=article-category><a href=/categories/ebpf/ style=background-color:#beceef;color:#0f1f3d>EBPF</a></header><div class=article-title-wrapper><h2 class=article-title><a href=/p/%E6%9B%B4%E9%80%82%E5%90%88ebpf%E7%A8%8B%E5%BA%8F%E5%AE%9D%E5%AE%9D%E4%BD%93%E8%B4%A8%E7%9A%84clangd%E9%85%8D%E7%BD%AE/>更适合eBPF程序宝宝体质的clangd配置</a></h2></div><footer class=article-meta><div class=inline-meta><svg class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><path d="M11.795 21H5a2 2 0 01-2-2V7a2 2 0 012-2h12a2 2 0 012 2v4"/><circle cx="18" cy="18" r="4"/><path d="M15 3v4"/><path d="M7 3v4"/><path d="M3 11h16"/><path d="M18 16.496V18l1 1"/></svg>
+<time class=article-time--published datetime=2026-02-15T00:00:00Z>2026年2月15日星期日</time>
+<svg class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg>
+<time class=article-time--reading>阅读时长: 1 分钟</time></div></footer></div></header><section class=article-content><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span><span class=lnt>34
+</span><span class=lnt>35
+</span><span class=lnt>36
+</span><span class=lnt>37
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-yaml data-lang=yaml><span class=line><span class=cl><span class=nn>---</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=c># 1. 扩大匹配范围，确保头文件也能享受 BPF 配置</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=nt>If</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span><span class=nt>PathMatch</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=l>.*\.bpf\.c, .*/bpf/.*\.c, .*\.h]</span><span class=w> </span><span class=c># 增加对 .h 的支持</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=nt>CompileFlags</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span><span class=nt>Add</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span>- <span class=s2>&#34;-target&#34;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span>- <span class=s2>&#34;bpf&#34;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span>- <span class=s2>&#34;-x&#34;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span>- <span class=s2>&#34;c&#34;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span>- <span class=s2>&#34;-std=gnu11&#34;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span>- <span class=s2>&#34;-D__BPF_TRACING__&#34;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span>- <span class=s2>&#34;-D__TARGET_ARCH_x86&#34;</span><span class=w>      </span><span class=c># 必须指定架构，否则 vmlinux.h 内部的部分条件编译会失效</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span>- <span class=s2>&#34;-I.&#34;</span><span class=w>                      </span><span class=c># 确保当前目录的头文件优先级最高</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span>- <span class=s2>&#34;-I/usr/include/bpf&#34;</span><span class=w>       </span><span class=c># 指向 libbpf 头文件路径</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span>- <span class=s2>&#34;-Wno-unknown-attributes&#34;</span><span class=w>  </span><span class=c># 忽略不认识的属性</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span>- <span class=s2>&#34;-ferror-limit=0&#34;</span><span class=w>          </span><span class=c># 即使错误再多也不要停止解析，这对补全很重要</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span><span class=nt>Remove</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span>- <span class=s2>&#34;-std=c++*&#34;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span>- <span class=s2>&#34;-fexceptions&#34;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=nt>Diagnostics</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span><span class=c># 2. 针对 vmlinux.h 的重定义问题进行精准打击</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span><span class=nt>Suppress</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span>- <span class=s2>&#34;redefinition&#34;</span><span class=w>              </span><span class=c># 抑制所有的符号重定义</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span>- <span class=s2>&#34;typedef_redefinition&#34;</span><span class=w>      </span><span class=c># 特别针对 typedef 的冲突</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span>- <span class=s2>&#34;too_many_errors&#34;</span><span class=w>           </span><span class=c># 彻底关掉那个烦人的警告</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span>- <span class=s2>&#34;err_expected_identifer&#34;</span><span class=w>    </span><span class=c># 针对 vmlinux 内部属性解析失败的补救</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=nn>---</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=c># 3. 针对特定的 vmlinux.h 文件彻底关闭检查</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=nt>If</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span><span class=nt>PathMatch</span><span class=p>:</span><span class=w> </span><span class=l>.*vmlinux\.h</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=nt>Diagnostics</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span><span class=nt>Suppress</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=s2>&#34;*&#34;</span><span class=p>]</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div></section><footer class="article-meta article-footer"><section class=article-tags><a href=/tags/clangd/>Clangd</a></section><section class="article-copyright inline-meta"><svg class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><path d="M14.5 9a3.5 4 0 100 6"/></svg>
+<span>Licensed under CC BY-NC-SA 4.0</span></section></footer></article><footer class=site-footer><section class=copyright>&copy;
+2025 -
+2026 Kerolt's Note</section><section class=powerby>使用 <a href=https://gohugo.io/ target=_blank rel=noopener>Hugo</a> 构建<br>主题 <b><a href=https://github.com/CaiJimmy/hugo-theme-stack target=_blank rel=noopener data-version=4.0.3>Stack</a></b> 由 <a href=https://jimmycai.com target=_blank rel=noopener>Jimmy</a> 设计</section></footer><script type=module>
+    import gallery from '\/ts\/gallery.js';
+
+    const articleContent = document.querySelector('.article-content');
+    const shouldLoad = articleContent && (articleContent.querySelectorAll('figure').length > 0 || articleContent.querySelectorAll('img.gallery-image').length > 0);
+    
+    if (shouldLoad) {
+        gallery(articleContent);
+
+        const PhotoSwipeLightbox = (await import("https:\/\/cdn.jsdelivr.net\/npm\/photoswipe@5.4.4\/dist\/photoswipe-lightbox.esm.min.js")).default;
+        const styleHref = "https:\/\/cdn.jsdelivr.net\/npm\/photoswipe@5.4.4\/dist\/photoswipe.css";
+
+        const styleTag = document.createElement('link');
+        styleTag.rel = 'stylesheet';
+        styleTag.href = styleHref;
+        document.head.appendChild(styleTag);
+
+        const lightbox = new PhotoSwipeLightbox({
+            gallerySelector: '.article-content',
+            childSelector: 'figure a.image-link',
+            pswpModule: () => import("https:\/\/cdn.jsdelivr.net\/npm\/photoswipe@5.4.4\/dist\/photoswipe.esm.min.js")
+        });
+        lightbox.init();
+    }
+</script></main></div><script type=text/javascript src=/ts/main.f856840516f7c2ad1769a8f5937e3d08d6cb386e2cd2dd025ae696e0ff207958.js defer></script></body></html>
