@@ -603,7 +603,399 @@
 &lt;/div&gt;
 &lt;/div&gt;&lt;p&gt;由于 &lt;code&gt;pids.max = 20&lt;/code&gt;，内核会在超过限制后拒绝每一个 &lt;code&gt;fork()&lt;/code&gt; 调用。容器 shell 会死掉。在宿主机上打开另一个终端，一切正常运行。如果没有 cgroups，那个 fork bomb 会需要硬重启才能恢复。&lt;/p&gt;
 &lt;hr&gt;
-&lt;p&gt;好了！你已经从零构建了一个真正的容器，具备了：使用命名空间的隔离、使用 chroot 的文件系统虚拟化、以及使用 cgroup v2 的资源限制。这本质上就是 Docker 在底层做的事情，只不过 Docker 有更多的功能、更好的用户体验和生产级工具。&lt;/p&gt;</description></item><item><title>更改Go的默认安装位置</title><link>https://kerolt.github.io/p/%E6%9B%B4%E6%94%B9go%E7%9A%84%E9%BB%98%E8%AE%A4%E5%AE%89%E8%A3%85%E4%BD%8D%E7%BD%AE/</link><pubDate>Wed, 11 Feb 2026 00:00:00 +0000</pubDate><guid>https://kerolt.github.io/p/%E6%9B%B4%E6%94%B9go%E7%9A%84%E9%BB%98%E8%AE%A4%E5%AE%89%E8%A3%85%E4%BD%8D%E7%BD%AE/</guid><description>
+&lt;p&gt;好了！你已经从零构建了一个真正的容器，具备了：使用命名空间的隔离、使用 chroot 的文件系统虚拟化、以及使用 cgroup v2 的资源限制。这本质上就是 Docker 在底层做的事情，只不过 Docker 有更多的功能、更好的用户体验和生产级工具。&lt;/p&gt;</description></item><item><title>Go 与汇编</title><link>https://kerolt.github.io/p/go-%E4%B8%8E%E6%B1%87%E7%BC%96/</link><pubDate>Mon, 11 May 2026 00:00:00 +0000</pubDate><guid>https://kerolt.github.io/p/go-%E4%B8%8E%E6%B1%87%E7%BC%96/</guid><description>&lt;h2 id="1-为什么-go-需要汇编"&gt;1. 为什么 Go 需要汇编
+&lt;/h2&gt;&lt;p&gt;Go 在以下场景允许直接嵌入汇编：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;性能热点&lt;/strong&gt;：手写 SIMD 指令、避免编译器优化不足&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;系统调用&lt;/strong&gt;：部分 runtime 代码（如 &lt;code&gt;runtime·sys_linux_amd64.s&lt;/code&gt;）直接发起 syscall&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;引导/启动&lt;/strong&gt;：&lt;code&gt;rt0_linux_amd64.s&lt;/code&gt; 等启动代码必须在汇编层面完成栈和寄存器初始化&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;密码学&lt;/strong&gt;：&lt;code&gt;crypto/aes&lt;/code&gt;, &lt;code&gt;crypto/sha256&lt;/code&gt; 等标准库大量使用汇编加速&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Go 使用 &lt;strong&gt;Plan 9 汇编语法&lt;/strong&gt;，与 AT&amp;amp;T / Intel 语法都不同。&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2 id="2-plan-9-汇编基础"&gt;2. Plan 9 汇编基础
+&lt;/h2&gt;&lt;h3 id="21-操作数顺序"&gt;2.1 操作数顺序
+&lt;/h3&gt;&lt;p&gt;Plan 9 汇编是&lt;strong&gt;源操作数在前，目标操作数在后&lt;/strong&gt;（类似 AT&amp;amp;T，但无 &lt;code&gt;%&lt;/code&gt; / &lt;code&gt;$&lt;/code&gt; 前缀）：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-shell" data-lang="shell"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;ADDQ BX, AX // &lt;span class="nv"&gt;AX&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; AX + BX &lt;span class="o"&gt;(&lt;/span&gt;Intel: add rax, rbx&lt;span class="o"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;MOVQ x+0&lt;span class="o"&gt;(&lt;/span&gt;FP&lt;span class="o"&gt;)&lt;/span&gt;, AX // &lt;span class="nv"&gt;AX&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; *&lt;span class="o"&gt;(&lt;/span&gt;FP + x_offset&lt;span class="o"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h3 id="22-寄存器命名"&gt;2.2 寄存器命名
+&lt;/h3&gt;&lt;table&gt;
+	&lt;thead&gt;
+			&lt;tr&gt;
+					&lt;th style="text-align: left"&gt;通用寄存器&lt;/th&gt;
+					&lt;th style="text-align: left"&gt;Plan 9 名&lt;/th&gt;
+					&lt;th style="text-align: left"&gt;Intel 名&lt;/th&gt;
+			&lt;/tr&gt;
+	&lt;/thead&gt;
+	&lt;tbody&gt;
+			&lt;tr&gt;
+					&lt;td style="text-align: left"&gt;AX / EAX / AX:BX&lt;/td&gt;
+					&lt;td style="text-align: left"&gt;AX&lt;/td&gt;
+					&lt;td style="text-align: left"&gt;RAX&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td style="text-align: left"&gt;BX&lt;/td&gt;
+					&lt;td style="text-align: left"&gt;BX&lt;/td&gt;
+					&lt;td style="text-align: left"&gt;RBX&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td style="text-align: left"&gt;CX&lt;/td&gt;
+					&lt;td style="text-align: left"&gt;CX&lt;/td&gt;
+					&lt;td style="text-align: left"&gt;RCX&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td style="text-align: left"&gt;DX&lt;/td&gt;
+					&lt;td style="text-align: left"&gt;DX&lt;/td&gt;
+					&lt;td style="text-align: left"&gt;RDX&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td style="text-align: left"&gt;Stack Pointer&lt;/td&gt;
+					&lt;td style="text-align: left"&gt;SP&lt;/td&gt;
+					&lt;td style="text-align: left"&gt;RSP&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td style="text-align: left"&gt;Base Pointer&lt;/td&gt;
+					&lt;td style="text-align: left"&gt;BP&lt;/td&gt;
+					&lt;td style="text-align: left"&gt;RBP&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td style="text-align: left"&gt;R8–R15&lt;/td&gt;
+					&lt;td style="text-align: left"&gt;R8–R15&lt;/td&gt;
+					&lt;td style="text-align: left"&gt;R8–R15&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td style="text-align: left"&gt;X0–X15 (SSE)&lt;/td&gt;
+					&lt;td style="text-align: left"&gt;X0–X15&lt;/td&gt;
+					&lt;td style="text-align: left"&gt;XMM0–XMM15&lt;/td&gt;
+			&lt;/tr&gt;
+	&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h3 id="23-伪寄存器核心概念"&gt;2.3 伪寄存器（核心概念）
+&lt;/h3&gt;&lt;p&gt;Go 汇编定义了四个伪寄存器，没有物理硬件对应：&lt;/p&gt;
+&lt;table&gt;
+	&lt;thead&gt;
+			&lt;tr&gt;
+					&lt;th style="text-align: left"&gt;伪寄存器&lt;/th&gt;
+					&lt;th style="text-align: left"&gt;含义&lt;/th&gt;
+					&lt;th style="text-align: left"&gt;示例&lt;/th&gt;
+			&lt;/tr&gt;
+	&lt;/thead&gt;
+	&lt;tbody&gt;
+			&lt;tr&gt;
+					&lt;td style="text-align: left"&gt;&lt;strong&gt;SB&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style="text-align: left"&gt;Static Base — 全局符号基址&lt;/td&gt;
+					&lt;td style="text-align: left"&gt;&lt;code&gt;TEXT ·Sum(SB)&lt;/code&gt; 声明全局函数&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td style="text-align: left"&gt;&lt;strong&gt;FP&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style="text-align: left"&gt;Frame Pointer — 指向参数和返回值区域的起始&lt;/td&gt;
+					&lt;td style="text-align: left"&gt;&lt;code&gt;x+0(FP)&lt;/code&gt; 访问第一个参数&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td style="text-align: left"&gt;&lt;strong&gt;SP&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style="text-align: left"&gt;栈指针 — 指向当前 goroutine 栈顶&lt;/td&gt;
+					&lt;td style="text-align: left"&gt;&lt;code&gt;MOVQ AX, local+0(SP)&lt;/code&gt; 局部变量&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td style="text-align: left"&gt;&lt;strong&gt;PC&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style="text-align: left"&gt;Program Counter — 指令地址&lt;/td&gt;
+					&lt;td style="text-align: left"&gt;用于跳转表和 &lt;code&gt;CALL&lt;/code&gt;&lt;/td&gt;
+			&lt;/tr&gt;
+	&lt;/tbody&gt;
+&lt;/table&gt;
+
+ &lt;blockquote&gt;
+ &lt;p&gt;&lt;strong&gt;重点&lt;/strong&gt;：&lt;code&gt;FP&lt;/code&gt; 是函数参数/返回值的入口地址，硬件寄存器 &lt;code&gt;SP&lt;/code&gt; 是 &lt;code&gt;RSP&lt;/code&gt;，而汇编中的 &lt;code&gt;SP&lt;/code&gt; 指的是局部变量区的基址。两者是不同的。&lt;/p&gt;
+
+ &lt;/blockquote&gt;
+&lt;h3 id="24-指令后缀"&gt;2.4 指令后缀
+&lt;/h3&gt;&lt;table&gt;
+	&lt;thead&gt;
+			&lt;tr&gt;
+					&lt;th style="text-align: left"&gt;后缀&lt;/th&gt;
+					&lt;th style="text-align: left"&gt;操作数大小&lt;/th&gt;
+					&lt;th style="text-align: left"&gt;对应 C 类型&lt;/th&gt;
+			&lt;/tr&gt;
+	&lt;/thead&gt;
+	&lt;tbody&gt;
+			&lt;tr&gt;
+					&lt;td style="text-align: left"&gt;&lt;code&gt;B&lt;/code&gt;&lt;/td&gt;
+					&lt;td style="text-align: left"&gt;1 字节&lt;/td&gt;
+					&lt;td style="text-align: left"&gt;&lt;code&gt;byte&lt;/code&gt; / &lt;code&gt;uint8&lt;/code&gt;&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td style="text-align: left"&gt;&lt;code&gt;W&lt;/code&gt;&lt;/td&gt;
+					&lt;td style="text-align: left"&gt;2 字节&lt;/td&gt;
+					&lt;td style="text-align: left"&gt;&lt;code&gt;uint16&lt;/code&gt;&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td style="text-align: left"&gt;&lt;code&gt;L&lt;/code&gt;&lt;/td&gt;
+					&lt;td style="text-align: left"&gt;4 字节&lt;/td&gt;
+					&lt;td style="text-align: left"&gt;&lt;code&gt;uint32&lt;/code&gt;&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td style="text-align: left"&gt;&lt;code&gt;Q&lt;/code&gt;&lt;/td&gt;
+					&lt;td style="text-align: left"&gt;8 字节&lt;/td&gt;
+					&lt;td style="text-align: left"&gt;&lt;code&gt;uint64&lt;/code&gt; / &lt;code&gt;int&lt;/code&gt; (64-bit)&lt;/td&gt;
+			&lt;/tr&gt;
+	&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;hr&gt;
+&lt;h2 id="3-函数声明与栈帧"&gt;3. 函数声明与栈帧
+&lt;/h2&gt;&lt;h3 id="31-text-指令"&gt;3.1 TEXT 指令
+&lt;/h3&gt;&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-shell" data-lang="shell"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;TEXT ·函数名&lt;span class="o"&gt;(&lt;/span&gt;SB&lt;span class="o"&gt;)&lt;/span&gt;, $帧大小-参数大小
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;·函数名&lt;/code&gt;：&lt;code&gt;·&lt;/code&gt;（U+00B7）是包分隔符，等价于 Go 的 &lt;code&gt;.&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;SB&lt;/code&gt;：使该符号全局可见，Go 链接器可找到它&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;$N-M&lt;/code&gt;：
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;N&lt;/code&gt;：局部变量所需的栈空间（0 表示不需要）&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;M&lt;/code&gt;：参数 + 返回值占用的总字节数&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id="32-栈布局amd64"&gt;3.2 栈布局（amd64）
+&lt;/h3&gt;&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt; 1
+&lt;/span&gt;&lt;span class="lnt"&gt; 2
+&lt;/span&gt;&lt;span class="lnt"&gt; 3
+&lt;/span&gt;&lt;span class="lnt"&gt; 4
+&lt;/span&gt;&lt;span class="lnt"&gt; 5
+&lt;/span&gt;&lt;span class="lnt"&gt; 6
+&lt;/span&gt;&lt;span class="lnt"&gt; 7
+&lt;/span&gt;&lt;span class="lnt"&gt; 8
+&lt;/span&gt;&lt;span class="lnt"&gt; 9
+&lt;/span&gt;&lt;span class="lnt"&gt;10
+&lt;/span&gt;&lt;span class="lnt"&gt;11
+&lt;/span&gt;&lt;span class="lnt"&gt;12
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-shell" data-lang="shell"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;调用者视角:
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;+------------------+ 高地址
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="p"&gt;|&lt;/span&gt; &lt;span class="nb"&gt;caller&lt;/span&gt; frame &lt;span class="p"&gt;|&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;+------------------+
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="p"&gt;|&lt;/span&gt; &lt;span class="k"&gt;return&lt;/span&gt; addr &lt;span class="p"&gt;|&lt;/span&gt; &lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="m"&gt;8&lt;/span&gt; bytes, 由 CALL 压栈&lt;span class="o"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;+------------------+ ← 被调函数的硬件 SP &lt;span class="o"&gt;(&lt;/span&gt;RSP&lt;span class="o"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="p"&gt;|&lt;/span&gt; 参数1 x &lt;span class="p"&gt;|&lt;/span&gt; x+0&lt;span class="o"&gt;(&lt;/span&gt;FP&lt;span class="o"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="p"&gt;|&lt;/span&gt; 参数2 y &lt;span class="p"&gt;|&lt;/span&gt; y+8&lt;span class="o"&gt;(&lt;/span&gt;FP&lt;span class="o"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="p"&gt;|&lt;/span&gt; 返回值 &lt;span class="p"&gt;|&lt;/span&gt; ret+16&lt;span class="o"&gt;(&lt;/span&gt;FP&lt;span class="o"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;+------------------+ ← FP &lt;span class="o"&gt;(&lt;/span&gt;伪寄存器&lt;span class="o"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="p"&gt;|&lt;/span&gt; 局部变量区 &lt;span class="p"&gt;|&lt;/span&gt; local+0&lt;span class="o"&gt;(&lt;/span&gt;SP&lt;span class="o"&gt;)&lt;/span&gt; ... local+N&lt;span class="o"&gt;(&lt;/span&gt;SP&lt;span class="o"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;+------------------+ ← 硬件 SP 最终位置
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+ &lt;blockquote&gt;
+ &lt;p&gt;&lt;strong&gt;关键&lt;/strong&gt;：&lt;code&gt;FP&lt;/code&gt; 指向参数区的起始，&lt;code&gt;SP&lt;/code&gt;（伪寄存器）指向局部变量区的起始。返回值存放在参数区的最末尾，紧接在参数之后。&lt;/p&gt;
+
+ &lt;/blockquote&gt;
+&lt;h3 id="33-参数与返回值的偏移计算"&gt;3.3 参数与返回值的偏移计算
+&lt;/h3&gt;&lt;p&gt;对于 &lt;code&gt;func Sum(x, y int) int&lt;/code&gt;（amd64，int = 8 字节）：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;span class="lnt"&gt;4
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-shell" data-lang="shell"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;FP + 0: x &lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="m"&gt;8&lt;/span&gt; bytes&lt;span class="o"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;FP + 8: y &lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="m"&gt;8&lt;/span&gt; bytes&lt;span class="o"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;FP + 16: ret &lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="m"&gt;8&lt;/span&gt; bytes&lt;span class="o"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;总大小: &lt;span class="m"&gt;24&lt;/span&gt; bytes
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;因此 &lt;code&gt;TEXT&lt;/code&gt; 指令的帧大小应为 &lt;code&gt;$0-24&lt;/code&gt;（0 字节局部变量 + 24 字节参数/返回值空间）。&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2 id="4-实例解析"&gt;4. 实例解析
+&lt;/h2&gt;&lt;h3 id="41-go-侧-maingo"&gt;4.1 Go 侧 (main.go)
+&lt;/h3&gt;&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt; 1
+&lt;/span&gt;&lt;span class="lnt"&gt; 2
+&lt;/span&gt;&lt;span class="lnt"&gt; 3
+&lt;/span&gt;&lt;span class="lnt"&gt; 4
+&lt;/span&gt;&lt;span class="lnt"&gt; 5
+&lt;/span&gt;&lt;span class="lnt"&gt; 6
+&lt;/span&gt;&lt;span class="lnt"&gt; 7
+&lt;/span&gt;&lt;span class="lnt"&gt; 8
+&lt;/span&gt;&lt;span class="lnt"&gt; 9
+&lt;/span&gt;&lt;span class="lnt"&gt;10
+&lt;/span&gt;&lt;span class="lnt"&gt;11
+&lt;/span&gt;&lt;span class="lnt"&gt;12
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-go" data-lang="go"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="kn"&gt;package&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;main&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="kn"&gt;import&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s"&gt;&amp;#34;fmt&amp;#34;&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="kd"&gt;func&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nf"&gt;main&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;x&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;:=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mi"&gt;10&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;y&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;:=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mi"&gt;20&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;sum&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;:=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nf"&gt;Sum&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;x&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;y&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;fmt&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;Println&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;#34;Sum:&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;sum&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="p"&gt;}&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="kd"&gt;func&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nf"&gt;Sum&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;x&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;y&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="kt"&gt;int&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="kt"&gt;int&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="c1"&gt;// 只声明，无函数体&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;Sum&lt;/code&gt; 只有签名没有实现体&lt;/li&gt;
+&lt;li&gt;Go 编译器看到这样的声明会自动查找同名汇编符号&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;注意&lt;/strong&gt;：汇编函数名大小写敏感，&lt;code&gt;Sum&lt;/code&gt; 大写表示导出（exported）&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id="42-汇编侧-adds"&gt;4.2 汇编侧 (add.s)
+&lt;/h3&gt;&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;span class="lnt"&gt;4
+&lt;/span&gt;&lt;span class="lnt"&gt;5
+&lt;/span&gt;&lt;span class="lnt"&gt;6
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-asm" data-lang="asm"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nf"&gt;TEXT&lt;/span&gt; &lt;span class="err"&gt;·&lt;/span&gt;&lt;span class="no"&gt;Sum&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="no"&gt;SB&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt; &lt;span class="no"&gt;$0-24&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="nf"&gt;MOVQ&lt;/span&gt; &lt;span class="no"&gt;x&lt;/span&gt;&lt;span class="err"&gt;+&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="no"&gt;FP&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt; &lt;span class="no"&gt;AX&lt;/span&gt; &lt;span class="c1"&gt;// AX = x
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="nf"&gt;MOVQ&lt;/span&gt; &lt;span class="no"&gt;y&lt;/span&gt;&lt;span class="err"&gt;+&lt;/span&gt;&lt;span class="mi"&gt;8&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="no"&gt;FP&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt; &lt;span class="no"&gt;BX&lt;/span&gt; &lt;span class="c1"&gt;// BX = y
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="nf"&gt;ADDQ&lt;/span&gt; &lt;span class="no"&gt;BX&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="no"&gt;AX&lt;/span&gt; &lt;span class="c1"&gt;// AX = AX + BX
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="nf"&gt;MOVQ&lt;/span&gt; &lt;span class="no"&gt;AX&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="no"&gt;ret&lt;/span&gt;&lt;span class="err"&gt;+&lt;/span&gt;&lt;span class="mi"&gt;16&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="no"&gt;FP&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="c1"&gt;// 将结果写入返回值位置
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="nf"&gt;RET&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;逐行解释：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;code&gt;MOVQ x+0(FP), AX&lt;/code&gt; — 从栈上偏移 0 处取出参数 &lt;code&gt;x&lt;/code&gt;，放入 &lt;code&gt;AX&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;MOVQ y+8(FP), BX&lt;/code&gt; — 从栈上偏移 8 处取出参数 &lt;code&gt;y&lt;/code&gt;，放入 &lt;code&gt;BX&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;ADDQ BX, AX&lt;/code&gt; — &lt;code&gt;AX += BX&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;MOVQ AX, ret+16(FP)&lt;/code&gt; — 将 &lt;code&gt;AX&lt;/code&gt; 的值写入返回值槽位&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;RET&lt;/code&gt; — 函数返回，调用者从 &lt;code&gt;ret+16(FP)&lt;/code&gt; 处读取结果&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h3 id="43-编译与运行"&gt;4.3 编译与运行
+&lt;/h3&gt;&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt; 1
+&lt;/span&gt;&lt;span class="lnt"&gt; 2
+&lt;/span&gt;&lt;span class="lnt"&gt; 3
+&lt;/span&gt;&lt;span class="lnt"&gt; 4
+&lt;/span&gt;&lt;span class="lnt"&gt; 5
+&lt;/span&gt;&lt;span class="lnt"&gt; 6
+&lt;/span&gt;&lt;span class="lnt"&gt; 7
+&lt;/span&gt;&lt;span class="lnt"&gt; 8
+&lt;/span&gt;&lt;span class="lnt"&gt; 9
+&lt;/span&gt;&lt;span class="lnt"&gt;10
+&lt;/span&gt;&lt;span class="lnt"&gt;11
+&lt;/span&gt;&lt;span class="lnt"&gt;12
+&lt;/span&gt;&lt;span class="lnt"&gt;13
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# 直接 go build，汇编文件 (.s) 会被自动识别&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;go build -o go-asm
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;./go-asm
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# 输出: Sum: 30&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# 查看 Go 生成的汇编（对比编译器生成版本）&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;go tool compile -S main.go
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# 只编译汇编文件&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;go tool asm add.s
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# 反汇编已编译的二进制&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;go tool objdump -s Sum go-asm
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;hr&gt;
+&lt;h2 id="5-调试与工具"&gt;5. 调试与工具
+&lt;/h2&gt;&lt;h3 id="51-验证栈帧大小"&gt;5.1 验证栈帧大小
+&lt;/h3&gt;&lt;p&gt;编译时设置 &lt;code&gt;-asan&lt;/code&gt; 或者直接检查：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;go build -gcflags&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;&amp;#34;-live&amp;#34;&lt;/span&gt; 2&amp;gt;&lt;span class="p"&gt;&amp;amp;&lt;/span&gt;&lt;span class="m"&gt;1&lt;/span&gt; &lt;span class="p"&gt;|&lt;/span&gt; head
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h3 id="52-查看调用约定兼容性"&gt;5.2 查看调用约定兼容性
+&lt;/h3&gt;&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# 确认寄存器传参是否被使用（Go 1.17+ ABI 内部变化）&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;go build -gcflags&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;&amp;#34;-S&amp;#34;&lt;/span&gt; 2&amp;gt;&lt;span class="p"&gt;&amp;amp;&lt;/span&gt;&lt;span class="m"&gt;1&lt;/span&gt; &lt;span class="p"&gt;|&lt;/span&gt; grep Sum
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+ &lt;blockquote&gt;
+ &lt;p&gt;Go 1.17 起引入了&lt;strong&gt;基于寄存器的调用约定&lt;/strong&gt;（ABIInternal），参数和返回值优先通过寄存器传递而非栈。但手写的汇编 &lt;code&gt;.s&lt;/code&gt; 文件默认仍使用栈传参（&lt;code&gt;ABI0&lt;/code&gt;）。如果需要兼容 ABIInternal，需要在 &lt;code&gt;TEXT&lt;/code&gt; 指令中指定。&lt;/p&gt;
+
+ &lt;/blockquote&gt;
+&lt;hr&gt;
+&lt;h2 id="6-常见陷阱"&gt;6. 常见陷阱
+&lt;/h2&gt;&lt;h3 id="61-帧大小标注不匹配"&gt;6.1 帧大小标注不匹配
+&lt;/h3&gt;&lt;p&gt;如果 &lt;code&gt;TEXT&lt;/code&gt; 中声明的 &lt;code&gt;$N-M&lt;/code&gt; 与实际使用的偏移量不一致，链接时可能不会报错但运行时会产生数据竞争或栈损坏。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;当前仓库中 &lt;code&gt;add.s&lt;/code&gt; 的 &lt;code&gt;$0-8&lt;/code&gt; 应修正为 &lt;code&gt;$0-24&lt;/code&gt;&lt;/strong&gt;（amd64 下 &lt;code&gt;int&lt;/code&gt; 为 8 字节，参数 + 返回值共 24 字节）。&lt;/p&gt;
+&lt;h3 id="62-符号命名"&gt;6.2 符号命名
+&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;Go 中使用 &lt;code&gt;·&lt;/code&gt;（middle dot）分隔包名和函数名，不可用普通点 &lt;code&gt;.&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;导出函数名（首字母大写）在汇编中同样需要大写&lt;/li&gt;
+&lt;li&gt;使用 &lt;code&gt;&amp;quot;&amp;quot;.Sum&lt;/code&gt; 或 &lt;code&gt;·Sum&lt;/code&gt; 均可（后者是缩写形式）&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id="63-栈对齐"&gt;6.3 栈对齐
+&lt;/h3&gt;&lt;p&gt;x86-64 ABI 要求栈在 &lt;code&gt;CALL&lt;/code&gt; 前 16 字节对齐。如果手动调整栈指针，需要确保对齐。&lt;/p&gt;
+&lt;h3 id="64-寄存器保存"&gt;6.4 寄存器保存
+&lt;/h3&gt;&lt;p&gt;Go 汇编中，调用者需要保存 &lt;strong&gt;callee-saved&lt;/strong&gt; 寄存器（&lt;code&gt;BP&lt;/code&gt;、&lt;code&gt;BX&lt;/code&gt;、&lt;code&gt;R12–R15&lt;/code&gt;）。&lt;code&gt;AX&lt;/code&gt;、&lt;code&gt;CX&lt;/code&gt;、&lt;code&gt;DX&lt;/code&gt; 等是调用者保存的 scratch 寄存器，可以随意使用。&lt;/p&gt;
+&lt;h3 id="65-go-版本差异"&gt;6.5 Go 版本差异
+&lt;/h3&gt;&lt;table&gt;
+	&lt;thead&gt;
+			&lt;tr&gt;
+					&lt;th style="text-align: left"&gt;版本&lt;/th&gt;
+					&lt;th style="text-align: left"&gt;变化&lt;/th&gt;
+			&lt;/tr&gt;
+	&lt;/thead&gt;
+	&lt;tbody&gt;
+			&lt;tr&gt;
+					&lt;td style="text-align: left"&gt;Go 1.17&lt;/td&gt;
+					&lt;td style="text-align: left"&gt;引入 ABIInternal（寄存器传参），汇编默认仍使用 ABI0&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td style="text-align: left"&gt;Go 1.21+&lt;/td&gt;
+					&lt;td style="text-align: left"&gt;部分标准库汇编适配寄存器 ABI&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td style="text-align: left"&gt;Go 1.22+&lt;/td&gt;
+					&lt;td style="text-align: left"&gt;&lt;code&gt;GOAMD64=v3&lt;/code&gt; 支持 AVX2 等新指令&lt;/td&gt;
+			&lt;/tr&gt;
+	&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;hr&gt;
+&lt;h2 id="7-参考资源"&gt;7. 参考资源
+&lt;/h2&gt;&lt;ul&gt;
+&lt;li&gt;&lt;a class="link" href="https://go.dev/doc/asm" target="_blank" rel="noopener"
+ &gt;A Quick Guide to Go&amp;rsquo;s Assembler&lt;/a&gt; — Go 官方汇编快速指南&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;go tool compile -S xxx.go&lt;/code&gt; — 查看编译器生成的汇编&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;go doc cmd/asm&lt;/code&gt; — 汇编器文档&lt;/li&gt;
+&lt;li&gt;标准库 &lt;a class="link" href="https://github.com/golang/go/tree/master/src/crypto" target="_blank" rel="noopener"
+ &gt;&lt;code&gt;crypto/&lt;/code&gt;&lt;/a&gt; 目录下大量 &lt;code&gt;.s&lt;/code&gt; 文件可供学习&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>更改Go的默认安装位置</title><link>https://kerolt.github.io/p/%E6%9B%B4%E6%94%B9go%E7%9A%84%E9%BB%98%E8%AE%A4%E5%AE%89%E8%A3%85%E4%BD%8D%E7%BD%AE/</link><pubDate>Wed, 11 Feb 2026 00:00:00 +0000</pubDate><guid>https://kerolt.github.io/p/%E6%9B%B4%E6%94%B9go%E7%9A%84%E9%BB%98%E8%AE%A4%E5%AE%89%E8%A3%85%E4%BD%8D%E7%BD%AE/</guid><description>
  &lt;blockquote&gt;
  &lt;p&gt;将 Go 的默认工作 Go 目录从 &lt;code&gt;$HOME/go&lt;/code&gt; 改为 &lt;code&gt;$HOME/.go&lt;/code&gt; ，这个行为由环境变量 &lt;code&gt;GOPATH&lt;/code&gt; 控制&lt;/p&gt;
 
