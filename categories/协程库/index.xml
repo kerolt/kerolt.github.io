@@ -1152,7 +1152,7 @@
 &lt;/ul&gt;
 &lt;p&gt;调度器中最重要的一个函数我认为就是 &lt;code&gt;Run()&lt;/code&gt; 函数了，这个函数用于协程的调度，或者，你可以将他理解为是一个调度协程（名词）。&lt;/p&gt;
 &lt;p&gt;创建 Scheduler 时会为每一个内部线程池中的每一个线程都绑定一个调度协程，线程数量默认为 1，此时也默认会使用 caller 线程，也就是使用的主线程。调度协程 &lt;code&gt;Scheduler::Run()&lt;/code&gt; 会从任务队列 Task Queue 中不断去取任务去执行。如果有任务可执行，那就切换至任务协程执行，任务协程执行完毕后又切换回调度协程；无任务执行时，调度协程切换至 Idle 协程进行等待。&lt;/p&gt;
-&lt;p&gt;&lt;img class="gallery-image" data-flex-basis="401px" data-flex-grow="167" height="730" loading="lazy" sizes="(max-width: 767px) calc(100vw - 30px), (max-width: 1023px) 700px, (max-width: 1279px) 950px, 1232px" src="https://gitee.com/kerolt/picture/raw/main/20241216-143744.png" srcset="https://kerolt.github.io/'20241216-143744_13013154973165091284_hu_34a279a05b8876bf.png 800w, https://gitee.com/kerolt/picture/raw/main/20241216-143744.png 1220w" width="1220"&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img class="gallery-image" data-flex-basis="401px" data-flex-grow="167" height="730" loading="lazy" sizes="(max-width: 767px) calc(100vw - 30px), (max-width: 1023px) 700px, (max-width: 1279px) 950px, 1232px" src="https://gitee.com/kerolt/picture/raw/main/20241216-143744.png" srcset="https://kerolt.github.io/20241216-143744_13013154973165091284_hu_34a279a05b8876bf.png 800w, https://gitee.com/kerolt/picture/raw/main/20241216-143744.png 1220w" width="1220"&gt;&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
 &lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
 &lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt; 1

@@ -1,4 +1,152 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Posts on Kerolt's Note</title><link>https://kerolt.github.io/post/</link><description>Recent content in Posts on Kerolt's Note</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><lastBuildDate>Wed, 20 May 2026 00:00:00 +0000</lastBuildDate><atom:link href="https://kerolt.github.io/post/index.xml" rel="self" type="application/rss+xml"/><item><title>零拷贝技术</title><link>https://kerolt.github.io/p/%E9%9B%B6%E6%8B%B7%E8%B4%9D%E6%8A%80%E6%9C%AF/</link><pubDate>Mon, 18 May 2026 00:00:00 +0000</pubDate><guid>https://kerolt.github.io/p/%E9%9B%B6%E6%8B%B7%E8%B4%9D%E6%8A%80%E6%9C%AF/</guid><description>&lt;p&gt;一句话概括：零拷贝技术让数据在 &lt;strong&gt;磁盘 → 内核缓冲区 → 网卡&lt;/strong&gt; 之间直接传输，避免用户态与内核态之间的冗余数据拷贝，核心是消除 CPU 参与的数据搬移。&lt;/p&gt;
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Posts on Kerolt's Note</title><link>https://kerolt.github.io/post/</link><description>Recent content in Posts on Kerolt's Note</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><lastBuildDate>Sat, 13 Jun 2026 00:00:00 +0000</lastBuildDate><atom:link href="https://kerolt.github.io/post/index.xml" rel="self" type="application/rss+xml"/><item><title>Clash Fake-IP 模式下 Git SSH 连接失败</title><link>https://kerolt.github.io/p/clash-fake-ip-%E6%A8%A1%E5%BC%8F%E4%B8%8B-git-ssh-%E8%BF%9E%E6%8E%A5%E5%A4%B1%E8%B4%A5/</link><pubDate>Sat, 13 Jun 2026 00:00:00 +0000</pubDate><guid>https://kerolt.github.io/p/clash-fake-ip-%E6%A8%A1%E5%BC%8F%E4%B8%8B-git-ssh-%E8%BF%9E%E6%8E%A5%E5%A4%B1%E8%B4%A5/</guid><description>&lt;h2 id="问题现象"&gt;问题现象
+&lt;/h2&gt;&lt;p&gt;执行 &lt;code&gt;git fetch --all&lt;/code&gt; 报错：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;Connection closed by 198.18.0.35 port &lt;span class="m"&gt;22&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;fatal: Could not &lt;span class="nb"&gt;read&lt;/span&gt; from remote repository.
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h2 id="排查过程"&gt;排查过程
+&lt;/h2&gt;&lt;h3 id="1-确认-remote-地址"&gt;1. 确认 remote 地址
+&lt;/h3&gt;&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;git remote -v
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# origin git@github.com:ZJNU-Lab-29202/detection-saas.git&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;使用的是 SSH 协议。&lt;/p&gt;
+&lt;h3 id="2-排查-dns-解析"&gt;2. 排查 DNS 解析
+&lt;/h3&gt;&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;nslookup github.com
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# Name: github.com&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# Address: 198.18.0.35&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;&lt;code&gt;198.18.0.35&lt;/code&gt; 不是 GitHub 真实 IP，属于 &lt;code&gt;198.18.0.0/15&lt;/code&gt; 保留段。这是 &lt;strong&gt;Clash Fake-IP 模式&lt;/strong&gt; 的典型特征——DNS 返回虚拟 IP，由 Clash 透明代理接管流量。&lt;/p&gt;
+&lt;h3 id="3-确认-clash-运行状态"&gt;3. 确认 Clash 运行状态
+&lt;/h3&gt;&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;ss -tlnp &lt;span class="p"&gt;|&lt;/span&gt; grep &lt;span class="m"&gt;789&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# LISTEN *:7890 # HTTP 代理&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# LISTEN *:7891 # SOCKS5 代理&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;Clash (mihomo) 正在运行，HTTP 代理端口 &lt;code&gt;7890&lt;/code&gt;，SOCKS5 端口 &lt;code&gt;7891&lt;/code&gt;，均开启了 Basic 认证。&lt;/p&gt;
+&lt;h3 id="4-尝试-ssh-proxycommand"&gt;4. 尝试 SSH ProxyCommand
+&lt;/h3&gt;&lt;p&gt;在 &lt;code&gt;~/.ssh/config&lt;/code&gt; 中为 &lt;code&gt;github.com&lt;/code&gt; 添加 ProxyCommand：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;Host github.com
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; HostName github.com
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; ProxyCommand ncat --proxy-type http --proxy 127.0.0.1:7890 --proxy-auth kerolt:xxxxxx %h %p
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;&lt;code&gt;ncat&lt;/code&gt; 能成功建立 CONNECT 隧道（exit 0），但 SSH 握手阶段被远端关闭：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;debug1: Local version string SSH-2.0-OpenSSH_10.2
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;kex_exchange_identification: Connection closed by remote host
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;&lt;strong&gt;结论：&lt;/strong&gt; Fake-IP 模式下，即使通过 HTTP CONNECT 代理转发 SSH 流量，也无法完成完整的 SSH 握手。Clash 对 SSH 流量的透明代理处理存在问题。&lt;/p&gt;
+&lt;h2 id="解决方案"&gt;解决方案
+&lt;/h2&gt;&lt;h3 id="方案一推荐改用-https--git-代理"&gt;方案一（推荐）：改用 HTTPS + Git 代理
+&lt;/h3&gt;&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;span class="lnt"&gt;4
+&lt;/span&gt;&lt;span class="lnt"&gt;5
+&lt;/span&gt;&lt;span class="lnt"&gt;6
+&lt;/span&gt;&lt;span class="lnt"&gt;7
+&lt;/span&gt;&lt;span class="lnt"&gt;8
+&lt;/span&gt;&lt;span class="lnt"&gt;9
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# 1. 配置 git 全局 HTTPS 代理（含 Clash 认证）&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;git config --global http.proxy http://kerolt:&amp;lt;password&amp;gt;@127.0.0.1:7890
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;git config --global https.proxy http://kerolt:&amp;lt;password&amp;gt;@127.0.0.1:7890
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# 2. 将 remote 从 SSH 改为 HTTPS&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;git remote set-url origin https://github.com/&amp;lt;owner&amp;gt;/&amp;lt;repo&amp;gt;.git
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# 3. 验证&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;git fetch --all
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+ &lt;blockquote&gt;
+ &lt;p&gt;&lt;strong&gt;注意：&lt;/strong&gt; GitHub 已不支持密码认证，push 时需要 Personal Access Token (PAT)。可以配置：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;git config --global url.&lt;span class="s2"&gt;&amp;#34;https://&amp;lt;TOKEN&amp;gt;@github.com/&amp;#34;&lt;/span&gt;.insteadOf &lt;span class="s2"&gt;&amp;#34;https://github.com/&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+ &lt;/blockquote&gt;
+&lt;h3 id="方案二clash-切换为-redir-host-模式"&gt;方案二：Clash 切换为 Redir-Host 模式
+&lt;/h3&gt;&lt;p&gt;在 Clash 配置中将 &lt;code&gt;fake-ip&lt;/code&gt; 改为 &lt;code&gt;redir-host&lt;/code&gt;，让 DNS 返回真实 IP，SSH 就能正常走透明代理。但这可能影响其他依赖 Fake-IP 的功能。&lt;/p&gt;
+&lt;h3 id="方案三使用-socks5-代理工具"&gt;方案三：使用 SOCKS5 代理工具
+&lt;/h3&gt;&lt;p&gt;安装 &lt;code&gt;connect-proxy&lt;/code&gt; 或 &lt;code&gt;socat&lt;/code&gt; 等工具替代 &lt;code&gt;ncat&lt;/code&gt;，部分工具对 SOCKS5 代理的 SSH 转发支持更好。&lt;/p&gt;
+&lt;h2 id="核心原因总结"&gt;核心原因总结
+&lt;/h2&gt;&lt;table&gt;
+	&lt;thead&gt;
+			&lt;tr&gt;
+					&lt;th&gt;环节&lt;/th&gt;
+					&lt;th&gt;说明&lt;/th&gt;
+			&lt;/tr&gt;
+	&lt;/thead&gt;
+	&lt;tbody&gt;
+			&lt;tr&gt;
+					&lt;td&gt;Clash Fake-IP&lt;/td&gt;
+					&lt;td&gt;DNS 返回虚拟 IP &lt;code&gt;198.18.0.x&lt;/code&gt;，依赖透明代理接管流量&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;SSH 协议&lt;/td&gt;
+					&lt;td&gt;不是 HTTP，无法被 HTTP 代理直接转发&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;CONNECT 隧道&lt;/td&gt;
+					&lt;td&gt;可以建立 TCP 隧道，但 SSH 握手阶段被阻断&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;HTTPS 方案&lt;/td&gt;
+					&lt;td&gt;Git over HTTPS 是标准 HTTP 流量，Clash 代理完美支持&lt;/td&gt;
+			&lt;/tr&gt;
+	&lt;/tbody&gt;
+&lt;/table&gt;</description></item><item><title>零拷贝技术</title><link>https://kerolt.github.io/p/%E9%9B%B6%E6%8B%B7%E8%B4%9D%E6%8A%80%E6%9C%AF/</link><pubDate>Mon, 18 May 2026 00:00:00 +0000</pubDate><guid>https://kerolt.github.io/p/%E9%9B%B6%E6%8B%B7%E8%B4%9D%E6%8A%80%E6%9C%AF/</guid><description>&lt;p&gt;一句话概括：零拷贝技术让数据在 &lt;strong&gt;磁盘 → 内核缓冲区 → 网卡&lt;/strong&gt; 之间直接传输，避免用户态与内核态之间的冗余数据拷贝，核心是消除 CPU 参与的数据搬移。&lt;/p&gt;
 &lt;h2 id="传统-io-路径4-次拷贝2-次-cpu-参与"&gt;传统 IO 路径（4 次拷贝，2 次 CPU 参与）
 &lt;/h2&gt;&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
 &lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
@@ -18534,7 +18682,7 @@ JSON 格式，描述网络的类型、IPAM 配置、路由等。&lt;/p&gt;
 &lt;/div&gt;</description></item><item><title>【MIT6.S081】Lab10 mmap</title><link>https://kerolt.github.io/p/mit6.s081lab10-mmap/</link><pubDate>Fri, 22 Nov 2024 00:00:00 +0000</pubDate><guid>https://kerolt.github.io/p/mit6.s081lab10-mmap/</guid><description>&lt;h2 id="什么是mmap"&gt;什么是mmap？
 &lt;/h2&gt;&lt;p&gt;&lt;code&gt;mmap&lt;/code&gt; 是一种用于将文件或设备与进程的地址空间关联起来的内存映射技术。通过 &lt;code&gt;mmap&lt;/code&gt;，可以将文件的内容直接映射到进程的虚拟内存地址空间，使得文件的内容可以像操作普通内存一样进行读取和写入。&lt;/p&gt;
 &lt;p&gt;在Linux中，虚拟内存的布局如下：&lt;/p&gt;
-&lt;p&gt;&lt;img class="gallery-image" data-flex-basis="241px" data-flex-grow="100" height="1652" loading="lazy" sizes="(max-width: 767px) calc(100vw - 30px), (max-width: 1023px) 700px, (max-width: 1279px) 950px, 1232px" src="https://cdn.xiaolincoding.com//mysql/other/532e6cdf4899588f8b873b6435cba2d8.png" srcset="https://kerolt.github.io/532e6cdf4899588f8b873b6435cba2d8_3792964083280631767_hu_e56be65ed8c9fab7.png 800w, https://kerolt.github.io/532e6cdf4899588f8b873b6435cba2d8_3792964083280631767_hu_dd80a892e4948cab.png 1600w, https://cdn.xiaolincoding.com//mysql/other/532e6cdf4899588f8b873b6435cba2d8.png 1665w" width="1665"&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img class="gallery-image" data-flex-basis="241px" data-flex-grow="100" height="1652" loading="lazy" sizes="(max-width: 767px) calc(100vw - 30px), (max-width: 1023px) 700px, (max-width: 1279px) 950px, 1232px" src="https://cdn.xiaolincoding.com//mysql/other/532e6cdf4899588f8b873b6435cba2d8.png" srcset="https://kerolt.github.io/532e6cdf4899588f8b873b6435cba2d8_3792964083280631767_hu_3b6cb39808d0274b.png 800w, https://kerolt.github.io/532e6cdf4899588f8b873b6435cba2d8_3792964083280631767_hu_77ae52d7a221e8bc.png 1600w, https://cdn.xiaolincoding.com//mysql/other/532e6cdf4899588f8b873b6435cba2d8.png 1665w" width="1665"&gt;&lt;/p&gt;
 
  &lt;blockquote&gt;
  &lt;p&gt;图片来源：&lt;a class="link" href="https://xiaolincoding.com/os/3_memory/linux_mem.html#_3-%E8%BF%9B%E7%A8%8B%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98%E7%A9%BA%E9%97%B4" target="_blank" rel="noopener"
@@ -18625,11 +18773,11 @@ JSON 格式，描述网络的类型、IPAM 配置、路由等。&lt;/p&gt;
 &lt;/ol&gt;
 &lt;h2 id="如何实现"&gt;如何实现？
 &lt;/h2&gt;&lt;p&gt;在xv6的虚拟内存布局中，可以看到堆区和trapframe之间有一片没有使用的区域，我们可以拿它作为文件映射区域。（xv6和Linux的虚拟内存布局有点区别，xv6的堆区在栈区上面）&lt;/p&gt;
-&lt;p&gt;&lt;img class="gallery-image" data-flex-basis="408px" data-flex-grow="170" height="595" loading="lazy" sizes="(max-width: 767px) calc(100vw - 30px), (max-width: 1023px) 700px, (max-width: 1279px) 950px, 1232px" src="https://gitee.com/kerolt/picture/raw/main/20241215-134845.png" srcset="https://kerolt.github.io/'20241215-134845_11585558939395049439_hu_779147808ea0b20f.png 800w, https://gitee.com/kerolt/picture/raw/main/20241215-134845.png 1012w" width="1012"&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img class="gallery-image" data-flex-basis="408px" data-flex-grow="170" height="595" loading="lazy" sizes="(max-width: 767px) calc(100vw - 30px), (max-width: 1023px) 700px, (max-width: 1279px) 950px, 1232px" src="https://gitee.com/kerolt/picture/raw/main/20241215-134845.png" srcset="https://kerolt.github.io/20241215-134845_11585558939395049439_hu_779147808ea0b20f.png 800w, https://gitee.com/kerolt/picture/raw/main/20241215-134845.png 1012w" width="1012"&gt;&lt;/p&gt;
 &lt;p&gt;当使用&lt;code&gt;mmap&lt;/code&gt;系统调用时，也可以使用懒分配的策略（类似于Copy On Write）：我们在mmap系统调用中 &lt;strong&gt;标识（不是分配）&lt;/strong&gt; 文件映射区中有一个区域与文件相关联，但这时还不会分配物理块，自然还不急着将文件读入这片内存区域；当我们需要访问这片区域的内存时，可以通过触发page fault来分配物理块，然后读入文件内容到内存块中，并将虚拟内存映射到这块物理内存上。&lt;/p&gt;
 &lt;p&gt;使用&lt;code&gt;munmap&lt;/code&gt;系统调用时，会解除文件在映射区&lt;code&gt;[addr, addr + len]&lt;/code&gt;范围内的映射，将这块区域的内存写回文件，并释放掉这块内存。实验中保证释放的区域大小一定是页的整数倍。&lt;/p&gt;
 &lt;p&gt;我们也仿照Linux上的，让文件映射区从高地址处开始向低地址增长。下图是文件映射的样子，左边为映射区域大小不固定，右边为映射大小为页框的整数倍：&lt;/p&gt;
-&lt;p&gt;&lt;img class="gallery-image" data-flex-basis="255px" data-flex-grow="106" height="1353" loading="lazy" sizes="(max-width: 767px) calc(100vw - 30px), (max-width: 1023px) 700px, (max-width: 1279px) 950px, 1232px" src="https://gitee.com/kerolt/picture/raw/main/20241215-134845-1.png" srcset="https://kerolt.github.io/'20241215-134845-1_13067623828124312749_hu_869a7e2fd4884237.png 800w, https://gitee.com/kerolt/picture/raw/main/20241215-134845-1.png 1443w" width="1443"&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img class="gallery-image" data-flex-basis="255px" data-flex-grow="106" height="1353" loading="lazy" sizes="(max-width: 767px) calc(100vw - 30px), (max-width: 1023px) 700px, (max-width: 1279px) 950px, 1232px" src="https://gitee.com/kerolt/picture/raw/main/20241215-134845-1.png" srcset="https://kerolt.github.io/20241215-134845-1_13067623828124312749_hu_869a7e2fd4884237.png 800w, https://gitee.com/kerolt/picture/raw/main/20241215-134845-1.png 1443w" width="1443"&gt;&lt;/p&gt;
 &lt;p&gt;在实验的提示中，有说到&lt;code&gt;mmaptest&lt;/code&gt;中没有使用的功能可以不实现，其中每次使用&lt;code&gt;mmap&lt;/code&gt;都是映射的&lt;code&gt;PGSIZE&lt;/code&gt;的整数倍，那也就说明我们可以之用考虑右边的情况，这让实验降低了一点复杂度。&lt;/p&gt;
 &lt;h2 id="标识映射区域"&gt;标识映射区域
 &lt;/h2&gt;&lt;p&gt;根据实验提示，我们需要为每个进程设置用于标识映射区域的结构体：&lt;/p&gt;
@@ -19367,7 +19515,7 @@ JSON 格式，描述网络的类型、IPAM 配置、路由等。&lt;/p&gt;
 &lt;h2 id="large-files"&gt;Large files
 &lt;/h2&gt;&lt;h3 id="如何扩大单个文件的大小上限"&gt;如何扩大单个文件的大小上限？
 &lt;/h3&gt;&lt;p&gt;要求我们扩大单个文件的大小，实现机制就是通过修改inode的块索引，将原来的12个直接索引和一个一级间接索引变为11个直接索引、一个一级间接索引和一个二级间接索引。&lt;/p&gt;
-&lt;p&gt;&lt;img class="gallery-image" data-flex-basis="314px" data-flex-grow="130" height="1060" loading="lazy" sizes="(max-width: 767px) calc(100vw - 30px), (max-width: 1023px) 700px, (max-width: 1279px) 950px, 1232px" src="https://gitee.com/kerolt/picture/raw/main/20241215-134854.png" srcset="https://kerolt.github.io/'20241215-134854_15025860143240780405_hu_1ca02299e3f00f7.png 800w, https://gitee.com/kerolt/picture/raw/main/20241215-134854.png 1388w" width="1388"&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img class="gallery-image" data-flex-basis="314px" data-flex-grow="130" height="1060" loading="lazy" sizes="(max-width: 767px) calc(100vw - 30px), (max-width: 1023px) 700px, (max-width: 1279px) 950px, 1232px" src="https://gitee.com/kerolt/picture/raw/main/20241215-134854.png" srcset="https://kerolt.github.io/20241215-134854_15025860143240780405_hu_1ca02299e3f00f7.png 800w, https://gitee.com/kerolt/picture/raw/main/20241215-134854.png 1388w" width="1388"&gt;&lt;/p&gt;
 &lt;p&gt;在xv6中，一个数据块的大小为&lt;code&gt;1KB&lt;/code&gt;，由于间接块中存放的是下一个块的地址（其实个人认为更准确的说是块号），使用的类型是&lt;code&gt;uint&lt;/code&gt;，那么一个间接块能存放这样的地址共&lt;code&gt;1KB / sizeof(uint) = 1KB / 4B = 256&lt;/code&gt;个。&lt;/p&gt;
 &lt;p&gt;这样的话，单个文件大小最大为&lt;code&gt;12 * 1KB + 256 * 1KB = 268KB&lt;/code&gt;变为了&lt;code&gt;11 * 1KB + 256 * 1KB + 256 * 256 * 1KB = 65803KB&lt;/code&gt;。&lt;/p&gt;
 &lt;h3 id="修改inode结构体"&gt;修改inode结构体
@@ -19701,7 +19849,7 @@ JSON 格式，描述网络的类型、IPAM 配置、路由等。&lt;/p&gt;
 &lt;/div&gt;
 &lt;/div&gt;&lt;p&gt;多的步骤就是二级间接索引需要多一次读取数据块和查找：&lt;/p&gt;
 &lt;p&gt;假设传入bmap的块号为524，那么其不在直接块中，也不在一级间接块中，而是在二级间接块中。通过bmap中的前两个if之后对于bn的减法操作，此时的bn = 524 - 11 - 256 = 257。那么在二级间接块的第一层中（level1），索引为257 / 256 = 1，在第二层中（level2）索引为257 % 256 = 1 。如下图所示：&lt;/p&gt;
-&lt;p&gt;&lt;img class="gallery-image" data-flex-basis="393px" data-flex-grow="163" height="781" loading="lazy" sizes="(max-width: 767px) calc(100vw - 30px), (max-width: 1023px) 700px, (max-width: 1279px) 950px, 1232px" src="https://gitee.com/kerolt/picture/raw/main/20241215-134854-1.png" srcset="https://kerolt.github.io/'20241215-134854-1_3664929381797016564_hu_614ea6c5a2237d4a.png 800w, https://gitee.com/kerolt/picture/raw/main/20241215-134854-1.png 1280w" width="1280"&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img class="gallery-image" data-flex-basis="393px" data-flex-grow="163" height="781" loading="lazy" sizes="(max-width: 767px) calc(100vw - 30px), (max-width: 1023px) 700px, (max-width: 1279px) 950px, 1232px" src="https://gitee.com/kerolt/picture/raw/main/20241215-134854-1.png" srcset="https://kerolt.github.io/20241215-134854-1_3664929381797016564_hu_614ea6c5a2237d4a.png 800w, https://gitee.com/kerolt/picture/raw/main/20241215-134854-1.png 1280w" width="1280"&gt;&lt;/p&gt;
 &lt;h2 id="symbolic-links"&gt;Symbolic links
 &lt;/h2&gt;&lt;p&gt;首先要搞清楚软硬链接的区别：&lt;/p&gt;
 &lt;ul&gt;
@@ -20226,7 +20374,7 @@ JSON 格式，描述网络的类型、IPAM 配置、路由等。&lt;/p&gt;
 &lt;li&gt;&lt;code&gt;struct buf buf[NBUF]&lt;/code&gt;：缓冲块池，即包含了所有的buffer cache&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;struct buf head&lt;/code&gt;：一个LRU链表，用于操作缓冲块，使用head.next获取的是最近刚使用过的buffer，head.prev获取的是最近未使用时间最久的buffer（或者说是未被使用的buffer，即引用计数为0）&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;&lt;img class="gallery-image" data-flex-basis="558px" data-flex-grow="232" height="589" loading="lazy" sizes="(max-width: 767px) calc(100vw - 30px), (max-width: 1023px) 700px, (max-width: 1279px) 950px, 1232px" src="https://gitee.com/kerolt/picture/raw/main/20241215-134743.png" srcset="https://kerolt.github.io/'20241215-134743_2721402267024553664_hu_c5dab16debf0c747.png 800w, https://gitee.com/kerolt/picture/raw/main/20241215-134743.png 1370w" width="1370"&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img class="gallery-image" data-flex-basis="558px" data-flex-grow="232" height="589" loading="lazy" sizes="(max-width: 767px) calc(100vw - 30px), (max-width: 1023px) 700px, (max-width: 1279px) 950px, 1232px" src="https://gitee.com/kerolt/picture/raw/main/20241215-134743.png" srcset="https://kerolt.github.io/20241215-134743_2721402267024553664_hu_c5dab16debf0c747.png 800w, https://gitee.com/kerolt/picture/raw/main/20241215-134743.png 1370w" width="1370"&gt;&lt;/p&gt;
 &lt;p&gt;原来的bcache中的buf数组在binit时就给LRU链表初始化用了：&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
 &lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
@@ -20308,7 +20456,7 @@ JSON 格式，描述网络的类型、IPAM 配置、路由等。&lt;/p&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="p"&gt;}&lt;/span&gt; &lt;span class="n"&gt;bcache&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
-&lt;/div&gt;&lt;p&gt;&lt;img class="gallery-image" data-flex-basis="317px" data-flex-grow="132" height="1037" loading="lazy" sizes="(max-width: 767px) calc(100vw - 30px), (max-width: 1023px) 700px, (max-width: 1279px) 950px, 1232px" src="https://gitee.com/kerolt/picture/raw/main/20241215-134743-1.png" srcset="https://kerolt.github.io/'20241215-134743-1_17672644317407277968_hu_1f6e383e65b92d01.png 800w, https://gitee.com/kerolt/picture/raw/main/20241215-134743-1.png 1370w" width="1370"&gt;&lt;/p&gt;
+&lt;/div&gt;&lt;p&gt;&lt;img class="gallery-image" data-flex-basis="317px" data-flex-grow="132" height="1037" loading="lazy" sizes="(max-width: 767px) calc(100vw - 30px), (max-width: 1023px) 700px, (max-width: 1279px) 950px, 1232px" src="https://gitee.com/kerolt/picture/raw/main/20241215-134743-1.png" srcset="https://kerolt.github.io/20241215-134743-1_17672644317407277968_hu_1f6e383e65b92d01.png 800w, https://gitee.com/kerolt/picture/raw/main/20241215-134743-1.png 1370w" width="1370"&gt;&lt;/p&gt;
 &lt;p&gt;我们在重构的方案中，不再使用LRU链表，但还是使用了LRU算法的思想，只是用时间戳来代替LRU链表：&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
 &lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
@@ -20998,11 +21146,11 @@ JSON 格式，描述网络的类型、IPAM 配置、路由等。&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;当执行顺序为从调度器选择可调度进程（RUNNABLE）后进行进程切换：&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;&lt;img class="gallery-image" data-flex-basis="478px" data-flex-grow="199" height="1262" loading="lazy" sizes="(max-width: 767px) calc(100vw - 30px), (max-width: 1023px) 700px, (max-width: 1279px) 950px, 1232px" src="https://gitee.com/kerolt/picture/raw/main/20241215-134904.png" srcset="https://kerolt.github.io/'20241215-134904_13676004664408373585_hu_53b0fe44e718f1e6.png 800w, https://kerolt.github.io/'20241215-134904_13676004664408373585_hu_a00c0ad2d7ad3a65.png 1600w, https://kerolt.github.io/'20241215-134904_13676004664408373585_hu_ee90806faa8c2c63.png 2400w, https://gitee.com/kerolt/picture/raw/main/20241215-134904.png 2516w" width="2516"&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img class="gallery-image" data-flex-basis="478px" data-flex-grow="199" height="1262" loading="lazy" sizes="(max-width: 767px) calc(100vw - 30px), (max-width: 1023px) 700px, (max-width: 1279px) 950px, 1232px" src="https://gitee.com/kerolt/picture/raw/main/20241215-134904.png" srcset="https://kerolt.github.io/20241215-134904_13676004664408373585_hu_53b0fe44e718f1e6.png 800w, https://kerolt.github.io/20241215-134904_13676004664408373585_hu_a00c0ad2d7ad3a65.png 1600w, https://kerolt.github.io/20241215-134904_13676004664408373585_hu_ee90806faa8c2c63.png 2400w, https://gitee.com/kerolt/picture/raw/main/20241215-134904.png 2516w" width="2516"&gt;&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;当执行顺序为进程触发中断等陷入时，放弃cpu资源，需要执行进程调度时：&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;&lt;img class="gallery-image" data-flex-basis="325px" data-flex-grow="135" height="1574" loading="lazy" sizes="(max-width: 767px) calc(100vw - 30px), (max-width: 1023px) 700px, (max-width: 1279px) 950px, 1232px" src="https://gitee.com/kerolt/picture/raw/main/20241215-134904-1.png" srcset="https://kerolt.github.io/'20241215-134904-1_12200221774095490040_hu_3e8f27947f9ff154.png 800w, https://kerolt.github.io/'20241215-134904-1_12200221774095490040_hu_e7a8928a1f020fb0.png 1600w, https://gitee.com/kerolt/picture/raw/main/20241215-134904-1.png 2136w" width="2136"&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img class="gallery-image" data-flex-basis="325px" data-flex-grow="135" height="1574" loading="lazy" sizes="(max-width: 767px) calc(100vw - 30px), (max-width: 1023px) 700px, (max-width: 1279px) 950px, 1232px" src="https://gitee.com/kerolt/picture/raw/main/20241215-134904-1.png" srcset="https://kerolt.github.io/20241215-134904-1_12200221774095490040_hu_3e8f27947f9ff154.png 800w, https://kerolt.github.io/20241215-134904-1_12200221774095490040_hu_e7a8928a1f020fb0.png 1600w, https://gitee.com/kerolt/picture/raw/main/20241215-134904-1.png 2136w" width="2136"&gt;&lt;/p&gt;
 &lt;p&gt;可以看到，在yield函数中，进程p的锁的使用顺序并不是&lt;code&gt;acquire() 获取锁-&amp;gt; 执行shed()函数 -&amp;gt; release()释放锁&lt;/code&gt;这样线性的，在其中会发生进程切换因此锁的“获取、释放”逻辑并不发生在一个函数中。&lt;/p&gt;</description></item><item><title>【MIT6.S081】Lab6 multithreading</title><link>https://kerolt.github.io/p/mit6.s081lab6-multithreading/</link><pubDate>Fri, 15 Nov 2024 00:00:00 +0000</pubDate><guid>https://kerolt.github.io/p/mit6.s081lab6-multithreading/</guid><description>&lt;p&gt;本次的实验总体都不是很难，第一个练习让我们在用户态模拟了线程的切换，这里重要的就是进程/线程上下文的保存与恢复；第二三个练习则是让我们跳出了xv6，去熟悉pthread库和线程的同步互斥。&lt;/p&gt;
 &lt;h2 id="简单分析xv6中的进程切换"&gt;简单分析xv6中的进程切换
 &lt;/h2&gt;&lt;p&gt;init是用户态最先启动的进程，其启动后会创建sh进程，sh进程又会fork并exec其他命令：&lt;/p&gt;
@@ -21111,7 +21259,7 @@ JSON 格式，描述网络的类型、IPAM 配置、路由等。&lt;/p&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
 &lt;/div&gt;&lt;p&gt;&lt;code&gt;swtch(&amp;amp;p-&amp;gt;context, &amp;amp;mycpu()-&amp;gt;context)&lt;/code&gt;函数会将当前寄存器中的值保存到p-&amp;gt;context中，并将当前cpu中context的内容恢复到寄存器中，其中最重要的就是&lt;code&gt;ra&lt;/code&gt;寄存器，当恢复了这个后，ra的值对应的地址在调度器&lt;code&gt;scheduler()&lt;/code&gt;中：&lt;/p&gt;
-&lt;p&gt;&lt;img class="gallery-image" data-flex-basis="231px" data-flex-grow="96" height="990" loading="lazy" sizes="(max-width: 767px) calc(100vw - 30px), (max-width: 1023px) 700px, (max-width: 1279px) 950px, 1232px" src="https://gitee.com/kerolt/picture/raw/main/20241215-134724.png" srcset="https://kerolt.github.io/'20241215-134724_13063291559617015402_hu_90d54013ede01dc7.png 800w, https://gitee.com/kerolt/picture/raw/main/20241215-134724.png 954w" width="954"&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img class="gallery-image" data-flex-basis="231px" data-flex-grow="96" height="990" loading="lazy" sizes="(max-width: 767px) calc(100vw - 30px), (max-width: 1023px) 700px, (max-width: 1279px) 950px, 1232px" src="https://gitee.com/kerolt/picture/raw/main/20241215-134724.png" srcset="https://kerolt.github.io/20241215-134724_13063291559617015402_hu_90d54013ede01dc7.png 800w, https://gitee.com/kerolt/picture/raw/main/20241215-134724.png 954w" width="954"&gt;&lt;/p&gt;
 &lt;p&gt;（这里ra的16进制为0x8000141e）&lt;/p&gt;
 &lt;p&gt;这样，xv6就从：执行当前进程 -&amp;gt; yield -&amp;gt; shed -&amp;gt; scheduler；在scheduler调度器中，内核会找到下一个就绪态的进程，并使用swtch进行进程切换：&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
@@ -21756,7 +21904,7 @@ JSON 格式，描述网络的类型、IPAM 配置、路由等。&lt;/p&gt;
 &lt;p&gt;&lt;img class="gallery-image" data-flex-basis="246px" data-flex-grow="102" height="592" loading="lazy" sizes="(max-width: 767px) calc(100vw - 30px), (max-width: 1023px) 700px, (max-width: 1279px) 950px, 1232px" src="https://gitee.com/kerolt/picture/raw/main/20241215-103350-1.png" width="607"&gt;&lt;/p&gt;
 &lt;h2 id="具体实现"&gt;具体实现
 &lt;/h2&gt;&lt;h3 id="cow标志位"&gt;COW标志位
-&lt;/h3&gt;&lt;p&gt;&lt;img class="gallery-image" data-flex-basis="676px" data-flex-grow="281" height="505" loading="lazy" sizes="(max-width: 767px) calc(100vw - 30px), (max-width: 1023px) 700px, (max-width: 1279px) 950px, 1232px" src="https://gitee.com/kerolt/picture/raw/main/20241215-103350-2.png" srcset="https://kerolt.github.io/'20241215-103350-2_2693859986388424408_hu_b4d27a7507f75286.png 800w, https://gitee.com/kerolt/picture/raw/main/20241215-103350-2.png 1424w" width="1424"&gt;&lt;/p&gt;
+&lt;/h3&gt;&lt;p&gt;&lt;img class="gallery-image" data-flex-basis="676px" data-flex-grow="281" height="505" loading="lazy" sizes="(max-width: 767px) calc(100vw - 30px), (max-width: 1023px) 700px, (max-width: 1279px) 950px, 1232px" src="https://gitee.com/kerolt/picture/raw/main/20241215-103350-2.png" srcset="https://kerolt.github.io/20241215-103350-2_2693859986388424408_hu_b4d27a7507f75286.png 800w, https://gitee.com/kerolt/picture/raw/main/20241215-103350-2.png 1424w" width="1424"&gt;&lt;/p&gt;
 &lt;p&gt;首先我们需要为PTE添加一个用于识别COW的标志位，上图展示了PTE的后10位也就是其flags的情况，可以看到第8、9位是保留没有被使用的，那么我们可以用第8位来作为COW的标志位：&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
 &lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
@@ -24737,15 +24885,15 @@ JSON 格式，描述网络的类型、IPAM 配置、路由等。&lt;/p&gt;
 &lt;h3 id="错误3fetchpage找到直接返回时没有pin一下"&gt;错误3：FetchPage找到直接返回时没有pin一下
 &lt;/h3&gt;&lt;p&gt;这里卡了几个测试是因为&lt;code&gt;FetchPage&lt;/code&gt;在&lt;code&gt;page_id&lt;/code&gt;在缓冲池中时会直接返回，但是我没有在这种情况中对这个page的&lt;code&gt;pin_count_&lt;/code&gt;进行+1操作。&lt;/p&gt;
 &lt;h3 id="错误4unpin中的is_dirty参数的设置"&gt;错误4：Unpin中的is_dirty参数的设置
-&lt;/h3&gt;&lt;p&gt;&lt;img class="gallery-image" data-flex-basis="750px" data-flex-grow="312" height="331" loading="lazy" sizes="(max-width: 767px) calc(100vw - 30px), (max-width: 1023px) 700px, (max-width: 1279px) 950px, 1232px" src="https://gitee.com/kerolt/picture/raw/main/20241216-143702.png" srcset="https://kerolt.github.io/'20241216-143702_3419574272597718870_hu_f99dda458ba587ff.png 800w, https://gitee.com/kerolt/picture/raw/main/20241216-143702.png 1035w" width="1035"&gt;&lt;/p&gt;
+&lt;/h3&gt;&lt;p&gt;&lt;img class="gallery-image" data-flex-basis="750px" data-flex-grow="312" height="331" loading="lazy" sizes="(max-width: 767px) calc(100vw - 30px), (max-width: 1023px) 700px, (max-width: 1279px) 950px, 1232px" src="https://gitee.com/kerolt/picture/raw/main/20241216-143702.png" srcset="https://kerolt.github.io/20241216-143702_3419574272597718870_hu_f99dda458ba587ff.png 800w, https://gitee.com/kerolt/picture/raw/main/20241216-143702.png 1035w" width="1035"&gt;&lt;/p&gt;
 &lt;p&gt;在&lt;code&gt;Unpin&lt;/code&gt;中，不能直接将&lt;code&gt;page.is_dirty_&lt;/code&gt;设置成参数is_dirty，而是应该用&lt;strong&gt;或&lt;/strong&gt;操作：&lt;code&gt;page.is_dirty_ |= is_dirty;&lt;/code&gt;。如果不这样做，那么当原先&lt;code&gt;page.is_dirty_&lt;/code&gt;为true时，如果我们通过&lt;code&gt;Unpin&lt;/code&gt;设置了false，其is_dirty_就变为了false，但是这个页面仍然是脏页面。&lt;/p&gt;
 &lt;h3 id="错误5fetchpage没有recordaccess"&gt;错误5：FetchPage没有RecordAccess
-&lt;/h3&gt;&lt;p&gt;&lt;img class="gallery-image" data-flex-basis="530px" data-flex-grow="220" height="465" loading="lazy" sizes="(max-width: 767px) calc(100vw - 30px), (max-width: 1023px) 700px, (max-width: 1279px) 950px, 1232px" src="https://gitee.com/kerolt/picture/raw/main/20241216-143702-1.png" srcset="https://kerolt.github.io/'20241216-143702-1_3520377634796832022_hu_5f65369445294e35.png 800w, https://gitee.com/kerolt/picture/raw/main/20241216-143702-1.png 1027w" width="1027"&gt;&lt;/p&gt;
+&lt;/h3&gt;&lt;p&gt;&lt;img class="gallery-image" data-flex-basis="530px" data-flex-grow="220" height="465" loading="lazy" sizes="(max-width: 767px) calc(100vw - 30px), (max-width: 1023px) 700px, (max-width: 1279px) 950px, 1232px" src="https://gitee.com/kerolt/picture/raw/main/20241216-143702-1.png" srcset="https://kerolt.github.io/20241216-143702-1_3520377634796832022_hu_5f65369445294e35.png 800w, https://gitee.com/kerolt/picture/raw/main/20241216-143702-1.png 1027w" width="1027"&gt;&lt;/p&gt;
 &lt;p&gt;在&lt;code&gt;FetchPage&lt;/code&gt;中，如果缓冲池中有 page id 直接返回时，&lt;code&gt;replacer_&lt;/code&gt;也应该执行&lt;code&gt;RecordAccess&lt;/code&gt;。因为这时相当于使用了Page，当然要记录更新。&lt;/p&gt;
 &lt;h2 id="最终提交"&gt;最终提交
 &lt;/h2&gt;&lt;p&gt;&lt;img class="gallery-image" data-flex-basis="261px" data-flex-grow="109" height="432" loading="lazy" sizes="(max-width: 767px) calc(100vw - 30px), (max-width: 1023px) 700px, (max-width: 1279px) 950px, 1232px" src="https://gitee.com/kerolt/picture/raw/main/20241216-143702-2.png" width="471"&gt;&lt;/p&gt;
 &lt;p&gt;然后Leaderboard的排名有点低了，因为之前都是使用的大锁，希望之后能优化一下。&lt;/p&gt;
-&lt;p&gt;&lt;img class="gallery-image" data-flex-basis="2883px" data-flex-grow="1201" height="131" loading="lazy" sizes="(max-width: 767px) calc(100vw - 30px), (max-width: 1023px) 700px, (max-width: 1279px) 950px, 1232px" src="https://gitee.com/kerolt/picture/raw/main/20241216-143702-3.png" srcset="https://kerolt.github.io/'20241216-143702-3_6278386027656700930_hu_5ad16ac278473565.png 800w, https://gitee.com/kerolt/picture/raw/main/20241216-143702-3.png 1574w" width="1574"&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img class="gallery-image" data-flex-basis="2883px" data-flex-grow="1201" height="131" loading="lazy" sizes="(max-width: 767px) calc(100vw - 30px), (max-width: 1023px) 700px, (max-width: 1279px) 950px, 1232px" src="https://gitee.com/kerolt/picture/raw/main/20241216-143702-3.png" srcset="https://kerolt.github.io/20241216-143702-3_6278386027656700930_hu_5ad16ac278473565.png 800w, https://gitee.com/kerolt/picture/raw/main/20241216-143702-3.png 1574w" width="1574"&gt;&lt;/p&gt;
 &lt;h2 id="小结"&gt;小结
 &lt;/h2&gt;&lt;p&gt;这个Project差不多搞了四五天，主体代码用了两天左右，然后就是漫长的修Bug。由于从这个Project开始，就不会在本地给出完整的测试集了，所以在评测平台上也是提交了很多次来检测。通过Discord中的频道，也是找到了一些解决Bug的办法，很多时候是一些细节处自己没有考虑到（错误记录）。好在最后也基本上是自己独立完成的，有点小小的成就感！&lt;/p&gt;</description></item><item><title>【CMU15-445 Fall2023】Project0 C++ Primer 小结</title><link>https://kerolt.github.io/p/cmu15-445-fall2023project0-c-primer-%E5%B0%8F%E7%BB%93/</link><pubDate>Sun, 06 Oct 2024 00:00:00 +0000</pubDate><guid>https://kerolt.github.io/p/cmu15-445-fall2023project0-c-primer-%E5%B0%8F%E7%BB%93/</guid><description>&lt;blockquote&gt;
  &lt;p&gt;该系列博客只是为了记录自己在写Lab时的思路，按照课程要求不会在Github和博客中公开源代码。欢迎与我一起讨论交流！&lt;/p&gt;
@@ -26062,7 +26210,7 @@ JSON 格式，描述网络的类型、IPAM 配置、路由等。&lt;/p&gt;
 &lt;/ul&gt;
 &lt;p&gt;调度器中最重要的一个函数我认为就是 &lt;code&gt;Run()&lt;/code&gt; 函数了，这个函数用于协程的调度，或者，你可以将他理解为是一个调度协程（名词）。&lt;/p&gt;
 &lt;p&gt;创建 Scheduler 时会为每一个内部线程池中的每一个线程都绑定一个调度协程，线程数量默认为 1，此时也默认会使用 caller 线程，也就是使用的主线程。调度协程 &lt;code&gt;Scheduler::Run()&lt;/code&gt; 会从任务队列 Task Queue 中不断去取任务去执行。如果有任务可执行，那就切换至任务协程执行，任务协程执行完毕后又切换回调度协程；无任务执行时，调度协程切换至 Idle 协程进行等待。&lt;/p&gt;
-&lt;p&gt;&lt;img class="gallery-image" data-flex-basis="401px" data-flex-grow="167" height="730" loading="lazy" sizes="(max-width: 767px) calc(100vw - 30px), (max-width: 1023px) 700px, (max-width: 1279px) 950px, 1232px" src="https://gitee.com/kerolt/picture/raw/main/20241216-143744.png" srcset="https://kerolt.github.io/'20241216-143744_13013154973165091284_hu_34a279a05b8876bf.png 800w, https://gitee.com/kerolt/picture/raw/main/20241216-143744.png 1220w" width="1220"&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img class="gallery-image" data-flex-basis="401px" data-flex-grow="167" height="730" loading="lazy" sizes="(max-width: 767px) calc(100vw - 30px), (max-width: 1023px) 700px, (max-width: 1279px) 950px, 1232px" src="https://gitee.com/kerolt/picture/raw/main/20241216-143744.png" srcset="https://kerolt.github.io/20241216-143744_13013154973165091284_hu_34a279a05b8876bf.png 800w, https://gitee.com/kerolt/picture/raw/main/20241216-143744.png 1220w" width="1220"&gt;&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
 &lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
 &lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt; 1
@@ -26692,7 +26840,7 @@ JSON 格式，描述网络的类型、IPAM 配置、路由等。&lt;/p&gt;
 &lt;/div&gt;&lt;p&gt;这会将项目的子目录dist推送到远程仓库的gh-pages分支，如果远程仓库没有gh-pages分支，Git 会自动创建它并推送内容。&lt;/p&gt;
 &lt;p&gt;&lt;img class="gallery-image" data-flex-basis="631px" data-flex-grow="263" height="245" loading="lazy" sizes="(max-width: 767px) calc(100vw - 30px), (max-width: 1023px) 700px, (max-width: 1279px) 950px, 1232px" src="https://gitee.com/kerolt/picture/raw/main/20241216-143623-1.png" width="645"&gt;&lt;/p&gt;
 &lt;p&gt;接着在Github仓库的Settings中设置部署的位置：&lt;/p&gt;
-&lt;p&gt;&lt;img class="gallery-image" data-flex-basis="530px" data-flex-grow="220" height="530" loading="lazy" sizes="(max-width: 767px) calc(100vw - 30px), (max-width: 1023px) 700px, (max-width: 1279px) 950px, 1232px" src="https://gitee.com/kerolt/picture/raw/main/20241216-143623-2.png" srcset="https://kerolt.github.io/'20241216-143623-2_2569679765079340514_hu_c93a5208a693ba9b.png 800w, https://gitee.com/kerolt/picture/raw/main/20241216-143623-2.png 1171w" width="1171"&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img class="gallery-image" data-flex-basis="530px" data-flex-grow="220" height="530" loading="lazy" sizes="(max-width: 767px) calc(100vw - 30px), (max-width: 1023px) 700px, (max-width: 1279px) 950px, 1232px" src="https://gitee.com/kerolt/picture/raw/main/20241216-143623-2.png" srcset="https://kerolt.github.io/20241216-143623-2_2569679765079340514_hu_c93a5208a693ba9b.png 800w, https://gitee.com/kerolt/picture/raw/main/20241216-143623-2.png 1171w" width="1171"&gt;&lt;/p&gt;
 &lt;h2 id="github-pages项目路径错误"&gt;Github Pages项目路径错误
 &lt;/h2&gt;&lt;p&gt;由于&lt;code&gt;kerolt.github.io&lt;/code&gt;用作了我的博客，这个项目只能作为子项来部署，也就是通过&lt;code&gt;kerolt.github.io/web-terminal&lt;/code&gt;来访问。完成前面的步骤后，我虽然能访问，但是其中的内容无法显示，其原因为无法正确获取对应的文件。&lt;/p&gt;
 &lt;p&gt;这是因为相当于是在嵌套的公共路径下部署项目，在vite中需指定 &lt;a class="link" href="https://cn.vitejs.dev/config/shared-options.html#base" target="_blank" rel="noopener"
@@ -26831,7 +26979,7 @@ JSON 格式，描述网络的类型、IPAM 配置、路由等。&lt;/p&gt;
  &gt;博客&lt;/a&gt;），具体为什么我也暂时不清楚，只知道和&lt;code&gt;Y组合子&lt;/code&gt;的知识点有关。&lt;/p&gt;</description></item><item><title>【协程】C++20协程初体验</title><link>https://kerolt.github.io/p/%E5%8D%8F%E7%A8%8Bc-20%E5%8D%8F%E7%A8%8B%E5%88%9D%E4%BD%93%E9%AA%8C/</link><pubDate>Sun, 18 Aug 2024 00:00:00 +0000</pubDate><guid>https://kerolt.github.io/p/%E5%8D%8F%E7%A8%8Bc-20%E5%8D%8F%E7%A8%8B%E5%88%9D%E4%BD%93%E9%AA%8C/</guid><description>&lt;h2 id="为什么我们需要协程"&gt;为什么我们需要协程？
 &lt;/h2&gt;&lt;p&gt;为什么我们有了线程还需要协程呢？（其实这个问题不应该这么问，协程的出现在线程之前）在一个进程中虽然我们可以创建多个线程，但是在一个进程中能创建的线程数量是有限制的，并且线程的调度仍然受操作系统控制，也就是说线程何时抢占、何时被抢占对于开发者来说都是透明的，并且在调度的过程中还可能涉及到用户态和内核态的切换开销。&lt;/p&gt;
 &lt;p&gt;当我们需要去处理一个非常耗时的IO操作时（假设使用的阻塞IO），为了不阻塞当前线程，我们可能会想到新建一个线程去执行这个操作，但是线程的创建和调度也是需要消耗资源的，我们希望有更加轻便的方法，例如：在当前线程中，一个任务遇到阻塞IO时，不要傻傻的停在这里，而是暂停这个任务，转而去执行其他任务，直到IO完成再恢复之前的任务来运行。&lt;/p&gt;
-&lt;p&gt;&lt;img class="gallery-image" data-flex-basis="174px" data-flex-grow="72" height="794" loading="lazy" sizes="(max-width: 767px) calc(100vw - 30px), (max-width: 1023px) 700px, (max-width: 1279px) 950px, 1232px" src="https://gitee.com/kerolt/picture/raw/main/20241216-143810.png" width="578"&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img loading="lazy" sizes="(max-width: 767px) calc(100vw - 30px), (max-width: 1023px) 700px, (max-width: 1279px) 950px, 1232px" src="https://gitee.com/kerolt/picture/raw/main/20241216-143810.png"&gt;&lt;/p&gt;
 &lt;p&gt;这里看起来是不是像两个函数之间的调用和被调用关系？确实有点像，但区别可大了，在任务1中我们并没有去显式地调用任务2！&lt;/p&gt;
 &lt;p&gt;协程的最本质的解释是“&lt;strong&gt;可以挂起和恢复的函数&lt;/strong&gt;”。例如上图中我们遇到耗时的IO操作了，我们就可以&lt;strong&gt;主动&lt;/strong&gt;将当前运行的函数挂起（suspend），让其等待（await）IO操作，让线程去运行其他的函数，直到IO操作完成后再恢复（resume）。上下文切换的时机是靠调用方（写代码的开发人员）自身去控制的，这样协程的调度掌握在我们自己手中，相比与线程减小了系统切换上下文和其他资源的开销。因此协程在需要处理大量I/O操作或者并发任务的情况下提高程序的性能和可维护性。&lt;/p&gt;
 &lt;h2 id="c20带来的协程"&gt;C++20带来的协程
@@ -27053,7 +27201,7 @@ JSON 格式，描述网络的类型、IPAM 配置、路由等。&lt;/p&gt;
  &lt;/blockquote&gt;
 &lt;p&gt;题目中给出的n范围为&lt;code&gt;1 &amp;lt;= n &amp;lt;= 10&lt;/code&gt;，那么说明最多的10个分部的情况下，可以选择关闭的可行情况有&lt;code&gt;2^10&lt;/code&gt;种，这个数据量并不大，可以用暴力枚举做出来。&lt;/p&gt;
 &lt;p&gt;但是如何知道选择了哪些顶点呢？这里有用到位运算这个很巧妙的方法，一个int型数据有32位，我们最多只要用其中的10位即可表示所有的情况，同时还能用每一位来表示是否选择了某一个顶点（分部）。&lt;/p&gt;
-&lt;p&gt;&lt;img class="gallery-image" data-flex-basis="917px" data-flex-grow="382" height="261" loading="lazy" sizes="(max-width: 767px) calc(100vw - 30px), (max-width: 1023px) 700px, (max-width: 1279px) 950px, 1232px" src="https://gitee.com/kerolt/picture/raw/main/20241216-143726.png" srcset="https://kerolt.github.io/'20241216-143726_1291110471852136716_hu_582106d2147b52dd.png 800w, https://gitee.com/kerolt/picture/raw/main/20241216-143726.png 998w" width="998"&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img class="gallery-image" data-flex-basis="917px" data-flex-grow="382" height="261" loading="lazy" sizes="(max-width: 767px) calc(100vw - 30px), (max-width: 1023px) 700px, (max-width: 1279px) 950px, 1232px" src="https://gitee.com/kerolt/picture/raw/main/20241216-143726.png" srcset="https://kerolt.github.io/20241216-143726_1291110471852136716_hu_582106d2147b52dd.png 800w, https://gitee.com/kerolt/picture/raw/main/20241216-143726.png 998w" width="998"&gt;&lt;/p&gt;
 &lt;p&gt;利用Floyd算法可以求解出一个图中任意两个顶点之间的最小距离。当我们选择一个可能的集合时，判断这个集合中有的分部之间的最短距离是否会大于题目要求的最远距离&lt;code&gt;maxDistance&lt;/code&gt;，如果有大于的，说明有分部之间最短的距离都无法满足要求。&lt;/p&gt;
 &lt;p&gt;需要注意的是，每一种情况我们只需要处理在集合中包含的分部。&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
@@ -27347,9 +27495,9 @@ JSON 格式，描述网络的类型、IPAM 配置、路由等。&lt;/p&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
 &lt;/div&gt;&lt;p&gt;如果在代码中碰到一些eslint的报错，例如&lt;/p&gt;
-&lt;p&gt;&lt;img class="gallery-image" data-flex-basis="797px" data-flex-grow="332" height="365" loading="lazy" sizes="(max-width: 767px) calc(100vw - 30px), (max-width: 1023px) 700px, (max-width: 1279px) 950px, 1232px" src="https://gitee.com/kerolt/picture/raw/main/20241216-143638.png" srcset="https://kerolt.github.io/'20241216-143638_8599504973388456718_hu_69b55c46cd8205db.png 800w, https://gitee.com/kerolt/picture/raw/main/20241216-143638.png 1213w" width="1213"&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img class="gallery-image" data-flex-basis="797px" data-flex-grow="332" height="365" loading="lazy" sizes="(max-width: 767px) calc(100vw - 30px), (max-width: 1023px) 700px, (max-width: 1279px) 950px, 1232px" src="https://gitee.com/kerolt/picture/raw/main/20241216-143638.png" srcset="https://kerolt.github.io/20241216-143638_8599504973388456718_hu_69b55c46cd8205db.png 800w, https://gitee.com/kerolt/picture/raw/main/20241216-143638.png 1213w" width="1213"&gt;&lt;/p&gt;
 &lt;p&gt;那么可以在报错信息中给出的链接网页中查找&lt;/p&gt;
-&lt;p&gt;&lt;img class="gallery-image" data-flex-basis="571px" data-flex-grow="238" height="366" loading="lazy" sizes="(max-width: 767px) calc(100vw - 30px), (max-width: 1023px) 700px, (max-width: 1279px) 950px, 1232px" src="https://gitee.com/kerolt/picture/raw/main/20241216-143638-1.png" srcset="https://kerolt.github.io/'20241216-143638-1_10174791618987220622_hu_dd12048103e3e03b.png 800w, https://gitee.com/kerolt/picture/raw/main/20241216-143638-1.png 872w" width="872"&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img class="gallery-image" data-flex-basis="571px" data-flex-grow="238" height="366" loading="lazy" sizes="(max-width: 767px) calc(100vw - 30px), (max-width: 1023px) 700px, (max-width: 1279px) 950px, 1232px" src="https://gitee.com/kerolt/picture/raw/main/20241216-143638-1.png" srcset="https://kerolt.github.io/20241216-143638-1_10174791618987220622_hu_dd12048103e3e03b.png 800w, https://gitee.com/kerolt/picture/raw/main/20241216-143638-1.png 872w" width="872"&gt;&lt;/p&gt;
 &lt;p&gt;在&lt;code&gt;eslint.config.mjs&lt;/code&gt;中的rules中加入&lt;code&gt;&amp;quot;vue/multi-word-component-names&amp;quot;: 0&lt;/code&gt;后，报错就消失了。&lt;/p&gt;</description></item><item><title>30. 串联所有单词的子串</title><link>https://kerolt.github.io/p/30.-%E4%B8%B2%E8%81%94%E6%89%80%E6%9C%89%E5%8D%95%E8%AF%8D%E7%9A%84%E5%AD%90%E4%B8%B2/</link><pubDate>Fri, 07 Jun 2024 00:00:00 +0000</pubDate><guid>https://kerolt.github.io/p/30.-%E4%B8%B2%E8%81%94%E6%89%80%E6%9C%89%E5%8D%95%E8%AF%8D%E7%9A%84%E5%AD%90%E4%B8%B2/</guid><description>&lt;blockquote&gt;
  &lt;p&gt;难度：Hard&lt;/p&gt;
 &lt;p&gt;标签：哈希表、字符串、滑动窗口&lt;/p&gt;

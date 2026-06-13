@@ -1,4 +1,152 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Clash on Kerolt's Note</title><link>https://kerolt.github.io/tags/clash/</link><description>Recent content in Clash on Kerolt's Note</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><lastBuildDate>Sat, 18 Apr 2026 00:00:00 +0000</lastBuildDate><atom:link href="https://kerolt.github.io/tags/clash/index.xml" rel="self" type="application/rss+xml"/><item><title>Minikube配置主机代理</title><link>https://kerolt.github.io/p/minikube%E9%85%8D%E7%BD%AE%E4%B8%BB%E6%9C%BA%E4%BB%A3%E7%90%86/</link><pubDate>Fri, 17 Apr 2026 00:00:00 +0000</pubDate><guid>https://kerolt.github.io/p/minikube%E9%85%8D%E7%BD%AE%E4%B8%BB%E6%9C%BA%E4%BB%A3%E7%90%86/</guid><description>&lt;p&gt;在使用 minikube 的时候碰到了一个问题，&lt;code&gt;minikube start&lt;/code&gt; 之后，&lt;strong&gt;虽然我开启了主机的代理，但是在 minikube 节点中 pull 镜像时总是失败&lt;/strong&gt;。&lt;/p&gt;
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Clash on Kerolt's Note</title><link>https://kerolt.github.io/tags/clash/</link><description>Recent content in Clash on Kerolt's Note</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><lastBuildDate>Sat, 13 Jun 2026 00:00:00 +0000</lastBuildDate><atom:link href="https://kerolt.github.io/tags/clash/index.xml" rel="self" type="application/rss+xml"/><item><title>Clash Fake-IP 模式下 Git SSH 连接失败</title><link>https://kerolt.github.io/p/clash-fake-ip-%E6%A8%A1%E5%BC%8F%E4%B8%8B-git-ssh-%E8%BF%9E%E6%8E%A5%E5%A4%B1%E8%B4%A5/</link><pubDate>Sat, 13 Jun 2026 00:00:00 +0000</pubDate><guid>https://kerolt.github.io/p/clash-fake-ip-%E6%A8%A1%E5%BC%8F%E4%B8%8B-git-ssh-%E8%BF%9E%E6%8E%A5%E5%A4%B1%E8%B4%A5/</guid><description>&lt;h2 id="问题现象"&gt;问题现象
+&lt;/h2&gt;&lt;p&gt;执行 &lt;code&gt;git fetch --all&lt;/code&gt; 报错：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;Connection closed by 198.18.0.35 port &lt;span class="m"&gt;22&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;fatal: Could not &lt;span class="nb"&gt;read&lt;/span&gt; from remote repository.
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h2 id="排查过程"&gt;排查过程
+&lt;/h2&gt;&lt;h3 id="1-确认-remote-地址"&gt;1. 确认 remote 地址
+&lt;/h3&gt;&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;git remote -v
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# origin git@github.com:ZJNU-Lab-29202/detection-saas.git&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;使用的是 SSH 协议。&lt;/p&gt;
+&lt;h3 id="2-排查-dns-解析"&gt;2. 排查 DNS 解析
+&lt;/h3&gt;&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;nslookup github.com
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# Name: github.com&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# Address: 198.18.0.35&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;&lt;code&gt;198.18.0.35&lt;/code&gt; 不是 GitHub 真实 IP，属于 &lt;code&gt;198.18.0.0/15&lt;/code&gt; 保留段。这是 &lt;strong&gt;Clash Fake-IP 模式&lt;/strong&gt; 的典型特征——DNS 返回虚拟 IP，由 Clash 透明代理接管流量。&lt;/p&gt;
+&lt;h3 id="3-确认-clash-运行状态"&gt;3. 确认 Clash 运行状态
+&lt;/h3&gt;&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;ss -tlnp &lt;span class="p"&gt;|&lt;/span&gt; grep &lt;span class="m"&gt;789&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# LISTEN *:7890 # HTTP 代理&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# LISTEN *:7891 # SOCKS5 代理&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;Clash (mihomo) 正在运行，HTTP 代理端口 &lt;code&gt;7890&lt;/code&gt;，SOCKS5 端口 &lt;code&gt;7891&lt;/code&gt;，均开启了 Basic 认证。&lt;/p&gt;
+&lt;h3 id="4-尝试-ssh-proxycommand"&gt;4. 尝试 SSH ProxyCommand
+&lt;/h3&gt;&lt;p&gt;在 &lt;code&gt;~/.ssh/config&lt;/code&gt; 中为 &lt;code&gt;github.com&lt;/code&gt; 添加 ProxyCommand：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;Host github.com
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; HostName github.com
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; ProxyCommand ncat --proxy-type http --proxy 127.0.0.1:7890 --proxy-auth kerolt:xxxxxx %h %p
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;&lt;code&gt;ncat&lt;/code&gt; 能成功建立 CONNECT 隧道（exit 0），但 SSH 握手阶段被远端关闭：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;debug1: Local version string SSH-2.0-OpenSSH_10.2
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;kex_exchange_identification: Connection closed by remote host
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;&lt;strong&gt;结论：&lt;/strong&gt; Fake-IP 模式下，即使通过 HTTP CONNECT 代理转发 SSH 流量，也无法完成完整的 SSH 握手。Clash 对 SSH 流量的透明代理处理存在问题。&lt;/p&gt;
+&lt;h2 id="解决方案"&gt;解决方案
+&lt;/h2&gt;&lt;h3 id="方案一推荐改用-https--git-代理"&gt;方案一（推荐）：改用 HTTPS + Git 代理
+&lt;/h3&gt;&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;span class="lnt"&gt;4
+&lt;/span&gt;&lt;span class="lnt"&gt;5
+&lt;/span&gt;&lt;span class="lnt"&gt;6
+&lt;/span&gt;&lt;span class="lnt"&gt;7
+&lt;/span&gt;&lt;span class="lnt"&gt;8
+&lt;/span&gt;&lt;span class="lnt"&gt;9
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# 1. 配置 git 全局 HTTPS 代理（含 Clash 认证）&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;git config --global http.proxy http://kerolt:&amp;lt;password&amp;gt;@127.0.0.1:7890
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;git config --global https.proxy http://kerolt:&amp;lt;password&amp;gt;@127.0.0.1:7890
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# 2. 将 remote 从 SSH 改为 HTTPS&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;git remote set-url origin https://github.com/&amp;lt;owner&amp;gt;/&amp;lt;repo&amp;gt;.git
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# 3. 验证&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;git fetch --all
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+ &lt;blockquote&gt;
+ &lt;p&gt;&lt;strong&gt;注意：&lt;/strong&gt; GitHub 已不支持密码认证，push 时需要 Personal Access Token (PAT)。可以配置：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;git config --global url.&lt;span class="s2"&gt;&amp;#34;https://&amp;lt;TOKEN&amp;gt;@github.com/&amp;#34;&lt;/span&gt;.insteadOf &lt;span class="s2"&gt;&amp;#34;https://github.com/&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+ &lt;/blockquote&gt;
+&lt;h3 id="方案二clash-切换为-redir-host-模式"&gt;方案二：Clash 切换为 Redir-Host 模式
+&lt;/h3&gt;&lt;p&gt;在 Clash 配置中将 &lt;code&gt;fake-ip&lt;/code&gt; 改为 &lt;code&gt;redir-host&lt;/code&gt;，让 DNS 返回真实 IP，SSH 就能正常走透明代理。但这可能影响其他依赖 Fake-IP 的功能。&lt;/p&gt;
+&lt;h3 id="方案三使用-socks5-代理工具"&gt;方案三：使用 SOCKS5 代理工具
+&lt;/h3&gt;&lt;p&gt;安装 &lt;code&gt;connect-proxy&lt;/code&gt; 或 &lt;code&gt;socat&lt;/code&gt; 等工具替代 &lt;code&gt;ncat&lt;/code&gt;，部分工具对 SOCKS5 代理的 SSH 转发支持更好。&lt;/p&gt;
+&lt;h2 id="核心原因总结"&gt;核心原因总结
+&lt;/h2&gt;&lt;table&gt;
+	&lt;thead&gt;
+			&lt;tr&gt;
+					&lt;th&gt;环节&lt;/th&gt;
+					&lt;th&gt;说明&lt;/th&gt;
+			&lt;/tr&gt;
+	&lt;/thead&gt;
+	&lt;tbody&gt;
+			&lt;tr&gt;
+					&lt;td&gt;Clash Fake-IP&lt;/td&gt;
+					&lt;td&gt;DNS 返回虚拟 IP &lt;code&gt;198.18.0.x&lt;/code&gt;，依赖透明代理接管流量&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;SSH 协议&lt;/td&gt;
+					&lt;td&gt;不是 HTTP，无法被 HTTP 代理直接转发&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;CONNECT 隧道&lt;/td&gt;
+					&lt;td&gt;可以建立 TCP 隧道，但 SSH 握手阶段被阻断&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;HTTPS 方案&lt;/td&gt;
+					&lt;td&gt;Git over HTTPS 是标准 HTTP 流量，Clash 代理完美支持&lt;/td&gt;
+			&lt;/tr&gt;
+	&lt;/tbody&gt;
+&lt;/table&gt;</description></item><item><title>Minikube配置主机代理</title><link>https://kerolt.github.io/p/minikube%E9%85%8D%E7%BD%AE%E4%B8%BB%E6%9C%BA%E4%BB%A3%E7%90%86/</link><pubDate>Fri, 17 Apr 2026 00:00:00 +0000</pubDate><guid>https://kerolt.github.io/p/minikube%E9%85%8D%E7%BD%AE%E4%B8%BB%E6%9C%BA%E4%BB%A3%E7%90%86/</guid><description>&lt;p&gt;在使用 minikube 的时候碰到了一个问题，&lt;code&gt;minikube start&lt;/code&gt; 之后，&lt;strong&gt;虽然我开启了主机的代理，但是在 minikube 节点中 pull 镜像时总是失败&lt;/strong&gt;。&lt;/p&gt;
 &lt;p&gt;在 minikube 官方文档里，推荐通过 &lt;strong&gt;&lt;code&gt;HTTP_PROXY&lt;/code&gt;&lt;/strong&gt;、&lt;strong&gt;&lt;code&gt;HTTPS_PROXY&lt;/code&gt;&lt;/strong&gt; 和 &lt;strong&gt;&lt;code&gt;NO_PROXY&lt;/code&gt;&lt;/strong&gt; 环境变量传给 minikube，并且特别强调 &lt;code&gt;NO_PROXY&lt;/code&gt; 很重要，&lt;strong&gt;否则集群内部地址也可能被错误地送进代理，导致组件通信异常&lt;/strong&gt;。&lt;/p&gt;
 &lt;p&gt;宿主机中执行 &lt;code&gt;ip a&lt;/code&gt; 时如下：&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;div class="chroma"&gt;

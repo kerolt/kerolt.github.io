@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Xv6 on Kerolt's Note</title><link>https://kerolt.github.io/tags/xv6/</link><description>Recent content in Xv6 on Kerolt's Note</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><lastBuildDate>Fri, 22 Nov 2024 00:00:00 +0000</lastBuildDate><atom:link href="https://kerolt.github.io/tags/xv6/index.xml" rel="self" type="application/rss+xml"/><item><title>【MIT6.S081】Lab10 mmap</title><link>https://kerolt.github.io/p/mit6.s081lab10-mmap/</link><pubDate>Fri, 22 Nov 2024 00:00:00 +0000</pubDate><guid>https://kerolt.github.io/p/mit6.s081lab10-mmap/</guid><description>&lt;h2 id="什么是mmap"&gt;什么是mmap？
 &lt;/h2&gt;&lt;p&gt;&lt;code&gt;mmap&lt;/code&gt; 是一种用于将文件或设备与进程的地址空间关联起来的内存映射技术。通过 &lt;code&gt;mmap&lt;/code&gt;，可以将文件的内容直接映射到进程的虚拟内存地址空间，使得文件的内容可以像操作普通内存一样进行读取和写入。&lt;/p&gt;
 &lt;p&gt;在Linux中，虚拟内存的布局如下：&lt;/p&gt;
-&lt;p&gt;&lt;img class="gallery-image" data-flex-basis="241px" data-flex-grow="100" height="1652" loading="lazy" sizes="(max-width: 767px) calc(100vw - 30px), (max-width: 1023px) 700px, (max-width: 1279px) 950px, 1232px" src="https://cdn.xiaolincoding.com//mysql/other/532e6cdf4899588f8b873b6435cba2d8.png" srcset="https://kerolt.github.io/532e6cdf4899588f8b873b6435cba2d8_3792964083280631767_hu_e56be65ed8c9fab7.png 800w, https://kerolt.github.io/532e6cdf4899588f8b873b6435cba2d8_3792964083280631767_hu_dd80a892e4948cab.png 1600w, https://cdn.xiaolincoding.com//mysql/other/532e6cdf4899588f8b873b6435cba2d8.png 1665w" width="1665"&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img class="gallery-image" data-flex-basis="241px" data-flex-grow="100" height="1652" loading="lazy" sizes="(max-width: 767px) calc(100vw - 30px), (max-width: 1023px) 700px, (max-width: 1279px) 950px, 1232px" src="https://cdn.xiaolincoding.com//mysql/other/532e6cdf4899588f8b873b6435cba2d8.png" srcset="https://kerolt.github.io/532e6cdf4899588f8b873b6435cba2d8_3792964083280631767_hu_3b6cb39808d0274b.png 800w, https://kerolt.github.io/532e6cdf4899588f8b873b6435cba2d8_3792964083280631767_hu_77ae52d7a221e8bc.png 1600w, https://cdn.xiaolincoding.com//mysql/other/532e6cdf4899588f8b873b6435cba2d8.png 1665w" width="1665"&gt;&lt;/p&gt;
 
  &lt;blockquote&gt;
  &lt;p&gt;图片来源：&lt;a class="link" href="https://xiaolincoding.com/os/3_memory/linux_mem.html#_3-%E8%BF%9B%E7%A8%8B%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98%E7%A9%BA%E9%97%B4" target="_blank" rel="noopener"
@@ -92,11 +92,11 @@
 &lt;/ol&gt;
 &lt;h2 id="如何实现"&gt;如何实现？
 &lt;/h2&gt;&lt;p&gt;在xv6的虚拟内存布局中，可以看到堆区和trapframe之间有一片没有使用的区域，我们可以拿它作为文件映射区域。（xv6和Linux的虚拟内存布局有点区别，xv6的堆区在栈区上面）&lt;/p&gt;
-&lt;p&gt;&lt;img class="gallery-image" data-flex-basis="408px" data-flex-grow="170" height="595" loading="lazy" sizes="(max-width: 767px) calc(100vw - 30px), (max-width: 1023px) 700px, (max-width: 1279px) 950px, 1232px" src="https://gitee.com/kerolt/picture/raw/main/20241215-134845.png" srcset="https://kerolt.github.io/'20241215-134845_11585558939395049439_hu_779147808ea0b20f.png 800w, https://gitee.com/kerolt/picture/raw/main/20241215-134845.png 1012w" width="1012"&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img class="gallery-image" data-flex-basis="408px" data-flex-grow="170" height="595" loading="lazy" sizes="(max-width: 767px) calc(100vw - 30px), (max-width: 1023px) 700px, (max-width: 1279px) 950px, 1232px" src="https://gitee.com/kerolt/picture/raw/main/20241215-134845.png" srcset="https://kerolt.github.io/20241215-134845_11585558939395049439_hu_779147808ea0b20f.png 800w, https://gitee.com/kerolt/picture/raw/main/20241215-134845.png 1012w" width="1012"&gt;&lt;/p&gt;
 &lt;p&gt;当使用&lt;code&gt;mmap&lt;/code&gt;系统调用时，也可以使用懒分配的策略（类似于Copy On Write）：我们在mmap系统调用中 &lt;strong&gt;标识（不是分配）&lt;/strong&gt; 文件映射区中有一个区域与文件相关联，但这时还不会分配物理块，自然还不急着将文件读入这片内存区域；当我们需要访问这片区域的内存时，可以通过触发page fault来分配物理块，然后读入文件内容到内存块中，并将虚拟内存映射到这块物理内存上。&lt;/p&gt;
 &lt;p&gt;使用&lt;code&gt;munmap&lt;/code&gt;系统调用时，会解除文件在映射区&lt;code&gt;[addr, addr + len]&lt;/code&gt;范围内的映射，将这块区域的内存写回文件，并释放掉这块内存。实验中保证释放的区域大小一定是页的整数倍。&lt;/p&gt;
 &lt;p&gt;我们也仿照Linux上的，让文件映射区从高地址处开始向低地址增长。下图是文件映射的样子，左边为映射区域大小不固定，右边为映射大小为页框的整数倍：&lt;/p&gt;
-&lt;p&gt;&lt;img class="gallery-image" data-flex-basis="255px" data-flex-grow="106" height="1353" loading="lazy" sizes="(max-width: 767px) calc(100vw - 30px), (max-width: 1023px) 700px, (max-width: 1279px) 950px, 1232px" src="https://gitee.com/kerolt/picture/raw/main/20241215-134845-1.png" srcset="https://kerolt.github.io/'20241215-134845-1_13067623828124312749_hu_869a7e2fd4884237.png 800w, https://gitee.com/kerolt/picture/raw/main/20241215-134845-1.png 1443w" width="1443"&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img class="gallery-image" data-flex-basis="255px" data-flex-grow="106" height="1353" loading="lazy" sizes="(max-width: 767px) calc(100vw - 30px), (max-width: 1023px) 700px, (max-width: 1279px) 950px, 1232px" src="https://gitee.com/kerolt/picture/raw/main/20241215-134845-1.png" srcset="https://kerolt.github.io/20241215-134845-1_13067623828124312749_hu_869a7e2fd4884237.png 800w, https://gitee.com/kerolt/picture/raw/main/20241215-134845-1.png 1443w" width="1443"&gt;&lt;/p&gt;
 &lt;p&gt;在实验的提示中，有说到&lt;code&gt;mmaptest&lt;/code&gt;中没有使用的功能可以不实现，其中每次使用&lt;code&gt;mmap&lt;/code&gt;都是映射的&lt;code&gt;PGSIZE&lt;/code&gt;的整数倍，那也就说明我们可以之用考虑右边的情况，这让实验降低了一点复杂度。&lt;/p&gt;
 &lt;h2 id="标识映射区域"&gt;标识映射区域
 &lt;/h2&gt;&lt;p&gt;根据实验提示，我们需要为每个进程设置用于标识映射区域的结构体：&lt;/p&gt;
@@ -834,7 +834,7 @@
 &lt;h2 id="large-files"&gt;Large files
 &lt;/h2&gt;&lt;h3 id="如何扩大单个文件的大小上限"&gt;如何扩大单个文件的大小上限？
 &lt;/h3&gt;&lt;p&gt;要求我们扩大单个文件的大小，实现机制就是通过修改inode的块索引，将原来的12个直接索引和一个一级间接索引变为11个直接索引、一个一级间接索引和一个二级间接索引。&lt;/p&gt;
-&lt;p&gt;&lt;img class="gallery-image" data-flex-basis="314px" data-flex-grow="130" height="1060" loading="lazy" sizes="(max-width: 767px) calc(100vw - 30px), (max-width: 1023px) 700px, (max-width: 1279px) 950px, 1232px" src="https://gitee.com/kerolt/picture/raw/main/20241215-134854.png" srcset="https://kerolt.github.io/'20241215-134854_15025860143240780405_hu_1ca02299e3f00f7.png 800w, https://gitee.com/kerolt/picture/raw/main/20241215-134854.png 1388w" width="1388"&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img class="gallery-image" data-flex-basis="314px" data-flex-grow="130" height="1060" loading="lazy" sizes="(max-width: 767px) calc(100vw - 30px), (max-width: 1023px) 700px, (max-width: 1279px) 950px, 1232px" src="https://gitee.com/kerolt/picture/raw/main/20241215-134854.png" srcset="https://kerolt.github.io/20241215-134854_15025860143240780405_hu_1ca02299e3f00f7.png 800w, https://gitee.com/kerolt/picture/raw/main/20241215-134854.png 1388w" width="1388"&gt;&lt;/p&gt;
 &lt;p&gt;在xv6中，一个数据块的大小为&lt;code&gt;1KB&lt;/code&gt;，由于间接块中存放的是下一个块的地址（其实个人认为更准确的说是块号），使用的类型是&lt;code&gt;uint&lt;/code&gt;，那么一个间接块能存放这样的地址共&lt;code&gt;1KB / sizeof(uint) = 1KB / 4B = 256&lt;/code&gt;个。&lt;/p&gt;
 &lt;p&gt;这样的话，单个文件大小最大为&lt;code&gt;12 * 1KB + 256 * 1KB = 268KB&lt;/code&gt;变为了&lt;code&gt;11 * 1KB + 256 * 1KB + 256 * 256 * 1KB = 65803KB&lt;/code&gt;。&lt;/p&gt;
 &lt;h3 id="修改inode结构体"&gt;修改inode结构体
@@ -1168,7 +1168,7 @@
 &lt;/div&gt;
 &lt;/div&gt;&lt;p&gt;多的步骤就是二级间接索引需要多一次读取数据块和查找：&lt;/p&gt;
 &lt;p&gt;假设传入bmap的块号为524，那么其不在直接块中，也不在一级间接块中，而是在二级间接块中。通过bmap中的前两个if之后对于bn的减法操作，此时的bn = 524 - 11 - 256 = 257。那么在二级间接块的第一层中（level1），索引为257 / 256 = 1，在第二层中（level2）索引为257 % 256 = 1 。如下图所示：&lt;/p&gt;
-&lt;p&gt;&lt;img class="gallery-image" data-flex-basis="393px" data-flex-grow="163" height="781" loading="lazy" sizes="(max-width: 767px) calc(100vw - 30px), (max-width: 1023px) 700px, (max-width: 1279px) 950px, 1232px" src="https://gitee.com/kerolt/picture/raw/main/20241215-134854-1.png" srcset="https://kerolt.github.io/'20241215-134854-1_3664929381797016564_hu_614ea6c5a2237d4a.png 800w, https://gitee.com/kerolt/picture/raw/main/20241215-134854-1.png 1280w" width="1280"&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img class="gallery-image" data-flex-basis="393px" data-flex-grow="163" height="781" loading="lazy" sizes="(max-width: 767px) calc(100vw - 30px), (max-width: 1023px) 700px, (max-width: 1279px) 950px, 1232px" src="https://gitee.com/kerolt/picture/raw/main/20241215-134854-1.png" srcset="https://kerolt.github.io/20241215-134854-1_3664929381797016564_hu_614ea6c5a2237d4a.png 800w, https://gitee.com/kerolt/picture/raw/main/20241215-134854-1.png 1280w" width="1280"&gt;&lt;/p&gt;
 &lt;h2 id="symbolic-links"&gt;Symbolic links
 &lt;/h2&gt;&lt;p&gt;首先要搞清楚软硬链接的区别：&lt;/p&gt;
 &lt;ul&gt;
@@ -1693,7 +1693,7 @@
 &lt;li&gt;&lt;code&gt;struct buf buf[NBUF]&lt;/code&gt;：缓冲块池，即包含了所有的buffer cache&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;struct buf head&lt;/code&gt;：一个LRU链表，用于操作缓冲块，使用head.next获取的是最近刚使用过的buffer，head.prev获取的是最近未使用时间最久的buffer（或者说是未被使用的buffer，即引用计数为0）&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;&lt;img class="gallery-image" data-flex-basis="558px" data-flex-grow="232" height="589" loading="lazy" sizes="(max-width: 767px) calc(100vw - 30px), (max-width: 1023px) 700px, (max-width: 1279px) 950px, 1232px" src="https://gitee.com/kerolt/picture/raw/main/20241215-134743.png" srcset="https://kerolt.github.io/'20241215-134743_2721402267024553664_hu_c5dab16debf0c747.png 800w, https://gitee.com/kerolt/picture/raw/main/20241215-134743.png 1370w" width="1370"&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img class="gallery-image" data-flex-basis="558px" data-flex-grow="232" height="589" loading="lazy" sizes="(max-width: 767px) calc(100vw - 30px), (max-width: 1023px) 700px, (max-width: 1279px) 950px, 1232px" src="https://gitee.com/kerolt/picture/raw/main/20241215-134743.png" srcset="https://kerolt.github.io/20241215-134743_2721402267024553664_hu_c5dab16debf0c747.png 800w, https://gitee.com/kerolt/picture/raw/main/20241215-134743.png 1370w" width="1370"&gt;&lt;/p&gt;
 &lt;p&gt;原来的bcache中的buf数组在binit时就给LRU链表初始化用了：&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
 &lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
@@ -1775,7 +1775,7 @@
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="p"&gt;}&lt;/span&gt; &lt;span class="n"&gt;bcache&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
-&lt;/div&gt;&lt;p&gt;&lt;img class="gallery-image" data-flex-basis="317px" data-flex-grow="132" height="1037" loading="lazy" sizes="(max-width: 767px) calc(100vw - 30px), (max-width: 1023px) 700px, (max-width: 1279px) 950px, 1232px" src="https://gitee.com/kerolt/picture/raw/main/20241215-134743-1.png" srcset="https://kerolt.github.io/'20241215-134743-1_17672644317407277968_hu_1f6e383e65b92d01.png 800w, https://gitee.com/kerolt/picture/raw/main/20241215-134743-1.png 1370w" width="1370"&gt;&lt;/p&gt;
+&lt;/div&gt;&lt;p&gt;&lt;img class="gallery-image" data-flex-basis="317px" data-flex-grow="132" height="1037" loading="lazy" sizes="(max-width: 767px) calc(100vw - 30px), (max-width: 1023px) 700px, (max-width: 1279px) 950px, 1232px" src="https://gitee.com/kerolt/picture/raw/main/20241215-134743-1.png" srcset="https://kerolt.github.io/20241215-134743-1_17672644317407277968_hu_1f6e383e65b92d01.png 800w, https://gitee.com/kerolt/picture/raw/main/20241215-134743-1.png 1370w" width="1370"&gt;&lt;/p&gt;
 &lt;p&gt;我们在重构的方案中，不再使用LRU链表，但还是使用了LRU算法的思想，只是用时间戳来代替LRU链表：&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
 &lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
@@ -2465,11 +2465,11 @@
 &lt;ul&gt;
 &lt;li&gt;当执行顺序为从调度器选择可调度进程（RUNNABLE）后进行进程切换：&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;&lt;img class="gallery-image" data-flex-basis="478px" data-flex-grow="199" height="1262" loading="lazy" sizes="(max-width: 767px) calc(100vw - 30px), (max-width: 1023px) 700px, (max-width: 1279px) 950px, 1232px" src="https://gitee.com/kerolt/picture/raw/main/20241215-134904.png" srcset="https://kerolt.github.io/'20241215-134904_13676004664408373585_hu_53b0fe44e718f1e6.png 800w, https://kerolt.github.io/'20241215-134904_13676004664408373585_hu_a00c0ad2d7ad3a65.png 1600w, https://kerolt.github.io/'20241215-134904_13676004664408373585_hu_ee90806faa8c2c63.png 2400w, https://gitee.com/kerolt/picture/raw/main/20241215-134904.png 2516w" width="2516"&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img class="gallery-image" data-flex-basis="478px" data-flex-grow="199" height="1262" loading="lazy" sizes="(max-width: 767px) calc(100vw - 30px), (max-width: 1023px) 700px, (max-width: 1279px) 950px, 1232px" src="https://gitee.com/kerolt/picture/raw/main/20241215-134904.png" srcset="https://kerolt.github.io/20241215-134904_13676004664408373585_hu_53b0fe44e718f1e6.png 800w, https://kerolt.github.io/20241215-134904_13676004664408373585_hu_a00c0ad2d7ad3a65.png 1600w, https://kerolt.github.io/20241215-134904_13676004664408373585_hu_ee90806faa8c2c63.png 2400w, https://gitee.com/kerolt/picture/raw/main/20241215-134904.png 2516w" width="2516"&gt;&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;当执行顺序为进程触发中断等陷入时，放弃cpu资源，需要执行进程调度时：&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;&lt;img class="gallery-image" data-flex-basis="325px" data-flex-grow="135" height="1574" loading="lazy" sizes="(max-width: 767px) calc(100vw - 30px), (max-width: 1023px) 700px, (max-width: 1279px) 950px, 1232px" src="https://gitee.com/kerolt/picture/raw/main/20241215-134904-1.png" srcset="https://kerolt.github.io/'20241215-134904-1_12200221774095490040_hu_3e8f27947f9ff154.png 800w, https://kerolt.github.io/'20241215-134904-1_12200221774095490040_hu_e7a8928a1f020fb0.png 1600w, https://gitee.com/kerolt/picture/raw/main/20241215-134904-1.png 2136w" width="2136"&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img class="gallery-image" data-flex-basis="325px" data-flex-grow="135" height="1574" loading="lazy" sizes="(max-width: 767px) calc(100vw - 30px), (max-width: 1023px) 700px, (max-width: 1279px) 950px, 1232px" src="https://gitee.com/kerolt/picture/raw/main/20241215-134904-1.png" srcset="https://kerolt.github.io/20241215-134904-1_12200221774095490040_hu_3e8f27947f9ff154.png 800w, https://kerolt.github.io/20241215-134904-1_12200221774095490040_hu_e7a8928a1f020fb0.png 1600w, https://gitee.com/kerolt/picture/raw/main/20241215-134904-1.png 2136w" width="2136"&gt;&lt;/p&gt;
 &lt;p&gt;可以看到，在yield函数中，进程p的锁的使用顺序并不是&lt;code&gt;acquire() 获取锁-&amp;gt; 执行shed()函数 -&amp;gt; release()释放锁&lt;/code&gt;这样线性的，在其中会发生进程切换因此锁的“获取、释放”逻辑并不发生在一个函数中。&lt;/p&gt;</description></item><item><title>【MIT6.S081】Lab6 multithreading</title><link>https://kerolt.github.io/p/mit6.s081lab6-multithreading/</link><pubDate>Fri, 15 Nov 2024 00:00:00 +0000</pubDate><guid>https://kerolt.github.io/p/mit6.s081lab6-multithreading/</guid><description>&lt;p&gt;本次的实验总体都不是很难，第一个练习让我们在用户态模拟了线程的切换，这里重要的就是进程/线程上下文的保存与恢复；第二三个练习则是让我们跳出了xv6，去熟悉pthread库和线程的同步互斥。&lt;/p&gt;
 &lt;h2 id="简单分析xv6中的进程切换"&gt;简单分析xv6中的进程切换
 &lt;/h2&gt;&lt;p&gt;init是用户态最先启动的进程，其启动后会创建sh进程，sh进程又会fork并exec其他命令：&lt;/p&gt;
@@ -2578,7 +2578,7 @@
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
 &lt;/div&gt;&lt;p&gt;&lt;code&gt;swtch(&amp;amp;p-&amp;gt;context, &amp;amp;mycpu()-&amp;gt;context)&lt;/code&gt;函数会将当前寄存器中的值保存到p-&amp;gt;context中，并将当前cpu中context的内容恢复到寄存器中，其中最重要的就是&lt;code&gt;ra&lt;/code&gt;寄存器，当恢复了这个后，ra的值对应的地址在调度器&lt;code&gt;scheduler()&lt;/code&gt;中：&lt;/p&gt;
-&lt;p&gt;&lt;img class="gallery-image" data-flex-basis="231px" data-flex-grow="96" height="990" loading="lazy" sizes="(max-width: 767px) calc(100vw - 30px), (max-width: 1023px) 700px, (max-width: 1279px) 950px, 1232px" src="https://gitee.com/kerolt/picture/raw/main/20241215-134724.png" srcset="https://kerolt.github.io/'20241215-134724_13063291559617015402_hu_90d54013ede01dc7.png 800w, https://gitee.com/kerolt/picture/raw/main/20241215-134724.png 954w" width="954"&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img class="gallery-image" data-flex-basis="231px" data-flex-grow="96" height="990" loading="lazy" sizes="(max-width: 767px) calc(100vw - 30px), (max-width: 1023px) 700px, (max-width: 1279px) 950px, 1232px" src="https://gitee.com/kerolt/picture/raw/main/20241215-134724.png" srcset="https://kerolt.github.io/20241215-134724_13063291559617015402_hu_90d54013ede01dc7.png 800w, https://gitee.com/kerolt/picture/raw/main/20241215-134724.png 954w" width="954"&gt;&lt;/p&gt;
 &lt;p&gt;（这里ra的16进制为0x8000141e）&lt;/p&gt;
 &lt;p&gt;这样，xv6就从：执行当前进程 -&amp;gt; yield -&amp;gt; shed -&amp;gt; scheduler；在scheduler调度器中，内核会找到下一个就绪态的进程，并使用swtch进行进程切换：&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
@@ -3042,7 +3042,7 @@
 &lt;p&gt;&lt;img class="gallery-image" data-flex-basis="246px" data-flex-grow="102" height="592" loading="lazy" sizes="(max-width: 767px) calc(100vw - 30px), (max-width: 1023px) 700px, (max-width: 1279px) 950px, 1232px" src="https://gitee.com/kerolt/picture/raw/main/20241215-103350-1.png" width="607"&gt;&lt;/p&gt;
 &lt;h2 id="具体实现"&gt;具体实现
 &lt;/h2&gt;&lt;h3 id="cow标志位"&gt;COW标志位
-&lt;/h3&gt;&lt;p&gt;&lt;img class="gallery-image" data-flex-basis="676px" data-flex-grow="281" height="505" loading="lazy" sizes="(max-width: 767px) calc(100vw - 30px), (max-width: 1023px) 700px, (max-width: 1279px) 950px, 1232px" src="https://gitee.com/kerolt/picture/raw/main/20241215-103350-2.png" srcset="https://kerolt.github.io/'20241215-103350-2_2693859986388424408_hu_b4d27a7507f75286.png 800w, https://gitee.com/kerolt/picture/raw/main/20241215-103350-2.png 1424w" width="1424"&gt;&lt;/p&gt;
+&lt;/h3&gt;&lt;p&gt;&lt;img class="gallery-image" data-flex-basis="676px" data-flex-grow="281" height="505" loading="lazy" sizes="(max-width: 767px) calc(100vw - 30px), (max-width: 1023px) 700px, (max-width: 1279px) 950px, 1232px" src="https://gitee.com/kerolt/picture/raw/main/20241215-103350-2.png" srcset="https://kerolt.github.io/20241215-103350-2_2693859986388424408_hu_b4d27a7507f75286.png 800w, https://gitee.com/kerolt/picture/raw/main/20241215-103350-2.png 1424w" width="1424"&gt;&lt;/p&gt;
 &lt;p&gt;首先我们需要为PTE添加一个用于识别COW的标志位，上图展示了PTE的后10位也就是其flags的情况，可以看到第8、9位是保留没有被使用的，那么我们可以用第8位来作为COW的标志位：&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
 &lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;

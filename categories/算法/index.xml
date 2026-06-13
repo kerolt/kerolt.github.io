@@ -397,7 +397,7 @@
  &lt;/blockquote&gt;
 &lt;p&gt;题目中给出的n范围为&lt;code&gt;1 &amp;lt;= n &amp;lt;= 10&lt;/code&gt;，那么说明最多的10个分部的情况下，可以选择关闭的可行情况有&lt;code&gt;2^10&lt;/code&gt;种，这个数据量并不大，可以用暴力枚举做出来。&lt;/p&gt;
 &lt;p&gt;但是如何知道选择了哪些顶点呢？这里有用到位运算这个很巧妙的方法，一个int型数据有32位，我们最多只要用其中的10位即可表示所有的情况，同时还能用每一位来表示是否选择了某一个顶点（分部）。&lt;/p&gt;
-&lt;p&gt;&lt;img class="gallery-image" data-flex-basis="917px" data-flex-grow="382" height="261" loading="lazy" sizes="(max-width: 767px) calc(100vw - 30px), (max-width: 1023px) 700px, (max-width: 1279px) 950px, 1232px" src="https://gitee.com/kerolt/picture/raw/main/20241216-143726.png" srcset="https://kerolt.github.io/'20241216-143726_1291110471852136716_hu_582106d2147b52dd.png 800w, https://gitee.com/kerolt/picture/raw/main/20241216-143726.png 998w" width="998"&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img class="gallery-image" data-flex-basis="917px" data-flex-grow="382" height="261" loading="lazy" sizes="(max-width: 767px) calc(100vw - 30px), (max-width: 1023px) 700px, (max-width: 1279px) 950px, 1232px" src="https://gitee.com/kerolt/picture/raw/main/20241216-143726.png" srcset="https://kerolt.github.io/20241216-143726_1291110471852136716_hu_582106d2147b52dd.png 800w, https://gitee.com/kerolt/picture/raw/main/20241216-143726.png 998w" width="998"&gt;&lt;/p&gt;
 &lt;p&gt;利用Floyd算法可以求解出一个图中任意两个顶点之间的最小距离。当我们选择一个可能的集合时，判断这个集合中有的分部之间的最短距离是否会大于题目要求的最远距离&lt;code&gt;maxDistance&lt;/code&gt;，如果有大于的，说明有分部之间最短的距离都无法满足要求。&lt;/p&gt;
 &lt;p&gt;需要注意的是，每一种情况我们只需要处理在集合中包含的分部。&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
