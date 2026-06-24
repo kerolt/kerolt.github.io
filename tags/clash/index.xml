@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Clash on Kerolt's Note</title><link>https://kerolt.github.io/tags/clash/</link><description>Recent content in Clash on Kerolt's Note</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><lastBuildDate>Sat, 13 Jun 2026 00:00:00 +0000</lastBuildDate><atom:link href="https://kerolt.github.io/tags/clash/index.xml" rel="self" type="application/rss+xml"/><item><title>Clash Fake-IP 模式下 Git SSH 连接失败</title><link>https://kerolt.github.io/p/clash-fake-ip-%E6%A8%A1%E5%BC%8F%E4%B8%8B-git-ssh-%E8%BF%9E%E6%8E%A5%E5%A4%B1%E8%B4%A5/</link><pubDate>Sat, 13 Jun 2026 00:00:00 +0000</pubDate><guid>https://kerolt.github.io/p/clash-fake-ip-%E6%A8%A1%E5%BC%8F%E4%B8%8B-git-ssh-%E8%BF%9E%E6%8E%A5%E5%A4%B1%E8%B4%A5/</guid><description>&lt;h2 id="问题现象"&gt;问题现象
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Clash on Kerolt's Note</title><link>https://kerolt.github.io/tags/clash/</link><description>Recent content in Clash on Kerolt's Note</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><lastBuildDate>Wed, 24 Jun 2026 00:00:00 +0000</lastBuildDate><atom:link href="https://kerolt.github.io/tags/clash/index.xml" rel="self" type="application/rss+xml"/><item><title>Clash-Fake-IP模式下Git-SSH连接失败</title><link>https://kerolt.github.io/p/clash-fake-ip%E6%A8%A1%E5%BC%8F%E4%B8%8Bgit-ssh%E8%BF%9E%E6%8E%A5%E5%A4%B1%E8%B4%A5/</link><pubDate>Sat, 13 Jun 2026 00:00:00 +0000</pubDate><guid>https://kerolt.github.io/p/clash-fake-ip%E6%A8%A1%E5%BC%8F%E4%B8%8Bgit-ssh%E8%BF%9E%E6%8E%A5%E5%A4%B1%E8%B4%A5/</guid><description>&lt;h2 id="问题现象"&gt;问题现象
 &lt;/h2&gt;&lt;p&gt;执行 &lt;code&gt;git fetch --all&lt;/code&gt; 报错：&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
 &lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
@@ -19,7 +19,7 @@
 &lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
 &lt;td class="lntd"&gt;
 &lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;git remote -v
-&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# origin git@github.com:ZJNU-Lab-29202/detection-saas.git&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# origin git@github.com:xxx/yyy.git&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
 &lt;/div&gt;&lt;p&gt;使用的是 SSH 协议。&lt;/p&gt;
@@ -36,7 +36,7 @@
 &lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# Address: 198.18.0.35&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
-&lt;/div&gt;&lt;p&gt;&lt;code&gt;198.18.0.35&lt;/code&gt; 不是 GitHub 真实 IP，属于 &lt;code&gt;198.18.0.0/15&lt;/code&gt; 保留段。这是 &lt;strong&gt;Clash Fake-IP 模式&lt;/strong&gt; 的典型特征——DNS 返回虚拟 IP，由 Clash 透明代理接管流量。&lt;/p&gt;
+&lt;/div&gt;&lt;p&gt;&lt;code&gt;198.18.0.35&lt;/code&gt; 不是 GitHub 真实 IP，属于 &lt;code&gt;198.18.0.0/15&lt;/code&gt; 保留段。这是 &lt;strong&gt;Clash Fake-IP 模式&lt;/strong&gt; 的特征，即 DNS 返回虚拟 IP，由 Clash 透明代理接管流量。&lt;/p&gt;
 &lt;h3 id="3-确认-clash-运行状态"&gt;3. 确认 Clash 运行状态
 &lt;/h3&gt;&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
 &lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
@@ -76,7 +76,7 @@
 &lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;kex_exchange_identification: Connection closed by remote host
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
-&lt;/div&gt;&lt;p&gt;&lt;strong&gt;结论：&lt;/strong&gt; Fake-IP 模式下，即使通过 HTTP CONNECT 代理转发 SSH 流量，也无法完成完整的 SSH 握手。Clash 对 SSH 流量的透明代理处理存在问题。&lt;/p&gt;
+&lt;/div&gt;&lt;p&gt;在 Fake-IP 模式下，即使通过 HTTP CONNECT 代理转发 SSH 流量，也无法完成完整的 SSH 握手。Clash 对 SSH 流量的透明代理处理存在问题。&lt;/p&gt;
 &lt;h2 id="解决方案"&gt;解决方案
 &lt;/h2&gt;&lt;h3 id="方案一推荐改用-https--git-代理"&gt;方案一（推荐）：改用 HTTPS + Git 代理
 &lt;/h3&gt;&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;

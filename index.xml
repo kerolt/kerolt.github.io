@@ -1,4 +1,191 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Kerolt's Note</title><link>https://kerolt.github.io/</link><description>Recent content on Kerolt's Note</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><lastBuildDate>Sat, 13 Jun 2026 00:00:00 +0000</lastBuildDate><atom:link href="https://kerolt.github.io/index.xml" rel="self" type="application/rss+xml"/><item><title>Clash Fake-IP 模式下 Git SSH 连接失败</title><link>https://kerolt.github.io/p/clash-fake-ip-%E6%A8%A1%E5%BC%8F%E4%B8%8B-git-ssh-%E8%BF%9E%E6%8E%A5%E5%A4%B1%E8%B4%A5/</link><pubDate>Sat, 13 Jun 2026 00:00:00 +0000</pubDate><guid>https://kerolt.github.io/p/clash-fake-ip-%E6%A8%A1%E5%BC%8F%E4%B8%8B-git-ssh-%E8%BF%9E%E6%8E%A5%E5%A4%B1%E8%B4%A5/</guid><description>&lt;h2 id="问题现象"&gt;问题现象
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Kerolt's Note</title><link>https://kerolt.github.io/</link><description>Recent content on Kerolt's Note</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><lastBuildDate>Wed, 24 Jun 2026 00:00:00 +0000</lastBuildDate><atom:link href="https://kerolt.github.io/index.xml" rel="self" type="application/rss+xml"/><item><title>Minikube如何更改profile</title><link>https://kerolt.github.io/p/minikube%E5%A6%82%E4%BD%95%E6%9B%B4%E6%94%B9profile/</link><pubDate>Wed, 24 Jun 2026 00:00:00 +0000</pubDate><guid>https://kerolt.github.io/p/minikube%E5%A6%82%E4%BD%95%E6%9B%B4%E6%94%B9profile/</guid><description>&lt;p&gt;在 Minikube 中更改或切换 profile（配置文件/集群）主要通过 &lt;code&gt;minikube profile&lt;/code&gt; 命令来实现。&lt;/p&gt;
+&lt;p&gt;Minikube 的 profile 用于管理多个独立的集群。每个 profile 都有自己的配置、状态和持久化存储。不同的 profile 是相互隔离的。例如，你可以为不同的项目创建名为 &lt;code&gt;dev&lt;/code&gt;、&lt;code&gt;test&lt;/code&gt; 的 profile。&lt;/p&gt;
+&lt;p&gt;要切换当前使用的 profile，可以直接使用 &lt;strong&gt;&lt;code&gt;minikube profile&lt;/code&gt;&lt;/strong&gt; 命令并指定新的 profile 名称：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;minikube profile &amp;lt;新的profile名称&amp;gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;这条命令会&lt;strong&gt;切换&lt;/strong&gt;你的 Minikube 上下文到指定的 profile，后续的 &lt;code&gt;minikube start&lt;/code&gt;、&lt;code&gt;minikube stop&lt;/code&gt; 等操作都将针对这个 profile 生效。&lt;/p&gt;
+&lt;p&gt;其他常用 Profile 管理命令：&lt;/p&gt;
+&lt;table&gt;
+	&lt;thead&gt;
+			&lt;tr&gt;
+					&lt;th style="text-align: left"&gt;命令&lt;/th&gt;
+					&lt;th style="text-align: left"&gt;作用&lt;/th&gt;
+					&lt;th style="text-align: left"&gt;示例&lt;/th&gt;
+			&lt;/tr&gt;
+	&lt;/thead&gt;
+	&lt;tbody&gt;
+			&lt;tr&gt;
+					&lt;td style="text-align: left"&gt;&lt;strong&gt;切换回默认 Profile&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style="text-align: left"&gt;将当前上下文切换回名为 &lt;code&gt;minikube&lt;/code&gt; 的默认 profile。&lt;/td&gt;
+					&lt;td style="text-align: left"&gt;&lt;code&gt;minikube profile default&lt;/code&gt;&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td style="text-align: left"&gt;&lt;strong&gt;查看当前/所有 Profile&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style="text-align: left"&gt;不指定 profile 名称时，用于查看当前使用的 profile；加上 &lt;code&gt;list&lt;/code&gt; 参数可列出所有 profile。&lt;/td&gt;
+					&lt;td style="text-align: left"&gt;&lt;code&gt;minikube profile&lt;/code&gt; &lt;br&gt; &lt;code&gt;minikube profile list&lt;/code&gt;&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td style="text-align: left"&gt;&lt;strong&gt;创建新 Profile&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style="text-align: left"&gt;在启动时使用 &lt;code&gt;--profile&lt;/code&gt; (或 &lt;code&gt;-p&lt;/code&gt;) 标志创建一个新的独立集群。&lt;/td&gt;
+					&lt;td style="text-align: left"&gt;&lt;code&gt;minikube start --profile my-new-cluster&lt;/code&gt;&lt;/td&gt;
+			&lt;/tr&gt;
+	&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;除了使用 &lt;code&gt;minikube profile&lt;/code&gt; 命令切换上下文外，也可以在任何 &lt;code&gt;minikube&lt;/code&gt; 命令后加上 &lt;code&gt;--profile&lt;/code&gt; 或 &lt;code&gt;-p&lt;/code&gt; 标志来临时指定要操作的 profile。例如 &lt;code&gt;minikube status -p my-cluster&lt;/code&gt;。&lt;/p&gt;</description></item><item><title>搭建EasyTier中继服务器并进行组网</title><link>https://kerolt.github.io/p/%E6%90%AD%E5%BB%BAeasytier%E4%B8%AD%E7%BB%A7%E6%9C%8D%E5%8A%A1%E5%99%A8%E5%B9%B6%E8%BF%9B%E8%A1%8C%E7%BB%84%E7%BD%91/</link><pubDate>Wed, 24 Jun 2026 00:00:00 +0000</pubDate><guid>https://kerolt.github.io/p/%E6%90%AD%E5%BB%BAeasytier%E4%B8%AD%E7%BB%A7%E6%9C%8D%E5%8A%A1%E5%99%A8%E5%B9%B6%E8%BF%9B%E8%A1%8C%E7%BB%84%E7%BD%91/</guid><description>&lt;p&gt;在&lt;strong&gt;有公网 ip 的服务器&lt;/strong&gt;上通过官网文档安装好 EasyTier（或者下载好文件）后，修改对应的配置文件：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt; 1
+&lt;/span&gt;&lt;span class="lnt"&gt; 2
+&lt;/span&gt;&lt;span class="lnt"&gt; 3
+&lt;/span&gt;&lt;span class="lnt"&gt; 4
+&lt;/span&gt;&lt;span class="lnt"&gt; 5
+&lt;/span&gt;&lt;span class="lnt"&gt; 6
+&lt;/span&gt;&lt;span class="lnt"&gt; 7
+&lt;/span&gt;&lt;span class="lnt"&gt; 8
+&lt;/span&gt;&lt;span class="lnt"&gt; 9
+&lt;/span&gt;&lt;span class="lnt"&gt;10
+&lt;/span&gt;&lt;span class="lnt"&gt;11
+&lt;/span&gt;&lt;span class="lnt"&gt;12
+&lt;/span&gt;&lt;span class="lnt"&gt;13
+&lt;/span&gt;&lt;span class="lnt"&gt;14
+&lt;/span&gt;&lt;span class="lnt"&gt;15
+&lt;/span&gt;&lt;span class="lnt"&gt;16
+&lt;/span&gt;&lt;span class="lnt"&gt;17
+&lt;/span&gt;&lt;span class="lnt"&gt;18
+&lt;/span&gt;&lt;span class="lnt"&gt;19
+&lt;/span&gt;&lt;span class="lnt"&gt;20
+&lt;/span&gt;&lt;span class="lnt"&gt;21
+&lt;/span&gt;&lt;span class="lnt"&gt;22
+&lt;/span&gt;&lt;span class="lnt"&gt;23
+&lt;/span&gt;&lt;span class="lnt"&gt;24
+&lt;/span&gt;&lt;span class="lnt"&gt;25
+&lt;/span&gt;&lt;span class="lnt"&gt;26
+&lt;/span&gt;&lt;span class="lnt"&gt;27
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-toml" data-lang="toml"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c"&gt;# /usr/local/share/easytier/default.conf&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nx"&gt;instance_name&lt;/span&gt; &lt;span class="p"&gt;=&lt;/span&gt; &lt;span class="s2"&gt;&amp;#34;kerolt&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c"&gt;# 主机名，用于标识此设备的主机名&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nx"&gt;hostname&lt;/span&gt; &lt;span class="p"&gt;=&lt;/span&gt; &lt;span class="s2"&gt;&amp;#34;server&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nx"&gt;ipv4&lt;/span&gt; &lt;span class="p"&gt;=&lt;/span&gt; &lt;span class="s2"&gt;&amp;#34;10.112.112.1/24&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c"&gt;# 由 Easytier 自动确定并设置IP地址，默认从10.0.0.1开始。警告：在使用 DHCP 时，如果网络中出现 IP 冲突，IP 将自动更改（只做服务器写false）&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nx"&gt;dhcp&lt;/span&gt; &lt;span class="p"&gt;=&lt;/span&gt; &lt;span class="kc"&gt;false&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nx"&gt;listeners&lt;/span&gt; &lt;span class="p"&gt;=&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;	&lt;span class="s2"&gt;&amp;#34;tcp://0.0.0.0:11010&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;	&lt;span class="s2"&gt;&amp;#34;udp://0.0.0.0:11010&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;	&lt;span class="s2"&gt;&amp;#34;wg://0.0.0.0:11011&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;	&lt;span class="s2"&gt;&amp;#34;ws://0.0.0.0:11011/&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;	&lt;span class="s2"&gt;&amp;#34;wss://0.0.0.0:11012/&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="p"&gt;]&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nx"&gt;exit_nodes&lt;/span&gt; &lt;span class="p"&gt;=&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="p"&gt;]&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c"&gt;#[network_identity]&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c"&gt;# 网络名称，用于标识 VPN 网络（只做服务器不用填）&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c"&gt;#network_name = &amp;#34;&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c"&gt;# 网络密钥，用于验证此节点属于 VPN 网络（只做服务器不用填）&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c"&gt;#network_secret = &amp;#34;&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="nx"&gt;flags&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nx"&gt;relay_network_whitelist&lt;/span&gt; &lt;span class="p"&gt;=&lt;/span&gt; &lt;span class="s2"&gt;&amp;#34;kerolt&amp;#34;&lt;/span&gt; &lt;span class="c"&gt;# 之后我其他主机上的 easytier 网络名称都是使用 kerolt，如果需要所有网络都可以通过该服务器进行中继转发，可以将值设置为 &amp;#34;*&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;同时，你需要&lt;strong&gt;在服务器防火墙中放行 &lt;code&gt;11010&lt;/code&gt;、&lt;code&gt;11011&lt;/code&gt;、&lt;code&gt;11012&lt;/code&gt; 端口&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;然后通过 systemd 让 easytier 开机自启，编辑 &lt;code&gt;/etc/systemd/system/easytier.service&lt;/code&gt; 文件：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt; 1
+&lt;/span&gt;&lt;span class="lnt"&gt; 2
+&lt;/span&gt;&lt;span class="lnt"&gt; 3
+&lt;/span&gt;&lt;span class="lnt"&gt; 4
+&lt;/span&gt;&lt;span class="lnt"&gt; 5
+&lt;/span&gt;&lt;span class="lnt"&gt; 6
+&lt;/span&gt;&lt;span class="lnt"&gt; 7
+&lt;/span&gt;&lt;span class="lnt"&gt; 8
+&lt;/span&gt;&lt;span class="lnt"&gt; 9
+&lt;/span&gt;&lt;span class="lnt"&gt;10
+&lt;/span&gt;&lt;span class="lnt"&gt;11
+&lt;/span&gt;&lt;span class="lnt"&gt;12
+&lt;/span&gt;&lt;span class="lnt"&gt;13
+&lt;/span&gt;&lt;span class="lnt"&gt;14
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-ini" data-lang="ini"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="k"&gt;[Unit]&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="na"&gt;Description&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;EasyTier Service&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="na"&gt;After&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;network.target&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="k"&gt;[Service]&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="na"&gt;Type&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;simple&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# 主要是下面这行，取决于你的 easytier-core 和对应配置文件的位置&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="na"&gt;ExecStart&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;/usr/local/bin/easytier-core -c /usr/local/share/easytier/default.conf &lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="na"&gt;Restart&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;on-failure&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="na"&gt;RestartSec&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;5&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="na"&gt;User&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;root&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="k"&gt;[Install]&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="na"&gt;WantedBy&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;multi-user.target&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;执行如下命令，专属于你自己的 easytier 服务器就启动好了：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;sudo systemctl daemon-reload
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;sudo systemctl &lt;span class="nb"&gt;enable&lt;/span&gt; easytier
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;sudo systemctl restart easytier
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;之后，在需要进行组网的&lt;strong&gt;主机 A&lt;/strong&gt;上启动 easytier，编辑对应的&lt;strong&gt;配置文件&lt;/strong&gt;：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt; 1
+&lt;/span&gt;&lt;span class="lnt"&gt; 2
+&lt;/span&gt;&lt;span class="lnt"&gt; 3
+&lt;/span&gt;&lt;span class="lnt"&gt; 4
+&lt;/span&gt;&lt;span class="lnt"&gt; 5
+&lt;/span&gt;&lt;span class="lnt"&gt; 6
+&lt;/span&gt;&lt;span class="lnt"&gt; 7
+&lt;/span&gt;&lt;span class="lnt"&gt; 8
+&lt;/span&gt;&lt;span class="lnt"&gt; 9
+&lt;/span&gt;&lt;span class="lnt"&gt;10
+&lt;/span&gt;&lt;span class="lnt"&gt;11
+&lt;/span&gt;&lt;span class="lnt"&gt;12
+&lt;/span&gt;&lt;span class="lnt"&gt;13
+&lt;/span&gt;&lt;span class="lnt"&gt;14
+&lt;/span&gt;&lt;span class="lnt"&gt;15
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-toml" data-lang="toml"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nx"&gt;instance_name&lt;/span&gt; &lt;span class="p"&gt;=&lt;/span&gt; &lt;span class="s2"&gt;&amp;#34;kerolt&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nx"&gt;ipv4&lt;/span&gt; &lt;span class="p"&gt;=&lt;/span&gt; &lt;span class="s2"&gt;&amp;#34;10.112.112.2/24&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nx"&gt;dhcp&lt;/span&gt; &lt;span class="p"&gt;=&lt;/span&gt; &lt;span class="kc"&gt;false&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nx"&gt;listeners&lt;/span&gt; &lt;span class="p"&gt;=&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="s2"&gt;&amp;#34;tcp://0.0.0.0:11010&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="s2"&gt;&amp;#34;udp://0.0.0.0:11010&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="s2"&gt;&amp;#34;wg://0.0.0.0:11011&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="p"&gt;]&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="nx"&gt;network_identity&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nx"&gt;network_name&lt;/span&gt; &lt;span class="p"&gt;=&lt;/span&gt; &lt;span class="s2"&gt;&amp;#34;kerolt&amp;#34;&lt;/span&gt; &lt;span class="c"&gt;# 之前服务器上只配置了 kerolt 这个网络的白名单&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nx"&gt;network_secret&lt;/span&gt; &lt;span class="p"&gt;=&lt;/span&gt; &lt;span class="s2"&gt;&amp;#34;xxxx&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="p"&gt;[[&lt;/span&gt;&lt;span class="nx"&gt;peer&lt;/span&gt;&lt;span class="p"&gt;]]&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nx"&gt;uri&lt;/span&gt; &lt;span class="p"&gt;=&lt;/span&gt; &lt;span class="s2"&gt;&amp;#34;tcp://your-server-ip:11010&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;easytier 就会默认给你这个&lt;strong&gt;主机 A&lt;/strong&gt;分配一个虚拟局域网 ip 为 &lt;code&gt;10.112.112.2/24&lt;/code&gt;；同样的，对于另一台&lt;strong&gt;主机 B&lt;/strong&gt;，使用同样的配置文件，只需要修改 &lt;code&gt;ipv4 = &amp;quot;10.112.112.3/24&amp;quot;&lt;/code&gt; 和 &lt;code&gt;dhcp = false&lt;/code&gt;，或者直接使用 &lt;code&gt;dhcp = true&lt;/code&gt; 让 easytier 自动进行 DHCP 分配 ip。&lt;/p&gt;
+&lt;p&gt;到这里，&lt;strong&gt;主机 A&lt;/strong&gt;（10.112.112.2/24）和&lt;strong&gt;主机 B&lt;/strong&gt;（10.112.112.3/23）已经处于同一虚拟局域网内，即主机 A 和主机 B 已经可以通过虚拟网通信了。&lt;/p&gt;</description></item><item><title>Clash-Fake-IP模式下Git-SSH连接失败</title><link>https://kerolt.github.io/p/clash-fake-ip%E6%A8%A1%E5%BC%8F%E4%B8%8Bgit-ssh%E8%BF%9E%E6%8E%A5%E5%A4%B1%E8%B4%A5/</link><pubDate>Sat, 13 Jun 2026 00:00:00 +0000</pubDate><guid>https://kerolt.github.io/p/clash-fake-ip%E6%A8%A1%E5%BC%8F%E4%B8%8Bgit-ssh%E8%BF%9E%E6%8E%A5%E5%A4%B1%E8%B4%A5/</guid><description>&lt;h2 id="问题现象"&gt;问题现象
 &lt;/h2&gt;&lt;p&gt;执行 &lt;code&gt;git fetch --all&lt;/code&gt; 报错：&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
 &lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
@@ -19,7 +206,7 @@
 &lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
 &lt;td class="lntd"&gt;
 &lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;git remote -v
-&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# origin git@github.com:ZJNU-Lab-29202/detection-saas.git&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# origin git@github.com:xxx/yyy.git&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
 &lt;/div&gt;&lt;p&gt;使用的是 SSH 协议。&lt;/p&gt;
@@ -36,7 +223,7 @@
 &lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# Address: 198.18.0.35&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
-&lt;/div&gt;&lt;p&gt;&lt;code&gt;198.18.0.35&lt;/code&gt; 不是 GitHub 真实 IP，属于 &lt;code&gt;198.18.0.0/15&lt;/code&gt; 保留段。这是 &lt;strong&gt;Clash Fake-IP 模式&lt;/strong&gt; 的典型特征——DNS 返回虚拟 IP，由 Clash 透明代理接管流量。&lt;/p&gt;
+&lt;/div&gt;&lt;p&gt;&lt;code&gt;198.18.0.35&lt;/code&gt; 不是 GitHub 真实 IP，属于 &lt;code&gt;198.18.0.0/15&lt;/code&gt; 保留段。这是 &lt;strong&gt;Clash Fake-IP 模式&lt;/strong&gt; 的特征，即 DNS 返回虚拟 IP，由 Clash 透明代理接管流量。&lt;/p&gt;
 &lt;h3 id="3-确认-clash-运行状态"&gt;3. 确认 Clash 运行状态
 &lt;/h3&gt;&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
 &lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
@@ -76,7 +263,7 @@
 &lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;kex_exchange_identification: Connection closed by remote host
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
-&lt;/div&gt;&lt;p&gt;&lt;strong&gt;结论：&lt;/strong&gt; Fake-IP 模式下，即使通过 HTTP CONNECT 代理转发 SSH 流量，也无法完成完整的 SSH 握手。Clash 对 SSH 流量的透明代理处理存在问题。&lt;/p&gt;
+&lt;/div&gt;&lt;p&gt;在 Fake-IP 模式下，即使通过 HTTP CONNECT 代理转发 SSH 流量，也无法完成完整的 SSH 握手。Clash 对 SSH 流量的透明代理处理存在问题。&lt;/p&gt;
 &lt;h2 id="解决方案"&gt;解决方案
 &lt;/h2&gt;&lt;h3 id="方案一推荐改用-https--git-代理"&gt;方案一（推荐）：改用 HTTPS + Git 代理
 &lt;/h3&gt;&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
@@ -13826,7 +14013,7 @@ JSON 格式，描述网络的类型、IPAM 配置、路由等。&lt;/p&gt;
 &lt;/div&gt;</description></item><item><title>【MIT6.S081】Lab10 mmap</title><link>https://kerolt.github.io/p/mit6.s081lab10-mmap/</link><pubDate>Fri, 22 Nov 2024 00:00:00 +0000</pubDate><guid>https://kerolt.github.io/p/mit6.s081lab10-mmap/</guid><description>&lt;h2 id="什么是mmap"&gt;什么是mmap？
 &lt;/h2&gt;&lt;p&gt;&lt;code&gt;mmap&lt;/code&gt; 是一种用于将文件或设备与进程的地址空间关联起来的内存映射技术。通过 &lt;code&gt;mmap&lt;/code&gt;，可以将文件的内容直接映射到进程的虚拟内存地址空间，使得文件的内容可以像操作普通内存一样进行读取和写入。&lt;/p&gt;
 &lt;p&gt;在Linux中，虚拟内存的布局如下：&lt;/p&gt;
-&lt;p&gt;&lt;img class="gallery-image" data-flex-basis="241px" data-flex-grow="100" height="1652" loading="lazy" sizes="(max-width: 767px) calc(100vw - 30px), (max-width: 1023px) 700px, (max-width: 1279px) 950px, 1232px" src="https://cdn.xiaolincoding.com//mysql/other/532e6cdf4899588f8b873b6435cba2d8.png" srcset="https://kerolt.github.io/532e6cdf4899588f8b873b6435cba2d8_3792964083280631767_hu_8ebca9598c25eb96.png 800w, https://kerolt.github.io/532e6cdf4899588f8b873b6435cba2d8_3792964083280631767_hu_c6da87e84ee905b1.png 1600w, https://cdn.xiaolincoding.com//mysql/other/532e6cdf4899588f8b873b6435cba2d8.png 1665w" width="1665"&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img class="gallery-image" data-flex-basis="241px" data-flex-grow="100" height="1652" loading="lazy" sizes="(max-width: 767px) calc(100vw - 30px), (max-width: 1023px) 700px, (max-width: 1279px) 950px, 1232px" src="https://cdn.xiaolincoding.com//mysql/other/532e6cdf4899588f8b873b6435cba2d8.png" srcset="https://kerolt.github.io/532e6cdf4899588f8b873b6435cba2d8_3792964083280631767_hu_f374d991e10514b4.png 800w, https://kerolt.github.io/532e6cdf4899588f8b873b6435cba2d8_3792964083280631767_hu_9f90a67363751797.png 1600w, https://cdn.xiaolincoding.com//mysql/other/532e6cdf4899588f8b873b6435cba2d8.png 1665w" width="1665"&gt;&lt;/p&gt;
 
  &lt;blockquote&gt;
  &lt;p&gt;图片来源：&lt;a class="link" href="https://xiaolincoding.com/os/3_memory/linux_mem.html#_3-%E8%BF%9B%E7%A8%8B%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98%E7%A9%BA%E9%97%B4" target="_blank" rel="noopener"
@@ -13921,7 +14108,7 @@ JSON 格式，描述网络的类型、IPAM 配置、路由等。&lt;/p&gt;
 &lt;p&gt;当使用&lt;code&gt;mmap&lt;/code&gt;系统调用时，也可以使用懒分配的策略（类似于Copy On Write）：我们在mmap系统调用中 &lt;strong&gt;标识（不是分配）&lt;/strong&gt; 文件映射区中有一个区域与文件相关联，但这时还不会分配物理块，自然还不急着将文件读入这片内存区域；当我们需要访问这片区域的内存时，可以通过触发page fault来分配物理块，然后读入文件内容到内存块中，并将虚拟内存映射到这块物理内存上。&lt;/p&gt;
 &lt;p&gt;使用&lt;code&gt;munmap&lt;/code&gt;系统调用时，会解除文件在映射区&lt;code&gt;[addr, addr + len]&lt;/code&gt;范围内的映射，将这块区域的内存写回文件，并释放掉这块内存。实验中保证释放的区域大小一定是页的整数倍。&lt;/p&gt;
 &lt;p&gt;我们也仿照Linux上的，让文件映射区从高地址处开始向低地址增长。下图是文件映射的样子，左边为映射区域大小不固定，右边为映射大小为页框的整数倍：&lt;/p&gt;
-&lt;p&gt;&lt;img loading="lazy" sizes="(max-width: 767px) calc(100vw - 30px), (max-width: 1023px) 700px, (max-width: 1279px) 950px, 1232px" src="https://gitee.com/kerolt/picture/raw/main/20241215-134845-1.png"&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img class="gallery-image" data-flex-basis="255px" data-flex-grow="106" height="1353" loading="lazy" sizes="(max-width: 767px) calc(100vw - 30px), (max-width: 1023px) 700px, (max-width: 1279px) 950px, 1232px" src="https://gitee.com/kerolt/picture/raw/main/20241215-134845-1.png" srcset="https://kerolt.github.io/20241215-134845-1_13067623828124312749_hu_869a7e2fd4884237.png 800w, https://gitee.com/kerolt/picture/raw/main/20241215-134845-1.png 1443w" width="1443"&gt;&lt;/p&gt;
 &lt;p&gt;在实验的提示中，有说到&lt;code&gt;mmaptest&lt;/code&gt;中没有使用的功能可以不实现，其中每次使用&lt;code&gt;mmap&lt;/code&gt;都是映射的&lt;code&gt;PGSIZE&lt;/code&gt;的整数倍，那也就说明我们可以之用考虑右边的情况，这让实验降低了一点复杂度。&lt;/p&gt;
 &lt;h2 id="标识映射区域"&gt;标识映射区域
 &lt;/h2&gt;&lt;p&gt;根据实验提示，我们需要为每个进程设置用于标识映射区域的结构体：&lt;/p&gt;
