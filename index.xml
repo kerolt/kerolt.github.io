@@ -1778,197 +1778,7 @@
 &lt;/h2&gt;&lt;ul&gt;
 &lt;li&gt;&lt;code&gt;Sprintf&lt;/code&gt; 有内存分配开销；频繁调用可考虑 &lt;code&gt;strings.Builder&lt;/code&gt; + &lt;code&gt;fmt.Fprintf&lt;/code&gt;。&lt;/li&gt;
 &lt;li&gt;类型断言比 &lt;code&gt;%v&lt;/code&gt; 反射更快，但对通用代码可接受。&lt;/li&gt;
-&lt;/ul&gt;</description></item><item><title>为什么符号化时选择blazesym库</title><link>https://kerolt.github.io/p/%E4%B8%BA%E4%BB%80%E4%B9%88%E7%AC%A6%E5%8F%B7%E5%8C%96%E6%97%B6%E9%80%89%E6%8B%A9blazesym%E5%BA%93/</link><pubDate>Tue, 21 Apr 2026 00:00:00 +0000</pubDate><guid>https://kerolt.github.io/p/%E4%B8%BA%E4%BB%80%E4%B9%88%E7%AC%A6%E5%8F%B7%E5%8C%96%E6%97%B6%E9%80%89%E6%8B%A9blazesym%E5%BA%93/</guid><description>&lt;p&gt;这个项目选择 &lt;code&gt;blazesym&lt;/code&gt;，本质上是因为它正好解决了“采样拿到的是地址，怎么把地址稳定、较快地还原成符号”这个核心问题，而且它和当前项目的技术栈很匹配。&lt;/p&gt;
-&lt;p&gt;这个项目在 eBPF 里通过 &lt;code&gt;bpf_get_stack&lt;/code&gt; 拿到的其实只是地址数组，不是函数名。真正把这些地址变成 &lt;code&gt;main&lt;/code&gt;、&lt;code&gt;__GI___write&lt;/code&gt;、&lt;code&gt;do_syscall_64&lt;/code&gt; 这种可读符号的，是用户态的符号化器。这里在 &lt;a class="link" href="https://kerolt.github.io/home/kerolt/Workspace/profiler/src/blaze.h" &gt;&lt;code&gt;src/blaze.h&lt;/code&gt;&lt;/a&gt; 里封装了 &lt;code&gt;blazesym&lt;/code&gt;，在 &lt;a class="link" href="https://kerolt.github.io/home/kerolt/Workspace/profiler/src/event.cpp" &gt;&lt;code&gt;src/event.cpp&lt;/code&gt;&lt;/a&gt; 里分别对内核地址和进程地址做符号化。&lt;/p&gt;
-&lt;hr&gt;
-&lt;h2 id="为何选择"&gt;为何选择
-&lt;/h2&gt;&lt;h3 id="适合按地址批量符号化的场景"&gt;适合按地址批量符号化的场景
-&lt;/h3&gt;&lt;p&gt;这里不是偶尔查一个地址，而是每条样本里有一串用户栈和内核栈，频率还可能比较高。&lt;code&gt;blazesym&lt;/code&gt; 提供的接口就是面向“给我一批地址，我返回一批符号”，很贴合 &lt;a class="link" href="https://kerolt.github.io/home/kerolt/Workspace/profiler/src/event.cpp" &gt;&lt;code&gt;EventHandler::show_stack_trace&lt;/code&gt;&lt;/a&gt; 和 &lt;a class="link" href="https://kerolt.github.io/home/kerolt/Workspace/profiler/src/event.cpp" &gt;&lt;code&gt;EventHandler::symbolize_stack_to_vec&lt;/code&gt;&lt;/a&gt; 这种用法。&lt;/p&gt;
-&lt;p&gt;如果自己写，第一步就要先把 ELF、DWARF、内核符号、进程地址空间这些问题都啃下来，工程量会非常大。&lt;/p&gt;
-&lt;h3 id="它同时支持用户态和内核态符号化"&gt;它同时支持用户态和内核态符号化
-&lt;/h3&gt;&lt;p&gt;这个项目既抓用户栈，也抓内核栈，所以需要一个库同时处理：&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;某个 PID 的用户态地址&lt;/li&gt;
-&lt;li&gt;kernel 的绝对地址&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;在 &lt;a class="link" href="https://kerolt.github.io/home/kerolt/Workspace/profiler/src/blaze.h" &gt;&lt;code&gt;src/blaze.h&lt;/code&gt;&lt;/a&gt; 里可以看到，作者就是用一个 &lt;code&gt;variant&lt;/code&gt; 区分 &lt;code&gt;process&lt;/code&gt; 和 &lt;code&gt;kernel&lt;/code&gt; source，再统一走 &lt;code&gt;symbolize&lt;/code&gt;。这让用户态代码很整洁。&lt;/p&gt;
-&lt;p&gt;如果换一些更通用但更底层的库，通常你要自己拼用户符号解析和内核符号解析两套逻辑，接口层会更碎。&lt;/p&gt;
-&lt;h3 id="已经封装好许多细节"&gt;已经封装好许多细节
-&lt;/h3&gt;&lt;p&gt;符号化不是“读个符号表”这么简单，真正麻烦的是：&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;地址归属到哪个映射文件&lt;/li&gt;
-&lt;li&gt;符号表和调试信息怎么查&lt;/li&gt;
-&lt;li&gt;进程地址空间和内核地址空间怎么区分&lt;/li&gt;
-&lt;li&gt;inline frame 怎么处理&lt;/li&gt;
-&lt;li&gt;失败时怎么降级&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;在 &lt;a class="link" href="https://kerolt.github.io/home/kerolt/Workspace/profiler/src/event.cpp" &gt;&lt;code&gt;src/event.cpp&lt;/code&gt;&lt;/a&gt; 里，作者已经能直接拿到 &lt;code&gt;name&lt;/code&gt;、&lt;code&gt;addr&lt;/code&gt;、&lt;code&gt;offset&lt;/code&gt;，甚至还能打印 inlined 函数信息。&lt;/p&gt;
-&lt;p&gt;如果自己写，不但开发成本高，正确性风险也高，尤其是不同二进制格式、优化级别、strip 情况下会出各种边角问题。&lt;/p&gt;
-&lt;h3 id="和-ebpf--profiling-生态比较近"&gt;和 eBPF / profiling 生态比较近
-&lt;/h3&gt;&lt;p&gt;这个项目不是通用调试器，而是一个 Linux profiler。&lt;code&gt;blazesym&lt;/code&gt; 本身就比较偏 observability / profiling 场景，所以它的接口设计、性能目标、内核支持，都比一些传统符号库更对路。&lt;/p&gt;
-&lt;p&gt;也就是说，作者不是在选“最全能的符号库”，而是在选“最适合这个任务的符号库”。&lt;/p&gt;
-&lt;p&gt;然后说，为什么不用别的库。&lt;/p&gt;
-&lt;p&gt;如果用 &lt;code&gt;libbfd&lt;/code&gt;、&lt;code&gt;libdw&lt;/code&gt;、&lt;code&gt;libelf&lt;/code&gt; 这一类库，也不是不能做，但问题是它们更偏“底层能力库”。&lt;/p&gt;
-&lt;p&gt;它们给你零件，不直接给你一个好用的 profiler 级 symbolizer。你需要自己处理更多对象生命周期、地址归一化、模块映射关系，代码复杂度会上去，维护成本也更高。对于这个项目这种“小而完整”的工具来说，不划算。&lt;/p&gt;
-&lt;p&gt;如果用 &lt;code&gt;addr2line&lt;/code&gt; 这种外部工具，也不合适。&lt;/p&gt;
-&lt;p&gt;因为它更像离线单次查询工具，不适合高频、批量、运行时调用。你每次采样都去起进程或者频繁 shell out，开销会很难看，也不利于 benchmark。&lt;/p&gt;
-&lt;p&gt;如果完全自己写，那最大问题不是“能不能写出来”，而是&lt;strong&gt;投入和收益极不对称&lt;/strong&gt;。&lt;/p&gt;
-&lt;p&gt;这个项目真正想体现的价值在于：&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;eBPF 采样链路&lt;/li&gt;
-&lt;li&gt;perf event 挂载&lt;/li&gt;
-&lt;li&gt;ring buffer 传输&lt;/li&gt;
-&lt;li&gt;输出与 benchmark 设计&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;符号化并不是这里最值得重复造轮子的部分。自己写只会把大量时间花在 ELF/DWARF 解析和边界条件上，反而偏离项目重点。&lt;/p&gt;
-&lt;hr&gt;
-&lt;h2 id="代价"&gt;代价
-&lt;/h2&gt;&lt;p&gt;不过，选 &lt;code&gt;blazesym&lt;/code&gt; 也不是没有代价，我会主动补这一点，这样显得不是只会夸。&lt;/p&gt;
-&lt;p&gt;它的代价主要有两个：&lt;/p&gt;
-&lt;ol&gt;
-&lt;li&gt;
-&lt;p&gt;&lt;strong&gt;引入 Rust 构建链&lt;/strong&gt;&lt;/p&gt;
-&lt;p&gt;README 里专门写了要先构建 &lt;code&gt;blazesym&lt;/code&gt; C API，这会增加依赖复杂度。&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;&lt;strong&gt;符号化本身仍然是重操作&lt;/strong&gt;&lt;/p&gt;
-&lt;p&gt;项目专门提供了 &lt;code&gt;--no-symbolize&lt;/code&gt;，在 &lt;a class="link" href="https://kerolt.github.io/home/kerolt/Workspace/profiler/src/main.cpp" &gt;&lt;code&gt;src/main.cpp&lt;/code&gt;&lt;/a&gt; 里会切到 &lt;code&gt;RawCount&lt;/code&gt; 模式，只统计样本数不逐条输出。采样和符号化应该分开看，符号化成本不低。&lt;/p&gt;
-&lt;/li&gt;
-&lt;/ol&gt;
-&lt;hr&gt;
-&lt;h2 id="这一类库的原理"&gt;这一类库的原理
-&lt;/h2&gt;&lt;p&gt;这类库，也就是 &lt;code&gt;blazesym&lt;/code&gt;、&lt;code&gt;addr2line&lt;/code&gt;、&lt;code&gt;libdw&lt;/code&gt;、&lt;code&gt;libbfd&lt;/code&gt; 这类“符号化库”，核心原理可以概括成一句话：&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;把运行时采样拿到的地址，映射回它所属的二进制文件，再在这个文件的符号表和调试信息里查出函数名、偏移、源码位置。&lt;/strong&gt;&lt;/p&gt;
-&lt;p&gt;拆开讲就是几步。&lt;/p&gt;
-&lt;h3 id="1-先确定这个地址属于哪里"&gt;1. 先确定这个地址属于哪里
-&lt;/h3&gt;&lt;p&gt;采样时我们拿到的是一个虚拟地址，比如：&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
-&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
-&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
-&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
-&lt;td class="lntd"&gt;
-&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-text" data-lang="text"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;0x7f55ce0921fe
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
-&lt;/div&gt;
-&lt;/div&gt;&lt;p&gt;这个地址本身没有语义。符号化库要先判断它属于哪个映射区。对用户态进程来说，通常会读：&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
-&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
-&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
-&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
-&lt;td class="lntd"&gt;
-&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-text" data-lang="text"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;/proc/&amp;lt;pid&amp;gt;/maps
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
-&lt;/div&gt;
-&lt;/div&gt;&lt;p&gt;里面会告诉我们某段地址范围对应哪个文件，比如 &lt;code&gt;/usr/lib64/libc.so.6&lt;/code&gt;、&lt;code&gt;/usr/bin/yes&lt;/code&gt;、某个 &lt;code&gt;.so&lt;/code&gt;。&lt;/p&gt;
-&lt;p&gt;所以第一步是：&lt;strong&gt;运行时地址 -&amp;gt; 对应的 ELF 文件和映射偏移&lt;/strong&gt;。&lt;/p&gt;
-&lt;h3 id="2-把运行时地址转换成文件内地址"&gt;2. 把运行时地址转换成文件内地址
-&lt;/h3&gt;&lt;p&gt;因为程序运行时会有 ASLR，动态库加载地址每次可能不同，所以不能直接拿运行时地址去 ELF 文件里查。需要做一次归一化，大概是：&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
-&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
-&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
-&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
-&lt;td class="lntd"&gt;
-&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-text" data-lang="text"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;文件内地址 = 运行时地址 - 映射起始地址 + 文件映射偏移
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
-&lt;/div&gt;
-&lt;/div&gt;&lt;p&gt;例如某个函数在 libc 里，运行时地址是 &lt;code&gt;0x7f55ce0921fe&lt;/code&gt;，但 libc 在这次进程里加载到哪里是不固定的。符号化库要把它还原成 libc 文件内部的相对地址，才能继续查。&lt;/p&gt;
-&lt;h3 id="3-在符号表里查函数名"&gt;3. 在符号表里查函数名
-&lt;/h3&gt;&lt;p&gt;ELF 文件里可能有 &lt;code&gt;.symtab&lt;/code&gt; 或 &lt;code&gt;.dynsym&lt;/code&gt; 符号表。符号化库会找最接近这个地址、并且范围覆盖它的函数符号。&lt;/p&gt;
-&lt;p&gt;所以它能把：&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
-&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
-&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
-&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
-&lt;td class="lntd"&gt;
-&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-text" data-lang="text"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;0x7f55ce0921fe
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
-&lt;/div&gt;
-&lt;/div&gt;&lt;p&gt;解析成类似：&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
-&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
-&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
-&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
-&lt;td class="lntd"&gt;
-&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-text" data-lang="text"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;__GI___libc_write + 0x1e
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
-&lt;/div&gt;
-&lt;/div&gt;&lt;p&gt;这里的 &lt;code&gt;+0x1e&lt;/code&gt; 是说采样点落在函数入口之后的偏移位置。&lt;/p&gt;
-&lt;h3 id="4-如果有调试信息再查源码文件和行号"&gt;4. 如果有调试信息，再查源码文件和行号
-&lt;/h3&gt;&lt;p&gt;函数名通常来自符号表，但源码行号来自 DWARF 调试信息，比如 &lt;code&gt;.debug_info&lt;/code&gt;、&lt;code&gt;.debug_line&lt;/code&gt; 等 section。&lt;/p&gt;
-&lt;p&gt;如果二进制没有 debug info，可能只能得到函数名，甚至只能得到地址。&lt;/p&gt;
-&lt;p&gt;如果有 debuginfo，库就可以进一步解析成：&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
-&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
-&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
-&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
-&lt;td class="lntd"&gt;
-&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-text" data-lang="text"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;write.c:26
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
-&lt;/div&gt;
-&lt;/div&gt;&lt;p&gt;这一步比查函数名更复杂，也更慢。&lt;/p&gt;
-&lt;h3 id="5-处理-inline-函数"&gt;5. 处理 inline 函数
-&lt;/h3&gt;&lt;p&gt;现代编译器优化会把函数内联掉，采样地址可能实际对应一层或多层 inline 调用关系。&lt;/p&gt;
-&lt;p&gt;所以比较完整的符号化库会读取 DWARF 里的 inline 信息，把它还原成类似：&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
-&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
-&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
-&lt;/span&gt;&lt;span class="lnt"&gt;2
-&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
-&lt;td class="lntd"&gt;
-&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-text" data-lang="text"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;outer()
-&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; inlined inner()
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
-&lt;/div&gt;
-&lt;/div&gt;&lt;p&gt;这个项目里 &lt;a class="link" href="https://kerolt.github.io/home/kerolt/Workspace/profiler/src/event.cpp" &gt;&lt;code&gt;src/event.cpp&lt;/code&gt;&lt;/a&gt; 的 &lt;code&gt;show_stack_trace&lt;/code&gt; 就有打印 &lt;code&gt;inlined&lt;/code&gt; 信息的逻辑。&lt;/p&gt;
-&lt;p&gt;对于内核符号化，原理类似，但数据来源不太一样。&lt;/p&gt;
-&lt;p&gt;用户态一般看 &lt;code&gt;/proc/&amp;lt;pid&amp;gt;/maps&lt;/code&gt; 和 ELF 文件；内核态则通常依赖：&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
-&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
-&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
-&lt;/span&gt;&lt;span class="lnt"&gt;2
-&lt;/span&gt;&lt;span class="lnt"&gt;3
-&lt;/span&gt;&lt;span class="lnt"&gt;4
-&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
-&lt;td class="lntd"&gt;
-&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-text" data-lang="text"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;/proc/kallsyms
-&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;/sys/kernel/kallsyms
-&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;vmlinux
-&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;kernel debuginfo
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
-&lt;/div&gt;
-&lt;/div&gt;&lt;p&gt;还要考虑 KASLR，也就是内核地址随机化。符号化库需要知道内核符号的实际加载地址，才能把采样地址对应到 &lt;code&gt;do_syscall_64&lt;/code&gt;、&lt;code&gt;ksys_write&lt;/code&gt; 这类内核函数。&lt;/p&gt;
-&lt;p&gt;所以这类库真正做的事情不是“简单查表”，而是：&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
-&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
-&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
-&lt;/span&gt;&lt;span class="lnt"&gt;2
-&lt;/span&gt;&lt;span class="lnt"&gt;3
-&lt;/span&gt;&lt;span class="lnt"&gt;4
-&lt;/span&gt;&lt;span class="lnt"&gt;5
-&lt;/span&gt;&lt;span class="lnt"&gt;6
-&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
-&lt;td class="lntd"&gt;
-&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-text" data-lang="text"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;采样地址
-&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; -&amp;gt; 判断属于进程/内核/哪个动态库
-&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; -&amp;gt; 根据加载基址做地址归一化
-&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; -&amp;gt; 读取 ELF 符号表
-&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; -&amp;gt; 可选读取 DWARF 调试信息
-&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; -&amp;gt; 返回函数名、偏移、源码位置、inline 信息
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
-&lt;/div&gt;
-&lt;/div&gt;&lt;p&gt;放到这个项目里，BPF 端只负责采地址：&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
-&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
-&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
-&lt;/span&gt;&lt;span class="lnt"&gt;2
-&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
-&lt;td class="lntd"&gt;
-&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-c" data-lang="c"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nf"&gt;bpf_get_stack&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;ctx&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;event&lt;/span&gt;&lt;span class="o"&gt;-&amp;gt;&lt;/span&gt;&lt;span class="n"&gt;kstack&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="p"&gt;...)&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nf"&gt;bpf_get_stack&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;ctx&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;event&lt;/span&gt;&lt;span class="o"&gt;-&amp;gt;&lt;/span&gt;&lt;span class="n"&gt;ustack&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="p"&gt;...,&lt;/span&gt; &lt;span class="n"&gt;BPF_F_USER_STACK&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
-&lt;/div&gt;
-&lt;/div&gt;&lt;p&gt;然后用户态的 &lt;code&gt;blazesym&lt;/code&gt; 负责把地址变成人能看懂的调用栈。&lt;/p&gt;
-&lt;p&gt;这就是为什么 profiler 通常会把“采样”和“符号化”分成两个阶段：采样要求轻，符号化要求信息完整，两者关注点不一样。&lt;/p&gt;</description></item><item><title>awk与sed简单使用</title><link>https://kerolt.github.io/p/awk%E4%B8%8Esed%E7%AE%80%E5%8D%95%E4%BD%BF%E7%94%A8/</link><pubDate>Mon, 20 Apr 2026 00:00:00 +0000</pubDate><guid>https://kerolt.github.io/p/awk%E4%B8%8Esed%E7%AE%80%E5%8D%95%E4%BD%BF%E7%94%A8/</guid><description>&lt;h2 id="awk-常用命令"&gt;awk 常用命令
+&lt;/ul&gt;</description></item><item><title>awk与sed简单使用</title><link>https://kerolt.github.io/p/awk%E4%B8%8Esed%E7%AE%80%E5%8D%95%E4%BD%BF%E7%94%A8/</link><pubDate>Mon, 20 Apr 2026 00:00:00 +0000</pubDate><guid>https://kerolt.github.io/p/awk%E4%B8%8Esed%E7%AE%80%E5%8D%95%E4%BD%BF%E7%94%A8/</guid><description>&lt;h2 id="awk-常用命令"&gt;awk 常用命令
 &lt;/h2&gt;&lt;h3 id="基本语法"&gt;基本语法
 &lt;/h3&gt;&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
 &lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
@@ -14016,7 +13826,7 @@ JSON 格式，描述网络的类型、IPAM 配置、路由等。&lt;/p&gt;
 &lt;/div&gt;</description></item><item><title>【MIT6.S081】Lab10 mmap</title><link>https://kerolt.github.io/p/mit6.s081lab10-mmap/</link><pubDate>Fri, 22 Nov 2024 00:00:00 +0000</pubDate><guid>https://kerolt.github.io/p/mit6.s081lab10-mmap/</guid><description>&lt;h2 id="什么是mmap"&gt;什么是mmap？
 &lt;/h2&gt;&lt;p&gt;&lt;code&gt;mmap&lt;/code&gt; 是一种用于将文件或设备与进程的地址空间关联起来的内存映射技术。通过 &lt;code&gt;mmap&lt;/code&gt;，可以将文件的内容直接映射到进程的虚拟内存地址空间，使得文件的内容可以像操作普通内存一样进行读取和写入。&lt;/p&gt;
 &lt;p&gt;在Linux中，虚拟内存的布局如下：&lt;/p&gt;
-&lt;p&gt;&lt;img class="gallery-image" data-flex-basis="241px" data-flex-grow="100" height="1652" loading="lazy" sizes="(max-width: 767px) calc(100vw - 30px), (max-width: 1023px) 700px, (max-width: 1279px) 950px, 1232px" src="https://cdn.xiaolincoding.com//mysql/other/532e6cdf4899588f8b873b6435cba2d8.png" srcset="https://kerolt.github.io/532e6cdf4899588f8b873b6435cba2d8_3792964083280631767_hu_a48b577a3543ee81.png 800w, https://kerolt.github.io/532e6cdf4899588f8b873b6435cba2d8_3792964083280631767_hu_ae0498cb1dc924b.png 1600w, https://cdn.xiaolincoding.com//mysql/other/532e6cdf4899588f8b873b6435cba2d8.png 1665w" width="1665"&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img class="gallery-image" data-flex-basis="241px" data-flex-grow="100" height="1652" loading="lazy" sizes="(max-width: 767px) calc(100vw - 30px), (max-width: 1023px) 700px, (max-width: 1279px) 950px, 1232px" src="https://cdn.xiaolincoding.com//mysql/other/532e6cdf4899588f8b873b6435cba2d8.png" srcset="https://kerolt.github.io/532e6cdf4899588f8b873b6435cba2d8_3792964083280631767_hu_8ebca9598c25eb96.png 800w, https://kerolt.github.io/532e6cdf4899588f8b873b6435cba2d8_3792964083280631767_hu_c6da87e84ee905b1.png 1600w, https://cdn.xiaolincoding.com//mysql/other/532e6cdf4899588f8b873b6435cba2d8.png 1665w" width="1665"&gt;&lt;/p&gt;
 
  &lt;blockquote&gt;
  &lt;p&gt;图片来源：&lt;a class="link" href="https://xiaolincoding.com/os/3_memory/linux_mem.html#_3-%E8%BF%9B%E7%A8%8B%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98%E7%A9%BA%E9%97%B4" target="_blank" rel="noopener"
@@ -14111,7 +13921,7 @@ JSON 格式，描述网络的类型、IPAM 配置、路由等。&lt;/p&gt;
 &lt;p&gt;当使用&lt;code&gt;mmap&lt;/code&gt;系统调用时，也可以使用懒分配的策略（类似于Copy On Write）：我们在mmap系统调用中 &lt;strong&gt;标识（不是分配）&lt;/strong&gt; 文件映射区中有一个区域与文件相关联，但这时还不会分配物理块，自然还不急着将文件读入这片内存区域；当我们需要访问这片区域的内存时，可以通过触发page fault来分配物理块，然后读入文件内容到内存块中，并将虚拟内存映射到这块物理内存上。&lt;/p&gt;
 &lt;p&gt;使用&lt;code&gt;munmap&lt;/code&gt;系统调用时，会解除文件在映射区&lt;code&gt;[addr, addr + len]&lt;/code&gt;范围内的映射，将这块区域的内存写回文件，并释放掉这块内存。实验中保证释放的区域大小一定是页的整数倍。&lt;/p&gt;
 &lt;p&gt;我们也仿照Linux上的，让文件映射区从高地址处开始向低地址增长。下图是文件映射的样子，左边为映射区域大小不固定，右边为映射大小为页框的整数倍：&lt;/p&gt;
-&lt;p&gt;&lt;img class="gallery-image" data-flex-basis="255px" data-flex-grow="106" height="1353" loading="lazy" sizes="(max-width: 767px) calc(100vw - 30px), (max-width: 1023px) 700px, (max-width: 1279px) 950px, 1232px" src="https://gitee.com/kerolt/picture/raw/main/20241215-134845-1.png" srcset="https://kerolt.github.io/20241215-134845-1_13067623828124312749_hu_869a7e2fd4884237.png 800w, https://gitee.com/kerolt/picture/raw/main/20241215-134845-1.png 1443w" width="1443"&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img loading="lazy" sizes="(max-width: 767px) calc(100vw - 30px), (max-width: 1023px) 700px, (max-width: 1279px) 950px, 1232px" src="https://gitee.com/kerolt/picture/raw/main/20241215-134845-1.png"&gt;&lt;/p&gt;
 &lt;p&gt;在实验的提示中，有说到&lt;code&gt;mmaptest&lt;/code&gt;中没有使用的功能可以不实现，其中每次使用&lt;code&gt;mmap&lt;/code&gt;都是映射的&lt;code&gt;PGSIZE&lt;/code&gt;的整数倍，那也就说明我们可以之用考虑右边的情况，这让实验降低了一点复杂度。&lt;/p&gt;
 &lt;h2 id="标识映射区域"&gt;标识映射区域
 &lt;/h2&gt;&lt;p&gt;根据实验提示，我们需要为每个进程设置用于标识映射区域的结构体：&lt;/p&gt;
