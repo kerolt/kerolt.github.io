@@ -14013,7 +14013,7 @@ JSON 格式，描述网络的类型、IPAM 配置、路由等。&lt;/p&gt;
 &lt;/div&gt;</description></item><item><title>【MIT6.S081】Lab10 mmap</title><link>https://kerolt.github.io/p/mit6.s081lab10-mmap/</link><pubDate>Fri, 22 Nov 2024 00:00:00 +0000</pubDate><guid>https://kerolt.github.io/p/mit6.s081lab10-mmap/</guid><description>&lt;h2 id="什么是mmap"&gt;什么是mmap？
 &lt;/h2&gt;&lt;p&gt;&lt;code&gt;mmap&lt;/code&gt; 是一种用于将文件或设备与进程的地址空间关联起来的内存映射技术。通过 &lt;code&gt;mmap&lt;/code&gt;，可以将文件的内容直接映射到进程的虚拟内存地址空间，使得文件的内容可以像操作普通内存一样进行读取和写入。&lt;/p&gt;
 &lt;p&gt;在Linux中，虚拟内存的布局如下：&lt;/p&gt;
-&lt;p&gt;&lt;img class="gallery-image" data-flex-basis="241px" data-flex-grow="100" height="1652" loading="lazy" sizes="(max-width: 767px) calc(100vw - 30px), (max-width: 1023px) 700px, (max-width: 1279px) 950px, 1232px" src="https://cdn.xiaolincoding.com//mysql/other/532e6cdf4899588f8b873b6435cba2d8.png" srcset="https://kerolt.github.io/532e6cdf4899588f8b873b6435cba2d8_3792964083280631767_hu_f374d991e10514b4.png 800w, https://kerolt.github.io/532e6cdf4899588f8b873b6435cba2d8_3792964083280631767_hu_9f90a67363751797.png 1600w, https://cdn.xiaolincoding.com//mysql/other/532e6cdf4899588f8b873b6435cba2d8.png 1665w" width="1665"&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img loading="lazy" sizes="(max-width: 767px) calc(100vw - 30px), (max-width: 1023px) 700px, (max-width: 1279px) 950px, 1232px" src="https://cdn.xiaolincoding.com//mysql/other/532e6cdf4899588f8b873b6435cba2d8.png"&gt;&lt;/p&gt;
 
  &lt;blockquote&gt;
  &lt;p&gt;图片来源：&lt;a class="link" href="https://xiaolincoding.com/os/3_memory/linux_mem.html#_3-%E8%BF%9B%E7%A8%8B%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98%E7%A9%BA%E9%97%B4" target="_blank" rel="noopener"
@@ -20143,7 +20143,7 @@ JSON 格式，描述网络的类型、IPAM 配置、路由等。&lt;/p&gt;
  &lt;p&gt;下图来源：https://www.qtmuniao.com/2021/02/10/cmu15445-project1-buffer-pool/&lt;/p&gt;
 
  &lt;/blockquote&gt;
-&lt;p&gt;&lt;img class="gallery-image" data-flex-basis="371px" data-flex-grow="154" height="1604" loading="lazy" sizes="(max-width: 767px) calc(100vw - 30px), (max-width: 1023px) 700px, (max-width: 1279px) 950px, 1232px" src="https://i.loli.net/2021/02/19/7QSY5EtFwKxuiVN.png" srcset="https://kerolt.github.io/7QSY5EtFwKxuiVN_5586808926661110307_hu_a6eee52eddae638c.png 800w, https://kerolt.github.io/7QSY5EtFwKxuiVN_5586808926661110307_hu_5209fceaba4c1ad.png 1600w, https://kerolt.github.io/7QSY5EtFwKxuiVN_5586808926661110307_hu_3da56e9861bd0a58.png 2400w, https://i.loli.net/2021/02/19/7QSY5EtFwKxuiVN.png 2484w" width="2484"&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img class="gallery-image" data-flex-basis="371px" data-flex-grow="154" height="1604" loading="lazy" sizes="(max-width: 767px) calc(100vw - 30px), (max-width: 1023px) 700px, (max-width: 1279px) 950px, 1232px" src="https://i.loli.net/2021/02/19/7QSY5EtFwKxuiVN.png" srcset="https://kerolt.github.io/7QSY5EtFwKxuiVN_5586808926661110307_hu_fd15aaab9317c21a.png 800w, https://kerolt.github.io/7QSY5EtFwKxuiVN_5586808926661110307_hu_2ebbaee7799fc06d.png 1600w, https://kerolt.github.io/7QSY5EtFwKxuiVN_5586808926661110307_hu_e961dfbcef59fe46.png 2400w, https://i.loli.net/2021/02/19/7QSY5EtFwKxuiVN.png 2484w" width="2484"&gt;&lt;/p&gt;
 &lt;p&gt;我们可以从freelist或者replacer中找到frame（优先从freelist中找）。如果free list中有空闲的frame，则使用它；否则从replacer中选出需要换出的frame（replacer的size与buffer pool的size相同）。&lt;/p&gt;
 &lt;p&gt;要实现的每个函数在代码头文件中都有较为详细的实现过程，需要注意很多细节。&lt;/p&gt;
 &lt;p&gt;需要注意:&lt;/p&gt;
