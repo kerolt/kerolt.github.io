@@ -727,7 +727,7 @@
 &lt;p&gt;所以不管用的是哈希还是 B+Tree，在操作索引时用的接口都相同。&lt;/p&gt;
 &lt;h4 id="如何理解索引"&gt;如何理解索引
 &lt;/h4&gt;&lt;p&gt;就如网上很多介绍索引的博客所描述的那样，数据库索引是用来加速检索速度的，就如同新华字典中的音节索引一样：&lt;/p&gt;
-&lt;p&gt;&lt;img loading="lazy" sizes="(max-width: 767px) calc(100vw - 30px), (max-width: 1023px) 700px, (max-width: 1279px) 950px, 1232px" src="https://i2.kknews.cc/xGbg60mPdeRNfqICEnjrmqLM9nGZdeKcOg/0.jpg"&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img class="gallery-image" data-flex-basis="172px" data-flex-grow="72" height="668" loading="lazy" sizes="(max-width: 767px) calc(100vw - 30px), (max-width: 1023px) 700px, (max-width: 1279px) 950px, 1232px" src="https://i2.kknews.cc/xGbg60mPdeRNfqICEnjrmqLM9nGZdeKcOg/0.jpg" width="481"&gt;&lt;/p&gt;
 &lt;p&gt;如同 table_info，catalog 中也有许多的 index_info，每个 index_info 就如同上图音节表中的一个字母。我们对一个字段（列）构建一个索引，就如同在上图中音节表中多加一个字母（例如 X）。&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;需要插入一条记录时，就往对应的索引下插入 &lt;code&gt;(记录， 对应记录的地址)&lt;/code&gt; 这样的键值对，例如上图的 &lt;code&gt;(xian, 519)&lt;/code&gt;，这里的地址为 &lt;code&gt;RID&lt;/code&gt;。&lt;/li&gt;
@@ -1633,7 +1633,7 @@
  &lt;p&gt;下图来源：https://www.qtmuniao.com/2021/02/10/cmu15445-project1-buffer-pool/&lt;/p&gt;
 
  &lt;/blockquote&gt;
-&lt;p&gt;&lt;img class="gallery-image" data-flex-basis="371px" data-flex-grow="154" height="1604" loading="lazy" sizes="(max-width: 767px) calc(100vw - 30px), (max-width: 1023px) 700px, (max-width: 1279px) 950px, 1232px" src="https://i.loli.net/2021/02/19/7QSY5EtFwKxuiVN.png" srcset="https://kerolt.github.io/7QSY5EtFwKxuiVN_5586808926661110307_hu_a6eee52eddae638c.png 800w, https://kerolt.github.io/7QSY5EtFwKxuiVN_5586808926661110307_hu_5209fceaba4c1ad.png 1600w, https://kerolt.github.io/7QSY5EtFwKxuiVN_5586808926661110307_hu_3da56e9861bd0a58.png 2400w, https://i.loli.net/2021/02/19/7QSY5EtFwKxuiVN.png 2484w" width="2484"&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img class="gallery-image" data-flex-basis="371px" data-flex-grow="154" height="1604" loading="lazy" sizes="(max-width: 767px) calc(100vw - 30px), (max-width: 1023px) 700px, (max-width: 1279px) 950px, 1232px" src="https://i.loli.net/2021/02/19/7QSY5EtFwKxuiVN.png" srcset="https://kerolt.github.io/7QSY5EtFwKxuiVN_5586808926661110307_hu_fd15aaab9317c21a.png 800w, https://kerolt.github.io/7QSY5EtFwKxuiVN_5586808926661110307_hu_2ebbaee7799fc06d.png 1600w, https://kerolt.github.io/7QSY5EtFwKxuiVN_5586808926661110307_hu_e961dfbcef59fe46.png 2400w, https://i.loli.net/2021/02/19/7QSY5EtFwKxuiVN.png 2484w" width="2484"&gt;&lt;/p&gt;
 &lt;p&gt;我们可以从freelist或者replacer中找到frame（优先从freelist中找）。如果free list中有空闲的frame，则使用它；否则从replacer中选出需要换出的frame（replacer的size与buffer pool的size相同）。&lt;/p&gt;
 &lt;p&gt;要实现的每个函数在代码头文件中都有较为详细的实现过程，需要注意很多细节。&lt;/p&gt;
 &lt;p&gt;需要注意:&lt;/p&gt;
