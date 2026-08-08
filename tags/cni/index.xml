@@ -1,4 +1,205 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>CNI on Kerolt's Note</title><link>https://kerolt.github.io/tags/cni/</link><description>Recent content in CNI on Kerolt's Note</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><lastBuildDate>Tue, 04 Nov 2025 00:00:00 +0000</lastBuildDate><atom:link href="https://kerolt.github.io/tags/cni/index.xml" rel="self" type="application/rss+xml"/><item><title>在开发一个CNI插件时需要定义的几个配置文件</title><link>https://kerolt.github.io/p/%E5%9C%A8%E5%BC%80%E5%8F%91%E4%B8%80%E4%B8%AAcni%E6%8F%92%E4%BB%B6%E6%97%B6%E9%9C%80%E8%A6%81%E5%AE%9A%E4%B9%89%E7%9A%84%E5%87%A0%E4%B8%AA%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6/</link><pubDate>Tue, 04 Nov 2025 00:00:00 +0000</pubDate><guid>https://kerolt.github.io/p/%E5%9C%A8%E5%BC%80%E5%8F%91%E4%B8%80%E4%B8%AAcni%E6%8F%92%E4%BB%B6%E6%97%B6%E9%9C%80%E8%A6%81%E5%AE%9A%E4%B9%89%E7%9A%84%E5%87%A0%E4%B8%AA%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6/</guid><description>&lt;p&gt;在开发一个 &lt;strong&gt;CNI（Container Network Interface）插件&lt;/strong&gt; 时，一般需要定义几个&lt;strong&gt;关键配置文件&lt;/strong&gt;，它们共同决定插件的行为、网络配置方式、以及与 Kubernetes 的集成。&lt;/p&gt;
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>CNI on Kerolt's Note</title><link>https://kerolt.github.io/tags/cni/</link><description>Recent content in CNI on Kerolt's Note</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><lastBuildDate>Sun, 02 Aug 2026 00:00:00 +0000</lastBuildDate><atom:link href="https://kerolt.github.io/tags/cni/index.xml" rel="self" type="application/rss+xml"/><item><title>NetworkPolicy 与 Mihomo 代理数据链路</title><link>https://kerolt.github.io/p/networkpolicy-%E4%B8%8E-mihomo-%E4%BB%A3%E7%90%86%E6%95%B0%E6%8D%AE%E9%93%BE%E8%B7%AF/</link><pubDate>Sun, 02 Aug 2026 00:00:00 +0000</pubDate><guid>https://kerolt.github.io/p/networkpolicy-%E4%B8%8E-mihomo-%E4%BB%A3%E7%90%86%E6%95%B0%E6%8D%AE%E9%93%BE%E8%B7%AF/</guid><description>&lt;h2 id="默认互通很方便也很危险"&gt;默认互通很方便，也很危险
+&lt;/h2&gt;&lt;p&gt;在没有 NetworkPolicy 时，多数 Kubernetes 网络实现允许 Pod 之间直接通信。对开发环境很省事，但一个 Pod 被攻破后，攻击者也更容易扫描和访问其他服务。&lt;/p&gt;
+&lt;p&gt;本项目采用“默认拒绝，再按需要放行”的思路：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;span class="lnt"&gt;4
+&lt;/span&gt;&lt;span class="lnt"&gt;5
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-text" data-lang="text"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;先把门全部关上
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; → 再开放 CPA/Manager 入站端口
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; → 只允许 runtime 出站到 DNS 与 Shared Mihomo
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; → 只允许受管 Pool 的 CPA 访问 Mihomo
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; → Mihomo 只能访问 DNS 和公共地址
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;NetworkPolicy 描述允许的流量，不是按顺序执行的防火墙脚本。&lt;/p&gt;
+&lt;h2 id="前提cni-必须真正实现-networkpolicy"&gt;前提：CNI 必须真正实现 NetworkPolicy
+&lt;/h2&gt;&lt;p&gt;API Server 会接受合法的 NetworkPolicy 对象，但是否执行取决于集群网络插件。若 CNI 不支持 NetworkPolicy，策略对象可能看起来都存在，流量却没有被拦截。&lt;/p&gt;
+&lt;p&gt;因此部署前要确认集群的 CNI 和策略能力。不要只用 &lt;code&gt;kubectl get networkpolicy&lt;/code&gt; 证明隔离已经生效，还应做有界连通性验证。&lt;/p&gt;
+&lt;h2 id="default-deny-如何生效"&gt;default-deny 如何生效
+&lt;/h2&gt;&lt;p&gt;每个号池 Namespace 有一个策略，选择带当前 Pool label 的所有 Pod，并同时声明：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-yaml" data-lang="yaml"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nt"&gt;policyTypes&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;- &lt;span class="l"&gt;Ingress&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;- &lt;span class="l"&gt;Egress&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;但不提供任何 ingress 或 egress allow rule。这会让选中的 Pod 在两个方向上进入隔离状态。&lt;/p&gt;
+&lt;p&gt;随后另一个 runtime NetworkPolicy 添加允许规则。NetworkPolicy 是可加和的：只要任一适用策略允许某段流量，该段流量就被允许。不同策略不会按文件顺序互相覆盖。&lt;/p&gt;
+&lt;h2 id="runtime-pod-的入站规则"&gt;runtime Pod 的入站规则
+&lt;/h2&gt;&lt;p&gt;项目允许 TCP 端口：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-text" data-lang="text"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;8317 → CPA
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;18317 → cpa-manager
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;当前规则只限制端口，没有填写 &lt;code&gt;from&lt;/code&gt;，因此从 NetworkPolicy 语义看，任何能够路由到该 Pod 的来源都可以访问这两个端口。&lt;/p&gt;
+&lt;p&gt;这不等于互联网能直接访问，因为 Pod 仍没有公网入口，Service 也是 ClusterIP；但集群内其他可达工作负载原则上可能连接这两个端口。&lt;/p&gt;
+&lt;p&gt;如果未来需要让 cpa-manager 只接受特定管理员跳板 Pod，应继续收紧 &lt;code&gt;from&lt;/code&gt;，而不是把 ClusterIP 当作完整的身份认证边界。&lt;/p&gt;
+&lt;h2 id="runtime-pod-的出站规则"&gt;runtime Pod 的出站规则
+&lt;/h2&gt;&lt;p&gt;只允许两类目的地。&lt;/p&gt;
+&lt;p&gt;第一类是 kube-system 中带 &lt;code&gt;k8s-app: kube-dns&lt;/code&gt; 标签的 DNS Pod，端口为 UDP/TCP 53。&lt;/p&gt;
+&lt;p&gt;第二类是 Operator Configuration 指定 Namespace 和 pod selector 的 Mihomo Pod，端口为 TCP 18000。&lt;/p&gt;
+&lt;p&gt;因此 CPA 不能直接访问任意公网地址，正常出站必须走：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;span class="lnt"&gt;4
+&lt;/span&gt;&lt;span class="lnt"&gt;5
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-text" data-lang="text"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;CPA
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; → mihomo-gateway.subpool-gateway.svc:18000
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; → Shared Mihomo Pod
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; → 上游代理
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; → 外部目标
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;这把代理策略集中到共享数据面，避免每个账号池保存代理订阅和节点凭据。&lt;/p&gt;
+&lt;h2 id="为什么-dns-必须单独放行"&gt;为什么 DNS 必须单独放行
+&lt;/h2&gt;&lt;p&gt;NetworkPolicy 一旦隔离 egress，DNS 查询也会被阻止。应用即使只想连接一个允许的 Service DNS 名称，也必须先解析它。&lt;/p&gt;
+&lt;p&gt;本项目同时允许 UDP 53 和 TCP 53。普通 DNS 查询常用 UDP，但响应过大、重试或特定场景会使用 TCP，只开 UDP 可能产生难以复现的问题。&lt;/p&gt;
+&lt;p&gt;策略假设集群 DNS Pod 位于 &lt;code&gt;kube-system&lt;/code&gt;，并带 &lt;code&gt;k8s-app: kube-dns&lt;/code&gt; 标签。不同发行版若使用不同标签，应同步修改 Operator 逻辑或平台配置，否则所有 Pool 都会出现 DNS 故障。&lt;/p&gt;
+&lt;h2 id="shared-mihomo-的入站边界"&gt;Shared Mihomo 的入站边界
+&lt;/h2&gt;&lt;p&gt;Mihomo NetworkPolicy 只允许：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Namespace 带 &lt;code&gt;subrelay.example.com/managed=true&lt;/code&gt;；&lt;/li&gt;
+&lt;li&gt;Pod 带 CPA 组件相关 label；&lt;/li&gt;
+&lt;li&gt;目标端口为 TCP 18000。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;code&gt;namespaceSelector&lt;/code&gt; 与 &lt;code&gt;podSelector&lt;/code&gt; 出现在同一个 peer 中时，是“Namespace 条件 AND Pod 条件”，不是 OR。&lt;/p&gt;
+&lt;p&gt;这阻止普通 Namespace 的 Pod 随意把 Shared Mihomo 当公共代理使用，也阻止受管 Namespace 中没有正确身份标签的 Pod访问它。&lt;/p&gt;
+&lt;h2 id="shared-mihomo-的出站边界"&gt;Shared Mihomo 的出站边界
+&lt;/h2&gt;&lt;p&gt;Mihomo 可以访问 DNS，也可以访问 &lt;code&gt;0.0.0.0/0&lt;/code&gt; 中排除私有、loopback、link-local、组播和保留地址后的公网 IPv4。&lt;/p&gt;
+&lt;p&gt;这种设计意图是：允许代理连接外部节点和目标，同时降低它访问集群内网、云元数据地址和私网服务的风险。&lt;/p&gt;
+&lt;p&gt;但它不是完整的出站安全产品：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;这里只展示 IPv4 规则，配置也关闭了 IPv6；&lt;/li&gt;
+&lt;li&gt;公网地址仍是很大的范围；&lt;/li&gt;
+&lt;li&gt;域名最终解析到什么 IP 会变化；&lt;/li&gt;
+&lt;li&gt;NetworkPolicy 通常是 L3/L4 控制，不理解 HTTP 用户或 URL；&lt;/li&gt;
+&lt;li&gt;CNI 对 ipBlock 与集群 NAT 的具体行为需要实测。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;若威胁模型更严格，可在专用 egress gateway、代理认证、域名策略和审计层继续加固。&lt;/p&gt;
+&lt;h2 id="networkpolicy-同时检查两端"&gt;NetworkPolicy 同时检查两端
+&lt;/h2&gt;&lt;p&gt;一次连接要成功，源 Pod 的 egress 和目标 Pod 的 ingress 都必须允许：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;span class="lnt"&gt;4
+&lt;/span&gt;&lt;span class="lnt"&gt;5
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-text" data-lang="text"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;runtime egress 允许 Mihomo
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; AND
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;Mihomo ingress 允许 runtime
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; ↓
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;连接才成功
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;只检查其中一侧，会看到“规则明明写了却还是不通”的现象。&lt;/p&gt;
+&lt;h2 id="mihomo-配置在做什么"&gt;Mihomo 配置在做什么
+&lt;/h2&gt;&lt;p&gt;Shared Mihomo 从 Secret 挂载的 &lt;code&gt;proxies.yaml&lt;/code&gt; 读取节点，启用 health check，并建立一个代理组：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-yaml" data-lang="yaml"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nt"&gt;type&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l"&gt;load-balance&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nt"&gt;strategy&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l"&gt;round-robin&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;然后在 18000 端口提供 HTTP proxy listener。CPA 只知道这个统一地址，不知道上游节点凭据。&lt;/p&gt;
+&lt;p&gt;这种设计有三个好处：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;节点和订阅只集中保存在一个共享 Secret；&lt;/li&gt;
+&lt;li&gt;Pool 无需因代理节点变化而修改 CR；&lt;/li&gt;
+&lt;li&gt;Operator 的 status、日志和 Event 不接触代理秘密。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="round-robin-为什么不等于每个请求换-ip"&gt;round-robin 为什么不等于每个请求换 IP
+&lt;/h2&gt;&lt;p&gt;Mihomo 的负载选择以新建出站连接为重要粒度。HTTP keep-alive、HTTP/2 多路复用或应用连接池可能让多个请求复用同一条连接，因此连续请求可能使用相同出口。&lt;/p&gt;
+&lt;p&gt;另外两个 Mihomo Pod 各自维护选择状态，没有跨 Pod 共享一个全局计数器。&lt;/p&gt;
+&lt;p&gt;所以项目只承诺：新连接会在健康节点集合中按策略选择。它不承诺：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;每个 HTTP 请求切换 IP；&lt;/li&gt;
+&lt;li&gt;所有 Gateway Pod 之间全局严格轮转；&lt;/li&gt;
+&lt;li&gt;某个账号固定到某个出口；&lt;/li&gt;
+&lt;li&gt;存在 primary/candidate 主备关系。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="service-ready-也不等于代理链路端到端成功"&gt;Service Ready 也不等于代理链路端到端成功
+&lt;/h2&gt;&lt;p&gt;Operator 通过 EndpointSlice 判断 Mihomo 至少有一个 Ready Pod。这只能证明 Kubernetes 层有可用代理 Endpoint。&lt;/p&gt;
+&lt;p&gt;以下问题仍可能存在：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;proxies.yaml&lt;/code&gt; 内容错误；&lt;/li&gt;
+&lt;li&gt;健康检查目标不可达；&lt;/li&gt;
+&lt;li&gt;上游代理认证失败；&lt;/li&gt;
+&lt;li&gt;代理可用但目标模型服务不可用；&lt;/li&gt;
+&lt;li&gt;网络策略或云安全组阻断实际公网路径。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;因此 &lt;code&gt;ProxyGatewayReady=True&lt;/code&gt; 是基础设施信号，不是业务请求成功率指标。&lt;/p&gt;
+&lt;h2 id="排查流量时按跳点验证"&gt;排查流量时按跳点验证
+&lt;/h2&gt;&lt;p&gt;不要一句“网络不通”就开始改策略。按链路分段：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;span class="lnt"&gt;4
+&lt;/span&gt;&lt;span class="lnt"&gt;5
+&lt;/span&gt;&lt;span class="lnt"&gt;6
+&lt;/span&gt;&lt;span class="lnt"&gt;7
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-text" data-lang="text"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;1. runtime Pod 能否解析 Mihomo Service DNS
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;2. Mihomo Service 是否有 Ready EndpointSlice
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;3. runtime egress 是否选中正确 Mihomo Pod
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;4. Mihomo ingress 是否选中正确 Pool Namespace 与 Pod
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;5. Mihomo Pod 自身是否 Ready
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;6. Mihomo egress 是否允许目标地址
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;7. 上游代理与最终业务请求是否成功
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;常用只读对象检查：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;span class="lnt"&gt;4
+&lt;/span&gt;&lt;span class="lnt"&gt;5
+&lt;/span&gt;&lt;span class="lnt"&gt;6
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;kubectl -n subpool-demo-pool get networkpolicy -o yaml
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;kubectl -n subpool-gateway get networkpolicy -o yaml
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;kubectl -n subpool-gateway get endpointslice &lt;span class="se"&gt;\
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; -l kubernetes.io/service-name&lt;span class="o"&gt;=&lt;/span&gt;mihomo-gateway -o yaml
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;kubectl -n subpool-gateway logs deployment/mihomo-gateway &lt;span class="se"&gt;\
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; --tail&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="m"&gt;100&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;不要为了“先通再说”永久删除 default-deny 或放开 CPA 直连公网。那会绕过项目最核心的代理与秘密边界，并把真正故障藏起来。&lt;/p&gt;</description></item><item><title>在开发一个CNI插件时需要定义的几个配置文件</title><link>https://kerolt.github.io/p/%E5%9C%A8%E5%BC%80%E5%8F%91%E4%B8%80%E4%B8%AAcni%E6%8F%92%E4%BB%B6%E6%97%B6%E9%9C%80%E8%A6%81%E5%AE%9A%E4%B9%89%E7%9A%84%E5%87%A0%E4%B8%AA%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6/</link><pubDate>Tue, 04 Nov 2025 00:00:00 +0000</pubDate><guid>https://kerolt.github.io/p/%E5%9C%A8%E5%BC%80%E5%8F%91%E4%B8%80%E4%B8%AAcni%E6%8F%92%E4%BB%B6%E6%97%B6%E9%9C%80%E8%A6%81%E5%AE%9A%E4%B9%89%E7%9A%84%E5%87%A0%E4%B8%AA%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6/</guid><description>&lt;p&gt;在开发一个 &lt;strong&gt;CNI（Container Network Interface）插件&lt;/strong&gt; 时，一般需要定义几个&lt;strong&gt;关键配置文件&lt;/strong&gt;，它们共同决定插件的行为、网络配置方式、以及与 Kubernetes 的集成。&lt;/p&gt;
 &lt;h2 id="一cni-网络配置文件"&gt;一、CNI 网络配置文件
 &lt;/h2&gt;&lt;ul&gt;
 &lt;li&gt;

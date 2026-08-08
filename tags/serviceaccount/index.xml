@@ -1,0 +1,282 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>ServiceAccount on Kerolt's Note</title><link>https://kerolt.github.io/tags/serviceaccount/</link><description>Recent content in ServiceAccount on Kerolt's Note</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><lastBuildDate>Sun, 02 Aug 2026 00:00:00 +0000</lastBuildDate><atom:link href="https://kerolt.github.io/tags/serviceaccount/index.xml" rel="self" type="application/rss+xml"/><item><title>ServiceAccount、RBAC、Leader Election 与容器安全</title><link>https://kerolt.github.io/p/serviceaccountrbacleader-election-%E4%B8%8E%E5%AE%B9%E5%99%A8%E5%AE%89%E5%85%A8/</link><pubDate>Sun, 02 Aug 2026 00:00:00 +0000</pubDate><guid>https://kerolt.github.io/p/serviceaccountrbacleader-election-%E4%B8%8E%E5%AE%B9%E5%99%A8%E5%AE%89%E5%85%A8/</guid><description>&lt;h2 id="安全不是一个开关而是一组互相补位的边界"&gt;安全不是一个开关，而是一组互相补位的边界
+&lt;/h2&gt;&lt;p&gt;本项目同时使用：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;ServiceAccount 表达工作负载身份；&lt;/li&gt;
+&lt;li&gt;RBAC 限制 API 权限；&lt;/li&gt;
+&lt;li&gt;leader election 保证多个 Operator 副本只有一个主动协调；&lt;/li&gt;
+&lt;li&gt;Pod Security Admission 限制 Pod 配置；&lt;/li&gt;
+&lt;li&gt;securityContext 限制容器进程权限；&lt;/li&gt;
+&lt;li&gt;NetworkPolicy 限制网络路径；&lt;/li&gt;
+&lt;li&gt;Secret 隔离敏感数据。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;这些机制没有哪个能单独解决全部问题。RBAC 管 API，不负责网络；NetworkPolicy 管流量，不负责文件权限；非 root 容器也不能弥补过大的 API 权限。&lt;/p&gt;
+&lt;h2 id="serviceaccountpod-在集群中的机器身份"&gt;ServiceAccount：Pod 在集群中的机器身份
+&lt;/h2&gt;&lt;p&gt;用户通过 kubeconfig 访问 API Server，Pod 通常通过 ServiceAccount 身份访问。&lt;/p&gt;
+&lt;p&gt;本项目有两类 ServiceAccount：&lt;/p&gt;
+&lt;table&gt;
+	&lt;thead&gt;
+			&lt;tr&gt;
+					&lt;th&gt;ServiceAccount&lt;/th&gt;
+					&lt;th&gt;Namespace&lt;/th&gt;
+					&lt;th&gt;用途&lt;/th&gt;
+			&lt;/tr&gt;
+	&lt;/thead&gt;
+	&lt;tbody&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;code&gt;subpool-operator&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;&lt;code&gt;subpool-system&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;Operator 调用 Kubernetes API&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;code&gt;subpool&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;每个 Pool Namespace&lt;/td&gt;
+					&lt;td&gt;runtime Pod 的身份&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;code&gt;mihomo-gateway&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;&lt;code&gt;subpool-gateway&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;Shared Mihomo Pod 身份&lt;/td&gt;
+			&lt;/tr&gt;
+	&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;为工作负载单独创建 ServiceAccount，比使用 Namespace 的 &lt;code&gt;default&lt;/code&gt; ServiceAccount 更容易审计，也便于精确绑定权限。&lt;/p&gt;
+&lt;h2 id="为什么-runtime-禁止自动挂载-api-token"&gt;为什么 runtime 禁止自动挂载 API token
+&lt;/h2&gt;&lt;p&gt;项目在 ServiceAccount 和 Pod 两处都设置：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-yaml" data-lang="yaml"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nt"&gt;automountServiceAccountToken&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="kc"&gt;false&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;CPA 与 cpa-manager 不需要调用 Kubernetes API，因此没有必要把 ServiceAccount token 放进容器。&lt;/p&gt;
+&lt;p&gt;如果应用被攻破，攻击者即使进入容器，也少了一份可直接拿来访问 API Server 的凭据。这是最小权限原则中非常实用的一步：不用的身份能力不要发放。&lt;/p&gt;
+&lt;p&gt;Mihomo 同样禁用 token 自动挂载，因为代理进程也不需要访问 Kubernetes API。&lt;/p&gt;
+&lt;h2 id="rbac-的四个问题"&gt;RBAC 的四个问题
+&lt;/h2&gt;&lt;p&gt;一条 RBAC rule 可以拆成四个问题：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;span class="lnt"&gt;4
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-text" data-lang="text"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;谁（Subject）
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;通过什么绑定（RoleBinding / ClusterRoleBinding）
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;可以对什么资源（apiGroups + resources）
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;执行哪些动作（verbs）
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;例如 Operator 需要管理 StatefulSet：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt; 1
+&lt;/span&gt;&lt;span class="lnt"&gt; 2
+&lt;/span&gt;&lt;span class="lnt"&gt; 3
+&lt;/span&gt;&lt;span class="lnt"&gt; 4
+&lt;/span&gt;&lt;span class="lnt"&gt; 5
+&lt;/span&gt;&lt;span class="lnt"&gt; 6
+&lt;/span&gt;&lt;span class="lnt"&gt; 7
+&lt;/span&gt;&lt;span class="lnt"&gt; 8
+&lt;/span&gt;&lt;span class="lnt"&gt; 9
+&lt;/span&gt;&lt;span class="lnt"&gt;10
+&lt;/span&gt;&lt;span class="lnt"&gt;11
+&lt;/span&gt;&lt;span class="lnt"&gt;12
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-yaml" data-lang="yaml"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nt"&gt;apiGroups&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;- &lt;span class="l"&gt;apps&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nt"&gt;resources&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;- &lt;span class="l"&gt;statefulsets&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nt"&gt;verbs&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;- &lt;span class="l"&gt;create&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;- &lt;span class="l"&gt;delete&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;- &lt;span class="l"&gt;get&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;- &lt;span class="l"&gt;list&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;- &lt;span class="l"&gt;patch&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;- &lt;span class="l"&gt;update&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;- &lt;span class="l"&gt;watch&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;&lt;code&gt;get&lt;/code&gt; 读取单个对象，&lt;code&gt;list&lt;/code&gt; 读取集合，&lt;code&gt;watch&lt;/code&gt; 订阅变化，&lt;code&gt;create/update/patch/delete&lt;/code&gt; 才会修改状态。&lt;/p&gt;
+&lt;h2 id="role-与-clusterrole-的区别"&gt;Role 与 ClusterRole 的区别
+&lt;/h2&gt;&lt;p&gt;Role 只在一个 Namespace 中定义权限。ClusterRole 可以表达 cluster-scoped 资源权限，也可以被不同 Namespace 的 RoleBinding 引用。&lt;/p&gt;
+&lt;p&gt;SubPool Operator 需要：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;监听 cluster-scoped &lt;code&gt;SubPool&lt;/code&gt;；&lt;/li&gt;
+&lt;li&gt;创建 cluster-scoped Namespace；&lt;/li&gt;
+&lt;li&gt;在任意派生 Pool Namespace 创建资源；&lt;/li&gt;
+&lt;li&gt;读取共享 Gateway、EndpointSlice；&lt;/li&gt;
+&lt;li&gt;更新 SubPool 的 status 和 finalizers。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;因此它的主要管理权限必须通过 ClusterRole 和 ClusterRoleBinding 提供。单一 Namespace 内的 Role 无法完成跨 Namespace 生命周期管理。&lt;/p&gt;
+&lt;p&gt;权限大并不意味着可以省略边界。控制器代码仍严格检查 owner reference，不凭名字接管对象。RBAC 是“技术上能做什么”，所有权校验是“业务上允许对谁做”。&lt;/p&gt;
+&lt;h2 id="status-与-finalizers-为什么是独立子资源权限"&gt;status 与 finalizers 为什么是独立子资源权限
+&lt;/h2&gt;&lt;p&gt;RBAC 中单独出现：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-text" data-lang="text"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;subpools/status
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;subpools/finalizers
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;Kubernetes 把 status 和 finalizer 更新视为独立 API 路径。控制器需要更新现实状态和删除收尾标记，但普通业务使用者未必需要这些权限。&lt;/p&gt;
+&lt;p&gt;把它们单独授权，能避免“只想允许用户编辑 spec，却顺手允许伪造 Ready 状态或移除 finalizer”。&lt;/p&gt;
+&lt;h2 id="可以用-auth-can-i-验证权限"&gt;可以用 auth can-i 验证权限
+&lt;/h2&gt;&lt;p&gt;查看当前身份能否执行某动作：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;kubectl auth can-i get subpools
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;kubectl auth can-i update subpools/status
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;kubectl auth can-i create namespaces
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;模拟 ServiceAccount：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;kubectl auth can-i list endpointslices &lt;span class="se"&gt;\
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; --as&lt;span class="o"&gt;=&lt;/span&gt;system:serviceaccount:subpool-system:subpool-operator
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;它适合验证 RBAC，不证明控制器业务逻辑一定正确。&lt;/p&gt;
+&lt;h2 id="两个-operator-pod-为什么不会同时-reconcile"&gt;两个 Operator Pod 为什么不会同时 reconcile
+&lt;/h2&gt;&lt;p&gt;Operator Deployment 设置 replicas 为 2，同时启用 leader election：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-text" data-lang="text"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;--leader-elect=true
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;--leader-election-namespace=subpool-system
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;多个 controller-manager 实例通过 &lt;code&gt;Lease&lt;/code&gt; 对象竞争领导权。获得 Lease 的实例执行 controller 工作，其他实例保持待命；leader 退出或续租失败后，另一个实例接管。&lt;/p&gt;
+&lt;p&gt;这解决的是控制面单实例故障：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-text" data-lang="text"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;Operator Pod A 是 leader → A 故障 → Lease 到期/转移 → Pod B 接管
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;它不让两个实例并行处理同一控制器以提高吞吐，更不会把 runtime StatefulSet 变成双副本。&lt;/p&gt;
+&lt;h2 id="leader-election-为什么单独使用-namespaced-role"&gt;leader election 为什么单独使用 namespaced Role
+&lt;/h2&gt;&lt;p&gt;Lease 位于 &lt;code&gt;subpool-system&lt;/code&gt;，所以项目用该 Namespace 中的 Role 授权对 &lt;code&gt;coordination.k8s.io/leases&lt;/code&gt; 的读写，并授权创建或 patch Event。&lt;/p&gt;
+&lt;p&gt;这部分不需要 cluster-wide 权限。把 leader election 权限限制在固定 Namespace，减少无关权限范围。&lt;/p&gt;
+&lt;h2 id="pdb-与-leader-election-是互补关系"&gt;PDB 与 leader election 是互补关系
+&lt;/h2&gt;&lt;p&gt;Operator 有两个 replica，PDB &lt;code&gt;minAvailable: 1&lt;/code&gt;。二者分工如下：&lt;/p&gt;
+&lt;table&gt;
+	&lt;thead&gt;
+			&lt;tr&gt;
+					&lt;th&gt;机制&lt;/th&gt;
+					&lt;th&gt;作用&lt;/th&gt;
+			&lt;/tr&gt;
+	&lt;/thead&gt;
+	&lt;tbody&gt;
+			&lt;tr&gt;
+					&lt;td&gt;replicas: 2&lt;/td&gt;
+					&lt;td&gt;保持一个待命实例&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;leader election&lt;/td&gt;
+					&lt;td&gt;确保只有一个实例主动协调&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;PDB&lt;/td&gt;
+					&lt;td&gt;自愿中断时尽量保留至少一个可用 Pod&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;readinessProbe&lt;/td&gt;
+					&lt;td&gt;判断某个 Operator Pod 是否可用&lt;/td&gt;
+			&lt;/tr&gt;
+	&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;缺少 leader election，两个副本可能同时写对象；缺少第二个副本，leader election 没有接管者；缺少 PDB，维护工具可能同时驱逐两个 Pod。&lt;/p&gt;
+&lt;p&gt;即使三者都具备，Node 同时故障、API Server 不可用等场景仍可能中断控制面。&lt;/p&gt;
+&lt;h2 id="容器为什么使用-uid-65532"&gt;容器为什么使用 UID 65532
+&lt;/h2&gt;&lt;p&gt;Operator 的最终镜像基于 &lt;code&gt;distroless/static:nonroot&lt;/code&gt;，并声明：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-dockerfile" data-lang="dockerfile"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="k"&gt;USER&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s"&gt;65532:65532&lt;/span&gt;&lt;span class="err"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;Deployment 也要求 non-root，并固定 UID/GID 65532。双重声明使镜像默认行为与 Kubernetes 运行约束一致。&lt;/p&gt;
+&lt;p&gt;Operator 容器还使用：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;span class="lnt"&gt;4
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-text" data-lang="text"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;allowPrivilegeEscalation: false
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;capabilities.drop: ALL
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;readOnlyRootFilesystem: true
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;seccompProfile: RuntimeDefault
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;这些配置分别限制提权、Linux capabilities、根文件系统写入和系统调用面。&lt;/p&gt;
+&lt;p&gt;runtime 容器也以 non-root 运行、drop all capabilities，并通过 PVC 挂载提供需要写入的路径。&lt;/p&gt;
+&lt;h2 id="pod-security-admission-的-namespace-级防线"&gt;Pod Security Admission 的 Namespace 级防线
+&lt;/h2&gt;&lt;p&gt;每个 Pool Namespace 带 restricted 级别标签：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-text" data-lang="text"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;pod-security.kubernetes.io/enforce=restricted
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;pod-security.kubernetes.io/audit=restricted
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;pod-security.kubernetes.io/warn=restricted
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;&lt;code&gt;enforce&lt;/code&gt; 会拒绝不符合 restricted 标准的 Pod；&lt;code&gt;audit&lt;/code&gt; 记录违规；&lt;code&gt;warn&lt;/code&gt; 给请求者提示。&lt;/p&gt;
+&lt;p&gt;它可以阻止常见危险配置，例如特权容器、危险 capabilities 或不满足 non-root 等要求。具体规则随 Kubernetes Pod Security Standards 定义，应在集群升级时做兼容验证。&lt;/p&gt;
+&lt;h2 id="livenessreadiness-与-rbac-无关"&gt;liveness、readiness 与 RBAC 无关
+&lt;/h2&gt;&lt;p&gt;Operator 的 &lt;code&gt;/healthz&lt;/code&gt; 和 &lt;code&gt;/readyz&lt;/code&gt; 只说明进程健康，不会自动验证 ClusterRole 是否包含全部业务权限。&lt;/p&gt;
+&lt;p&gt;一个 Operator Pod 可以 Ready，但 reconcile 时不断收到 Forbidden。因此故障时要同时看：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;span class="lnt"&gt;4
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;kubectl -n subpool-system get pods
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;kubectl -n subpool-system logs deployment/subpool-operator &lt;span class="se"&gt;\
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; --all-containers&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="nb"&gt;true&lt;/span&gt; --tail&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="m"&gt;200&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;kubectl auth can-i ...
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h2 id="安全设计中的几个诚实边界"&gt;安全设计中的几个诚实边界
+&lt;/h2&gt;&lt;ul&gt;
+&lt;li&gt;ClusterIP 不等于只有受认证用户能访问；它只是集群内入口类型。&lt;/li&gt;
+&lt;li&gt;Secret 不等于加密保险箱；访问 Secret 的 RBAC 必须严格。&lt;/li&gt;
+&lt;li&gt;non-root 不等于容器没有漏洞；仍要维护镜像和依赖。&lt;/li&gt;
+&lt;li&gt;NetworkPolicy 不限制 Kubernetes API 权限；RBAC 也不限制普通 TCP 流量。&lt;/li&gt;
+&lt;li&gt;leader election 不等于业务数据高可用。&lt;/li&gt;
+&lt;li&gt;PDB 不阻止所有故障。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;成熟的安全不是给系统贴上“secure”标签，而是每层都明确允许什么、拒绝什么，以及这层机制覆盖不到什么。&lt;/p&gt;</description></item></channel></rss>

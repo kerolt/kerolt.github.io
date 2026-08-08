@@ -1,0 +1,468 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Kustomize on Kerolt's Note</title><link>https://kerolt.github.io/tags/kustomize/</link><description>Recent content in Kustomize on Kerolt's Note</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><lastBuildDate>Sun, 02 Aug 2026 00:00:00 +0000</lastBuildDate><atom:link href="https://kerolt.github.io/tags/kustomize/index.xml" rel="self" type="application/rss+xml"/><item><title>Kustomize 部署、生命周期操作与排障</title><link>https://kerolt.github.io/p/kustomize-%E9%83%A8%E7%BD%B2%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F%E6%93%8D%E4%BD%9C%E4%B8%8E%E6%8E%92%E9%9A%9C/</link><pubDate>Sun, 02 Aug 2026 00:00:00 +0000</pubDate><guid>https://kerolt.github.io/p/kustomize-%E9%83%A8%E7%BD%B2%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F%E6%93%8D%E4%BD%9C%E4%B8%8E%E6%8E%92%E9%9A%9C/</guid><description>&lt;h2 id="先渲染再写入集群"&gt;先渲染，再写入集群
+&lt;/h2&gt;&lt;p&gt;Kustomize 不是模板语言，它以 Kubernetes YAML 为基础，通过 resources、patches、images、namespace 等机制组合最终 manifests。&lt;code&gt;kubectl&lt;/code&gt; 已内置常用 Kustomize 能力：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;kubectl kustomize &amp;lt;目录&amp;gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;kubectl apply -k &amp;lt;目录&amp;gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;前者只渲染到标准输出，不修改集群；后者把渲染结果提交给 API Server。&lt;/p&gt;
+&lt;p&gt;一个稳妥习惯是：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;span class="lnt"&gt;4
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-text" data-lang="text"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;先看最终会提交什么
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; → 做本地检查
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; → 再 apply
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; → 最后观察状态
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h2 id="本项目的-kustomize-分层"&gt;本项目的 Kustomize 分层
+&lt;/h2&gt;&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt; 1
+&lt;/span&gt;&lt;span class="lnt"&gt; 2
+&lt;/span&gt;&lt;span class="lnt"&gt; 3
+&lt;/span&gt;&lt;span class="lnt"&gt; 4
+&lt;/span&gt;&lt;span class="lnt"&gt; 5
+&lt;/span&gt;&lt;span class="lnt"&gt; 6
+&lt;/span&gt;&lt;span class="lnt"&gt; 7
+&lt;/span&gt;&lt;span class="lnt"&gt; 8
+&lt;/span&gt;&lt;span class="lnt"&gt; 9
+&lt;/span&gt;&lt;span class="lnt"&gt;10
+&lt;/span&gt;&lt;span class="lnt"&gt;11
+&lt;/span&gt;&lt;span class="lnt"&gt;12
+&lt;/span&gt;&lt;span class="lnt"&gt;13
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-text" data-lang="text"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;config/
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; ├─ crd/ SubPool CRD
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; ├─ rbac/ ServiceAccount、权限与绑定
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; ├─ manager/ Operator Deployment、metrics Service、PDB
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; └─ default/ 组合上述资源，加 Namespace 与 Operator Configuration
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;deploy/
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; ├─ operator/ Operator 正式入口，并覆盖镜像
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; └─ gateway/ Shared Mihomo 与 Envoy Gateway
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;examples/
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; ├─ subpool-internal.yaml
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; └─ mihomo/ 引用共享 Mihomo manifests 的兼容入口
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;&lt;code&gt;deploy/operator&lt;/code&gt; 与 &lt;code&gt;deploy/gateway&lt;/code&gt; 是独立入口。安装 Operator 不会自动安装 Gateway，也不会创建 SubPool 或 Secret。&lt;/p&gt;
+&lt;p&gt;这能防止一次看似普通的控制面安装，顺便启动真实代理或创建业务实例。&lt;/p&gt;
+&lt;h2 id="resources-是组合不是复制"&gt;resources 是组合，不是复制
+&lt;/h2&gt;&lt;p&gt;例如 &lt;code&gt;config/default/kustomization.yaml&lt;/code&gt; 引用：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;span class="lnt"&gt;4
+&lt;/span&gt;&lt;span class="lnt"&gt;5
+&lt;/span&gt;&lt;span class="lnt"&gt;6
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-yaml" data-lang="yaml"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nt"&gt;resources&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;- &lt;span class="l"&gt;namespace.yaml&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;- &lt;span class="l"&gt;../crd&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;- &lt;span class="l"&gt;../rbac&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;- &lt;span class="l"&gt;operator-config.yaml&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;- &lt;span class="l"&gt;../manager&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;Kustomize 递归加载这些资源，形成一个最终对象集合。&lt;code&gt;deploy/operator&lt;/code&gt; 再引用 &lt;code&gt;config/default&lt;/code&gt;，并通过 &lt;code&gt;images&lt;/code&gt; 修改 Operator 镜像。&lt;/p&gt;
+&lt;p&gt;因此修改基础文件会影响所有引用它的入口。排查最终内容时，不要只看当前目录那几行 kustomization，要渲染完整结果。&lt;/p&gt;
+&lt;h2 id="images-transformer-做什么"&gt;images transformer 做什么
+&lt;/h2&gt;&lt;p&gt;项目通过：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;span class="lnt"&gt;4
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-yaml" data-lang="yaml"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nt"&gt;images&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;- &lt;span class="nt"&gt;name&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l"&gt;registry.example.invalid/example-org/subpool-operator&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nt"&gt;newName&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l"&gt;example-org/subrelay-operator&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nt"&gt;newTag&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;#34;example-tag&amp;#34;&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;把基础 Deployment 中的镜像名称和 tag 替换为环境要使用的版本。&lt;/p&gt;
+&lt;p&gt;远程集群必须能从它自己的节点网络拉取该镜像。本地电脑能 &lt;code&gt;docker pull&lt;/code&gt;，不代表集群 Node 一定能拉取。&lt;/p&gt;
+&lt;p&gt;生产更推荐不可变版本或 digest，并在发布前确认：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;registry 可达；&lt;/li&gt;
+&lt;li&gt;私有仓库凭据已配置；&lt;/li&gt;
+&lt;li&gt;CPU architecture 匹配；&lt;/li&gt;
+&lt;li&gt;镜像 tag/digest 正确；&lt;/li&gt;
+&lt;li&gt;imagePullPolicy 符合预期。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="dockerfile-的两阶段构建"&gt;Dockerfile 的两阶段构建
+&lt;/h2&gt;&lt;p&gt;项目先在 Go 镜像中编译静态 manager，再复制到 distroless nonroot 镜像：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;span class="lnt"&gt;4
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-text" data-lang="text"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;golang:1.26.0
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; → go build /out/manager
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; → gcr.io/distroless/static:nonroot
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; → USER 65532:65532
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;优点是最终镜像不包含完整编译工具链和 shell，体积与攻击面更小。代价是进入容器临时执行 shell 命令并不可用，排障应依赖日志、metrics、健康端点和 Kubernetes 对象，而不是假设能 &lt;code&gt;sh&lt;/code&gt; 进去。&lt;/p&gt;
+&lt;h2 id="部署前本地验证"&gt;部署前本地验证
+&lt;/h2&gt;&lt;p&gt;项目提供：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;span class="lnt"&gt;4
+&lt;/span&gt;&lt;span class="lnt"&gt;5
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nv"&gt;GOCACHE&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;/tmp/subrelay-operator-go-build-cache go &lt;span class="nb"&gt;test&lt;/span&gt; ./...
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;bash deploy/tests/render.sh
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;kubectl kustomize deploy/operator &amp;gt;/dev/null
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;kubectl kustomize deploy/gateway &amp;gt;/dev/null
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;kubectl kustomize examples/mihomo &amp;gt;/dev/null
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;这些命令不向集群写资源。它们分别验证 Go 行为和 manifests 能否渲染，并检查渲染结果是否违反项目约束。&lt;/p&gt;
+&lt;p&gt;本地通过不保证集群部署一定成功，因为 StorageClass、Gateway API、镜像仓库和 CNI 等依赖属于目标环境。&lt;/p&gt;
+&lt;h2 id="推荐部署顺序"&gt;推荐部署顺序
+&lt;/h2&gt;&lt;h3 id="第一步构建并准备-operator-镜像"&gt;第一步：构建并准备 Operator 镜像
+&lt;/h3&gt;&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;docker build -t subpool-operator:latest .
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;远程集群需推送到可拉取 registry，并更新 &lt;code&gt;deploy/operator/kustomization.yaml&lt;/code&gt;。&lt;/p&gt;
+&lt;h3 id="第二步渲染并安装-operator-bootstrap"&gt;第二步：渲染并安装 Operator Bootstrap
+&lt;/h3&gt;&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;kubectl kustomize deploy/operator
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;kubectl apply -k deploy/operator
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;这会安装：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;subpool-system&lt;/code&gt; Namespace；&lt;/li&gt;
+&lt;li&gt;SubPool CRD；&lt;/li&gt;
+&lt;li&gt;RBAC；&lt;/li&gt;
+&lt;li&gt;immutable Operator Configuration；&lt;/li&gt;
+&lt;li&gt;Operator Deployment；&lt;/li&gt;
+&lt;li&gt;metrics Service；&lt;/li&gt;
+&lt;li&gt;Operator PDB。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;检查：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;span class="lnt"&gt;4
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;kubectl -n subpool-system get deployment,pod,service
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;kubectl get crd subpools.subrelay.example.com
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;kubectl -n subpool-system logs deployment/subpool-operator &lt;span class="se"&gt;\
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; --all-containers&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="nb"&gt;true&lt;/span&gt; --tail&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="m"&gt;200&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h3 id="第三步按需安装共享-gateway"&gt;第三步：按需安装共享 Gateway
+&lt;/h3&gt;&lt;p&gt;先通过安全流程创建 &lt;code&gt;mihomo-gateway-providers&lt;/code&gt; Secret，再执行：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;kubectl apply -k deploy/gateway
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;这会安装 &lt;code&gt;subpool-gateway&lt;/code&gt; Namespace、Shared Mihomo、GatewayClass 和 Gateway。它不会安装 Envoy Gateway controller，也不包含 Secret value。&lt;/p&gt;
+&lt;p&gt;检查：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;span class="lnt"&gt;4
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;kubectl -n subpool-gateway get deployment,pod,service,gateway
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;kubectl get gatewayclass subpool-envoy
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;kubectl -n subpool-gateway get endpointslice &lt;span class="se"&gt;\
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; -l kubernetes.io/service-name&lt;span class="o"&gt;=&lt;/span&gt;mihomo-gateway
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h3 id="第四步创建第一个-internal-pool"&gt;第四步：创建第一个 Internal Pool
+&lt;/h3&gt;&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;kubectl apply -f examples/subpool-internal.yaml
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;kubectl get sp demo-pool
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;kubectl describe sp demo-pool
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;Internal 是最适合第一次验证的模式，因为它不依赖外部 DNS、TLS 和 Gateway route。&lt;/p&gt;
+&lt;h2 id="创建后的观察顺序"&gt;创建后的观察顺序
+&lt;/h2&gt;&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;span class="lnt"&gt;4
+&lt;/span&gt;&lt;span class="lnt"&gt;5
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;kubectl get sp demo-pool -o yaml
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;kubectl get namespace subpool-demo-pool
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;kubectl -n subpool-demo-pool get &lt;span class="se"&gt;\
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; statefulset,service,pvc,pod,networkpolicy,poddisruptionbudget
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;kubectl -n subpool-demo-pool get events --sort-by&lt;span class="o"&gt;=&lt;/span&gt;.lastTimestamp
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;等待 Ready：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;kubectl &lt;span class="nb"&gt;wait&lt;/span&gt; --for&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="nv"&gt;condition&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;Ready &lt;span class="se"&gt;\
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; subpool/demo-pool --timeout&lt;span class="o"&gt;=&lt;/span&gt;300s
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;若超时，立即转为 Conditions 驱动的排查，不要反复 apply 同一文件期待随机恢复。&lt;/p&gt;
+&lt;h2 id="internal-模式的访问"&gt;Internal 模式的访问
+&lt;/h2&gt;&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;kubectl -n subpool-demo-pool port-forward service/cpa 8317:8317
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;kubectl -n subpool-demo-pool port-forward &lt;span class="se"&gt;\
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; service/cpa-manager 18317:18317
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;两个命令需要分别占用一个持续运行的终端。它们只适合开发与受控管理访问。&lt;/p&gt;
+&lt;h2 id="更新操作"&gt;更新操作
+&lt;/h2&gt;&lt;p&gt;镜像或 CPU/内存资源应修改 SubPool spec，由 Operator 同步到 StatefulSet。生产镜像优先使用 digest。&lt;/p&gt;
+&lt;p&gt;不要直接编辑受管 StatefulSet。即使暂时成功，下一轮 reconcile 也会按 SubPool 恢复。&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;storage.size&lt;/code&gt; 当前不可修改。若业务需要更大容量，必须先设计受支持的数据迁移或未来扩容流程，不能通过手工改 PVC 与 CR 制造状态分叉。&lt;/p&gt;
+&lt;h2 id="暂停与恢复"&gt;暂停与恢复
+&lt;/h2&gt;&lt;p&gt;暂停：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;kubectl patch subpool demo-pool --type&lt;span class="o"&gt;=&lt;/span&gt;merge &lt;span class="se"&gt;\
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; -p &lt;span class="s1"&gt;&amp;#39;{&amp;#34;spec&amp;#34;:{&amp;#34;suspend&amp;#34;:true}}&amp;#39;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;预期结果：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;StatefulSet replicas 为 0；&lt;/li&gt;
+&lt;li&gt;HTTPRoute 被删除；&lt;/li&gt;
+&lt;li&gt;Namespace、PVC、Secret 保留；&lt;/li&gt;
+&lt;li&gt;Ready=False，reason 为 Suspended。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;恢复：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;kubectl patch subpool demo-pool --type&lt;span class="o"&gt;=&lt;/span&gt;merge &lt;span class="se"&gt;\
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; -p &lt;span class="s1"&gt;&amp;#39;{&amp;#34;spec&amp;#34;:{&amp;#34;suspend&amp;#34;:false}}&amp;#39;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;Operator 会重新创建运行 Pod，并继续使用旧 PVC。&lt;/p&gt;
+&lt;h2 id="删除前先停一下"&gt;删除前先停一下
+&lt;/h2&gt;&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;kubectl delete subpool demo-pool
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;删除会销毁专属 Namespace、PVC、Credential Secret 和运行数据。当前项目不提供备份恢复。&lt;/p&gt;
+&lt;p&gt;不要使用 &lt;code&gt;--force&lt;/code&gt;，不要手工删除 &lt;code&gt;subrelay.example.com/finalizer&lt;/code&gt;。如果只是临时不用，选择 suspend。&lt;/p&gt;
+&lt;p&gt;删除卡住时检查：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;kubectl get sp demo-pool -o yaml
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;kubectl get namespace subpool-demo-pool -o yaml
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;kubectl -n subpool-demo-pool get pvc -o yaml
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;关注 &lt;code&gt;DeletionBlocked&lt;/code&gt;、Namespace/PVC finalizers 以及负责相关资源的第三方 controller。&lt;/p&gt;
+&lt;h2 id="conditions-驱动的排障地图"&gt;Conditions 驱动的排障地图
+&lt;/h2&gt;&lt;table&gt;
+	&lt;thead&gt;
+			&lt;tr&gt;
+					&lt;th&gt;Condition/Reason&lt;/th&gt;
+					&lt;th&gt;首要对象&lt;/th&gt;
+			&lt;/tr&gt;
+	&lt;/thead&gt;
+	&lt;tbody&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;code&gt;OperatorConfigurationInvalid&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;&lt;code&gt;subpool-system&lt;/code&gt; 中版本化 ConfigMap 与 Operator 参数&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;code&gt;InvalidPoolResources&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;SubPool 的 requests/limits&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;code&gt;ResourcesExceedBaseline&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;SubPool 合计申请与 &lt;code&gt;maxPerPool&lt;/code&gt;&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;code&gt;NamespaceConflict&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;派生 Namespace labels、ownerReferences、UID&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;code&gt;CredentialConflict&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;&lt;code&gt;subpool-credentials&lt;/code&gt; ownerReferences&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;code&gt;CredentialInvalid&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;Secret 必需 key 是否存在且非空，不读取 value&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;code&gt;WorkloadMissing&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;StatefulSet 是否创建&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;code&gt;WorkloadsNotReady&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;Pod、PVC、镜像、探针和 Event&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;code&gt;ServiceMissing&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;CPA 与 cpa-manager Service&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;code&gt;EndpointsUnavailable&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;Shared Mihomo Pod 与 EndpointSlice&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;code&gt;RouteNotAccepted&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;HTTPRoute parent conditions 与 allowedRoutes&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;code&gt;GatewayNotProgrammed&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;Envoy Gateway controller 和 Gateway status&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;code&gt;NamespaceTerminating&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;Namespace 内资源及第三方 finalizers&lt;/td&gt;
+			&lt;/tr&gt;
+	&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h2 id="三层排障法"&gt;三层排障法
+&lt;/h2&gt;&lt;h3 id="第一层api-与控制器"&gt;第一层：API 与控制器
+&lt;/h3&gt;&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;kubectl get sp demo-pool -o yaml
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;kubectl -n subpool-system logs deployment/subpool-operator &lt;span class="se"&gt;\
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; --all-containers&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="nb"&gt;true&lt;/span&gt; --tail&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="m"&gt;200&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;确认 CR 被接受、generation 被观察、Operator 没有 Forbidden 或 reconcile error。&lt;/p&gt;
+&lt;h3 id="第二层kubernetes-资源"&gt;第二层：Kubernetes 资源
+&lt;/h3&gt;&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;kubectl -n subpool-demo-pool get statefulset,pod,pvc,service
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;kubectl -n subpool-demo-pool describe pod runtime-0
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;kubectl -n subpool-demo-pool get events --sort-by&lt;span class="o"&gt;=&lt;/span&gt;.lastTimestamp
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;确认调度、存储、镜像和探针。&lt;/p&gt;
+&lt;h3 id="第三层数据路径"&gt;第三层：数据路径
+&lt;/h3&gt;&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-text" data-lang="text"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;入站：Gateway → HTTPRoute → CPA Service → Endpoint → Pod
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;出站：CPA → Mihomo Service → Endpoint → Mihomo → 上游代理
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;每次只验证相邻两个跳点，避免一句“网络不通”覆盖十种不同故障。&lt;/p&gt;
+&lt;h2 id="不要用破坏架构的方式排障"&gt;不要用破坏架构的方式排障
+&lt;/h2&gt;&lt;p&gt;以下动作可能让表面症状消失，却破坏项目边界：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;删除 default-deny NetworkPolicy；&lt;/li&gt;
+&lt;li&gt;给 CPA 临时开直接公网出站后忘记恢复；&lt;/li&gt;
+&lt;li&gt;把 CPA Service 改成每 Pool LoadBalancer；&lt;/li&gt;
+&lt;li&gt;给 cpa-manager 创建公网 Route；&lt;/li&gt;
+&lt;li&gt;强删 Namespace 或 finalizer；&lt;/li&gt;
+&lt;li&gt;手工覆盖 Credential Secret；&lt;/li&gt;
+&lt;li&gt;直接修改 Operator 管理的 StatefulSet。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;更可靠的做法是记录具体 Condition、对象、Event 和时间点，修复负责该层的依赖，再验证状态是否自然收敛。&lt;/p&gt;
+&lt;h2 id="最终验收清单"&gt;最终验收清单
+&lt;/h2&gt;&lt;ul&gt;
+&lt;li&gt;Operator 两个 Pod 正常，leader election 无持续错误；&lt;/li&gt;
+&lt;li&gt;SubPool CRD 已安装，&lt;code&gt;kubectl get sp&lt;/code&gt; 可用；&lt;/li&gt;
+&lt;li&gt;Operator Configuration 名称与 Deployment 参数一致；&lt;/li&gt;
+&lt;li&gt;Shared Mihomo 有 Ready Endpoint；&lt;/li&gt;
+&lt;li&gt;SubPool 派生 Namespace 所有权正确；&lt;/li&gt;
+&lt;li&gt;runtime StatefulSet、PVC、两个 Service 均存在；&lt;/li&gt;
+&lt;li&gt;Pod probes Ready，重启次数无异常增长；&lt;/li&gt;
+&lt;li&gt;Internal 模式 port-forward 可用，或 Gateway 模式 Route Accepted 且 Gateway Programmed；&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;metadata.generation == status.observedGeneration&lt;/code&gt;；&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;Ready=True&lt;/code&gt; 的含义没有被误解为账号和真实模型请求也已验证。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;部署完成不是“apply 命令退出码为 0”，而是从声明、控制器、资源到数据路径都有证据证明系统达到了它承诺的状态。&lt;/p&gt;</description></item></channel></rss>

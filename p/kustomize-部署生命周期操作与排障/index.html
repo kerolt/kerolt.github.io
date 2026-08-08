@@ -1,0 +1,204 @@
+<!doctype html><html lang=zh-cn dir=ltr><head><meta charset=utf-8><meta name=viewport content='width=device-width,initial-scale=1'><meta name=description content="先渲染，再写入集群 Kustomize 不是模板语言，它以 Kubernetes YAML 为基础，通过 resources、patches、images、namespace 等机制组合最终 manifests。kubectl 已内置常用 Kustomize 能力：\n"><title>Kustomize 部署、生命周期操作与排障</title><link rel=canonical href=https://kerolt.github.io/p/kustomize-%E9%83%A8%E7%BD%B2%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F%E6%93%8D%E4%BD%9C%E4%B8%8E%E6%8E%92%E9%9A%9C/><link rel=preconnect href=https://fonts.googleapis.com><link rel=preconnect href=https://fonts.gstatic.com crossorigin><link rel=preload as=style href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap"><link rel=stylesheet href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap"><link rel=stylesheet href=/scss/style.min.e62e09c60ba428a627e03568fa3df938f6a8224f815b5846f00816c17d4a0be4.css><meta property='og:title' content="Kustomize 部署、生命周期操作与排障"><meta property='og:description' content="先渲染，再写入集群 Kustomize 不是模板语言，它以 Kubernetes YAML 为基础，通过 resources、patches、images、namespace 等机制组合最终 manifests。kubectl 已内置常用 Kustomize 能力：\n"><meta property='og:url' content='https://kerolt.github.io/p/kustomize-%E9%83%A8%E7%BD%B2%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F%E6%93%8D%E4%BD%9C%E4%B8%8E%E6%8E%92%E9%9A%9C/'><meta property='og:site_name' content="Kerolt's Note"><meta property='og:type' content='article'><meta property='article:section' content='Post'><meta property='article:tag' content='Kubernetes'><meta property='article:tag' content='Kustomize'><meta property='article:tag' content='kubectl'><meta property='article:tag' content='运维'><meta property='article:tag' content='故障排查'><meta property='article:published_time' content='2026-08-02T00:00:00+00:00'><meta property='article:modified_time' content='2026-08-02T00:00:00+00:00'><meta name=twitter:title content="Kustomize 部署、生命周期操作与排障"><meta name=twitter:description content="先渲染，再写入集群 Kustomize 不是模板语言，它以 Kubernetes YAML 为基础，通过 resources、patches、images、namespace 等机制组合最终 manifests。kubectl 已内置常用 Kustomize 能力：\n"><link rel="shortcut icon" href=/images/favicon.png></head><body class=article-page><script>(function(){const e="StackColorScheme";localStorage.getItem(e)||localStorage.setItem(e,"auto")})()</script><script>(function(){const t="StackColorScheme",e=localStorage.getItem(t),n=window.matchMedia("(prefers-color-scheme: dark)").matches===!0;e=="dark"||e==="auto"&&n?document.documentElement.dataset.scheme="dark":document.documentElement.dataset.scheme="light"})()</script><div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky"><button class="hamburger hamburger--spin" type=button id=toggle-menu aria-label=切换菜单>
+<span class=hamburger-box><span class=hamburger-inner></span></span></button><header><figure class=site-avatar><a href=/><img src=/images/avatar.jpg width=200 height=200 class=site-logo loading=lazy alt=Avatar>
+</a><span class=emoji>🏸</span></figure><div class=site-meta><h1 class=site-name><a href=/>Kerolt's Note</a></h1><h2 class=site-description>愿你无拘无束自由的活着</h2></div></header><ol class=menu-social><li><a href=https://github.com/kerolt title=GitHub rel=me><svg class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 19c-4.3 1.4-4.3-2.5-6-3m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6.0 00-1.3-3.2 4.2 4.2.0 00-.1-3.2s-1.1-.3-3.5 1.3a12.3 12.3.0 00-6.2.0C6.5 2.8 5.4 3.1 5.4 3.1a4.2 4.2.0 00-.1 3.2A4.6 4.6.0 004 9.5c0 4.6 2.7 5.7 5.5 6-.6.6-.6 1.2-.5 2V21"/></svg></a></li></ol><ol class=menu id=main-menu><li><a href=/><svg class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><polyline points="5 12 3 12 12 3 21 12 19 12"/><path d="M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"/><path d="M9 21v-6a2 2 0 012-2h2a2 2 0 012 2v6"/></svg>
+<span>首页</span></a></li><li><a href=/archives/><svg class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><rect x="3" y="4" width="18" height="4" rx="2"/><path d="M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
+<span>归档</span></a></li><li><a href=/categories/><svg class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><line x1="5" y1="9" x2="19" y2="9"/><line x1="5" y1="15" x2="19" y2="15"/><line x1="11" y1="4" x2="7" y2="20"/><line x1="17" y1="4" x2="13" y2="20"/></svg>
+<span>分类</span></a></li><li><a href=/tags/><svg class="icon icon-tabler icon-tabler-tag" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><path d="M11 3l9 9a1.5 1.5.0 010 2l-6 6a1.5 1.5.0 01-2 0L3 11V7a4 4 0 014-4h4"/><circle cx="9" cy="9" r="2"/></svg>
+<span>标签</span></a></li><li><a href=/about/><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-info-circle"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 12a9 9 0 1018 0A9 9 0 003 12"/><path d="M12 9h.01"/><path d="M11 12h1v4h1"/></svg>
+<span>关于我</span></a></li><li><a href=/search/><svg class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="10" cy="10" r="7"/><line x1="21" y1="21" x2="15" y2="15"/></svg>
+<span>搜索</span></a></li><li class=menu-bottom-section><ol class=menu><li id=dark-mode-toggle><svg class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="8" cy="12" r="2"/><rect x="2" y="6" width="20" height="12" rx="6"/></svg>
+<svg class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="16" cy="12" r="2"/><rect x="2" y="6" width="20" height="12" rx="6"/></svg>
+<span>暗色模式</span></li></ol></li></ol></aside><aside class="sidebar right-sidebar sticky"><section class="widget archives"><div class=widget-icon><svg class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><line x1="5" y1="9" x2="19" y2="9"/><line x1="5" y1="15" x2="19" y2="15"/><line x1="11" y1="4" x2="7" y2="20"/><line x1="17" y1="4" x2="13" y2="20"/></svg></div><h2 class="widget-title section-title">目录</h2><div class=widget--toc><nav class=toc-nav id=TableOfContents><ol><li><a href=#先渲染再写入集群>先渲染，再写入集群</a></li><li><a href=#本项目的-kustomize-分层>本项目的 Kustomize 分层</a></li><li><a href=#resources-是组合不是复制>resources 是组合，不是复制</a></li><li><a href=#images-transformer-做什么>images transformer 做什么</a></li><li><a href=#dockerfile-的两阶段构建>Dockerfile 的两阶段构建</a></li><li><a href=#部署前本地验证>部署前本地验证</a></li><li><a href=#推荐部署顺序>推荐部署顺序</a><ol><li><a href=#第一步构建并准备-operator-镜像>第一步：构建并准备 Operator 镜像</a></li><li><a href=#第二步渲染并安装-operator-bootstrap>第二步：渲染并安装 Operator Bootstrap</a></li><li><a href=#第三步按需安装共享-gateway>第三步：按需安装共享 Gateway</a></li><li><a href=#第四步创建第一个-internal-pool>第四步：创建第一个 Internal Pool</a></li></ol></li><li><a href=#创建后的观察顺序>创建后的观察顺序</a></li><li><a href=#internal-模式的访问>Internal 模式的访问</a></li><li><a href=#更新操作>更新操作</a></li><li><a href=#暂停与恢复>暂停与恢复</a></li><li><a href=#删除前先停一下>删除前先停一下</a></li><li><a href=#conditions-驱动的排障地图>Conditions 驱动的排障地图</a></li><li><a href=#三层排障法>三层排障法</a><ol><li><a href=#第一层api-与控制器>第一层：API 与控制器</a></li><li><a href=#第二层kubernetes-资源>第二层：Kubernetes 资源</a></li><li><a href=#第三层数据路径>第三层：数据路径</a></li></ol></li><li><a href=#不要用破坏架构的方式排障>不要用破坏架构的方式排障</a></li><li><a href=#最终验收清单>最终验收清单</a></li></ol></nav></div></section></aside><main class="main full-width"><article class=main-article><header class=article-header><div class=article-details><header class=article-category><a href=/categories/kubernetes/ style=background-color:#c7efbe;color:#183d0f>Kubernetes</a></header><div class=article-title-wrapper><h2 class=article-title><a href=/p/kustomize-%E9%83%A8%E7%BD%B2%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F%E6%93%8D%E4%BD%9C%E4%B8%8E%E6%8E%92%E9%9A%9C/>Kustomize 部署、生命周期操作与排障</a></h2></div><footer class=article-meta><div class=inline-meta><svg class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><path d="M11.795 21H5a2 2 0 01-2-2V7a2 2 0 012-2h12a2 2 0 012 2v4"/><circle cx="18" cy="18" r="4"/><path d="M15 3v4"/><path d="M7 3v4"/><path d="M3 11h16"/><path d="M18 16.496V18l1 1"/></svg>
+<time class=article-time--published datetime=2026-08-02T00:00:00Z>2026年8月2日星期日</time>
+<svg class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg>
+<time class=article-time--reading>阅读时长: 6 分钟</time></div></footer></div></header><aside class=article-toc><details><summary><div class=article-toc-title><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-chevron-right"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 6l6 6-6 6"/></svg>
+<span>目录</span></div></summary><nav class=toc-nav><ol><li><a href=#先渲染再写入集群>先渲染，再写入集群</a></li><li><a href=#本项目的-kustomize-分层>本项目的 Kustomize 分层</a></li><li><a href=#resources-是组合不是复制>resources 是组合，不是复制</a></li><li><a href=#images-transformer-做什么>images transformer 做什么</a></li><li><a href=#dockerfile-的两阶段构建>Dockerfile 的两阶段构建</a></li><li><a href=#部署前本地验证>部署前本地验证</a></li><li><a href=#推荐部署顺序>推荐部署顺序</a><ol><li><a href=#第一步构建并准备-operator-镜像>第一步：构建并准备 Operator 镜像</a></li><li><a href=#第二步渲染并安装-operator-bootstrap>第二步：渲染并安装 Operator Bootstrap</a></li><li><a href=#第三步按需安装共享-gateway>第三步：按需安装共享 Gateway</a></li><li><a href=#第四步创建第一个-internal-pool>第四步：创建第一个 Internal Pool</a></li></ol></li><li><a href=#创建后的观察顺序>创建后的观察顺序</a></li><li><a href=#internal-模式的访问>Internal 模式的访问</a></li><li><a href=#更新操作>更新操作</a></li><li><a href=#暂停与恢复>暂停与恢复</a></li><li><a href=#删除前先停一下>删除前先停一下</a></li><li><a href=#conditions-驱动的排障地图>Conditions 驱动的排障地图</a></li><li><a href=#三层排障法>三层排障法</a><ol><li><a href=#第一层api-与控制器>第一层：API 与控制器</a></li><li><a href=#第二层kubernetes-资源>第二层：Kubernetes 资源</a></li><li><a href=#第三层数据路径>第三层：数据路径</a></li></ol></li><li><a href=#不要用破坏架构的方式排障>不要用破坏架构的方式排障</a></li><li><a href=#最终验收清单>最终验收清单</a></li></ol></nav></details></aside><section class=article-content><h2 id=先渲染再写入集群>先渲染，再写入集群</h2><p>Kustomize 不是模板语言，它以 Kubernetes YAML 为基础，通过 resources、patches、images、namespace 等机制组合最终 manifests。<code>kubectl</code> 已内置常用 Kustomize 能力：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>kubectl kustomize &lt;目录&gt;
+</span></span><span class=line><span class=cl>kubectl apply -k &lt;目录&gt;
+</span></span></code></pre></td></tr></table></div></div><p>前者只渲染到标准输出，不修改集群；后者把渲染结果提交给 API Server。</p><p>一个稳妥习惯是：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-text data-lang=text><span class=line><span class=cl>先看最终会提交什么
+</span></span><span class=line><span class=cl>  → 做本地检查
+</span></span><span class=line><span class=cl>  → 再 apply
+</span></span><span class=line><span class=cl>  → 最后观察状态
+</span></span></code></pre></td></tr></table></div></div><h2 id=本项目的-kustomize-分层>本项目的 Kustomize 分层</h2><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-text data-lang=text><span class=line><span class=cl>config/
+</span></span><span class=line><span class=cl>  ├─ crd/       SubPool CRD
+</span></span><span class=line><span class=cl>  ├─ rbac/      ServiceAccount、权限与绑定
+</span></span><span class=line><span class=cl>  ├─ manager/   Operator Deployment、metrics Service、PDB
+</span></span><span class=line><span class=cl>  └─ default/   组合上述资源，加 Namespace 与 Operator Configuration
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>deploy/
+</span></span><span class=line><span class=cl>  ├─ operator/  Operator 正式入口，并覆盖镜像
+</span></span><span class=line><span class=cl>  └─ gateway/   Shared Mihomo 与 Envoy Gateway
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>examples/
+</span></span><span class=line><span class=cl>  ├─ subpool-internal.yaml
+</span></span><span class=line><span class=cl>  └─ mihomo/    引用共享 Mihomo manifests 的兼容入口
+</span></span></code></pre></td></tr></table></div></div><p><code>deploy/operator</code> 与 <code>deploy/gateway</code> 是独立入口。安装 Operator 不会自动安装 Gateway，也不会创建 SubPool 或 Secret。</p><p>这能防止一次看似普通的控制面安装，顺便启动真实代理或创建业务实例。</p><h2 id=resources-是组合不是复制>resources 是组合，不是复制</h2><p>例如 <code>config/default/kustomization.yaml</code> 引用：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-yaml data-lang=yaml><span class=line><span class=cl><span class=nt>resources</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span>- <span class=l>namespace.yaml</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span>- <span class=l>../crd</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span>- <span class=l>../rbac</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span>- <span class=l>operator-config.yaml</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span>- <span class=l>../manager</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><p>Kustomize 递归加载这些资源，形成一个最终对象集合。<code>deploy/operator</code> 再引用 <code>config/default</code>，并通过 <code>images</code> 修改 Operator 镜像。</p><p>因此修改基础文件会影响所有引用它的入口。排查最终内容时，不要只看当前目录那几行 kustomization，要渲染完整结果。</p><h2 id=images-transformer-做什么>images transformer 做什么</h2><p>项目通过：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-yaml data-lang=yaml><span class=line><span class=cl><span class=nt>images</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span>- <span class=nt>name</span><span class=p>:</span><span class=w> </span><span class=l>registry.example.invalid/example-org/subpool-operator</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>newName</span><span class=p>:</span><span class=w> </span><span class=l>example-org/subrelay-operator</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>newTag</span><span class=p>:</span><span class=w> </span><span class=s2>&#34;example-tag&#34;</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><p>把基础 Deployment 中的镜像名称和 tag 替换为环境要使用的版本。</p><p>远程集群必须能从它自己的节点网络拉取该镜像。本地电脑能 <code>docker pull</code>，不代表集群 Node 一定能拉取。</p><p>生产更推荐不可变版本或 digest，并在发布前确认：</p><ul><li>registry 可达；</li><li>私有仓库凭据已配置；</li><li>CPU architecture 匹配；</li><li>镜像 tag/digest 正确；</li><li>imagePullPolicy 符合预期。</li></ul><h2 id=dockerfile-的两阶段构建>Dockerfile 的两阶段构建</h2><p>项目先在 Go 镜像中编译静态 manager，再复制到 distroless nonroot 镜像：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-text data-lang=text><span class=line><span class=cl>golang:1.26.0
+</span></span><span class=line><span class=cl>  → go build /out/manager
+</span></span><span class=line><span class=cl>  → gcr.io/distroless/static:nonroot
+</span></span><span class=line><span class=cl>  → USER 65532:65532
+</span></span></code></pre></td></tr></table></div></div><p>优点是最终镜像不包含完整编译工具链和 shell，体积与攻击面更小。代价是进入容器临时执行 shell 命令并不可用，排障应依赖日志、metrics、健康端点和 Kubernetes 对象，而不是假设能 <code>sh</code> 进去。</p><h2 id=部署前本地验证>部署前本地验证</h2><p>项目提供：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl><span class=nv>GOCACHE</span><span class=o>=</span>/tmp/subrelay-operator-go-build-cache go <span class=nb>test</span> ./...
+</span></span><span class=line><span class=cl>bash deploy/tests/render.sh
+</span></span><span class=line><span class=cl>kubectl kustomize deploy/operator &gt;/dev/null
+</span></span><span class=line><span class=cl>kubectl kustomize deploy/gateway &gt;/dev/null
+</span></span><span class=line><span class=cl>kubectl kustomize examples/mihomo &gt;/dev/null
+</span></span></code></pre></td></tr></table></div></div><p>这些命令不向集群写资源。它们分别验证 Go 行为和 manifests 能否渲染，并检查渲染结果是否违反项目约束。</p><p>本地通过不保证集群部署一定成功，因为 StorageClass、Gateway API、镜像仓库和 CNI 等依赖属于目标环境。</p><h2 id=推荐部署顺序>推荐部署顺序</h2><h3 id=第一步构建并准备-operator-镜像>第一步：构建并准备 Operator 镜像</h3><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>docker build -t subpool-operator:latest .
+</span></span></code></pre></td></tr></table></div></div><p>远程集群需推送到可拉取 registry，并更新 <code>deploy/operator/kustomization.yaml</code>。</p><h3 id=第二步渲染并安装-operator-bootstrap>第二步：渲染并安装 Operator Bootstrap</h3><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>kubectl kustomize deploy/operator
+</span></span><span class=line><span class=cl>kubectl apply -k deploy/operator
+</span></span></code></pre></td></tr></table></div></div><p>这会安装：</p><ul><li><code>subpool-system</code> Namespace；</li><li>SubPool CRD；</li><li>RBAC；</li><li>immutable Operator Configuration；</li><li>Operator Deployment；</li><li>metrics Service；</li><li>Operator PDB。</li></ul><p>检查：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>kubectl -n subpool-system get deployment,pod,service
+</span></span><span class=line><span class=cl>kubectl get crd subpools.subrelay.example.com
+</span></span><span class=line><span class=cl>kubectl -n subpool-system logs deployment/subpool-operator <span class=se>\
+</span></span></span><span class=line><span class=cl>  --all-containers<span class=o>=</span><span class=nb>true</span> --tail<span class=o>=</span><span class=m>200</span>
+</span></span></code></pre></td></tr></table></div></div><h3 id=第三步按需安装共享-gateway>第三步：按需安装共享 Gateway</h3><p>先通过安全流程创建 <code>mihomo-gateway-providers</code> Secret，再执行：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>kubectl apply -k deploy/gateway
+</span></span></code></pre></td></tr></table></div></div><p>这会安装 <code>subpool-gateway</code> Namespace、Shared Mihomo、GatewayClass 和 Gateway。它不会安装 Envoy Gateway controller，也不包含 Secret value。</p><p>检查：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>kubectl -n subpool-gateway get deployment,pod,service,gateway
+</span></span><span class=line><span class=cl>kubectl get gatewayclass subpool-envoy
+</span></span><span class=line><span class=cl>kubectl -n subpool-gateway get endpointslice <span class=se>\
+</span></span></span><span class=line><span class=cl>  -l kubernetes.io/service-name<span class=o>=</span>mihomo-gateway
+</span></span></code></pre></td></tr></table></div></div><h3 id=第四步创建第一个-internal-pool>第四步：创建第一个 Internal Pool</h3><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>kubectl apply -f examples/subpool-internal.yaml
+</span></span><span class=line><span class=cl>kubectl get sp demo-pool
+</span></span><span class=line><span class=cl>kubectl describe sp demo-pool
+</span></span></code></pre></td></tr></table></div></div><p>Internal 是最适合第一次验证的模式，因为它不依赖外部 DNS、TLS 和 Gateway route。</p><h2 id=创建后的观察顺序>创建后的观察顺序</h2><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>kubectl get sp demo-pool -o yaml
+</span></span><span class=line><span class=cl>kubectl get namespace subpool-demo-pool
+</span></span><span class=line><span class=cl>kubectl -n subpool-demo-pool get <span class=se>\
+</span></span></span><span class=line><span class=cl>  statefulset,service,pvc,pod,networkpolicy,poddisruptionbudget
+</span></span><span class=line><span class=cl>kubectl -n subpool-demo-pool get events --sort-by<span class=o>=</span>.lastTimestamp
+</span></span></code></pre></td></tr></table></div></div><p>等待 Ready：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>kubectl <span class=nb>wait</span> --for<span class=o>=</span><span class=nv>condition</span><span class=o>=</span>Ready <span class=se>\
+</span></span></span><span class=line><span class=cl>  subpool/demo-pool --timeout<span class=o>=</span>300s
+</span></span></code></pre></td></tr></table></div></div><p>若超时，立即转为 Conditions 驱动的排查，不要反复 apply 同一文件期待随机恢复。</p><h2 id=internal-模式的访问>Internal 模式的访问</h2><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>kubectl -n subpool-demo-pool port-forward service/cpa 8317:8317
+</span></span><span class=line><span class=cl>kubectl -n subpool-demo-pool port-forward <span class=se>\
+</span></span></span><span class=line><span class=cl>  service/cpa-manager 18317:18317
+</span></span></code></pre></td></tr></table></div></div><p>两个命令需要分别占用一个持续运行的终端。它们只适合开发与受控管理访问。</p><h2 id=更新操作>更新操作</h2><p>镜像或 CPU/内存资源应修改 SubPool spec，由 Operator 同步到 StatefulSet。生产镜像优先使用 digest。</p><p>不要直接编辑受管 StatefulSet。即使暂时成功，下一轮 reconcile 也会按 SubPool 恢复。</p><p><code>storage.size</code> 当前不可修改。若业务需要更大容量，必须先设计受支持的数据迁移或未来扩容流程，不能通过手工改 PVC 与 CR 制造状态分叉。</p><h2 id=暂停与恢复>暂停与恢复</h2><p>暂停：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>kubectl patch subpool demo-pool --type<span class=o>=</span>merge <span class=se>\
+</span></span></span><span class=line><span class=cl>  -p <span class=s1>&#39;{&#34;spec&#34;:{&#34;suspend&#34;:true}}&#39;</span>
+</span></span></code></pre></td></tr></table></div></div><p>预期结果：</p><ul><li>StatefulSet replicas 为 0；</li><li>HTTPRoute 被删除；</li><li>Namespace、PVC、Secret 保留；</li><li>Ready=False，reason 为 Suspended。</li></ul><p>恢复：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>kubectl patch subpool demo-pool --type<span class=o>=</span>merge <span class=se>\
+</span></span></span><span class=line><span class=cl>  -p <span class=s1>&#39;{&#34;spec&#34;:{&#34;suspend&#34;:false}}&#39;</span>
+</span></span></code></pre></td></tr></table></div></div><p>Operator 会重新创建运行 Pod，并继续使用旧 PVC。</p><h2 id=删除前先停一下>删除前先停一下</h2><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>kubectl delete subpool demo-pool
+</span></span></code></pre></td></tr></table></div></div><p>删除会销毁专属 Namespace、PVC、Credential Secret 和运行数据。当前项目不提供备份恢复。</p><p>不要使用 <code>--force</code>，不要手工删除 <code>subrelay.example.com/finalizer</code>。如果只是临时不用，选择 suspend。</p><p>删除卡住时检查：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>kubectl get sp demo-pool -o yaml
+</span></span><span class=line><span class=cl>kubectl get namespace subpool-demo-pool -o yaml
+</span></span><span class=line><span class=cl>kubectl -n subpool-demo-pool get pvc -o yaml
+</span></span></code></pre></td></tr></table></div></div><p>关注 <code>DeletionBlocked</code>、Namespace/PVC finalizers 以及负责相关资源的第三方 controller。</p><h2 id=conditions-驱动的排障地图>Conditions 驱动的排障地图</h2><div class=table-wrapper><table><thead><tr><th>Condition/Reason</th><th>首要对象</th></tr></thead><tbody><tr><td><code>OperatorConfigurationInvalid</code></td><td><code>subpool-system</code> 中版本化 ConfigMap 与 Operator 参数</td></tr><tr><td><code>InvalidPoolResources</code></td><td>SubPool 的 requests/limits</td></tr><tr><td><code>ResourcesExceedBaseline</code></td><td>SubPool 合计申请与 <code>maxPerPool</code></td></tr><tr><td><code>NamespaceConflict</code></td><td>派生 Namespace labels、ownerReferences、UID</td></tr><tr><td><code>CredentialConflict</code></td><td><code>subpool-credentials</code> ownerReferences</td></tr><tr><td><code>CredentialInvalid</code></td><td>Secret 必需 key 是否存在且非空，不读取 value</td></tr><tr><td><code>WorkloadMissing</code></td><td>StatefulSet 是否创建</td></tr><tr><td><code>WorkloadsNotReady</code></td><td>Pod、PVC、镜像、探针和 Event</td></tr><tr><td><code>ServiceMissing</code></td><td>CPA 与 cpa-manager Service</td></tr><tr><td><code>EndpointsUnavailable</code></td><td>Shared Mihomo Pod 与 EndpointSlice</td></tr><tr><td><code>RouteNotAccepted</code></td><td>HTTPRoute parent conditions 与 allowedRoutes</td></tr><tr><td><code>GatewayNotProgrammed</code></td><td>Envoy Gateway controller 和 Gateway status</td></tr><tr><td><code>NamespaceTerminating</code></td><td>Namespace 内资源及第三方 finalizers</td></tr></tbody></table></div><h2 id=三层排障法>三层排障法</h2><h3 id=第一层api-与控制器>第一层：API 与控制器</h3><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>kubectl get sp demo-pool -o yaml
+</span></span><span class=line><span class=cl>kubectl -n subpool-system logs deployment/subpool-operator <span class=se>\
+</span></span></span><span class=line><span class=cl>  --all-containers<span class=o>=</span><span class=nb>true</span> --tail<span class=o>=</span><span class=m>200</span>
+</span></span></code></pre></td></tr></table></div></div><p>确认 CR 被接受、generation 被观察、Operator 没有 Forbidden 或 reconcile error。</p><h3 id=第二层kubernetes-资源>第二层：Kubernetes 资源</h3><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>kubectl -n subpool-demo-pool get statefulset,pod,pvc,service
+</span></span><span class=line><span class=cl>kubectl -n subpool-demo-pool describe pod runtime-0
+</span></span><span class=line><span class=cl>kubectl -n subpool-demo-pool get events --sort-by<span class=o>=</span>.lastTimestamp
+</span></span></code></pre></td></tr></table></div></div><p>确认调度、存储、镜像和探针。</p><h3 id=第三层数据路径>第三层：数据路径</h3><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-text data-lang=text><span class=line><span class=cl>入站：Gateway → HTTPRoute → CPA Service → Endpoint → Pod
+</span></span><span class=line><span class=cl>出站：CPA → Mihomo Service → Endpoint → Mihomo → 上游代理
+</span></span></code></pre></td></tr></table></div></div><p>每次只验证相邻两个跳点，避免一句“网络不通”覆盖十种不同故障。</p><h2 id=不要用破坏架构的方式排障>不要用破坏架构的方式排障</h2><p>以下动作可能让表面症状消失，却破坏项目边界：</p><ul><li>删除 default-deny NetworkPolicy；</li><li>给 CPA 临时开直接公网出站后忘记恢复；</li><li>把 CPA Service 改成每 Pool LoadBalancer；</li><li>给 cpa-manager 创建公网 Route；</li><li>强删 Namespace 或 finalizer；</li><li>手工覆盖 Credential Secret；</li><li>直接修改 Operator 管理的 StatefulSet。</li></ul><p>更可靠的做法是记录具体 Condition、对象、Event 和时间点，修复负责该层的依赖，再验证状态是否自然收敛。</p><h2 id=最终验收清单>最终验收清单</h2><ul><li>Operator 两个 Pod 正常，leader election 无持续错误；</li><li>SubPool CRD 已安装，<code>kubectl get sp</code> 可用；</li><li>Operator Configuration 名称与 Deployment 参数一致；</li><li>Shared Mihomo 有 Ready Endpoint；</li><li>SubPool 派生 Namespace 所有权正确；</li><li>runtime StatefulSet、PVC、两个 Service 均存在；</li><li>Pod probes Ready，重启次数无异常增长；</li><li>Internal 模式 port-forward 可用，或 Gateway 模式 Route Accepted 且 Gateway Programmed；</li><li><code>metadata.generation == status.observedGeneration</code>；</li><li><code>Ready=True</code> 的含义没有被误解为账号和真实模型请求也已验证。</li></ul><p>部署完成不是“apply 命令退出码为 0”，而是从声明、控制器、资源到数据路径都有证据证明系统达到了它承诺的状态。</p></section><footer class="article-meta article-footer"><section class=article-tags><a href=/tags/kubernetes/>Kubernetes</a>
+<a href=/tags/kustomize/>Kustomize</a>
+<a href=/tags/kubectl/>Kubectl</a>
+<a href=/tags/%E8%BF%90%E7%BB%B4/>运维</a>
+<a href=/tags/%E6%95%85%E9%9A%9C%E6%8E%92%E6%9F%A5/>故障排查</a></section><section class="article-copyright inline-meta"><svg class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><path d="M14.5 9a3.5 4 0 100 6"/></svg>
+<span>Licensed under CC BY-NC-SA 4.0</span></section></footer></article><footer class=site-footer><section class=copyright>&copy;
+2025 -
+2026 Kerolt's Note</section><section class=powerby>使用 <a href=https://gohugo.io/ target=_blank rel=noopener>Hugo</a> 构建<br>主题 <b><a href=https://github.com/CaiJimmy/hugo-theme-stack target=_blank rel=noopener data-version=4.0.3>Stack</a></b> 由 <a href=https://jimmycai.com target=_blank rel=noopener>Jimmy</a> 设计</section></footer><script type=module>
+    import gallery from '\/ts\/gallery.js';
+
+    const articleContent = document.querySelector('.article-content');
+    const shouldLoad = articleContent && (articleContent.querySelectorAll('figure').length > 0 || articleContent.querySelectorAll('img.gallery-image').length > 0);
+    
+    if (shouldLoad) {
+        gallery(articleContent);
+
+        const PhotoSwipeLightbox = (await import("https:\/\/cdn.jsdelivr.net\/npm\/photoswipe@5.4.4\/dist\/photoswipe-lightbox.esm.min.js")).default;
+        const styleHref = "https:\/\/cdn.jsdelivr.net\/npm\/photoswipe@5.4.4\/dist\/photoswipe.css";
+
+        const styleTag = document.createElement('link');
+        styleTag.rel = 'stylesheet';
+        styleTag.href = styleHref;
+        document.head.appendChild(styleTag);
+
+        const lightbox = new PhotoSwipeLightbox({
+            gallerySelector: '.article-content',
+            childSelector: 'figure a.image-link',
+            pswpModule: () => import("https:\/\/cdn.jsdelivr.net\/npm\/photoswipe@5.4.4\/dist\/photoswipe.esm.min.js")
+        });
+        lightbox.init();
+    }
+</script></main></div><script type=text/javascript src=/ts/main.f856840516f7c2ad1769a8f5937e3d08d6cb386e2cd2dd025ae696e0ff207958.js defer></script></body></html>

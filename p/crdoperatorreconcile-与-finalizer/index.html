@@ -1,0 +1,182 @@
+<!doctype html><html lang=zh-cn dir=ltr><head><meta charset=utf-8><meta name=viewport content='width=device-width,initial-scale=1'><meta name=description content="Operator 的本质：把运维知识写成控制循环 普通 YAML 能描述一组静态对象，但很难表达这些规则：\n一个业务对象自动派生一个 Namespace； 先校验资源预算，再创建任何持久资源； Secret 缺失时随机生成，存在时绝不覆盖； Gateway 模式才创建 HTTPRoute； suspend 时缩容但保留 PVC； 删除时等待 Namespace 真正清理完； 持续把依赖状态汇总成 Conditions。 Operator 把这类领域运维知识编码进 controller。使用者面对的是 SubPool，底层 Kubernetes 积木由 controller 组织。\n"><title>CRD、Operator、Reconcile 与 Finalizer</title><link rel=canonical href=https://kerolt.github.io/p/crdoperatorreconcile-%E4%B8%8E-finalizer/><link rel=preconnect href=https://fonts.googleapis.com><link rel=preconnect href=https://fonts.gstatic.com crossorigin><link rel=preload as=style href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap"><link rel=stylesheet href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap"><link rel=stylesheet href=/scss/style.min.e62e09c60ba428a627e03568fa3df938f6a8224f815b5846f00816c17d4a0be4.css><meta property='og:title' content="CRD、Operator、Reconcile 与 Finalizer"><meta property='og:description' content="Operator 的本质：把运维知识写成控制循环 普通 YAML 能描述一组静态对象，但很难表达这些规则：\n一个业务对象自动派生一个 Namespace； 先校验资源预算，再创建任何持久资源； Secret 缺失时随机生成，存在时绝不覆盖； Gateway 模式才创建 HTTPRoute； suspend 时缩容但保留 PVC； 删除时等待 Namespace 真正清理完； 持续把依赖状态汇总成 Conditions。 Operator 把这类领域运维知识编码进 controller。使用者面对的是 SubPool，底层 Kubernetes 积木由 controller 组织。\n"><meta property='og:url' content='https://kerolt.github.io/p/crdoperatorreconcile-%E4%B8%8E-finalizer/'><meta property='og:site_name' content="Kerolt's Note"><meta property='og:type' content='article'><meta property='article:section' content='Post'><meta property='article:tag' content='Kubernetes'><meta property='article:tag' content='CRD'><meta property='article:tag' content='Operator'><meta property='article:tag' content='Reconcile'><meta property='article:tag' content='Finalizer'><meta property='article:published_time' content='2026-08-02T00:00:00+00:00'><meta property='article:modified_time' content='2026-08-02T00:00:00+00:00'><meta name=twitter:title content="CRD、Operator、Reconcile 与 Finalizer"><meta name=twitter:description content="Operator 的本质：把运维知识写成控制循环 普通 YAML 能描述一组静态对象，但很难表达这些规则：\n一个业务对象自动派生一个 Namespace； 先校验资源预算，再创建任何持久资源； Secret 缺失时随机生成，存在时绝不覆盖； Gateway 模式才创建 HTTPRoute； suspend 时缩容但保留 PVC； 删除时等待 Namespace 真正清理完； 持续把依赖状态汇总成 Conditions。 Operator 把这类领域运维知识编码进 controller。使用者面对的是 SubPool，底层 Kubernetes 积木由 controller 组织。\n"><link rel="shortcut icon" href=/images/favicon.png></head><body class=article-page><script>(function(){const e="StackColorScheme";localStorage.getItem(e)||localStorage.setItem(e,"auto")})()</script><script>(function(){const t="StackColorScheme",e=localStorage.getItem(t),n=window.matchMedia("(prefers-color-scheme: dark)").matches===!0;e=="dark"||e==="auto"&&n?document.documentElement.dataset.scheme="dark":document.documentElement.dataset.scheme="light"})()</script><div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky"><button class="hamburger hamburger--spin" type=button id=toggle-menu aria-label=切换菜单>
+<span class=hamburger-box><span class=hamburger-inner></span></span></button><header><figure class=site-avatar><a href=/><img src=/images/avatar.jpg width=200 height=200 class=site-logo loading=lazy alt=Avatar>
+</a><span class=emoji>🏸</span></figure><div class=site-meta><h1 class=site-name><a href=/>Kerolt's Note</a></h1><h2 class=site-description>愿你无拘无束自由的活着</h2></div></header><ol class=menu-social><li><a href=https://github.com/kerolt title=GitHub rel=me><svg class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 19c-4.3 1.4-4.3-2.5-6-3m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6.0 00-1.3-3.2 4.2 4.2.0 00-.1-3.2s-1.1-.3-3.5 1.3a12.3 12.3.0 00-6.2.0C6.5 2.8 5.4 3.1 5.4 3.1a4.2 4.2.0 00-.1 3.2A4.6 4.6.0 004 9.5c0 4.6 2.7 5.7 5.5 6-.6.6-.6 1.2-.5 2V21"/></svg></a></li></ol><ol class=menu id=main-menu><li><a href=/><svg class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><polyline points="5 12 3 12 12 3 21 12 19 12"/><path d="M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"/><path d="M9 21v-6a2 2 0 012-2h2a2 2 0 012 2v6"/></svg>
+<span>首页</span></a></li><li><a href=/archives/><svg class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><rect x="3" y="4" width="18" height="4" rx="2"/><path d="M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
+<span>归档</span></a></li><li><a href=/categories/><svg class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><line x1="5" y1="9" x2="19" y2="9"/><line x1="5" y1="15" x2="19" y2="15"/><line x1="11" y1="4" x2="7" y2="20"/><line x1="17" y1="4" x2="13" y2="20"/></svg>
+<span>分类</span></a></li><li><a href=/tags/><svg class="icon icon-tabler icon-tabler-tag" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><path d="M11 3l9 9a1.5 1.5.0 010 2l-6 6a1.5 1.5.0 01-2 0L3 11V7a4 4 0 014-4h4"/><circle cx="9" cy="9" r="2"/></svg>
+<span>标签</span></a></li><li><a href=/about/><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-info-circle"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 12a9 9 0 1018 0A9 9 0 003 12"/><path d="M12 9h.01"/><path d="M11 12h1v4h1"/></svg>
+<span>关于我</span></a></li><li><a href=/search/><svg class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="10" cy="10" r="7"/><line x1="21" y1="21" x2="15" y2="15"/></svg>
+<span>搜索</span></a></li><li class=menu-bottom-section><ol class=menu><li id=dark-mode-toggle><svg class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="8" cy="12" r="2"/><rect x="2" y="6" width="20" height="12" rx="6"/></svg>
+<svg class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="16" cy="12" r="2"/><rect x="2" y="6" width="20" height="12" rx="6"/></svg>
+<span>暗色模式</span></li></ol></li></ol></aside><aside class="sidebar right-sidebar sticky"><section class="widget archives"><div class=widget-icon><svg class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><line x1="5" y1="9" x2="19" y2="9"/><line x1="5" y1="15" x2="19" y2="15"/><line x1="11" y1="4" x2="7" y2="20"/><line x1="17" y1="4" x2="13" y2="20"/></svg></div><h2 class="widget-title section-title">目录</h2><div class=widget--toc><nav class=toc-nav id=TableOfContents><ol><li><a href=#operator-的本质把运维知识写成控制循环>Operator 的本质：把运维知识写成控制循环</a></li><li><a href=#crd给-kubernetes-扩展一种新对象>CRD：给 Kubernetes 扩展一种新对象</a></li><li><a href=#go-类型如何变成-kubernetes-api>Go 类型如何变成 Kubernetes API</a></li><li><a href=#静态校验与动态校验的边界>静态校验与动态校验的边界</a></li><li><a href=#controller-managerscheme-与-client>Controller Manager、Scheme 与 Client</a></li><li><a href=#watch-不是每秒全量扫描>Watch 不是每秒全量扫描</a></li><li><a href=#predicate-为什么过滤-status-only-更新>predicate 为什么过滤 status-only 更新</a></li><li><a href=#一次-reconcile-的固定顺序>一次 reconcile 的固定顺序</a></li><li><a href=#reconcile-必须幂等>Reconcile 必须幂等</a></li><li><a href=#只管理明确拥有的字段>只管理明确拥有的字段</a></li><li><a href=#所有权冲突为什么必须阻塞>所有权冲突为什么必须阻塞</a></li><li><a href=#finalizer删除前的待办清单>Finalizer：删除前的待办清单</a></li><li><a href=#为什么不要手工移除-finalizer>为什么不要手工移除 finalizer</a></li><li><a href=#suspend-是期望状态不是删除流程>suspend 是期望状态，不是删除流程</a></li><li><a href=#status-更新也要避免噪声>Status 更新也要避免噪声</a></li><li><a href=#阅读-operator-代码的推荐路线>阅读 Operator 代码的推荐路线</a></li></ol></nav></div></section></aside><main class="main full-width"><article class=main-article><header class=article-header><div class=article-details><header class=article-category><a href=/categories/kubernetes/ style=background-color:#c7efbe;color:#183d0f>Kubernetes</a></header><div class=article-title-wrapper><h2 class=article-title><a href=/p/crdoperatorreconcile-%E4%B8%8E-finalizer/>CRD、Operator、Reconcile 与 Finalizer</a></h2></div><footer class=article-meta><div class=inline-meta><svg class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><path d="M11.795 21H5a2 2 0 01-2-2V7a2 2 0 012-2h12a2 2 0 012 2v4"/><circle cx="18" cy="18" r="4"/><path d="M15 3v4"/><path d="M7 3v4"/><path d="M3 11h16"/><path d="M18 16.496V18l1 1"/></svg>
+<time class=article-time--published datetime=2026-08-02T00:00:00Z>2026年8月2日星期日</time>
+<svg class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg>
+<time class=article-time--reading>阅读时长: 6 分钟</time></div></footer></div></header><aside class=article-toc><details><summary><div class=article-toc-title><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-chevron-right"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 6l6 6-6 6"/></svg>
+<span>目录</span></div></summary><nav class=toc-nav><ol><li><a href=#operator-的本质把运维知识写成控制循环>Operator 的本质：把运维知识写成控制循环</a></li><li><a href=#crd给-kubernetes-扩展一种新对象>CRD：给 Kubernetes 扩展一种新对象</a></li><li><a href=#go-类型如何变成-kubernetes-api>Go 类型如何变成 Kubernetes API</a></li><li><a href=#静态校验与动态校验的边界>静态校验与动态校验的边界</a></li><li><a href=#controller-managerscheme-与-client>Controller Manager、Scheme 与 Client</a></li><li><a href=#watch-不是每秒全量扫描>Watch 不是每秒全量扫描</a></li><li><a href=#predicate-为什么过滤-status-only-更新>predicate 为什么过滤 status-only 更新</a></li><li><a href=#一次-reconcile-的固定顺序>一次 reconcile 的固定顺序</a></li><li><a href=#reconcile-必须幂等>Reconcile 必须幂等</a></li><li><a href=#只管理明确拥有的字段>只管理明确拥有的字段</a></li><li><a href=#所有权冲突为什么必须阻塞>所有权冲突为什么必须阻塞</a></li><li><a href=#finalizer删除前的待办清单>Finalizer：删除前的待办清单</a></li><li><a href=#为什么不要手工移除-finalizer>为什么不要手工移除 finalizer</a></li><li><a href=#suspend-是期望状态不是删除流程>suspend 是期望状态，不是删除流程</a></li><li><a href=#status-更新也要避免噪声>Status 更新也要避免噪声</a></li><li><a href=#阅读-operator-代码的推荐路线>阅读 Operator 代码的推荐路线</a></li></ol></nav></details></aside><section class=article-content><h2 id=operator-的本质把运维知识写成控制循环>Operator 的本质：把运维知识写成控制循环</h2><p>普通 YAML 能描述一组静态对象，但很难表达这些规则：</p><ul><li>一个业务对象自动派生一个 Namespace；</li><li>先校验资源预算，再创建任何持久资源；</li><li>Secret 缺失时随机生成，存在时绝不覆盖；</li><li>Gateway 模式才创建 HTTPRoute；</li><li>suspend 时缩容但保留 PVC；</li><li>删除时等待 Namespace 真正清理完；</li><li>持续把依赖状态汇总成 Conditions。</li></ul><p>Operator 把这类领域运维知识编码进 controller。使用者面对的是 <code>SubPool</code>，底层 Kubernetes 积木由 controller 组织。</p><h2 id=crd给-kubernetes-扩展一种新对象>CRD：给 Kubernetes 扩展一种新对象</h2><p>CustomResourceDefinition 告诉 API Server：集群现在支持一种新资源。</p><p>本项目安装：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-text data-lang=text><span class=line><span class=cl>plural: subpools
+</span></span><span class=line><span class=cl>group: subrelay.example.com
+</span></span><span class=line><span class=cl>version: v1alpha1
+</span></span><span class=line><span class=cl>kind: SubPool
+</span></span><span class=line><span class=cl>scope: Cluster
+</span></span><span class=line><span class=cl>shortName: sp
+</span></span></code></pre></td></tr></table></div></div><p>安装 CRD 后，才能执行：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>kubectl get subpools
+</span></span><span class=line><span class=cl>kubectl get sp
+</span></span><span class=line><span class=cl>kubectl apply -f examples/subpool-internal.yaml
+</span></span></code></pre></td></tr></table></div></div><p>CRD 只定义 API 和校验规则，不会自己创建 StatefulSet。真正的自动化逻辑来自 Operator controller。</p><h2 id=go-类型如何变成-kubernetes-api>Go 类型如何变成 Kubernetes API</h2><p><code>api/v1alpha1/subpool_types.go</code> 定义：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-text data-lang=text><span class=line><span class=cl>SubPool
+</span></span><span class=line><span class=cl>  ├─ ObjectMeta
+</span></span><span class=line><span class=cl>  ├─ Spec
+</span></span><span class=line><span class=cl>  │   ├─ Exposure
+</span></span><span class=line><span class=cl>  │   ├─ Storage
+</span></span><span class=line><span class=cl>  │   ├─ CPA
+</span></span><span class=line><span class=cl>  │   ├─ CPAManager
+</span></span><span class=line><span class=cl>  │   └─ Suspend
+</span></span><span class=line><span class=cl>  └─ Status
+</span></span><span class=line><span class=cl>      ├─ ObservedGeneration
+</span></span><span class=line><span class=cl>      ├─ Namespace
+</span></span><span class=line><span class=cl>      ├─ CPAService
+</span></span><span class=line><span class=cl>      ├─ Hostname
+</span></span><span class=line><span class=cl>      └─ Conditions
+</span></span></code></pre></td></tr></table></div></div><p>Kubebuilder markers 描述 scope、short name、status subresource、打印列和 CEL 校验。生成的 CRD YAML被放在 <code>config/crd/bases/</code>。</p><p>Go 类型是 controller 编译时使用的强类型模型，CRD schema 是 API Server 接收对象时使用的运行时契约。修改其中一边却忘记重新生成另一边，会造成代码和集群 API 不一致。</p><h2 id=静态校验与动态校验的边界>静态校验与动态校验的边界</h2><p>CRD schema 适合检查：</p><ul><li>exposure mode 枚举；</li><li>必填字段；</li><li>名称格式；</li><li>storage.size 不可变；</li><li>resources 必须包含 CPU 和内存。</li></ul><p>Operator 适合检查：</p><ul><li>配置的 ConfigMap 能否读取与解析；</li><li>两个容器的合计资源是否超过平台包络；</li><li>派生 Namespace 是否已被别人占用；</li><li>Secret 是否属于当前 SubPool；</li><li>Shared Mihomo 有没有 Ready Endpoint；</li><li>HTTPRoute 和 Gateway status 是否就绪。</li></ul><p>静态规则尽早拒绝，动态规则通过 Condition 提供可诊断状态。</p><h2 id=controller-managerscheme-与-client>Controller Manager、Scheme 与 Client</h2><p><code>main.go</code> 创建 controller-runtime Manager，并把这些 API 注册到 Scheme：</p><ul><li>Kubernetes core API；</li><li>Gateway API v1；</li><li>SubPool v1alpha1。</li></ul><p>Scheme 让 client 知道 Go 类型与 Group/Version/Kind 的对应关系。没有注册类型，controller 无法正确编码或解码对象。</p><p>Manager 统一负责 client/cache、controller 生命周期、metrics、health endpoints、leader election 和信号处理。</p><h2 id=watch-不是每秒全量扫描>Watch 不是每秒全量扫描</h2><p>Controller 通常通过 list/watch 与本地 cache 感知对象变化。SubPool 创建、spec 更新或受管对象变化时，事件进入 work queue，触发 reconcile。</p><p>本项目声明 <code>Owns</code> Namespace、Secret、ConfigMap、ServiceAccount、Service、StatefulSet、ResourceQuota、NetworkPolicy 和 PDB。它们的 owner reference 让 controller-runtime 能把子资源事件映射回 SubPool。</p><p>共享 Gateway 和 Mihomo EndpointSlice 不归任何 SubPool 所有，不能通过 <code>Owns</code> 关联。因此 controller 在活动状态下默认每 30 秒 requeue，周期性复核这些共享依赖。</p><p>这不是用轮询创建资源，而是为无法直接归属到单个 SubPool 的共享状态提供保守复查。</p><h2 id=predicate-为什么过滤-status-only-更新>predicate 为什么过滤 status-only 更新</h2><p>Controller 更新 SubPool status 本身也会产生对象更新事件。如果每次 status 更新都再次触发 reconcile，可能形成无意义循环。</p><p>项目的 predicate 只在以下根对象变化时继续：</p><ul><li>新建或删除事件；</li><li><code>metadata.generation</code> 变化，也就是 spec 更新；</li><li>首次出现 deletionTimestamp。</li></ul><p>单纯 status 更新不会触发新的根 reconcile。这能降低 API Server 和 work queue 噪声。</p><h2 id=一次-reconcile-的固定顺序>一次 reconcile 的固定顺序</h2><p>活动 SubPool 的流程可以概括为：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-text data-lang=text><span class=line><span class=cl>1. 读取并校验 immutable Operator Configuration
+</span></span><span class=line><span class=cl>2. 校验 Gateway 模式配置是否完整
+</span></span><span class=line><span class=cl>3. 校验 SubPool ID、镜像、资源、存储与资源包络
+</span></span><span class=line><span class=cl>4. 构造全部期望对象
+</span></span><span class=line><span class=cl>5. 创建或确认 Namespace 所有权
+</span></span><span class=line><span class=cl>6. 创建或确认 Credential Secret
+</span></span><span class=line><span class=cl>7. 清理本 Pool 所有的旧版 LimitRange
+</span></span><span class=line><span class=cl>8. 创建或修正其余受管对象
+</span></span><span class=line><span class=cl>9. 根据 Internal/Gateway/suspend 删除或保留 HTTPRoute
+</span></span><span class=line><span class=cl>10. 读取实际状态并更新 Conditions
+</span></span></code></pre></td></tr></table></div></div><p>先校验再创建很重要。无效请求不会留下 Namespace、PVC 或 Secret 等持久半成品。</p><h2 id=reconcile-必须幂等>Reconcile 必须幂等</h2><p>幂等表示：对同样的期望和实际状态重复执行，最终结果不变，也不会每次制造新资源。</p><p>项目的 <code>ensureManagedObject</code> 使用这种模式：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-text data-lang=text><span class=line><span class=cl>Get 当前对象
+</span></span><span class=line><span class=cl>  ├─ 不存在 → Create
+</span></span><span class=line><span class=cl>  └─ 已存在
+</span></span><span class=line><span class=cl>       ├─ owner 不匹配 → 报冲突，不接管
+</span></span><span class=line><span class=cl>       ├─ 已等于期望 → 什么也不做
+</span></span><span class=line><span class=cl>       └─ 有受控字段漂移 → Update
+</span></span></code></pre></td></tr></table></div></div><p>这比“每次先删再建”安全得多。Service 的 ClusterIP 等 API Server 分配字段必须保留，不能拿一份新对象整体覆盖。</p><h2 id=只管理明确拥有的字段>只管理明确拥有的字段</h2><p>Controller 同步稳定 labels 和 owner references，并按 Kind 更新特定 spec。</p><p>以 Service 为例，它只同步：</p><ul><li>type；</li><li>ports；</li><li>selector。</li></ul><p>ClusterIP、IP family 等由 API Server 分配或默认的字段被保留。</p><p>Metadata 中的额外 labels 也被保留，只覆盖 Operator 自己期望的键。这让其他合法系统可以添加自己的 label，而不会被每轮 reconcile 清掉。</p><p>“SubPool 是唯一期望来源”不意味着粗暴覆盖对象所有字节，而是要明确 controller 对哪些字段拥有写入权。</p><h2 id=所有权冲突为什么必须阻塞>所有权冲突为什么必须阻塞</h2><p>若同名对象已存在但不由当前 SubPool 控制，项目不会自动加 owner reference。否则可能出现：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-text data-lang=text><span class=line><span class=cl>别人创建了 subpool-demo-pool Namespace
+</span></span><span class=line><span class=cl>  → Operator 只因名字相同就接管
+</span></span><span class=line><span class=cl>  → 用户删除 demo-pool
+</span></span><span class=line><span class=cl>  → Operator 删除别人的 Namespace 和数据
+</span></span></code></pre></td></tr></table></div></div><p>因此 Namespace、Secret 和其他受管资源都会检查 <code>metav1.IsControlledBy</code>。Namespace 还额外检查 managed label 和 Pool label。</p><p>冲突会写入稳定 reason，例如 <code>NamespaceConflict</code>、<code>CredentialConflict</code> 或 <code>ManagedResourceConflict</code>。</p><h2 id=finalizer删除前的待办清单>Finalizer：删除前的待办清单</h2><p>SubPool 使用：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-text data-lang=text><span class=line><span class=cl>subrelay.example.com/finalizer
+</span></span></code></pre></td></tr></table></div></div><p>正常活动对象先加入 finalizer。用户执行 delete 后，API Server 设置 deletionTimestamp，但在 finalizer 清空前保留对象。</p><p>Operator 删除路径：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-text data-lang=text><span class=line><span class=cl>看到 deletionTimestamp
+</span></span><span class=line><span class=cl>  → 计算派生 Namespace
+</span></span><span class=line><span class=cl>  → Namespace 不存在：移除 finalizer
+</span></span><span class=line><span class=cl>  → Namespace 存在且属于当前 SubPool：请求删除 Namespace
+</span></span><span class=line><span class=cl>  → 等 Namespace 及内部资源完成删除
+</span></span><span class=line><span class=cl>  → Namespace 消失后移除 finalizer
+</span></span><span class=line><span class=cl>  → SubPool 最终从 API 消失
+</span></span></code></pre></td></tr></table></div></div><p>如果同名 Namespace 不属于当前 SubPool，Operator 不删除它，只移除自己的 finalizer。这保持所有权边界。</p><h2 id=为什么不要手工移除-finalizer>为什么不要手工移除 finalizer</h2><p>直接移除 finalizer 会让 SubPool 消失，但它负责清理的 Namespace 可能继续存在，形成孤儿资源、PVC 和 Secret。</p><p>若删除卡住，应检查：</p><ul><li><code>DeletionBlocked</code> 的 reason 和 message；</li><li>Namespace 的 finalizers；</li><li>PVC/PV 与 CSI 状态；</li><li>第三方 controller 是否还在运行；</li><li>API 删除是否收到 Forbidden 或其他错误。</li></ul><p>修复负责收尾的依赖，比强行撕掉“待办清单”更安全。</p><h2 id=suspend-是期望状态不是删除流程>suspend 是期望状态，不是删除流程</h2><p><code>spec.suspend=true</code> 时：</p><ul><li>StatefulSet replicas 改为 0；</li><li>HTTPRoute 删除；</li><li>Namespace、PVC 和 Secret 保留；</li><li>Conditions 明确使用 <code>Suspended</code>；</li><li>ProxyGatewayReady 设为 Unknown，因为暂停期间不需要评估代理。</li></ul><p>这说明 Operator API 不只有 CRUD。一个业务资源可以拥有清晰的生命周期状态，而不需要通过手工改底层对象实现暂停。</p><h2 id=status-更新也要避免噪声>Status 更新也要避免噪声</h2><p>Condition 只有在 status、reason、message 或 observedGeneration 变化时才替换，并保留未变化条件的 lastTransitionTime。</p><p>如果每 30 秒 reconcile 都刷新时间，会让监控以为状态持续变化，也产生大量无意义 API 写入。稳定的 transition time 才能回答“这个问题从什么时候开始”。</p><h2 id=阅读-operator-代码的推荐路线>阅读 Operator 代码的推荐路线</h2><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-text data-lang=text><span class=line><span class=cl>api/v1alpha1/subpool_types.go
+</span></span><span class=line><span class=cl>  → 先看 API 契约
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>controllers/subpool_controller.go
+</span></span><span class=line><span class=cl>  → 再看 Reconcile 入口、watch、finalizer
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>controllers/subpool_reconcile.go
+</span></span><span class=line><span class=cl>  → 看活动路径的顺序
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>internal/subpool/resources.go
+</span></span><span class=line><span class=cl>internal/subpool/workloads.go
+</span></span><span class=line><span class=cl>internal/subpool/network.go
+</span></span><span class=line><span class=cl>  → 看期望对象怎样构造
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>controllers/subpool_readiness.go
+</span></span><span class=line><span class=cl>controllers/subpool_status.go
+</span></span><span class=line><span class=cl>  → 看现实状态怎样投影回 CR
+</span></span></code></pre></td></tr></table></div></div><p>Operator 并不是 Kubernetes 的魔法插件。它只是一个认真遵守幂等、所有权和异步状态语义的程序：不断比较愿望与现实，并把差距一点点收敛掉。</p></section><footer class="article-meta article-footer"><section class=article-tags><a href=/tags/kubernetes/>Kubernetes</a>
+<a href=/tags/crd/>CRD</a>
+<a href=/tags/operator/>Operator</a>
+<a href=/tags/reconcile/>Reconcile</a>
+<a href=/tags/finalizer/>Finalizer</a></section><section class="article-copyright inline-meta"><svg class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><path d="M14.5 9a3.5 4 0 100 6"/></svg>
+<span>Licensed under CC BY-NC-SA 4.0</span></section></footer></article><footer class=site-footer><section class=copyright>&copy;
+2025 -
+2026 Kerolt's Note</section><section class=powerby>使用 <a href=https://gohugo.io/ target=_blank rel=noopener>Hugo</a> 构建<br>主题 <b><a href=https://github.com/CaiJimmy/hugo-theme-stack target=_blank rel=noopener data-version=4.0.3>Stack</a></b> 由 <a href=https://jimmycai.com target=_blank rel=noopener>Jimmy</a> 设计</section></footer><script type=module>
+    import gallery from '\/ts\/gallery.js';
+
+    const articleContent = document.querySelector('.article-content');
+    const shouldLoad = articleContent && (articleContent.querySelectorAll('figure').length > 0 || articleContent.querySelectorAll('img.gallery-image').length > 0);
+    
+    if (shouldLoad) {
+        gallery(articleContent);
+
+        const PhotoSwipeLightbox = (await import("https:\/\/cdn.jsdelivr.net\/npm\/photoswipe@5.4.4\/dist\/photoswipe-lightbox.esm.min.js")).default;
+        const styleHref = "https:\/\/cdn.jsdelivr.net\/npm\/photoswipe@5.4.4\/dist\/photoswipe.css";
+
+        const styleTag = document.createElement('link');
+        styleTag.rel = 'stylesheet';
+        styleTag.href = styleHref;
+        document.head.appendChild(styleTag);
+
+        const lightbox = new PhotoSwipeLightbox({
+            gallerySelector: '.article-content',
+            childSelector: 'figure a.image-link',
+            pswpModule: () => import("https:\/\/cdn.jsdelivr.net\/npm\/photoswipe@5.4.4\/dist\/photoswipe.esm.min.js")
+        });
+        lightbox.init();
+    }
+</script></main></div><script type=text/javascript src=/ts/main.f856840516f7c2ad1769a8f5937e3d08d6cb386e2cd2dd025ae696e0ff207958.js defer></script></body></html>

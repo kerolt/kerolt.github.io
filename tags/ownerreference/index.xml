@@ -1,0 +1,326 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>OwnerReference on Kerolt's Note</title><link>https://kerolt.github.io/tags/ownerreference/</link><description>Recent content in OwnerReference on Kerolt's Note</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><lastBuildDate>Sun, 02 Aug 2026 00:00:00 +0000</lastBuildDate><atom:link href="https://kerolt.github.io/tags/ownerreference/index.xml" rel="self" type="application/rss+xml"/><item><title>Namespace、Label、Selector 与资源所有权</title><link>https://kerolt.github.io/p/namespacelabelselector-%E4%B8%8E%E8%B5%84%E6%BA%90%E6%89%80%E6%9C%89%E6%9D%83/</link><pubDate>Sun, 02 Aug 2026 00:00:00 +0000</pubDate><guid>https://kerolt.github.io/p/namespacelabelselector-%E4%B8%8E%E8%B5%84%E6%BA%90%E6%89%80%E6%9C%89%E6%9D%83/</guid><description>&lt;h2 id="kubernetes-不靠目录组织资源"&gt;Kubernetes 不靠目录组织资源
+&lt;/h2&gt;&lt;p&gt;传统服务器上，我们习惯用目录表达归属：这个程序在 &lt;code&gt;/opt/app-a&lt;/code&gt;，那个程序在 &lt;code&gt;/opt/app-b&lt;/code&gt;。Kubernetes 的资源不是文件，它主要靠 Namespace、Label、Selector 和 OwnerReference 建立边界与关系。&lt;/p&gt;
+&lt;p&gt;这四个概念各管一件事：&lt;/p&gt;
+&lt;table&gt;
+	&lt;thead&gt;
+			&lt;tr&gt;
+					&lt;th&gt;概念&lt;/th&gt;
+					&lt;th&gt;回答的问题&lt;/th&gt;
+			&lt;/tr&gt;
+	&lt;/thead&gt;
+	&lt;tbody&gt;
+			&lt;tr&gt;
+					&lt;td&gt;Namespace&lt;/td&gt;
+					&lt;td&gt;资源位于哪个隔离空间&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;Label&lt;/td&gt;
+					&lt;td&gt;资源带有什么可查询身份&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;Selector&lt;/td&gt;
+					&lt;td&gt;我想选择哪些资源&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;OwnerReference&lt;/td&gt;
+					&lt;td&gt;这个资源由谁负责生命周期&lt;/td&gt;
+			&lt;/tr&gt;
+	&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;它们经常一起出现，但不能相互替代。&lt;/p&gt;
+&lt;h2 id="namespace资源名称的房间也是策略边界"&gt;Namespace：资源名称的房间，也是策略边界
+&lt;/h2&gt;&lt;p&gt;本项目为每个 &lt;code&gt;SubPool&lt;/code&gt; 派生一个专属 Namespace：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-text" data-lang="text"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;SubPool demo-pool → Namespace subpool-demo-pool
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;SubPool team-a → Namespace subpool-team-a
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;这样每个号池内部都可以使用固定名称：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-text" data-lang="text"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;subpool-demo-pool/cpa
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;subpool-team-a/cpa
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;两个 Service 都叫 &lt;code&gt;cpa&lt;/code&gt;，因为它们位于不同 Namespace，不会冲突。&lt;/p&gt;
+&lt;p&gt;Namespace 还是很多策略的作用域：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;ResourceQuota 限制整个 Namespace 的资源；&lt;/li&gt;
+&lt;li&gt;NetworkPolicy 通常在 Namespace 内选择 Pod；&lt;/li&gt;
+&lt;li&gt;Role 和 RoleBinding 可把权限约束在 Namespace；&lt;/li&gt;
+&lt;li&gt;Secret、ConfigMap、Service 和 PVC 默认只能被同 Namespace 的 Pod 直接引用。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;不过 Namespace 不是虚拟机。多个 Namespace 的 Pod 仍可能运行在同一个 Node 上，共享同一个内核。它提供的是 API、命名和策略层隔离，真正的安全还依赖 RBAC、NetworkPolicy、Pod Security、容器隔离和底层运行时。&lt;/p&gt;
+&lt;h2 id="cluster-scoped-与-namespaced"&gt;Cluster-scoped 与 namespaced
+&lt;/h2&gt;&lt;p&gt;Kubernetes 对象分为两类。&lt;/p&gt;
+&lt;p&gt;Cluster-scoped 对象全局存在，例如：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Namespace；&lt;/li&gt;
+&lt;li&gt;Node；&lt;/li&gt;
+&lt;li&gt;ClusterRole、ClusterRoleBinding；&lt;/li&gt;
+&lt;li&gt;CRD；&lt;/li&gt;
+&lt;li&gt;本项目的 &lt;code&gt;SubPool&lt;/code&gt;；&lt;/li&gt;
+&lt;li&gt;GatewayClass。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Namespaced 对象属于某个 Namespace，例如：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Pod、Deployment、StatefulSet；&lt;/li&gt;
+&lt;li&gt;Service、ConfigMap、Secret；&lt;/li&gt;
+&lt;li&gt;PVC、NetworkPolicy、ResourceQuota；&lt;/li&gt;
+&lt;li&gt;HTTPRoute；&lt;/li&gt;
+&lt;li&gt;Gateway。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;可以用 API discovery 查询某个资源是否 namespaced：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;kubectl api-resources
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;kubectl api-resources --namespaced&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="nb"&gt;true&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;kubectl api-resources --namespaced&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="nb"&gt;false&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;本项目故意把 &lt;code&gt;SubPool&lt;/code&gt; 设计为 cluster-scoped，因为一个 SubPool 会创建并拥有一个 Namespace。若它自己先被放进某个业务 Namespace，生命周期与权限边界会更绕。&lt;/p&gt;
+&lt;h2 id="label贴在对象上的机器可读标签"&gt;Label：贴在对象上的机器可读标签
+&lt;/h2&gt;&lt;p&gt;Label 是简短键值对。项目使用 Kubernetes 推荐风格的应用标签：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;span class="lnt"&gt;4
+&lt;/span&gt;&lt;span class="lnt"&gt;5
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-yaml" data-lang="yaml"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nt"&gt;labels&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nt"&gt;app.kubernetes.io/name&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l"&gt;subpool&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nt"&gt;app.kubernetes.io/component&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l"&gt;runtime&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nt"&gt;app.kubernetes.io/part-of&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l"&gt;subpool&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nt"&gt;subrelay.example.com/pool&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l"&gt;demo-pool&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;这些标签既方便人查询，也让 Service、NetworkPolicy 和 PDB 能精确选择目标。&lt;/p&gt;
+&lt;p&gt;常用查询方式：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;span class="lnt"&gt;4
+&lt;/span&gt;&lt;span class="lnt"&gt;5
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;kubectl -n subpool-demo-pool get pods --show-labels
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;kubectl -n subpool-demo-pool get pods &lt;span class="se"&gt;\
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; -l app.kubernetes.io/component&lt;span class="o"&gt;=&lt;/span&gt;runtime
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;kubectl get namespaces &lt;span class="se"&gt;\
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; -l subrelay.example.com/managed&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="nb"&gt;true&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;Label 适合低基数、用于筛选的稳定信息。大段说明、时间戳、配置内容更适合 annotation，不应塞进 label。&lt;/p&gt;
+&lt;h2 id="selector用标签建立松耦合关系"&gt;Selector：用标签建立松耦合关系
+&lt;/h2&gt;&lt;p&gt;Selector 是查询条件。例如 CPA Service 并不记录某个 Pod 的名字，而是声明：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;span class="lnt"&gt;4
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-yaml" data-lang="yaml"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nt"&gt;selector&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nt"&gt;app.kubernetes.io/name&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l"&gt;subpool&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nt"&gt;app.kubernetes.io/component&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l"&gt;runtime&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nt"&gt;subrelay.example.com/pool&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l"&gt;demo-pool&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;符合这些标签的 Pod 就成为它的后端。Pod 被重建、名字和 IP 改变后，只要新 Pod 仍带相同标签，Service 仍能找到它。&lt;/p&gt;
+&lt;p&gt;这就是 Kubernetes 常见的松耦合方式：对象不记住易变实例，而是描述“我需要哪一类实例”。&lt;/p&gt;
+&lt;p&gt;同样的 selector 还被用在：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;StatefulSet 判断哪些 Pod 属于自己；&lt;/li&gt;
+&lt;li&gt;PDB 判断哪些 Pod 受中断预算保护；&lt;/li&gt;
+&lt;li&gt;NetworkPolicy 判断策略作用于哪些 Pod；&lt;/li&gt;
+&lt;li&gt;Mihomo NetworkPolicy 判断哪些号池 Pod 可以访问代理端口。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="selector-配错会发生什么"&gt;Selector 配错会发生什么
+&lt;/h2&gt;&lt;p&gt;Selector 错误通常不会产生明显语法错误，却会造成很真实的故障：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Service 选不到 Pod，于是 EndpointSlice 为空；&lt;/li&gt;
+&lt;li&gt;Service 误选了其他 Pod，流量进入错误后端；&lt;/li&gt;
+&lt;li&gt;PDB 选不到 Pod，实际上没有保护任何工作负载；&lt;/li&gt;
+&lt;li&gt;NetworkPolicy 选错 Pod，可能该拦的没拦、该放的没放；&lt;/li&gt;
+&lt;li&gt;StatefulSet 的 selector 与 template labels 不匹配时，API Server 会拒绝对象。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;排查 Service 时，应并排检查 selector 和 Pod labels：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;span class="lnt"&gt;4
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;kubectl -n subpool-demo-pool get service cpa -o yaml
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;kubectl -n subpool-demo-pool get pods --show-labels
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;kubectl -n subpool-demo-pool get endpointslice &lt;span class="se"&gt;\
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; -l kubernetes.io/service-name&lt;span class="o"&gt;=&lt;/span&gt;cpa
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h2 id="ownerreference谁负责这个对象的生与死"&gt;OwnerReference：谁负责这个对象的生与死
+&lt;/h2&gt;&lt;p&gt;Operator 创建资源时会写入 owner reference。概念上类似：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;span class="lnt"&gt;4
+&lt;/span&gt;&lt;span class="lnt"&gt;5
+&lt;/span&gt;&lt;span class="lnt"&gt;6
+&lt;/span&gt;&lt;span class="lnt"&gt;7
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-yaml" data-lang="yaml"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nt"&gt;metadata&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nt"&gt;ownerReferences&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;- &lt;span class="nt"&gt;apiVersion&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l"&gt;subrelay.example.com/v1alpha1&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nt"&gt;kind&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l"&gt;SubPool&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nt"&gt;name&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l"&gt;demo-pool&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nt"&gt;uid&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l"&gt;...&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nt"&gt;controller&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="kc"&gt;true&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;这里最重要的是 UID，而不只是 name。即使旧的 &lt;code&gt;demo-pool&lt;/code&gt; 被删除后又创建了同名对象，新对象的 UID 也不同，不能自然接管旧对象。&lt;/p&gt;
+&lt;p&gt;OwnerReference 有两个主要用途：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;让控制器判断对象是不是自己管理的；&lt;/li&gt;
+&lt;li&gt;让 Kubernetes garbage collector 在 owner 删除后清理 dependents。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;本项目对所有权非常保守。若 &lt;code&gt;subpool-demo-pool&lt;/code&gt; Namespace 已存在，但 owner reference 不属于当前 SubPool，Operator 报告 &lt;code&gt;NamespaceConflict&lt;/code&gt;，不会接管它。&lt;/p&gt;
+&lt;p&gt;这不是“自动化不够聪明”，而是安全边界。仅凭同名就接管资源，可能误删别人的 Namespace 和数据。&lt;/p&gt;
+&lt;h2 id="为什么-namespace-也能由-subpool-拥有"&gt;为什么 Namespace 也能由 SubPool 拥有
+&lt;/h2&gt;&lt;p&gt;Namespaced owner 不能跨 Namespace 随意拥有其他 Namespace 的对象，但 cluster-scoped owner 可以拥有 namespaced 对象。本项目的 &lt;code&gt;SubPool&lt;/code&gt; 是 cluster-scoped，因此可以成为派生 Namespace 的 controller owner。&lt;/p&gt;
+&lt;p&gt;具体生命周期是：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;span class="lnt"&gt;4
+&lt;/span&gt;&lt;span class="lnt"&gt;5
+&lt;/span&gt;&lt;span class="lnt"&gt;6
+&lt;/span&gt;&lt;span class="lnt"&gt;7
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-text" data-lang="text"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;SubPool
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; └─ Namespace subpool-demo-pool
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; ├─ Secret
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; ├─ StatefulSet
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; ├─ Service
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; ├─ PVC
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; └─ NetworkPolicy 等
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;删除 SubPool 时，Operator 先明确删除自己拥有的 Namespace。Namespace 的删除又触发内部 namespaced 资源清理。&lt;/p&gt;
+&lt;h2 id="所有权与名字一样是两回事"&gt;所有权与“名字一样”是两回事
+&lt;/h2&gt;&lt;p&gt;项目中有两个典型冲突：&lt;/p&gt;
+&lt;h3 id="namespaceconflict"&gt;NamespaceConflict
+&lt;/h3&gt;&lt;p&gt;派生 Namespace 已存在，但不属于当前 SubPool。Operator 停止创建，不覆盖 labels，也不在删除 SubPool 时删除它。&lt;/p&gt;
+&lt;h3 id="credentialconflict"&gt;CredentialConflict
+&lt;/h3&gt;&lt;p&gt;&lt;code&gt;subpool-credentials&lt;/code&gt; Secret 已存在，但不由当前 SubPool 控制。Operator 不读取并当作自己的凭据，也不覆盖其内容。&lt;/p&gt;
+&lt;p&gt;正确判断逻辑是：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-text" data-lang="text"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;名称符合预期 + owner UID 符合预期 + 对象结构符合约定
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;缺一项都不应盲目接管。&lt;/p&gt;
+&lt;h2 id="namespace-label-还能连接跨-namespace-策略"&gt;Namespace label 还能连接跨 Namespace 策略
+&lt;/h2&gt;&lt;p&gt;本项目给派生 Namespace 添加：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-yaml" data-lang="yaml"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nt"&gt;subrelay.example.com/managed&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;#34;true&amp;#34;&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;Shared Mihomo 的 NetworkPolicy 通过 &lt;code&gt;namespaceSelector&lt;/code&gt; 只允许这些受管 Namespace 中的 CPA Pod访问 18000 端口。&lt;/p&gt;
+&lt;p&gt;Shared Envoy Gateway 的 listener 也用相同 Namespace label 限制哪些 Namespace 可以绑定 HTTPRoute：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;span class="lnt"&gt;4
+&lt;/span&gt;&lt;span class="lnt"&gt;5
+&lt;/span&gt;&lt;span class="lnt"&gt;6
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-yaml" data-lang="yaml"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nt"&gt;allowedRoutes&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nt"&gt;namespaces&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nt"&gt;from&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l"&gt;Selector&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nt"&gt;selector&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nt"&gt;matchLabels&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nt"&gt;subrelay.example.com/managed&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;#34;true&amp;#34;&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;这是一种很漂亮的“共享基础设施准入证”：Operator 创建并标记受管 Namespace，共享网关只接受带这个标记的租户。&lt;/p&gt;
+&lt;h2 id="pod-security-也通过-namespace-label-启用"&gt;Pod Security 也通过 Namespace label 启用
+&lt;/h2&gt;&lt;p&gt;Operator Configuration 还会把这些标签投影到每个号池 Namespace：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-yaml" data-lang="yaml"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nt"&gt;pod-security.kubernetes.io/enforce&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l"&gt;restricted&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nt"&gt;pod-security.kubernetes.io/audit&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l"&gt;restricted&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nt"&gt;pod-security.kubernetes.io/warn&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l"&gt;restricted&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;它们启用 Pod Security Admission 的 restricted 级别。若 Pod 配置违反规则，&lt;code&gt;enforce&lt;/code&gt; 会阻止创建，&lt;code&gt;audit&lt;/code&gt; 和 &lt;code&gt;warn&lt;/code&gt; 则留下审计或警告信号。&lt;/p&gt;
+&lt;p&gt;因此 Namespace 不只是“分类文件夹”，还是安全策略和准入策略的重要挂载点。&lt;/p&gt;
+&lt;h2 id="实用排查顺序"&gt;实用排查顺序
+&lt;/h2&gt;&lt;p&gt;遇到“资源明明存在，但系统不工作”时，可以按下面检查：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;span class="lnt"&gt;4
+&lt;/span&gt;&lt;span class="lnt"&gt;5
+&lt;/span&gt;&lt;span class="lnt"&gt;6
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;kubectl get sp demo-pool -o yaml
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;kubectl get namespace subpool-demo-pool -o yaml
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;kubectl -n subpool-demo-pool get all --show-labels
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;kubectl -n subpool-demo-pool get service cpa -o yaml
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;kubectl -n subpool-demo-pool get endpointslice &lt;span class="se"&gt;\
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; -l kubernetes.io/service-name&lt;span class="o"&gt;=&lt;/span&gt;cpa -o yaml
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;重点回答：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;Namespace 是否正确派生并带有 managed label？&lt;/li&gt;
+&lt;li&gt;子资源的 owner UID 是否指向当前 SubPool？&lt;/li&gt;
+&lt;li&gt;Service、PDB、NetworkPolicy 的 selector 是否与 Pod label 完全匹配？&lt;/li&gt;
+&lt;li&gt;有没有同名但不属于当前 SubPool 的遗留资源？&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;理解这些关系后，Kubernetes 就不再是一堆相互独立的 YAML，而是一张由作用域、标签选择和生命周期所有权连接起来的对象图。&lt;/p&gt;</description></item></channel></rss>

@@ -1,0 +1,222 @@
+<!doctype html><html lang=zh-cn dir=ltr><head><meta charset=utf-8><meta name=viewport content='width=device-width,initial-scale=1'><meta name=description content='基本结构 1 nmcli [对象] [动作] [参数] 主要对象：con（连接）、dev（设备）、gen（通用）\n常用命令 查看 1 2 3 4 5 6 7 8 9 10 11 12 13 14 # 列出所有连接 nmcli con show # 列出活跃连接 nmcli con show --active # 查看连接详情 nmcli con show "连接名" # 查看设备状态 nmcli dev status # 查看设备详情（IP、MAC 等） nmcli dev show enp171s0 创建连接 1 2 3 4 5 6 7 8 9 10 nmcli con add \\ con-name "连接名" \\ type ethernet \\ ifname enp171s0 \\ ipv4.addresses 192.168.100.2/24 \\ ipv4.method manual \\ ipv4.gateway "" \\ ipv4.dns "" \\ ipv4.never-default yes \\ connection.autoconnect yes 参数说明：\n'><title>nmcli 快速参考</title><link rel=canonical href=https://kerolt.github.io/p/nmcli-%E5%BF%AB%E9%80%9F%E5%8F%82%E8%80%83/><link rel=preconnect href=https://fonts.googleapis.com><link rel=preconnect href=https://fonts.gstatic.com crossorigin><link rel=preload as=style href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap"><link rel=stylesheet href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap"><link rel=stylesheet href=/scss/style.min.e62e09c60ba428a627e03568fa3df938f6a8224f815b5846f00816c17d4a0be4.css><meta property='og:title' content="nmcli 快速参考"><meta property='og:description' content='基本结构 1 nmcli [对象] [动作] [参数] 主要对象：con（连接）、dev（设备）、gen（通用）\n常用命令 查看 1 2 3 4 5 6 7 8 9 10 11 12 13 14 # 列出所有连接 nmcli con show # 列出活跃连接 nmcli con show --active # 查看连接详情 nmcli con show "连接名" # 查看设备状态 nmcli dev status # 查看设备详情（IP、MAC 等） nmcli dev show enp171s0 创建连接 1 2 3 4 5 6 7 8 9 10 nmcli con add \\ con-name "连接名" \\ type ethernet \\ ifname enp171s0 \\ ipv4.addresses 192.168.100.2/24 \\ ipv4.method manual \\ ipv4.gateway "" \\ ipv4.dns "" \\ ipv4.never-default yes \\ connection.autoconnect yes 参数说明：\n'><meta property='og:url' content='https://kerolt.github.io/p/nmcli-%E5%BF%AB%E9%80%9F%E5%8F%82%E8%80%83/'><meta property='og:site_name' content="Kerolt's Note"><meta property='og:type' content='article'><meta property='article:section' content='Post'><meta property='article:tag' content='nmcli'><meta property='article:tag' content='Linux'><meta property='article:tag' content='网络'><meta property='article:published_time' content='2026-06-28T00:00:00+00:00'><meta property='article:modified_time' content='2026-06-28T00:00:00+00:00'><meta name=twitter:title content="nmcli 快速参考"><meta name=twitter:description content='基本结构 1 nmcli [对象] [动作] [参数] 主要对象：con（连接）、dev（设备）、gen（通用）\n常用命令 查看 1 2 3 4 5 6 7 8 9 10 11 12 13 14 # 列出所有连接 nmcli con show # 列出活跃连接 nmcli con show --active # 查看连接详情 nmcli con show "连接名" # 查看设备状态 nmcli dev status # 查看设备详情（IP、MAC 等） nmcli dev show enp171s0 创建连接 1 2 3 4 5 6 7 8 9 10 nmcli con add \\ con-name "连接名" \\ type ethernet \\ ifname enp171s0 \\ ipv4.addresses 192.168.100.2/24 \\ ipv4.method manual \\ ipv4.gateway "" \\ ipv4.dns "" \\ ipv4.never-default yes \\ connection.autoconnect yes 参数说明：\n'><link rel="shortcut icon" href=/images/favicon.png></head><body class=article-page><script>(function(){const e="StackColorScheme";localStorage.getItem(e)||localStorage.setItem(e,"auto")})()</script><script>(function(){const t="StackColorScheme",e=localStorage.getItem(t),n=window.matchMedia("(prefers-color-scheme: dark)").matches===!0;e=="dark"||e==="auto"&&n?document.documentElement.dataset.scheme="dark":document.documentElement.dataset.scheme="light"})()</script><div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky"><button class="hamburger hamburger--spin" type=button id=toggle-menu aria-label=切换菜单>
+<span class=hamburger-box><span class=hamburger-inner></span></span></button><header><figure class=site-avatar><a href=/><img src=/images/avatar.jpg width=200 height=200 class=site-logo loading=lazy alt=Avatar>
+</a><span class=emoji>🏸</span></figure><div class=site-meta><h1 class=site-name><a href=/>Kerolt's Note</a></h1><h2 class=site-description>愿你无拘无束自由的活着</h2></div></header><ol class=menu-social><li><a href=https://github.com/kerolt title=GitHub rel=me><svg class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 19c-4.3 1.4-4.3-2.5-6-3m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6.0 00-1.3-3.2 4.2 4.2.0 00-.1-3.2s-1.1-.3-3.5 1.3a12.3 12.3.0 00-6.2.0C6.5 2.8 5.4 3.1 5.4 3.1a4.2 4.2.0 00-.1 3.2A4.6 4.6.0 004 9.5c0 4.6 2.7 5.7 5.5 6-.6.6-.6 1.2-.5 2V21"/></svg></a></li></ol><ol class=menu id=main-menu><li><a href=/><svg class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><polyline points="5 12 3 12 12 3 21 12 19 12"/><path d="M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"/><path d="M9 21v-6a2 2 0 012-2h2a2 2 0 012 2v6"/></svg>
+<span>首页</span></a></li><li><a href=/archives/><svg class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><rect x="3" y="4" width="18" height="4" rx="2"/><path d="M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
+<span>归档</span></a></li><li><a href=/categories/><svg class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><line x1="5" y1="9" x2="19" y2="9"/><line x1="5" y1="15" x2="19" y2="15"/><line x1="11" y1="4" x2="7" y2="20"/><line x1="17" y1="4" x2="13" y2="20"/></svg>
+<span>分类</span></a></li><li><a href=/tags/><svg class="icon icon-tabler icon-tabler-tag" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><path d="M11 3l9 9a1.5 1.5.0 010 2l-6 6a1.5 1.5.0 01-2 0L3 11V7a4 4 0 014-4h4"/><circle cx="9" cy="9" r="2"/></svg>
+<span>标签</span></a></li><li><a href=/about/><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-info-circle"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 12a9 9 0 1018 0A9 9 0 003 12"/><path d="M12 9h.01"/><path d="M11 12h1v4h1"/></svg>
+<span>关于我</span></a></li><li><a href=/search/><svg class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="10" cy="10" r="7"/><line x1="21" y1="21" x2="15" y2="15"/></svg>
+<span>搜索</span></a></li><li class=menu-bottom-section><ol class=menu><li id=dark-mode-toggle><svg class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="8" cy="12" r="2"/><rect x="2" y="6" width="20" height="12" rx="6"/></svg>
+<svg class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="16" cy="12" r="2"/><rect x="2" y="6" width="20" height="12" rx="6"/></svg>
+<span>暗色模式</span></li></ol></li></ol></aside><aside class="sidebar right-sidebar sticky"><section class="widget archives"><div class=widget-icon><svg class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><line x1="5" y1="9" x2="19" y2="9"/><line x1="5" y1="15" x2="19" y2="15"/><line x1="11" y1="4" x2="7" y2="20"/><line x1="17" y1="4" x2="13" y2="20"/></svg></div><h2 class="widget-title section-title">目录</h2><div class=widget--toc><nav class=toc-nav id=TableOfContents><ol><li><a href=#基本结构>基本结构</a></li><li><a href=#常用命令>常用命令</a><ol><li><a href=#查看>查看</a></li><li><a href=#创建连接>创建连接</a></li><li><a href=#修改连接>修改连接</a></li><li><a href=#启停连接>启停连接</a></li><li><a href=#删除连接>删除连接</a></li></ol></li><li><a href=#设备与连接的关系>设备与连接的关系</a><ol><li><a href=#多连接切换场景>多连接切换场景</a></li></ol></li><li><a href=#理解-nmcli-con-show-只显示持久化配置>理解 nmcli con show 只显示持久化配置</a></li><li><a href=#macos-与-fedora-的默认退避差异>macOS 与 Fedora 的默认退避差异</a></li><li><a href=#autoconnect-与多网口场景>autoconnect 与多网口场景</a><ol><li><a href=#管理原则>管理原则</a></li><li><a href=#实际方案>实际方案</a></li><li><a href=#判断当前哪个连接激活>判断当前哪个连接激活</a></li></ol></li><li><a href=#快速排查>快速排查</a></li><li><a href=#防火墙相关>防火墙相关</a></li></ol></nav></div></section></aside><main class="main full-width"><article class=main-article><header class=article-header><div class=article-details><header class=article-category><a href=/categories/notion/ style=background-color:#c8efbe;color:#183d0f>Notion</a></header><div class=article-title-wrapper><h2 class=article-title><a href=/p/nmcli-%E5%BF%AB%E9%80%9F%E5%8F%82%E8%80%83/>nmcli 快速参考</a></h2></div><footer class=article-meta><div class=inline-meta><svg class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><path d="M11.795 21H5a2 2 0 01-2-2V7a2 2 0 012-2h12a2 2 0 012 2v4"/><circle cx="18" cy="18" r="4"/><path d="M15 3v4"/><path d="M7 3v4"/><path d="M3 11h16"/><path d="M18 16.496V18l1 1"/></svg>
+<time class=article-time--published datetime=2026-06-28T00:00:00Z>2026年6月28日星期日</time>
+<svg class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg>
+<time class=article-time--reading>阅读时长: 4 分钟</time></div></footer></div></header><aside class=article-toc><details><summary><div class=article-toc-title><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-chevron-right"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 6l6 6-6 6"/></svg>
+<span>目录</span></div></summary><nav class=toc-nav><ol><li><a href=#基本结构>基本结构</a></li><li><a href=#常用命令>常用命令</a><ol><li><a href=#查看>查看</a></li><li><a href=#创建连接>创建连接</a></li><li><a href=#修改连接>修改连接</a></li><li><a href=#启停连接>启停连接</a></li><li><a href=#删除连接>删除连接</a></li></ol></li><li><a href=#设备与连接的关系>设备与连接的关系</a><ol><li><a href=#多连接切换场景>多连接切换场景</a></li></ol></li><li><a href=#理解-nmcli-con-show-只显示持久化配置>理解 nmcli con show 只显示持久化配置</a></li><li><a href=#macos-与-fedora-的默认退避差异>macOS 与 Fedora 的默认退避差异</a></li><li><a href=#autoconnect-与多网口场景>autoconnect 与多网口场景</a><ol><li><a href=#管理原则>管理原则</a></li><li><a href=#实际方案>实际方案</a></li><li><a href=#判断当前哪个连接激活>判断当前哪个连接激活</a></li></ol></li><li><a href=#快速排查>快速排查</a></li><li><a href=#防火墙相关>防火墙相关</a></li></ol></nav></details></aside><section class=article-content><h2 id=基本结构>基本结构</h2><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>nmcli [对象] [动作] [参数]
+</span></span></code></pre></td></tr></table></div></div><p>主要对象：<code>con</code>（连接）、<code>dev</code>（设备）、<code>gen</code>（通用）</p><hr><h2 id=常用命令>常用命令</h2><h3 id=查看>查看</h3><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl><span class=c1># 列出所有连接</span>
+</span></span><span class=line><span class=cl>nmcli con show
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># 列出活跃连接</span>
+</span></span><span class=line><span class=cl>nmcli con show --active
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># 查看连接详情</span>
+</span></span><span class=line><span class=cl>nmcli con show <span class=s2>&#34;连接名&#34;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># 查看设备状态</span>
+</span></span><span class=line><span class=cl>nmcli dev status
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># 查看设备详情（IP、MAC 等）</span>
+</span></span><span class=line><span class=cl>nmcli dev show enp171s0
+</span></span></code></pre></td></tr></table></div></div><h3 id=创建连接>创建连接</h3><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>nmcli con add <span class=se>\
+</span></span></span><span class=line><span class=cl>  con-name <span class=s2>&#34;连接名&#34;</span> <span class=se>\
+</span></span></span><span class=line><span class=cl>  <span class=nb>type</span> ethernet <span class=se>\
+</span></span></span><span class=line><span class=cl>  ifname enp171s0 <span class=se>\
+</span></span></span><span class=line><span class=cl>  ipv4.addresses 192.168.100.2/24 <span class=se>\
+</span></span></span><span class=line><span class=cl>  ipv4.method manual <span class=se>\
+</span></span></span><span class=line><span class=cl>  ipv4.gateway <span class=s2>&#34;&#34;</span> <span class=se>\
+</span></span></span><span class=line><span class=cl>  ipv4.dns <span class=s2>&#34;&#34;</span> <span class=se>\
+</span></span></span><span class=line><span class=cl>  ipv4.never-default yes <span class=se>\
+</span></span></span><span class=line><span class=cl>  connection.autoconnect yes
+</span></span></code></pre></td></tr></table></div></div><p>参数说明：</p><div class=table-wrapper><table><thead><tr><th>参数</th><th>作用</th></tr></thead><tbody><tr><td><code>ipv4.method manual</code></td><td>静态 IP（auto = DHCP）</td></tr><tr><td><code>ipv4.never-default yes</code></td><td>不添加默认路由，不影响 WiFi 上网</td></tr><tr><td><code>ipv4.gateway ""</code></td><td>不设网关</td></tr><tr><td><code>ipv4.dns ""</code></td><td>不设 DNS</td></tr><tr><td><code>connection.autoconnect yes</code></td><td>开机自动激活</td></tr></tbody></table></div><h3 id=修改连接>修改连接</h3><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl><span class=c1># 改 IP</span>
+</span></span><span class=line><span class=cl>nmcli con mod <span class=s2>&#34;连接名&#34;</span> ipv4.addresses 192.168.200.2/24
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># 绑多个 IP</span>
+</span></span><span class=line><span class=cl>nmcli con mod <span class=s2>&#34;连接名&#34;</span> ipv4.addresses <span class=s2>&#34;192.168.100.2/24,192.168.200.2/24&#34;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># 改连接名</span>
+</span></span><span class=line><span class=cl>nmcli con mod <span class=s2>&#34;旧名&#34;</span> connection.id <span class=s2>&#34;新名&#34;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># 改 autoconnect</span>
+</span></span><span class=line><span class=cl>nmcli con mod <span class=s2>&#34;连接名&#34;</span> connection.autoconnect no
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># 绑定到指定网口</span>
+</span></span><span class=line><span class=cl>nmcli con mod <span class=s2>&#34;连接名&#34;</span> connection.interface-name enp171s0
+</span></span></code></pre></td></tr></table></div></div><h3 id=启停连接>启停连接</h3><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>nmcli con up <span class=s2>&#34;连接名&#34;</span>      <span class=c1># 激活</span>
+</span></span><span class=line><span class=cl>nmcli con down <span class=s2>&#34;连接名&#34;</span>    <span class=c1># 停用（仅停此连接，不影响设备）</span>
+</span></span><span class=line><span class=cl>nmcli dev disconnect enp171s0   <span class=c1># 断开设备（所有连接）</span>
+</span></span><span class=line><span class=cl>nmcli dev connect enp171s0      <span class=c1># 重新连接</span>
+</span></span></code></pre></td></tr></table></div></div><h3 id=删除连接>删除连接</h3><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>nmcli con del <span class=s2>&#34;连接名&#34;</span>
+</span></span></code></pre></td></tr></table></div></div><hr><h2 id=设备与连接的关系>设备与连接的关系</h2><ul><li><strong>一个设备</strong>（如 <code>enp171s0</code>）可以绑定<strong>多个连接</strong></li><li><strong>一个设备同一时间只能激活一个连接</strong></li><li>切换连接：<code>nmcli con up "另一个连接"</code></li><li>切换后旧连接自动断开</li></ul><h3 id=多连接切换场景>多连接切换场景</h3><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl><span class=c1># 场景 A：直连 Mac（100 网段）</span>
+</span></span><span class=line><span class=cl>nmcli con up <span class=s2>&#34;rj45-direct&#34;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># 场景 B：直连其他设备（200 网段）</span>
+</span></span><span class=line><span class=cl>nmcli con up <span class=s2>&#34;rj45-direct-v2&#34;</span>
+</span></span></code></pre></td></tr></table></div></div><p>autoconnect 建议只保留一个连接设为 <code>yes</code>，其余手动 up。</p><hr><h2 id=理解-nmcli-con-show-只显示持久化配置>理解 nmcli con show 只显示持久化配置</h2><p><code>nmcli con show</code> 列出的是保存在 <code>/etc/NetworkManager/system-connections/</code> 的 <strong>连接配置文件（profile）</strong>，相当于"预设方案"。只有你手动 <code>nmcli con add</code> 或 <code>nmcli con save</code> 过的才会出现。</p><p>插网线后自动协商出的 <code>169.254.x.x</code>（Zeroconf/IPv4LL）是内核自动生成的<strong>临时地址</strong>，没有 profile，所以在 <code>nmcli con show</code> 里看不见，但 <code>ip addr</code> 里能看见。</p><div class=table-wrapper><table><thead><tr><th>来源</th><th style=text-align:center>出现 <code>ip addr</code></th><th style=text-align:center>出现 <code>nmcli con show</code></th><th style=text-align:center>重启后持久</th></tr></thead><tbody><tr><td><code>nmcli con add</code> 静态 IP</td><td style=text-align:center>是</td><td style=text-align:center>是</td><td style=text-align:center>是</td></tr><tr><td>DHCP 自动获取</td><td style=text-align:center>是</td><td style=text-align:center>是（自动生成临时 profile）</td><td style=text-align:center>仅本次会话</td></tr><tr><td>IPv4LL 自动协商 (169.254.x.x)</td><td style=text-align:center>是</td><td style=text-align:center>否</td><td style=text-align:center>否</td></tr></tbody></table></div><h2 id=macos-与-fedora-的默认退避差异>macOS 与 Fedora 的默认退避差异</h2><p>两端插网线且无 DHCP 时：</p><div class=table-wrapper><table><thead><tr><th>系统</th><th>无 DHCP 时的默认行为</th><th>结果</th></tr></thead><tbody><tr><td>macOS</td><td><strong>自动启用 Bonjour/Zeroconf</strong> → 协商 169.254.x.x</td><td>自动拿到 IPv4</td></tr><tr><td>Fedora</td><td><code>ipv4.link-local disabled</code></td><td>IPv4 空着，只有 fe80::</td></tr></tbody></table></div><p>如果希望 Fedora 和 Mac 一样，没 DHCP 时自动协商链路本地地址：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>nmcli con mod <span class=s2>&#34;连接名&#34;</span> ipv4.link-local enabled
+</span></span><span class=line><span class=cl>nmcli con up <span class=s2>&#34;连接名&#34;</span>
+</span></span></code></pre></td></tr></table></div></div><p>但对于直连场景，固定静态 IP（<code>192.168.100.x</code>）更可靠，避免每次随机协商地址变化带来的麻烦。</p><hr><h2 id=autoconnect-与多网口场景>autoconnect 与多网口场景</h2><p><strong>场景还原</strong>：<code>enp171s0</code> 绑定了静态 <code>rj45-direct</code>（<code>autoconnect yes</code>），换插到入户网线后，NetworkManager 自动激活了该连接，导致 IP/网关/ DNS 不对，无法上网。</p><p><strong>原因</strong>：<code>autoconnect yes</code> 的连接，当网口链路 UP 时 NetworkManager 会自动激活它，无视另一端连接的是什么设备。</p><h3 id=管理原则>管理原则</h3><ul><li>每个网口<strong>只保留一个连接设为 <code>autoconnect yes</code></strong>（或全设为 <code>no</code>）</li><li>不确定场景的连接优先设为 <code>autoconnect no</code>，需要时手动 <code>nmcli con up</code></li></ul><h3 id=实际方案>实际方案</h3><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl><span class=c1># 方案一：固定分工，不冲突</span>
+</span></span><span class=line><span class=cl><span class=c1># enp170s0 → 入户网（默认 DHCP，可不配任何 profile）</span>
+</span></span><span class=line><span class=cl><span class=c1># enp171s0 → 直连 Mac（关 autoconnect）</span>
+</span></span><span class=line><span class=cl>nmcli con mod <span class=s2>&#34;rj45-direct&#34;</span> connection.autoconnect no
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># 方案二：同一网口按场景切换</span>
+</span></span><span class=line><span class=cl>nmcli con add <span class=se>\
+</span></span></span><span class=line><span class=cl>  con-name <span class=s2>&#34;rj45-home&#34;</span> <span class=se>\
+</span></span></span><span class=line><span class=cl>  <span class=nb>type</span> ethernet <span class=se>\
+</span></span></span><span class=line><span class=cl>  ifname enp171s0 <span class=se>\
+</span></span></span><span class=line><span class=cl>  ipv4.method auto <span class=se>\
+</span></span></span><span class=line><span class=cl>  connection.autoconnect no
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># 切换</span>
+</span></span><span class=line><span class=cl>nmcli con up <span class=s2>&#34;rj45-direct&#34;</span>   <span class=c1># 直连 Mac</span>
+</span></span><span class=line><span class=cl>nmcli con up <span class=s2>&#34;rj45-home&#34;</span>     <span class=c1># 入户上网</span>
+</span></span></code></pre></td></tr></table></div></div><h3 id=判断当前哪个连接激活>判断当前哪个连接激活</h3><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>nmcli con show --active <span class=p>|</span> grep enp171s0
+</span></span></code></pre></td></tr></table></div></div><hr><h2 id=快速排查>快速排查</h2><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl><span class=c1># 看网口状态</span>
+</span></span><span class=line><span class=cl>ip link show enp171s0
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># 看 IP</span>
+</span></span><span class=line><span class=cl>ip addr show enp171s0
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># 看路由表</span>
+</span></span><span class=line><span class=cl>ip route
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># 看哪个连接激活了</span>
+</span></span><span class=line><span class=cl>nmcli con show --active
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># 看防火墙是否拦截</span>
+</span></span><span class=line><span class=cl>sudo firewall-cmd --list-all
+</span></span></code></pre></td></tr></table></div></div><hr><h2 id=防火墙相关>防火墙相关</h2><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl><span class=c1># 放行内网 SSH</span>
+</span></span><span class=line><span class=cl>sudo firewall-cmd --permanent --add-rich-rule<span class=o>=</span><span class=s1>&#39;rule family=&#34;ipv4&#34; source address=&#34;192.168.100.0/24&#34; service name=&#34;ssh&#34; accept&#39;</span>
+</span></span><span class=line><span class=cl>sudo firewall-cmd --reload
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># 放行 mDNS（用于 hostname.local 解析）</span>
+</span></span><span class=line><span class=cl>sudo firewall-cmd --permanent --add-service<span class=o>=</span>mdns
+</span></span><span class=line><span class=cl>sudo firewall-cmd --reload
+</span></span></code></pre></td></tr></table></div></div></section><footer class="article-meta article-footer"><section class=article-tags><a href=/tags/nmcli/>Nmcli</a>
+<a href=/tags/linux/>Linux</a>
+<a href=/tags/%E7%BD%91%E7%BB%9C/>网络</a></section><section class="article-copyright inline-meta"><svg class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><path d="M14.5 9a3.5 4 0 100 6"/></svg>
+<span>Licensed under CC BY-NC-SA 4.0</span></section></footer></article><footer class=site-footer><section class=copyright>&copy;
+2025 -
+2026 Kerolt's Note</section><section class=powerby>使用 <a href=https://gohugo.io/ target=_blank rel=noopener>Hugo</a> 构建<br>主题 <b><a href=https://github.com/CaiJimmy/hugo-theme-stack target=_blank rel=noopener data-version=4.0.3>Stack</a></b> 由 <a href=https://jimmycai.com target=_blank rel=noopener>Jimmy</a> 设计</section></footer><script type=module>
+    import gallery from '\/ts\/gallery.js';
+
+    const articleContent = document.querySelector('.article-content');
+    const shouldLoad = articleContent && (articleContent.querySelectorAll('figure').length > 0 || articleContent.querySelectorAll('img.gallery-image').length > 0);
+    
+    if (shouldLoad) {
+        gallery(articleContent);
+
+        const PhotoSwipeLightbox = (await import("https:\/\/cdn.jsdelivr.net\/npm\/photoswipe@5.4.4\/dist\/photoswipe-lightbox.esm.min.js")).default;
+        const styleHref = "https:\/\/cdn.jsdelivr.net\/npm\/photoswipe@5.4.4\/dist\/photoswipe.css";
+
+        const styleTag = document.createElement('link');
+        styleTag.rel = 'stylesheet';
+        styleTag.href = styleHref;
+        document.head.appendChild(styleTag);
+
+        const lightbox = new PhotoSwipeLightbox({
+            gallerySelector: '.article-content',
+            childSelector: 'figure a.image-link',
+            pswpModule: () => import("https:\/\/cdn.jsdelivr.net\/npm\/photoswipe@5.4.4\/dist\/photoswipe.esm.min.js")
+        });
+        lightbox.init();
+    }
+</script></main></div><script type=text/javascript src=/ts/main.f856840516f7c2ad1769a8f5937e3d08d6cb386e2cd2dd025ae696e0ff207958.js defer></script></body></html>

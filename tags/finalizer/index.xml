@@ -1,0 +1,306 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Finalizer on Kerolt's Note</title><link>https://kerolt.github.io/tags/finalizer/</link><description>Recent content in Finalizer on Kerolt's Note</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><lastBuildDate>Sun, 02 Aug 2026 00:00:00 +0000</lastBuildDate><atom:link href="https://kerolt.github.io/tags/finalizer/index.xml" rel="self" type="application/rss+xml"/><item><title>CRD、Operator、Reconcile 与 Finalizer</title><link>https://kerolt.github.io/p/crdoperatorreconcile-%E4%B8%8E-finalizer/</link><pubDate>Sun, 02 Aug 2026 00:00:00 +0000</pubDate><guid>https://kerolt.github.io/p/crdoperatorreconcile-%E4%B8%8E-finalizer/</guid><description>&lt;h2 id="operator-的本质把运维知识写成控制循环"&gt;Operator 的本质：把运维知识写成控制循环
+&lt;/h2&gt;&lt;p&gt;普通 YAML 能描述一组静态对象，但很难表达这些规则：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;一个业务对象自动派生一个 Namespace；&lt;/li&gt;
+&lt;li&gt;先校验资源预算，再创建任何持久资源；&lt;/li&gt;
+&lt;li&gt;Secret 缺失时随机生成，存在时绝不覆盖；&lt;/li&gt;
+&lt;li&gt;Gateway 模式才创建 HTTPRoute；&lt;/li&gt;
+&lt;li&gt;suspend 时缩容但保留 PVC；&lt;/li&gt;
+&lt;li&gt;删除时等待 Namespace 真正清理完；&lt;/li&gt;
+&lt;li&gt;持续把依赖状态汇总成 Conditions。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Operator 把这类领域运维知识编码进 controller。使用者面对的是 &lt;code&gt;SubPool&lt;/code&gt;，底层 Kubernetes 积木由 controller 组织。&lt;/p&gt;
+&lt;h2 id="crd给-kubernetes-扩展一种新对象"&gt;CRD：给 Kubernetes 扩展一种新对象
+&lt;/h2&gt;&lt;p&gt;CustomResourceDefinition 告诉 API Server：集群现在支持一种新资源。&lt;/p&gt;
+&lt;p&gt;本项目安装：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;span class="lnt"&gt;4
+&lt;/span&gt;&lt;span class="lnt"&gt;5
+&lt;/span&gt;&lt;span class="lnt"&gt;6
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-text" data-lang="text"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;plural: subpools
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;group: subrelay.example.com
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;version: v1alpha1
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;kind: SubPool
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;scope: Cluster
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;shortName: sp
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;安装 CRD 后，才能执行：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;kubectl get subpools
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;kubectl get sp
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;kubectl apply -f examples/subpool-internal.yaml
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;CRD 只定义 API 和校验规则，不会自己创建 StatefulSet。真正的自动化逻辑来自 Operator controller。&lt;/p&gt;
+&lt;h2 id="go-类型如何变成-kubernetes-api"&gt;Go 类型如何变成 Kubernetes API
+&lt;/h2&gt;&lt;p&gt;&lt;code&gt;api/v1alpha1/subpool_types.go&lt;/code&gt; 定义：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt; 1
+&lt;/span&gt;&lt;span class="lnt"&gt; 2
+&lt;/span&gt;&lt;span class="lnt"&gt; 3
+&lt;/span&gt;&lt;span class="lnt"&gt; 4
+&lt;/span&gt;&lt;span class="lnt"&gt; 5
+&lt;/span&gt;&lt;span class="lnt"&gt; 6
+&lt;/span&gt;&lt;span class="lnt"&gt; 7
+&lt;/span&gt;&lt;span class="lnt"&gt; 8
+&lt;/span&gt;&lt;span class="lnt"&gt; 9
+&lt;/span&gt;&lt;span class="lnt"&gt;10
+&lt;/span&gt;&lt;span class="lnt"&gt;11
+&lt;/span&gt;&lt;span class="lnt"&gt;12
+&lt;/span&gt;&lt;span class="lnt"&gt;13
+&lt;/span&gt;&lt;span class="lnt"&gt;14
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-text" data-lang="text"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;SubPool
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; ├─ ObjectMeta
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; ├─ Spec
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; │ ├─ Exposure
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; │ ├─ Storage
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; │ ├─ CPA
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; │ ├─ CPAManager
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; │ └─ Suspend
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; └─ Status
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; ├─ ObservedGeneration
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; ├─ Namespace
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; ├─ CPAService
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; ├─ Hostname
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; └─ Conditions
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;Kubebuilder markers 描述 scope、short name、status subresource、打印列和 CEL 校验。生成的 CRD YAML被放在 &lt;code&gt;config/crd/bases/&lt;/code&gt;。&lt;/p&gt;
+&lt;p&gt;Go 类型是 controller 编译时使用的强类型模型，CRD schema 是 API Server 接收对象时使用的运行时契约。修改其中一边却忘记重新生成另一边，会造成代码和集群 API 不一致。&lt;/p&gt;
+&lt;h2 id="静态校验与动态校验的边界"&gt;静态校验与动态校验的边界
+&lt;/h2&gt;&lt;p&gt;CRD schema 适合检查：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;exposure mode 枚举；&lt;/li&gt;
+&lt;li&gt;必填字段；&lt;/li&gt;
+&lt;li&gt;名称格式；&lt;/li&gt;
+&lt;li&gt;storage.size 不可变；&lt;/li&gt;
+&lt;li&gt;resources 必须包含 CPU 和内存。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Operator 适合检查：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;配置的 ConfigMap 能否读取与解析；&lt;/li&gt;
+&lt;li&gt;两个容器的合计资源是否超过平台包络；&lt;/li&gt;
+&lt;li&gt;派生 Namespace 是否已被别人占用；&lt;/li&gt;
+&lt;li&gt;Secret 是否属于当前 SubPool；&lt;/li&gt;
+&lt;li&gt;Shared Mihomo 有没有 Ready Endpoint；&lt;/li&gt;
+&lt;li&gt;HTTPRoute 和 Gateway status 是否就绪。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;静态规则尽早拒绝，动态规则通过 Condition 提供可诊断状态。&lt;/p&gt;
+&lt;h2 id="controller-managerscheme-与-client"&gt;Controller Manager、Scheme 与 Client
+&lt;/h2&gt;&lt;p&gt;&lt;code&gt;main.go&lt;/code&gt; 创建 controller-runtime Manager，并把这些 API 注册到 Scheme：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Kubernetes core API；&lt;/li&gt;
+&lt;li&gt;Gateway API v1；&lt;/li&gt;
+&lt;li&gt;SubPool v1alpha1。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Scheme 让 client 知道 Go 类型与 Group/Version/Kind 的对应关系。没有注册类型，controller 无法正确编码或解码对象。&lt;/p&gt;
+&lt;p&gt;Manager 统一负责 client/cache、controller 生命周期、metrics、health endpoints、leader election 和信号处理。&lt;/p&gt;
+&lt;h2 id="watch-不是每秒全量扫描"&gt;Watch 不是每秒全量扫描
+&lt;/h2&gt;&lt;p&gt;Controller 通常通过 list/watch 与本地 cache 感知对象变化。SubPool 创建、spec 更新或受管对象变化时，事件进入 work queue，触发 reconcile。&lt;/p&gt;
+&lt;p&gt;本项目声明 &lt;code&gt;Owns&lt;/code&gt; Namespace、Secret、ConfigMap、ServiceAccount、Service、StatefulSet、ResourceQuota、NetworkPolicy 和 PDB。它们的 owner reference 让 controller-runtime 能把子资源事件映射回 SubPool。&lt;/p&gt;
+&lt;p&gt;共享 Gateway 和 Mihomo EndpointSlice 不归任何 SubPool 所有，不能通过 &lt;code&gt;Owns&lt;/code&gt; 关联。因此 controller 在活动状态下默认每 30 秒 requeue，周期性复核这些共享依赖。&lt;/p&gt;
+&lt;p&gt;这不是用轮询创建资源，而是为无法直接归属到单个 SubPool 的共享状态提供保守复查。&lt;/p&gt;
+&lt;h2 id="predicate-为什么过滤-status-only-更新"&gt;predicate 为什么过滤 status-only 更新
+&lt;/h2&gt;&lt;p&gt;Controller 更新 SubPool status 本身也会产生对象更新事件。如果每次 status 更新都再次触发 reconcile，可能形成无意义循环。&lt;/p&gt;
+&lt;p&gt;项目的 predicate 只在以下根对象变化时继续：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;新建或删除事件；&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;metadata.generation&lt;/code&gt; 变化，也就是 spec 更新；&lt;/li&gt;
+&lt;li&gt;首次出现 deletionTimestamp。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;单纯 status 更新不会触发新的根 reconcile。这能降低 API Server 和 work queue 噪声。&lt;/p&gt;
+&lt;h2 id="一次-reconcile-的固定顺序"&gt;一次 reconcile 的固定顺序
+&lt;/h2&gt;&lt;p&gt;活动 SubPool 的流程可以概括为：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt; 1
+&lt;/span&gt;&lt;span class="lnt"&gt; 2
+&lt;/span&gt;&lt;span class="lnt"&gt; 3
+&lt;/span&gt;&lt;span class="lnt"&gt; 4
+&lt;/span&gt;&lt;span class="lnt"&gt; 5
+&lt;/span&gt;&lt;span class="lnt"&gt; 6
+&lt;/span&gt;&lt;span class="lnt"&gt; 7
+&lt;/span&gt;&lt;span class="lnt"&gt; 8
+&lt;/span&gt;&lt;span class="lnt"&gt; 9
+&lt;/span&gt;&lt;span class="lnt"&gt;10
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-text" data-lang="text"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;1. 读取并校验 immutable Operator Configuration
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;2. 校验 Gateway 模式配置是否完整
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;3. 校验 SubPool ID、镜像、资源、存储与资源包络
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;4. 构造全部期望对象
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;5. 创建或确认 Namespace 所有权
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;6. 创建或确认 Credential Secret
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;7. 清理本 Pool 所有的旧版 LimitRange
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;8. 创建或修正其余受管对象
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;9. 根据 Internal/Gateway/suspend 删除或保留 HTTPRoute
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;10. 读取实际状态并更新 Conditions
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;先校验再创建很重要。无效请求不会留下 Namespace、PVC 或 Secret 等持久半成品。&lt;/p&gt;
+&lt;h2 id="reconcile-必须幂等"&gt;Reconcile 必须幂等
+&lt;/h2&gt;&lt;p&gt;幂等表示：对同样的期望和实际状态重复执行，最终结果不变，也不会每次制造新资源。&lt;/p&gt;
+&lt;p&gt;项目的 &lt;code&gt;ensureManagedObject&lt;/code&gt; 使用这种模式：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;span class="lnt"&gt;4
+&lt;/span&gt;&lt;span class="lnt"&gt;5
+&lt;/span&gt;&lt;span class="lnt"&gt;6
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-text" data-lang="text"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;Get 当前对象
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; ├─ 不存在 → Create
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; └─ 已存在
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; ├─ owner 不匹配 → 报冲突，不接管
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; ├─ 已等于期望 → 什么也不做
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; └─ 有受控字段漂移 → Update
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;这比“每次先删再建”安全得多。Service 的 ClusterIP 等 API Server 分配字段必须保留，不能拿一份新对象整体覆盖。&lt;/p&gt;
+&lt;h2 id="只管理明确拥有的字段"&gt;只管理明确拥有的字段
+&lt;/h2&gt;&lt;p&gt;Controller 同步稳定 labels 和 owner references，并按 Kind 更新特定 spec。&lt;/p&gt;
+&lt;p&gt;以 Service 为例，它只同步：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;type；&lt;/li&gt;
+&lt;li&gt;ports；&lt;/li&gt;
+&lt;li&gt;selector。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;ClusterIP、IP family 等由 API Server 分配或默认的字段被保留。&lt;/p&gt;
+&lt;p&gt;Metadata 中的额外 labels 也被保留，只覆盖 Operator 自己期望的键。这让其他合法系统可以添加自己的 label，而不会被每轮 reconcile 清掉。&lt;/p&gt;
+&lt;p&gt;“SubPool 是唯一期望来源”不意味着粗暴覆盖对象所有字节，而是要明确 controller 对哪些字段拥有写入权。&lt;/p&gt;
+&lt;h2 id="所有权冲突为什么必须阻塞"&gt;所有权冲突为什么必须阻塞
+&lt;/h2&gt;&lt;p&gt;若同名对象已存在但不由当前 SubPool 控制，项目不会自动加 owner reference。否则可能出现：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;span class="lnt"&gt;4
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-text" data-lang="text"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;别人创建了 subpool-demo-pool Namespace
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; → Operator 只因名字相同就接管
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; → 用户删除 demo-pool
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; → Operator 删除别人的 Namespace 和数据
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;因此 Namespace、Secret 和其他受管资源都会检查 &lt;code&gt;metav1.IsControlledBy&lt;/code&gt;。Namespace 还额外检查 managed label 和 Pool label。&lt;/p&gt;
+&lt;p&gt;冲突会写入稳定 reason，例如 &lt;code&gt;NamespaceConflict&lt;/code&gt;、&lt;code&gt;CredentialConflict&lt;/code&gt; 或 &lt;code&gt;ManagedResourceConflict&lt;/code&gt;。&lt;/p&gt;
+&lt;h2 id="finalizer删除前的待办清单"&gt;Finalizer：删除前的待办清单
+&lt;/h2&gt;&lt;p&gt;SubPool 使用：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-text" data-lang="text"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;subrelay.example.com/finalizer
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;正常活动对象先加入 finalizer。用户执行 delete 后，API Server 设置 deletionTimestamp，但在 finalizer 清空前保留对象。&lt;/p&gt;
+&lt;p&gt;Operator 删除路径：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;span class="lnt"&gt;4
+&lt;/span&gt;&lt;span class="lnt"&gt;5
+&lt;/span&gt;&lt;span class="lnt"&gt;6
+&lt;/span&gt;&lt;span class="lnt"&gt;7
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-text" data-lang="text"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;看到 deletionTimestamp
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; → 计算派生 Namespace
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; → Namespace 不存在：移除 finalizer
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; → Namespace 存在且属于当前 SubPool：请求删除 Namespace
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; → 等 Namespace 及内部资源完成删除
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; → Namespace 消失后移除 finalizer
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; → SubPool 最终从 API 消失
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;如果同名 Namespace 不属于当前 SubPool，Operator 不删除它，只移除自己的 finalizer。这保持所有权边界。&lt;/p&gt;
+&lt;h2 id="为什么不要手工移除-finalizer"&gt;为什么不要手工移除 finalizer
+&lt;/h2&gt;&lt;p&gt;直接移除 finalizer 会让 SubPool 消失，但它负责清理的 Namespace 可能继续存在，形成孤儿资源、PVC 和 Secret。&lt;/p&gt;
+&lt;p&gt;若删除卡住，应检查：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;DeletionBlocked&lt;/code&gt; 的 reason 和 message；&lt;/li&gt;
+&lt;li&gt;Namespace 的 finalizers；&lt;/li&gt;
+&lt;li&gt;PVC/PV 与 CSI 状态；&lt;/li&gt;
+&lt;li&gt;第三方 controller 是否还在运行；&lt;/li&gt;
+&lt;li&gt;API 删除是否收到 Forbidden 或其他错误。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;修复负责收尾的依赖，比强行撕掉“待办清单”更安全。&lt;/p&gt;
+&lt;h2 id="suspend-是期望状态不是删除流程"&gt;suspend 是期望状态，不是删除流程
+&lt;/h2&gt;&lt;p&gt;&lt;code&gt;spec.suspend=true&lt;/code&gt; 时：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;StatefulSet replicas 改为 0；&lt;/li&gt;
+&lt;li&gt;HTTPRoute 删除；&lt;/li&gt;
+&lt;li&gt;Namespace、PVC 和 Secret 保留；&lt;/li&gt;
+&lt;li&gt;Conditions 明确使用 &lt;code&gt;Suspended&lt;/code&gt;；&lt;/li&gt;
+&lt;li&gt;ProxyGatewayReady 设为 Unknown，因为暂停期间不需要评估代理。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;这说明 Operator API 不只有 CRUD。一个业务资源可以拥有清晰的生命周期状态，而不需要通过手工改底层对象实现暂停。&lt;/p&gt;
+&lt;h2 id="status-更新也要避免噪声"&gt;Status 更新也要避免噪声
+&lt;/h2&gt;&lt;p&gt;Condition 只有在 status、reason、message 或 observedGeneration 变化时才替换，并保留未变化条件的 lastTransitionTime。&lt;/p&gt;
+&lt;p&gt;如果每 30 秒 reconcile 都刷新时间，会让监控以为状态持续变化，也产生大量无意义 API 写入。稳定的 transition time 才能回答“这个问题从什么时候开始”。&lt;/p&gt;
+&lt;h2 id="阅读-operator-代码的推荐路线"&gt;阅读 Operator 代码的推荐路线
+&lt;/h2&gt;&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt; 1
+&lt;/span&gt;&lt;span class="lnt"&gt; 2
+&lt;/span&gt;&lt;span class="lnt"&gt; 3
+&lt;/span&gt;&lt;span class="lnt"&gt; 4
+&lt;/span&gt;&lt;span class="lnt"&gt; 5
+&lt;/span&gt;&lt;span class="lnt"&gt; 6
+&lt;/span&gt;&lt;span class="lnt"&gt; 7
+&lt;/span&gt;&lt;span class="lnt"&gt; 8
+&lt;/span&gt;&lt;span class="lnt"&gt; 9
+&lt;/span&gt;&lt;span class="lnt"&gt;10
+&lt;/span&gt;&lt;span class="lnt"&gt;11
+&lt;/span&gt;&lt;span class="lnt"&gt;12
+&lt;/span&gt;&lt;span class="lnt"&gt;13
+&lt;/span&gt;&lt;span class="lnt"&gt;14
+&lt;/span&gt;&lt;span class="lnt"&gt;15
+&lt;/span&gt;&lt;span class="lnt"&gt;16
+&lt;/span&gt;&lt;span class="lnt"&gt;17
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-text" data-lang="text"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;api/v1alpha1/subpool_types.go
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; → 先看 API 契约
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;controllers/subpool_controller.go
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; → 再看 Reconcile 入口、watch、finalizer
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;controllers/subpool_reconcile.go
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; → 看活动路径的顺序
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;internal/subpool/resources.go
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;internal/subpool/workloads.go
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;internal/subpool/network.go
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; → 看期望对象怎样构造
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;controllers/subpool_readiness.go
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;controllers/subpool_status.go
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; → 看现实状态怎样投影回 CR
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;Operator 并不是 Kubernetes 的魔法插件。它只是一个认真遵守幂等、所有权和异步状态语义的程序：不断比较愿望与现实，并把差距一点点收敛掉。&lt;/p&gt;</description></item></channel></rss>

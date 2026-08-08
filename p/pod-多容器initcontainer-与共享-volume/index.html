@@ -1,0 +1,136 @@
+<!doctype html><html lang=zh-cn dir=ltr><head><meta charset=utf-8><meta name=viewport content='width=device-width,initial-scale=1'><meta name=description content="Pod 才是 Kubernetes 的最小调度单位 Kubernetes 不直接把单个容器调度到 Node，而是调度 Pod。一个 Pod 可以包含一个或多个容器，这些容器会被当作一个整体：\n被调度到同一台 Node； 共享同一个网络命名空间； 拥有相同的 Pod IP； 可以通过 Volume 共享文件； 一起创建，也一起消失。 本项目每个号池只有一个 runtime Pod，但里面同时运行：\n"><title>Pod 多容器、InitContainer 与共享 Volume</title><link rel=canonical href=https://kerolt.github.io/p/pod-%E5%A4%9A%E5%AE%B9%E5%99%A8initcontainer-%E4%B8%8E%E5%85%B1%E4%BA%AB-volume/><link rel=preconnect href=https://fonts.googleapis.com><link rel=preconnect href=https://fonts.gstatic.com crossorigin><link rel=preload as=style href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap"><link rel=stylesheet href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap"><link rel=stylesheet href=/scss/style.min.e62e09c60ba428a627e03568fa3df938f6a8224f815b5846f00816c17d4a0be4.css><meta property='og:title' content="Pod 多容器、InitContainer 与共享 Volume"><meta property='og:description' content="Pod 才是 Kubernetes 的最小调度单位 Kubernetes 不直接把单个容器调度到 Node，而是调度 Pod。一个 Pod 可以包含一个或多个容器，这些容器会被当作一个整体：\n被调度到同一台 Node； 共享同一个网络命名空间； 拥有相同的 Pod IP； 可以通过 Volume 共享文件； 一起创建，也一起消失。 本项目每个号池只有一个 runtime Pod，但里面同时运行：\n"><meta property='og:url' content='https://kerolt.github.io/p/pod-%E5%A4%9A%E5%AE%B9%E5%99%A8initcontainer-%E4%B8%8E%E5%85%B1%E4%BA%AB-volume/'><meta property='og:site_name' content="Kerolt's Note"><meta property='og:type' content='article'><meta property='article:section' content='Post'><meta property='article:tag' content='Kubernetes'><meta property='article:tag' content='Pod'><meta property='article:tag' content='InitContainer'><meta property='article:tag' content='Volume'><meta property='article:tag' content='容器'><meta property='article:published_time' content='2026-08-02T00:00:00+00:00'><meta property='article:modified_time' content='2026-08-02T00:00:00+00:00'><meta name=twitter:title content="Pod 多容器、InitContainer 与共享 Volume"><meta name=twitter:description content="Pod 才是 Kubernetes 的最小调度单位 Kubernetes 不直接把单个容器调度到 Node，而是调度 Pod。一个 Pod 可以包含一个或多个容器，这些容器会被当作一个整体：\n被调度到同一台 Node； 共享同一个网络命名空间； 拥有相同的 Pod IP； 可以通过 Volume 共享文件； 一起创建，也一起消失。 本项目每个号池只有一个 runtime Pod，但里面同时运行：\n"><link rel="shortcut icon" href=/images/favicon.png></head><body class=article-page><script>(function(){const e="StackColorScheme";localStorage.getItem(e)||localStorage.setItem(e,"auto")})()</script><script>(function(){const t="StackColorScheme",e=localStorage.getItem(t),n=window.matchMedia("(prefers-color-scheme: dark)").matches===!0;e=="dark"||e==="auto"&&n?document.documentElement.dataset.scheme="dark":document.documentElement.dataset.scheme="light"})()</script><div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky"><button class="hamburger hamburger--spin" type=button id=toggle-menu aria-label=切换菜单>
+<span class=hamburger-box><span class=hamburger-inner></span></span></button><header><figure class=site-avatar><a href=/><img src=/images/avatar.jpg width=200 height=200 class=site-logo loading=lazy alt=Avatar>
+</a><span class=emoji>🏸</span></figure><div class=site-meta><h1 class=site-name><a href=/>Kerolt's Note</a></h1><h2 class=site-description>愿你无拘无束自由的活着</h2></div></header><ol class=menu-social><li><a href=https://github.com/kerolt title=GitHub rel=me><svg class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 19c-4.3 1.4-4.3-2.5-6-3m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6.0 00-1.3-3.2 4.2 4.2.0 00-.1-3.2s-1.1-.3-3.5 1.3a12.3 12.3.0 00-6.2.0C6.5 2.8 5.4 3.1 5.4 3.1a4.2 4.2.0 00-.1 3.2A4.6 4.6.0 004 9.5c0 4.6 2.7 5.7 5.5 6-.6.6-.6 1.2-.5 2V21"/></svg></a></li></ol><ol class=menu id=main-menu><li><a href=/><svg class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><polyline points="5 12 3 12 12 3 21 12 19 12"/><path d="M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"/><path d="M9 21v-6a2 2 0 012-2h2a2 2 0 012 2v6"/></svg>
+<span>首页</span></a></li><li><a href=/archives/><svg class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><rect x="3" y="4" width="18" height="4" rx="2"/><path d="M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
+<span>归档</span></a></li><li><a href=/categories/><svg class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><line x1="5" y1="9" x2="19" y2="9"/><line x1="5" y1="15" x2="19" y2="15"/><line x1="11" y1="4" x2="7" y2="20"/><line x1="17" y1="4" x2="13" y2="20"/></svg>
+<span>分类</span></a></li><li><a href=/tags/><svg class="icon icon-tabler icon-tabler-tag" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><path d="M11 3l9 9a1.5 1.5.0 010 2l-6 6a1.5 1.5.0 01-2 0L3 11V7a4 4 0 014-4h4"/><circle cx="9" cy="9" r="2"/></svg>
+<span>标签</span></a></li><li><a href=/about/><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-info-circle"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 12a9 9 0 1018 0A9 9 0 003 12"/><path d="M12 9h.01"/><path d="M11 12h1v4h1"/></svg>
+<span>关于我</span></a></li><li><a href=/search/><svg class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="10" cy="10" r="7"/><line x1="21" y1="21" x2="15" y2="15"/></svg>
+<span>搜索</span></a></li><li class=menu-bottom-section><ol class=menu><li id=dark-mode-toggle><svg class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="8" cy="12" r="2"/><rect x="2" y="6" width="20" height="12" rx="6"/></svg>
+<svg class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="16" cy="12" r="2"/><rect x="2" y="6" width="20" height="12" rx="6"/></svg>
+<span>暗色模式</span></li></ol></li></ol></aside><aside class="sidebar right-sidebar sticky"><section class="widget archives"><div class=widget-icon><svg class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><line x1="5" y1="9" x2="19" y2="9"/><line x1="5" y1="15" x2="19" y2="15"/><line x1="11" y1="4" x2="7" y2="20"/><line x1="17" y1="4" x2="13" y2="20"/></svg></div><h2 class="widget-title section-title">目录</h2><div class=widget--toc><nav class=toc-nav id=TableOfContents><ol><li><a href=#pod-才是-kubernetes-的最小调度单位>Pod 才是 Kubernetes 的最小调度单位</a></li><li><a href=#为什么-cpa-与-cpa-manager-放在同一个-pod>为什么 CPA 与 cpa-manager 放在同一个 Pod</a></li><li><a href=#共享网络不等于共享端口>共享网络不等于共享端口</a></li><li><a href=#initcontainer开店前先布置柜台>InitContainer：开店前先布置柜台</a></li><li><a href=#volumepod-内的文件连接器>Volume：Pod 内的文件连接器</a></li><li><a href=#一个-pvc如何避免两个容器互相踩文件>一个 PVC，如何避免两个容器互相踩文件</a></li><li><a href=#secret-与-configmap-为什么挂成文件>Secret 与 ConfigMap 为什么挂成文件</a></li><li><a href=#pod-securitycontext-与-container-securitycontext>Pod SecurityContext 与 Container SecurityContext</a></li><li><a href=#terminationgraceperiodseconds-的意义>terminationGracePeriodSeconds 的意义</a></li><li><a href=#镜像拉取策略>镜像拉取策略</a></li><li><a href=#如何观察多容器-pod>如何观察多容器 Pod</a></li><li><a href=#一个容易误解的地方两个容器不等于高可用>一个容易误解的地方：两个容器不等于高可用</a></li></ol></nav></div></section></aside><main class="main full-width"><article class=main-article><header class=article-header><div class=article-details><header class=article-category><a href=/categories/kubernetes/ style=background-color:#c7efbe;color:#183d0f>Kubernetes</a></header><div class=article-title-wrapper><h2 class=article-title><a href=/p/pod-%E5%A4%9A%E5%AE%B9%E5%99%A8initcontainer-%E4%B8%8E%E5%85%B1%E4%BA%AB-volume/>Pod 多容器、InitContainer 与共享 Volume</a></h2></div><footer class=article-meta><div class=inline-meta><svg class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><path d="M11.795 21H5a2 2 0 01-2-2V7a2 2 0 012-2h12a2 2 0 012 2v4"/><circle cx="18" cy="18" r="4"/><path d="M15 3v4"/><path d="M7 3v4"/><path d="M3 11h16"/><path d="M18 16.496V18l1 1"/></svg>
+<time class=article-time--published datetime=2026-08-02T00:00:00Z>2026年8月2日星期日</time>
+<svg class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg>
+<time class=article-time--reading>阅读时长: 5 分钟</time></div></footer></div></header><aside class=article-toc><details><summary><div class=article-toc-title><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-chevron-right"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 6l6 6-6 6"/></svg>
+<span>目录</span></div></summary><nav class=toc-nav><ol><li><a href=#pod-才是-kubernetes-的最小调度单位>Pod 才是 Kubernetes 的最小调度单位</a></li><li><a href=#为什么-cpa-与-cpa-manager-放在同一个-pod>为什么 CPA 与 cpa-manager 放在同一个 Pod</a></li><li><a href=#共享网络不等于共享端口>共享网络不等于共享端口</a></li><li><a href=#initcontainer开店前先布置柜台>InitContainer：开店前先布置柜台</a></li><li><a href=#volumepod-内的文件连接器>Volume：Pod 内的文件连接器</a></li><li><a href=#一个-pvc如何避免两个容器互相踩文件>一个 PVC，如何避免两个容器互相踩文件</a></li><li><a href=#secret-与-configmap-为什么挂成文件>Secret 与 ConfigMap 为什么挂成文件</a></li><li><a href=#pod-securitycontext-与-container-securitycontext>Pod SecurityContext 与 Container SecurityContext</a></li><li><a href=#terminationgraceperiodseconds-的意义>terminationGracePeriodSeconds 的意义</a></li><li><a href=#镜像拉取策略>镜像拉取策略</a></li><li><a href=#如何观察多容器-pod>如何观察多容器 Pod</a></li><li><a href=#一个容易误解的地方两个容器不等于高可用>一个容易误解的地方：两个容器不等于高可用</a></li></ol></nav></details></aside><section class=article-content><h2 id=pod-才是-kubernetes-的最小调度单位>Pod 才是 Kubernetes 的最小调度单位</h2><p>Kubernetes 不直接把单个容器调度到 Node，而是调度 Pod。一个 Pod 可以包含一个或多个容器，这些容器会被当作一个整体：</p><ul><li>被调度到同一台 Node；</li><li>共享同一个网络命名空间；</li><li>拥有相同的 Pod IP；</li><li>可以通过 Volume 共享文件；</li><li>一起创建，也一起消失。</li></ul><p>本项目每个号池只有一个 runtime Pod，但里面同时运行：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-text data-lang=text><span class=line><span class=cl>Pod runtime-0
+</span></span><span class=line><span class=cl>  ├─ initContainer: initialize-config
+</span></span><span class=line><span class=cl>  ├─ container: cpa
+</span></span><span class=line><span class=cl>  └─ container: cpa-manager
+</span></span></code></pre></td></tr></table></div></div><p>这不是三个 Pod，而是一个 Pod 中的一个初始化容器和两个长期运行容器。</p><h2 id=为什么-cpa-与-cpa-manager-放在同一个-pod>为什么 CPA 与 cpa-manager 放在同一个 Pod</h2><p>cpa-manager 需要紧密访问 CPA，并与它共享持久数据。放在同一个 Pod 后，二者可以通过 loopback 通信：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-text data-lang=text><span class=line><span class=cl>cpa-manager → http://127.0.0.1:8317 → CPA
+</span></span></code></pre></td></tr></table></div></div><p>这里不经过 Service、集群 DNS 或 CNI 网络。对 cpa-manager 来说，CPA 就像运行在同一台机器上的另一个本地进程。</p><p>共享 Pod 的好处：</p><ul><li>本地通信简单，延迟低；</li><li>两个容器一起调度，不会出现 Manager 在 A 节点、CPA 在 B 节点；</li><li>可以自然共享同一个 RWO PVC；</li><li>生命周期耦合关系与业务现实一致。</li></ul><p>代价也很明确：</p><ul><li>两者不能独立扩缩容；</li><li>Pod 重建时二者一起重启；</li><li>任一容器一直不 Ready，整个 Pod 就不 Ready；</li><li>两个容器的资源总和决定这个 Pod 的调度需求。</li></ul><p>因此“多容器 Pod”适合强耦合进程，不应只为了少写一个 Deployment 就随便合并。</p><h2 id=共享网络不等于共享端口>共享网络不等于共享端口</h2><p>同一个 Pod 的容器共享 IP 和端口空间。CPA 监听 <code>8317</code>，cpa-manager 监听 <code>18317</code>：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-text data-lang=text><span class=line><span class=cl>Pod IP:8317   → CPA
+</span></span><span class=line><span class=cl>Pod IP:18317  → cpa-manager
+</span></span></code></pre></td></tr></table></div></div><p>因为端口空间共享，两个容器不能同时监听同一个 IP 和端口。若都尝试监听 <code>0.0.0.0:8317</code>，后启动的进程会因为端口被占用而失败。</p><p>容器在 YAML 中声明 <code>containerPort</code>，主要用于表达和命名端口，并不会像 Docker 的 <code>-p</code> 那样自动把它暴露到集群外。真正的稳定入口由 Service 提供。</p><h2 id=initcontainer开店前先布置柜台>InitContainer：开店前先布置柜台</h2><p>InitContainer 在普通容器启动前依次执行。只有所有 InitContainer 成功退出，主容器才会启动。</p><p>本项目的 <code>initialize-config</code> 负责：</p><ol><li>在共享数据卷中创建目录；</li><li>从 Secret 挂载文件读取凭据；</li><li>根据 Operator Configuration 注入的 Mihomo URL 生成 CPA 配置；</li><li>只在配置文件不存在时写入，避免每次重启覆盖运行数据。</li></ol><p>关键逻辑可以概括为：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-sh data-lang=sh><span class=line><span class=cl><span class=k>if</span> <span class=o>[</span> ! -f /data/cpa/config.yaml <span class=o>]</span><span class=p>;</span> <span class=k>then</span>
+</span></span><span class=line><span class=cl>  <span class=c1># 读取凭据并创建配置</span>
+</span></span><span class=line><span class=cl><span class=k>fi</span>
+</span></span></code></pre></td></tr></table></div></div><p>这叫幂等初始化：执行一次和重复执行多次，最终结果一致。Pod 因节点维护被重建时，PVC 上已有配置不会被覆盖。</p><p>InitContainer 失败时，主容器不会启动。排查时可查看：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>kubectl -n subpool-demo-pool describe pod runtime-0
+</span></span><span class=line><span class=cl>kubectl -n subpool-demo-pool logs runtime-0 <span class=se>\
+</span></span></span><span class=line><span class=cl>  -c initialize-config
+</span></span></code></pre></td></tr></table></div></div><p>不要只看 <code>cpa</code> 容器日志；如果初始化阶段就失败，它甚至还没开始运行。</p><h2 id=volumepod-内的文件连接器>Volume：Pod 内的文件连接器</h2><p>容器文件系统默认是临时的。Volume 让 Pod 把外部数据源或共享存储挂进容器。</p><p>本项目 runtime Pod 使用三种 Volume：</p><div class=table-wrapper><table><thead><tr><th>Volume</th><th>来源</th><th>用途</th><th>是否持久</th></tr></thead><tbody><tr><td><code>data</code></td><td>StatefulSet 的 PVC</td><td>CPA 与 Manager 数据</td><td>是</td></tr><tr><td><code>credentials</code></td><td>Secret</td><td>三个凭据文件</td><td>随 Secret 存在</td></tr><tr><td><code>bootstrap</code></td><td>ConfigMap</td><td>初始化脚本</td><td>随 ConfigMap 存在</td></tr></tbody></table></div><p>Volume 定义“数据从哪里来”，<code>volumeMounts</code> 定义“在某个容器中挂到哪里”。同一个 Volume 可以在不同容器里挂到不同路径。</p><h2 id=一个-pvc如何避免两个容器互相踩文件>一个 PVC，如何避免两个容器互相踩文件</h2><p><code>data</code> PVC 在 InitContainer 中挂载到 <code>/data</code>。主容器则使用 <code>subPath</code> 把其中不同部分挂到各自路径：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span><span class=lnt>8
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-text data-lang=text><span class=line><span class=cl>PVC 根目录
+</span></span><span class=line><span class=cl>  ├─ cpa/
+</span></span><span class=line><span class=cl>  │   ├─ config.yaml
+</span></span><span class=line><span class=cl>  │   ├─ auths/
+</span></span><span class=line><span class=cl>  │   └─ logs/
+</span></span><span class=line><span class=cl>  └─ cpa-manager/
+</span></span><span class=line><span class=cl>      ├─ usage.sqlite
+</span></span><span class=line><span class=cl>      └─ data.key
+</span></span></code></pre></td></tr></table></div></div><p>CPA 获得：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-text data-lang=text><span class=line><span class=cl>cpa/config.yaml → /CLIProxyAPI/config.yaml
+</span></span><span class=line><span class=cl>cpa/auths       → /CLIProxyAPI/auths
+</span></span><span class=line><span class=cl>cpa/logs        → /CLIProxyAPI/logs
+</span></span></code></pre></td></tr></table></div></div><p>cpa-manager 获得：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-text data-lang=text><span class=line><span class=cl>cpa-manager → /data
+</span></span></code></pre></td></tr></table></div></div><p>这样既共享同一个 PVC，又保持目录边界清楚。</p><p>需要注意：<code>subPath</code> 不是权限隔离机制。容器是否能看到其他目录取决于挂载方式，但底层仍是同一个卷；真正的安全还依赖进程身份、文件权限和应用设计。</p><h2 id=secret-与-configmap-为什么挂成文件>Secret 与 ConfigMap 为什么挂成文件</h2><p>本项目把凭据投影为 <code>/run/secrets/...</code> 下的文件，只选择约定的 key：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-text data-lang=text><span class=line><span class=cl>cpa_client_key
+</span></span><span class=line><span class=cl>cpa_management_key
+</span></span><span class=line><span class=cl>cpamp_admin_key
+</span></span></code></pre></td></tr></table></div></div><p>相较于直接把敏感值写进命令参数，文件方式能减少它出现在进程参数、YAML 和日志中的机会。初始化脚本读取后把必要内容写入权限受限的持久配置。</p><p>ConfigMap 中的初始化脚本则以只读、可执行模式挂到 <code>/bootstrap/initialize.sh</code>。普通配置和敏感凭据被明确分开：脚本可以进 Git，Secret value 不可以。</p><h2 id=pod-securitycontext-与-container-securitycontext>Pod SecurityContext 与 Container SecurityContext</h2><p>Pod 级配置决定共同的进程和文件身份：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-text data-lang=text><span class=line><span class=cl>runAsNonRoot: true
+</span></span><span class=line><span class=cl>runAsUser: 65532
+</span></span><span class=line><span class=cl>runAsGroup: 65532
+</span></span><span class=line><span class=cl>fsGroup: 65532
+</span></span><span class=line><span class=cl>seccompProfile: RuntimeDefault
+</span></span></code></pre></td></tr></table></div></div><p>容器级配置进一步限制：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-text data-lang=text><span class=line><span class=cl>allowPrivilegeEscalation: false
+</span></span><span class=line><span class=cl>capabilities.drop: [ALL]
+</span></span><span class=line><span class=cl>runAsNonRoot: true
+</span></span></code></pre></td></tr></table></div></div><p><code>fsGroup</code> 很重要：PVC 挂载后，kubelet 会尽量让卷中的文件对这个组可访问，否则非 root 容器可能无法写入数据卷。</p><p>安全配置不是“字段越多越安全”。它必须与镜像实际行为匹配。如果应用硬编码要求 root 或尝试写只读目录，Pod 会启动失败。正确做法是修正镜像和写路径，而不是第一时间取消安全约束。</p><h2 id=terminationgraceperiodseconds-的意义>terminationGracePeriodSeconds 的意义</h2><p>项目为 runtime Pod 设置 30 秒优雅终止时间。Pod 被删除时，大致经历：</p><ol><li>kubelet 向容器主进程发送 <code>SIGTERM</code>；</li><li>应用有机会停止接收请求、刷新文件、关闭数据库；</li><li>最多等待 30 秒；</li><li>仍未退出时才会被强制终止。</li></ol><p>对于使用 SQLite 或持久配置的应用，优雅退出比无状态 HTTP 服务更重要。应用也必须正确处理 <code>SIGTERM</code>，否则 YAML 中的等待时间只是空等。</p><h2 id=镜像拉取策略>镜像拉取策略</h2><p>本项目按镜像字符串选择策略：</p><ul><li>以 <code>:latest</code> 结尾：<code>Always</code>；</li><li>其他标签或 digest：<code>IfNotPresent</code>。</li></ul><p>开发时 <code>latest</code> 方便快速替换，生产更推荐不可变 digest：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-text data-lang=text><span class=line><span class=cl>registry.example/cpa@sha256:...
+</span></span></code></pre></td></tr></table></div></div><p>同一个 tag 的内容可能变化，导致重建后的 Pod 与之前运行的并非同一版本。digest 把“我想运行哪个镜像”变成可审计的精确声明。</p><h2 id=如何观察多容器-pod>如何观察多容器 Pod</h2><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>kubectl -n subpool-demo-pool get pod runtime-0
+</span></span><span class=line><span class=cl>kubectl -n subpool-demo-pool describe pod runtime-0
+</span></span><span class=line><span class=cl>kubectl -n subpool-demo-pool logs runtime-0 -c cpa --tail<span class=o>=</span><span class=m>100</span>
+</span></span><span class=line><span class=cl>kubectl -n subpool-demo-pool logs runtime-0 -c cpa-manager --tail<span class=o>=</span><span class=m>100</span>
+</span></span><span class=line><span class=cl>kubectl -n subpool-demo-pool logs runtime-0 <span class=se>\
+</span></span></span><span class=line><span class=cl>  -c initialize-config --previous
+</span></span></code></pre></td></tr></table></div></div><p><code>kubectl logs</code> 面对多容器 Pod 时应明确 <code>-c</code>。<code>--previous</code> 用于查看同一个容器上一次崩溃实例的日志，对 CrashLoopBackOff 很有用。</p><p>还可以查看每个容器的状态：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>kubectl -n subpool-demo-pool get pod runtime-0 <span class=se>\
+</span></span></span><span class=line><span class=cl>  -o <span class=nv>jsonpath</span><span class=o>=</span><span class=s1>&#39;{range .status.containerStatuses[*]}{.name}{&#34;\t&#34;}{.ready}{&#34;\t&#34;}{.restartCount}{&#34;\n&#34;}{end}&#39;</span>
+</span></span></code></pre></td></tr></table></div></div><h2 id=一个容易误解的地方两个容器不等于高可用>一个容易误解的地方：两个容器不等于高可用</h2><p>CPA 与 cpa-manager 在同一个 Pod 中，是为了协作和共享状态，不是冗余副本。这个 StatefulSet 的 replicas 是 1，PVC 又是 RWO，所以数据面仍是单实例。</p><p>Operator 自己运行两个副本并通过 leader election 提供控制面接管能力，但那不会把号池 runtime 自动变成双活。控制面高可用和数据面高可用必须分开讨论。</p><p>理解 Pod 的关键不是记住字段，而是看清“哪些进程必须同生共死、共享什么、通过什么通信”。本项目把 CPA 和 cpa-manager 放进同一个 Pod，正是对这种强耦合关系的明确表达。</p></section><footer class="article-meta article-footer"><section class=article-tags><a href=/tags/kubernetes/>Kubernetes</a>
+<a href=/tags/pod/>Pod</a>
+<a href=/tags/initcontainer/>InitContainer</a>
+<a href=/tags/volume/>Volume</a>
+<a href=/tags/%E5%AE%B9%E5%99%A8/>容器</a></section><section class="article-copyright inline-meta"><svg class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><path d="M14.5 9a3.5 4 0 100 6"/></svg>
+<span>Licensed under CC BY-NC-SA 4.0</span></section></footer></article><footer class=site-footer><section class=copyright>&copy;
+2025 -
+2026 Kerolt's Note</section><section class=powerby>使用 <a href=https://gohugo.io/ target=_blank rel=noopener>Hugo</a> 构建<br>主题 <b><a href=https://github.com/CaiJimmy/hugo-theme-stack target=_blank rel=noopener data-version=4.0.3>Stack</a></b> 由 <a href=https://jimmycai.com target=_blank rel=noopener>Jimmy</a> 设计</section></footer><script type=module>
+    import gallery from '\/ts\/gallery.js';
+
+    const articleContent = document.querySelector('.article-content');
+    const shouldLoad = articleContent && (articleContent.querySelectorAll('figure').length > 0 || articleContent.querySelectorAll('img.gallery-image').length > 0);
+    
+    if (shouldLoad) {
+        gallery(articleContent);
+
+        const PhotoSwipeLightbox = (await import("https:\/\/cdn.jsdelivr.net\/npm\/photoswipe@5.4.4\/dist\/photoswipe-lightbox.esm.min.js")).default;
+        const styleHref = "https:\/\/cdn.jsdelivr.net\/npm\/photoswipe@5.4.4\/dist\/photoswipe.css";
+
+        const styleTag = document.createElement('link');
+        styleTag.rel = 'stylesheet';
+        styleTag.href = styleHref;
+        document.head.appendChild(styleTag);
+
+        const lightbox = new PhotoSwipeLightbox({
+            gallerySelector: '.article-content',
+            childSelector: 'figure a.image-link',
+            pswpModule: () => import("https:\/\/cdn.jsdelivr.net\/npm\/photoswipe@5.4.4\/dist\/photoswipe.esm.min.js")
+        });
+        lightbox.init();
+    }
+</script></main></div><script type=text/javascript src=/ts/main.f856840516f7c2ad1769a8f5937e3d08d6cb386e2cd2dd025ae696e0ff207958.js defer></script></body></html>

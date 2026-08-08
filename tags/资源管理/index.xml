@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>资源管理 on Kerolt's Note</title><link>https://kerolt.github.io/tags/%E8%B5%84%E6%BA%90%E7%AE%A1%E7%90%86/</link><description>Recent content in 资源管理 on Kerolt's Note</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><lastBuildDate>Sun, 02 Aug 2026 00:00:00 +0000</lastBuildDate><atom:link href="https://kerolt.github.io/tags/%E8%B5%84%E6%BA%90%E7%AE%A1%E7%90%86/index.xml" rel="self" type="application/rss+xml"/><item><title>Requests、Limits、ResourceQuota 与 PDB</title><link>https://kerolt.github.io/p/requestslimitsresourcequota-%E4%B8%8E-pdb/</link><pubDate>Sun, 02 Aug 2026 00:00:00 +0000</pubDate><guid>https://kerolt.github.io/p/requestslimitsresourcequota-%E4%B8%8E-pdb/</guid><description>&lt;h2 id="资源配置不是装饰它决定能否调度和如何失效"&gt;资源配置不是装饰，它决定能否调度和如何失效
+&lt;/h2&gt;&lt;p&gt;本项目要求 CPA 与 cpa-manager 都明确填写 CPU、内存的 requests 和 limits：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;span class="lnt"&gt;4
+&lt;/span&gt;&lt;span class="lnt"&gt;5
+&lt;/span&gt;&lt;span class="lnt"&gt;6
+&lt;/span&gt;&lt;span class="lnt"&gt;7
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-yaml" data-lang="yaml"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nt"&gt;resources&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nt"&gt;requests&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nt"&gt;cpu&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l"&gt;200m&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nt"&gt;memory&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l"&gt;256Mi&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nt"&gt;limits&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nt"&gt;cpu&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l"&gt;300m&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nt"&gt;memory&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l"&gt;512Mi&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;这四个值既影响 Scheduler，也影响容器运行时和 Namespace 配额。它们不是“给监控看的备注”。&lt;/p&gt;
+&lt;h2 id="requests我至少要预留多少"&gt;requests：我至少要预留多少
+&lt;/h2&gt;&lt;p&gt;Scheduler 主要根据 requests 判断 Node 是否放得下 Pod。&lt;/p&gt;
+&lt;p&gt;CPU &lt;code&gt;200m&lt;/code&gt; 表示 0.2 个 CPU core 的请求。&lt;code&gt;1000m&lt;/code&gt; 等于 1 core。&lt;/p&gt;
+&lt;p&gt;内存 &lt;code&gt;256Mi&lt;/code&gt; 使用二进制单位：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-text" data-lang="text"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;1 Mi = 1024 × 1024 bytes
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;1 Gi = 1024 Mi
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;一个 Pod 中有多个普通容器时，调度通常考虑它们 requests 的总和。本项目 runtime Pod 同时运行 CPA 与 cpa-manager，因此号池的基础计算需求是二者之和。&lt;/p&gt;
+&lt;p&gt;InitContainer 按顺序运行，Kubernetes 会把普通容器总和与单个 InitContainer 的最大值进行有效资源计算。本项目初始化容器复用 CPA 的资源声明，而普通容器总和包含 CPA 加 Manager，因此有效值仍由普通容器总和主导。&lt;/p&gt;
+&lt;p&gt;requests 太低的后果不是“应用只能用这么多”，而是集群可能在一台 Node 上塞入过多 Pod，压力出现时应用性能剧烈抖动或被驱逐。&lt;/p&gt;
+&lt;h2 id="limits最多允许使用多少"&gt;limits：最多允许使用多少
+&lt;/h2&gt;&lt;p&gt;CPU 超过 limit 时通常被 throttling，也就是被限制执行时间，不会只因为超过 CPU limit 就直接杀死容器。&lt;/p&gt;
+&lt;p&gt;内存不同。容器实际内存超过 limit 时，可能被 OOM kill，然后由 kubelet 按 restart policy 重启。&lt;/p&gt;
+&lt;p&gt;因此：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-text" data-lang="text"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;CPU limit 太紧 → 延迟变高、吞吐下降、探针可能超时
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;内存 limit 太紧 → OOMKilled、容器重启、CrashLoopBackOff
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;查看上一次终止原因：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;kubectl -n subpool-demo-pool get pod runtime-0 &lt;span class="se"&gt;\
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; -o &lt;span class="nv"&gt;jsonpath&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;{range .status.containerStatuses[*]}{.name}{&amp;#34;\t&amp;#34;}{.lastState.terminated.reason}{&amp;#34;\n&amp;#34;}{end}&amp;#39;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h2 id="requests-与-limits-的关系"&gt;requests 与 limits 的关系
+&lt;/h2&gt;&lt;p&gt;本项目校验：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;值必须大于 0；&lt;/li&gt;
+&lt;li&gt;只能声明 CPU 和内存；&lt;/li&gt;
+&lt;li&gt;requests 和 limits 都必须完整；&lt;/li&gt;
+&lt;li&gt;limit 不能小于 request。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;例如：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-text" data-lang="text"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;requests.cpu = 500m
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;limits.cpu = 1
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;调度时按 0.5 core 预留，运行时最多允许使用约 1 core。&lt;/p&gt;
+&lt;p&gt;若 request 与 limit 相差很大，集群可以提高利用率，但资源争抢时性能更不稳定。数值应基于真实监控调整，而不是照抄示例。&lt;/p&gt;
+&lt;h2 id="qos-class压力下谁更容易受影响"&gt;QoS Class：压力下谁更容易受影响
+&lt;/h2&gt;&lt;p&gt;Kubernetes 根据每个容器的 requests/limits 给 Pod 分 QoS class：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;Guaranteed&lt;/code&gt;：所有容器的 CPU、内存 request 都等于对应 limit；&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;Burstable&lt;/code&gt;：至少声明了一些 request/limit，但不满足 Guaranteed；&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;BestEffort&lt;/code&gt;：完全没有声明 request/limit。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;项目要求完整声明资源，但示例中 request 与 limit 不相等，因此 runtime Pod 通常是 Burstable，而不是 Guaranteed。&lt;/p&gt;
+&lt;p&gt;QoS 会影响节点内存压力下的驱逐优先级，但它不是唯一因素，实际还要看使用量相对 request、优先级和节点状态。&lt;/p&gt;
+&lt;h2 id="operator-的资源包络"&gt;Operator 的资源包络
+&lt;/h2&gt;&lt;p&gt;Operator Configuration 定义单 Pool 最大值：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;span class="lnt"&gt;4
+&lt;/span&gt;&lt;span class="lnt"&gt;5
+&lt;/span&gt;&lt;span class="lnt"&gt;6
+&lt;/span&gt;&lt;span class="lnt"&gt;7
+&lt;/span&gt;&lt;span class="lnt"&gt;8
+&lt;/span&gt;&lt;span class="lnt"&gt;9
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-yaml" data-lang="yaml"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nt"&gt;resourcePolicy&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nt"&gt;maxPerPool&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nt"&gt;requests&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nt"&gt;cpu&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;#34;3&amp;#34;&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nt"&gt;memory&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l"&gt;4Gi&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nt"&gt;limits&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nt"&gt;cpu&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;#34;4&amp;#34;&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nt"&gt;memory&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l"&gt;8Gi&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nt"&gt;storage&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l"&gt;20Gi&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;Operator 在创建 Namespace、PVC 和 Secret 等持久资源之前，先计算 CPA 与 cpa-manager 的合计申请。超出包络时报告 &lt;code&gt;ResourcesExceedBaseline&lt;/code&gt;，不创建半套资源。&lt;/p&gt;
+&lt;p&gt;这个顺序很重要。若先创建 PVC 和 Secret，最后才发现 CPU 超限，集群里会留下难以解释的半成品。&lt;/p&gt;
+&lt;h2 id="resourcequota给-namespace-装上总闸"&gt;ResourceQuota：给 Namespace 装上总闸
+&lt;/h2&gt;&lt;p&gt;每个号池 Namespace 都会得到一个 ResourceQuota，hard limits 来自平台最大包络，而不是当前 CR 的实际申请：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;span class="lnt"&gt;4
+&lt;/span&gt;&lt;span class="lnt"&gt;5
+&lt;/span&gt;&lt;span class="lnt"&gt;6
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-text" data-lang="text"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;requests.cpu
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;requests.memory
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;limits.cpu
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;limits.memory
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;requests.storage
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;persistentvolumeclaims: 1
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;为什么不直接把 Quota 设成当前申请量？因为用户可能在允许范围内调整 CPU 和内存。如果 Quota 只等于旧值，更新工作负载时可能先被 Quota 阻止，控制器还要同步处理两个互相约束的对象。&lt;/p&gt;
+&lt;p&gt;使用平台最大包络后：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-text" data-lang="text"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;SubPool spec 决定当前想用多少
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;Operator 校验决定申请是否合法
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;ResourceQuota 防止 Namespace 内总用量突破平台上限
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;这是应用层校验和 Kubernetes 原生硬限制的双层防线。&lt;/p&gt;
+&lt;h2 id="为什么没有-limitrange"&gt;为什么没有 LimitRange
+&lt;/h2&gt;&lt;p&gt;LimitRange 常用于给未声明资源的容器补默认值，或限制单个容器的范围。本项目要求 SubPool 明确声明每个容器的 requests/limits，Operator 又负责校验并投影，所以不需要 LimitRange 自动补值。&lt;/p&gt;
+&lt;p&gt;显式输入有两个好处：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;用户提交的 CR 就能看出真实资源意图；&lt;/li&gt;
+&lt;li&gt;不会因不同 Namespace 的默认值而产生隐式差异。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;控制器还会删除属于本 Pool 的旧版 LimitRange，避免遗留策略与新契约冲突。&lt;/p&gt;
+&lt;h2 id="poddisruptionbudget-在保护什么"&gt;PodDisruptionBudget 在保护什么
+&lt;/h2&gt;&lt;p&gt;项目为 runtime 和 Operator、Mihomo 各配置了 PDB，常见形式是：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-yaml" data-lang="yaml"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nt"&gt;spec&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nt"&gt;minAvailable&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;1&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;PDB 限制的是自愿中断中的并发不可用数，例如：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;管理员执行 node drain；&lt;/li&gt;
+&lt;li&gt;集群自动缩容驱逐 Pod；&lt;/li&gt;
+&lt;li&gt;某些受 eviction API 管理的维护操作。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;它告诉执行驱逐的组件：“至少保留一个满足 selector 的可用 Pod。”&lt;/p&gt;
+&lt;h2 id="pdb-不是什么"&gt;PDB 不是什么
+&lt;/h2&gt;&lt;p&gt;PDB 不会：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;创建额外副本；&lt;/li&gt;
+&lt;li&gt;阻止 Node 突然宕机；&lt;/li&gt;
+&lt;li&gt;阻止容器崩溃；&lt;/li&gt;
+&lt;li&gt;阻止用户直接删除 Pod 或控制器；&lt;/li&gt;
+&lt;li&gt;修复探针或应用故障；&lt;/li&gt;
+&lt;li&gt;让一个 RWO 单副本应用自动变成高可用。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;runtime 只有一个 replica，&lt;code&gt;minAvailable: 1&lt;/code&gt; 意味着 drain 可能无法驱逐它，除非使用者处理预算或接受中断。它更像“维护刹车”，不是“永不断线保险”。&lt;/p&gt;
+&lt;p&gt;Operator 与 Mihomo 各有两个副本，PDB 才能在自愿中断时允许一个副本离开、同时保留另一个可用。但 Operator 还需要 leader election，Mihomo 两个副本则各自维护连接选择状态。&lt;/p&gt;
+&lt;h2 id="resourcequota-与实际-node-容量是两回事"&gt;ResourceQuota 与实际 Node 容量是两回事
+&lt;/h2&gt;&lt;p&gt;Quota 允许一个 Pool 请求 3 CPU，不代表集群此时一定有 Node 能提供 3 CPU。Quota 是“最多准许申请多少”，Scheduler 仍要根据实际 Node 可分配资源决定能否调度。&lt;/p&gt;
+&lt;p&gt;因此 Pod Pending 时要区分：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;API 创建被 ResourceQuota 拒绝；&lt;/li&gt;
+&lt;li&gt;Pod 已创建，但 Scheduler 报 Insufficient cpu/memory；&lt;/li&gt;
+&lt;li&gt;PVC 或 topology 阻止调度；&lt;/li&gt;
+&lt;li&gt;taint、affinity 等其他约束阻止调度。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;检查：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;kubectl -n subpool-demo-pool describe resourcequota
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;kubectl -n subpool-demo-pool describe pod runtime-0
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;kubectl get nodes
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h2 id="调参的正确闭环"&gt;调参的正确闭环
+&lt;/h2&gt;&lt;p&gt;不要仅凭“CPU 经常到 100%”就盲目加 limit，也不要为了调度成功把 request 压到极低。更可靠的闭环是：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;观察一段有代表性的 CPU、内存和延迟；&lt;/li&gt;
+&lt;li&gt;区分平均值、峰值与持续峰值；&lt;/li&gt;
+&lt;li&gt;检查 CPU throttling、OOM、重启和探针超时；&lt;/li&gt;
+&lt;li&gt;调整 SubPool spec；&lt;/li&gt;
+&lt;li&gt;确认没有超过 Operator 包络；&lt;/li&gt;
+&lt;li&gt;观察滚动更新后的新基线。&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;资源管理的目标不是让数字尽可能小，而是在成本、调度稳定性和应用性能之间建立可解释的边界。&lt;/p&gt;</description></item></channel></rss>

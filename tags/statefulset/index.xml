@@ -1,0 +1,262 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>StatefulSet on Kerolt's Note</title><link>https://kerolt.github.io/tags/statefulset/</link><description>Recent content in StatefulSet on Kerolt's Note</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><lastBuildDate>Sun, 02 Aug 2026 00:00:00 +0000</lastBuildDate><atom:link href="https://kerolt.github.io/tags/statefulset/index.xml" rel="self" type="application/rss+xml"/><item><title>StatefulSet、PVC 与 RWO 持久化存储</title><link>https://kerolt.github.io/p/statefulsetpvc-%E4%B8%8E-rwo-%E6%8C%81%E4%B9%85%E5%8C%96%E5%AD%98%E5%82%A8/</link><pubDate>Sun, 02 Aug 2026 00:00:00 +0000</pubDate><guid>https://kerolt.github.io/p/statefulsetpvc-%E4%B8%8E-rwo-%E6%8C%81%E4%B9%85%E5%8C%96%E5%AD%98%E5%82%A8/</guid><description>&lt;h2 id="容器会消失数据不能跟着失忆"&gt;容器会消失，数据不能跟着失忆
+&lt;/h2&gt;&lt;p&gt;Pod 是可替换资源。镜像更新、节点维护、健康检查失败或控制器重建，都可能让旧 Pod 消失并创建新 Pod。若数据只写在容器可写层，旧 Pod 一删，数据也没了。&lt;/p&gt;
+&lt;p&gt;本项目需要保存：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;CPA 配置；&lt;/li&gt;
+&lt;li&gt;账号认证数据；&lt;/li&gt;
+&lt;li&gt;CPA 日志；&lt;/li&gt;
+&lt;li&gt;cpa-manager 的 SQLite 数据库；&lt;/li&gt;
+&lt;li&gt;cpa-manager 的数据密钥。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;因此每个 SubPool 都需要独立的持久卷。Operator 通过 StatefulSet 的 &lt;code&gt;volumeClaimTemplates&lt;/code&gt; 为它创建一个 PVC。&lt;/p&gt;
+&lt;h2 id="四个容易混淆的角色"&gt;四个容易混淆的角色
+&lt;/h2&gt;&lt;table&gt;
+	&lt;thead&gt;
+			&lt;tr&gt;
+					&lt;th&gt;对象&lt;/th&gt;
+					&lt;th&gt;可以理解为&lt;/th&gt;
+					&lt;th&gt;由谁关心&lt;/th&gt;
+			&lt;/tr&gt;
+	&lt;/thead&gt;
+	&lt;tbody&gt;
+			&lt;tr&gt;
+					&lt;td&gt;Volume&lt;/td&gt;
+					&lt;td&gt;Pod 中的挂载定义&lt;/td&gt;
+					&lt;td&gt;Pod&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;PVC&lt;/td&gt;
+					&lt;td&gt;应用提交的存储申请&lt;/td&gt;
+					&lt;td&gt;应用与控制器&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;PV&lt;/td&gt;
+					&lt;td&gt;集群中实际可分配的存储资源&lt;/td&gt;
+					&lt;td&gt;Kubernetes 存储控制面&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;StorageClass&lt;/td&gt;
+					&lt;td&gt;动态创建存储的规格与驱动&lt;/td&gt;
+					&lt;td&gt;集群管理员&lt;/td&gt;
+			&lt;/tr&gt;
+	&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;关系大致是：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;span class="lnt"&gt;4
+&lt;/span&gt;&lt;span class="lnt"&gt;5
+&lt;/span&gt;&lt;span class="lnt"&gt;6
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-text" data-lang="text"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;StatefulSet
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; └─ volumeClaimTemplates
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; └─ PVC: 我要 20Gi、RWO、指定 StorageClass
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; └─ StorageClass / CSI provisioner
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; └─ PV: 实际云盘或其他存储
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; └─ 挂载进 runtime-0 Pod
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;PVC 不等于磁盘本身，它更像一张存储申请单。PV 才代表已经供 Kubernetes 使用的一块存储。&lt;/p&gt;
+&lt;h2 id="为什么本项目使用-statefulset"&gt;为什么本项目使用 StatefulSet
+&lt;/h2&gt;&lt;p&gt;Deployment 更适合可替换的无状态副本；StatefulSet 为 Pod 和存储提供稳定身份。&lt;/p&gt;
+&lt;p&gt;本项目生成的 StatefulSet 名为 &lt;code&gt;runtime&lt;/code&gt;，第一个 Pod 通常叫：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-text" data-lang="text"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;runtime-0
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;由 volume claim template 创建的 PVC 名称通常带模板名和 Pod 名，例如：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-text" data-lang="text"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;data-runtime-0
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;Pod 重建后名字仍然是 &lt;code&gt;runtime-0&lt;/code&gt;，并继续使用原来的 PVC。对于依赖本地 SQLite、配置文件和账号目录的工作负载，这种稳定身份比 Deployment 更合适。&lt;/p&gt;
+&lt;p&gt;不过 StatefulSet 并不自动等于“有状态高可用”。本项目只有一个 replica，同一个 RWO PVC 也只服务这个 runtime Pod。&lt;/p&gt;
+&lt;h2 id="volumeclaimtemplates-做了什么"&gt;volumeClaimTemplates 做了什么
+&lt;/h2&gt;&lt;p&gt;项目中的核心声明可以抽象为：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt; 1
+&lt;/span&gt;&lt;span class="lnt"&gt; 2
+&lt;/span&gt;&lt;span class="lnt"&gt; 3
+&lt;/span&gt;&lt;span class="lnt"&gt; 4
+&lt;/span&gt;&lt;span class="lnt"&gt; 5
+&lt;/span&gt;&lt;span class="lnt"&gt; 6
+&lt;/span&gt;&lt;span class="lnt"&gt; 7
+&lt;/span&gt;&lt;span class="lnt"&gt; 8
+&lt;/span&gt;&lt;span class="lnt"&gt; 9
+&lt;/span&gt;&lt;span class="lnt"&gt;10
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-yaml" data-lang="yaml"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nt"&gt;volumeClaimTemplates&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;- &lt;span class="nt"&gt;metadata&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nt"&gt;name&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l"&gt;data&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nt"&gt;spec&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nt"&gt;accessModes&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;- &lt;span class="l"&gt;ReadWriteOnce&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nt"&gt;storageClassName&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l"&gt;standard-rwo&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nt"&gt;resources&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nt"&gt;requests&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nt"&gt;storage&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l"&gt;20Gi&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;它不是引用一个预先写死的 PVC，而是告诉 StatefulSet controller：“给每个 Pod 按这个模板创建自己的 PVC。”&lt;/p&gt;
+&lt;p&gt;本项目 replicas 固定为 1，所以每个 Pool 正常只有一个由模板生成的 PVC。ResourceQuota 也固定最多允许一个 PVC，进一步阻止意外扩张。&lt;/p&gt;
+&lt;h2 id="rwo-的真实含义"&gt;RWO 的真实含义
+&lt;/h2&gt;&lt;p&gt;&lt;code&gt;ReadWriteOnce&lt;/code&gt; 常被误读成“只能被一个 Pod 使用”。它更准确的含义是：卷可以被单个 Node 以读写方式挂载。&lt;/p&gt;
+&lt;p&gt;这意味着：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;同一 Node 上的多个 Pod 是否能同时访问，要看具体驱动和挂载方式；&lt;/li&gt;
+&lt;li&gt;不应把 RWO 当作应用级分布式锁；&lt;/li&gt;
+&lt;li&gt;Pod 跨 Node 重调度时，旧挂载需要先解除，新 Node 才能挂载；&lt;/li&gt;
+&lt;li&gt;云盘 attach/detach 可能让恢复比无状态 Pod 慢。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;本项目用一个 Pod 承载两个容器，正好适配 RWO：两个容器通过同一 Pod 挂载同一个卷，不需要跨 Node 多写。&lt;/p&gt;
+&lt;h2 id="storageclass-是平台能力不是应用细节"&gt;StorageClass 是平台能力，不是应用细节
+&lt;/h2&gt;&lt;p&gt;当前 Operator Configuration 指定：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-yaml" data-lang="yaml"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nt"&gt;storage&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nt"&gt;className&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l"&gt;standard-rwo&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;这表示 SubPool 只声明容量，平台统一决定使用哪种存储。换一个集群时，管理员必须确认目标集群存在该 StorageClass：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;kubectl get storageclass
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;kubectl get storageclass standard-rwo -o yaml
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;如果 StorageClass 不存在或 CSI provisioner 异常，PVC 会一直 Pending，Pod 也无法正常启动。&lt;/p&gt;
+&lt;p&gt;典型检查：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;kubectl -n subpool-demo-pool get pvc
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;kubectl -n subpool-demo-pool describe pvc data-runtime-0
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;kubectl -n subpool-demo-pool get events --sort-by&lt;span class="o"&gt;=&lt;/span&gt;.lastTimestamp
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;Event 中常能看到 provision、topology、quota 或 attach 失败原因。&lt;/p&gt;
+&lt;h2 id="容量为什么创建后不可修改"&gt;容量为什么创建后不可修改
+&lt;/h2&gt;&lt;p&gt;Kubernetes 的 PVC 本身在满足 StorageClass 与 CSI 条件时可能支持扩容，但本项目把 &lt;code&gt;spec.storage.size&lt;/code&gt; 定义为不可变。这是项目 API 契约，而不是一句“Kubernetes 永远不能扩容”。&lt;/p&gt;
+&lt;p&gt;原因在于当前 Operator 直接把容量放进 StatefulSet 的 &lt;code&gt;volumeClaimTemplates&lt;/code&gt;。对已存在 StatefulSet，这部分字段受更新限制。若 CR 允许修改而底层模板不能可靠同步，就会出现：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-text" data-lang="text"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;SubPool spec 写 40Gi
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;现有 PVC 仍是 20Gi
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;StatefulSet 更新又被 API Server 拒绝
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;与其提供一个表面可改、实际行为不一致的字段，v1 选择在 CRD 层直接禁止修改。&lt;/p&gt;
+&lt;p&gt;未来若要支持扩容，需要明确设计：校验 StorageClass 能力、直接扩 PVC、处理文件系统扩容、记录进度和失败恢复，而不是只删除一条 CEL 校验。&lt;/p&gt;
+&lt;h2 id="暂停为什么能保留数据"&gt;暂停为什么能保留数据
+&lt;/h2&gt;&lt;p&gt;设置：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;kubectl patch subpool demo-pool --type&lt;span class="o"&gt;=&lt;/span&gt;merge &lt;span class="se"&gt;\
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; -p &lt;span class="s1"&gt;&amp;#39;{&amp;#34;spec&amp;#34;:{&amp;#34;suspend&amp;#34;:true}}&amp;#39;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;Operator 会把 StatefulSet replicas 调成 0，但保留：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;SubPool；&lt;/li&gt;
+&lt;li&gt;派生 Namespace；&lt;/li&gt;
+&lt;li&gt;PVC；&lt;/li&gt;
+&lt;li&gt;Credential Secret；&lt;/li&gt;
+&lt;li&gt;其他基础配置。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;恢复时再把 replicas 调回 1，新 Pod 重新挂载旧 PVC，从上次状态继续运行。&lt;/p&gt;
+&lt;p&gt;暂停适合临时停机、节省计算资源或等待外部依赖修复。它不释放持久存储费用。&lt;/p&gt;
+&lt;h2 id="删除为什么是高风险操作"&gt;删除为什么是高风险操作
+&lt;/h2&gt;&lt;p&gt;删除 &lt;code&gt;SubPool&lt;/code&gt; 会删除它拥有的 Namespace，Namespace 中的 PVC 也随之删除。PVC 删除后，底层 PV 如何处理取决于 StorageClass 的 reclaim policy：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;Delete&lt;/code&gt;：通常连底层存储一起删除；&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;Retain&lt;/code&gt;：PV 和底层存储可能保留，但需要人工回收。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;项目的产品语义明确把删除视为永久丢失号池运行数据。不要因为某个 Pod 卡住就删除 SubPool“试试看”。&lt;/p&gt;
+&lt;p&gt;删除前至少确认：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;kubectl get sp demo-pool -o yaml
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;kubectl -n subpool-demo-pool get pvc
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;kubectl get pv
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;当前 v1 不负责备份恢复，因此重要数据必须另有备份流程。&lt;/p&gt;
+&lt;h2 id="pdb-不能保护磁盘也不能制造副本"&gt;PDB 不能保护磁盘，也不能制造副本
+&lt;/h2&gt;&lt;p&gt;runtime StatefulSet 有一个 &lt;code&gt;minAvailable: 1&lt;/code&gt; 的 PodDisruptionBudget。它只限制某些自愿中断，例如节点 drain 时的 eviction。&lt;/p&gt;
+&lt;p&gt;它不能防止：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;容器进程崩溃；&lt;/li&gt;
+&lt;li&gt;Node 突然宕机；&lt;/li&gt;
+&lt;li&gt;磁盘故障；&lt;/li&gt;
+&lt;li&gt;用户删除 StatefulSet 或 Namespace；&lt;/li&gt;
+&lt;li&gt;只有一个副本时的滚动更新中断；&lt;/li&gt;
+&lt;li&gt;数据损坏。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;本项目单副本加 RWO 的设计重点是隔离和持久化，不是数据面无中断高可用。&lt;/p&gt;
+&lt;h2 id="常见状态与判断"&gt;常见状态与判断
+&lt;/h2&gt;&lt;h3 id="pvc-pending"&gt;PVC Pending
+&lt;/h3&gt;&lt;p&gt;优先检查 StorageClass、CSI provisioner、容量配额和拓扑限制。&lt;/p&gt;
+&lt;h3 id="pod-pending-且提示-unbound-pvc"&gt;Pod Pending 且提示 unbound PVC
+&lt;/h3&gt;&lt;p&gt;Pod 在等 PVC 绑定。不要先查应用日志，因为容器还没有运行。&lt;/p&gt;
+&lt;h3 id="multi-attach-error"&gt;Multi-Attach error
+&lt;/h3&gt;&lt;p&gt;通常是卷仍挂在旧 Node，或新旧 Pod 在不同 Node 争用 RWO 卷。检查 Pod 调度位置和 VolumeAttachment，等待安全 detach，不要强行绕过。&lt;/p&gt;
+&lt;h3 id="pod-运行但-permission-denied"&gt;Pod 运行但 Permission denied
+&lt;/h3&gt;&lt;p&gt;检查镜像运行 UID、&lt;code&gt;fsGroup&lt;/code&gt;、卷中文件的历史权限以及 CSI 驱动行为。本项目使用 UID/GID 65532，并设置 &lt;code&gt;FSGroupChangeOnRootMismatch&lt;/code&gt;。&lt;/p&gt;
+&lt;h2 id="实用观察命令"&gt;实用观察命令
+&lt;/h2&gt;&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;span class="lnt"&gt;4
+&lt;/span&gt;&lt;span class="lnt"&gt;5
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;kubectl -n subpool-demo-pool get statefulset runtime
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;kubectl -n subpool-demo-pool get pod runtime-0 -o wide
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;kubectl -n subpool-demo-pool get pvc -o wide
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;kubectl -n subpool-demo-pool describe pvc data-runtime-0
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;kubectl get storageclass
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;排查存储时沿着“Pod → PVC → StorageClass/PV → CSI”逐层向下，不要把所有 Pending 都归咎于应用镜像。&lt;/p&gt;</description></item></channel></rss>

@@ -1,0 +1,362 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>声明式API on Kerolt's Note</title><link>https://kerolt.github.io/tags/%E5%A3%B0%E6%98%8E%E5%BC%8Fapi/</link><description>Recent content in 声明式API on Kerolt's Note</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><lastBuildDate>Sun, 02 Aug 2026 00:00:00 +0000</lastBuildDate><atom:link href="https://kerolt.github.io/tags/%E5%A3%B0%E6%98%8E%E5%BC%8Fapi/index.xml" rel="self" type="application/rss+xml"/><item><title>从 YAML 开始理解 Kubernetes 对象</title><link>https://kerolt.github.io/p/%E4%BB%8E-yaml-%E5%BC%80%E5%A7%8B%E7%90%86%E8%A7%A3-kubernetes-%E5%AF%B9%E8%B1%A1/</link><pubDate>Sun, 02 Aug 2026 00:00:00 +0000</pubDate><guid>https://kerolt.github.io/p/%E4%BB%8E-yaml-%E5%BC%80%E5%A7%8B%E7%90%86%E8%A7%A3-kubernetes-%E5%AF%B9%E8%B1%A1/</guid><description>&lt;h2 id="yaml-不是-kubernetesyaml-只是申请表"&gt;YAML 不是 Kubernetes，YAML 只是申请表
+&lt;/h2&gt;&lt;p&gt;初学 Kubernetes 时，我们每天都在写 YAML，很容易产生一种错觉：Kubernetes 就是一堆 YAML。&lt;/p&gt;
+&lt;p&gt;更准确的理解是：YAML 只是把一个 API 对象序列化成文本。真正重要的是 API Server 中保存的对象，以及控制器围绕这些对象持续运行的控制循环。&lt;/p&gt;
+&lt;p&gt;下面这个文件不是一段“创建脚本”，而是一份期望状态声明：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;span class="lnt"&gt;4
+&lt;/span&gt;&lt;span class="lnt"&gt;5
+&lt;/span&gt;&lt;span class="lnt"&gt;6
+&lt;/span&gt;&lt;span class="lnt"&gt;7
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-yaml" data-lang="yaml"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nt"&gt;apiVersion&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l"&gt;subrelay.example.com/v1alpha1&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nt"&gt;kind&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l"&gt;SubPool&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nt"&gt;metadata&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nt"&gt;name&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l"&gt;demo-pool&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nt"&gt;spec&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nt"&gt;exposure&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nt"&gt;mode&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l"&gt;Internal&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;它表达的是：“集群里应该存在一个名为 &lt;code&gt;demo-pool&lt;/code&gt; 的 &lt;code&gt;SubPool&lt;/code&gt;，它的暴露模式应该是 &lt;code&gt;Internal&lt;/code&gt;。”&lt;/p&gt;
+&lt;h2 id="每个对象都有四个核心部分"&gt;每个对象都有四个核心部分
+&lt;/h2&gt;&lt;h3 id="apiversion去哪个-api-组找规则"&gt;apiVersion：去哪个 API 组找规则
+&lt;/h3&gt;&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-yaml" data-lang="yaml"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nt"&gt;apiVersion&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l"&gt;subrelay.example.com/v1alpha1&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;它由 API group 和 version 组成：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;API group：&lt;code&gt;subrelay.example.com&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;version：&lt;code&gt;v1alpha1&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Kubernetes 内置核心资源常用 &lt;code&gt;apiVersion: v1&lt;/code&gt;，例如 Namespace、Service、ConfigMap 和 Secret。其他资源会带 API group：&lt;/p&gt;
+&lt;table&gt;
+	&lt;thead&gt;
+			&lt;tr&gt;
+					&lt;th&gt;资源&lt;/th&gt;
+					&lt;th&gt;apiVersion&lt;/th&gt;
+			&lt;/tr&gt;
+	&lt;/thead&gt;
+	&lt;tbody&gt;
+			&lt;tr&gt;
+					&lt;td&gt;Deployment、StatefulSet&lt;/td&gt;
+					&lt;td&gt;&lt;code&gt;apps/v1&lt;/code&gt;&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;NetworkPolicy&lt;/td&gt;
+					&lt;td&gt;&lt;code&gt;networking.k8s.io/v1&lt;/code&gt;&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;PodDisruptionBudget&lt;/td&gt;
+					&lt;td&gt;&lt;code&gt;policy/v1&lt;/code&gt;&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;HTTPRoute、Gateway&lt;/td&gt;
+					&lt;td&gt;&lt;code&gt;gateway.networking.k8s.io/v1&lt;/code&gt;&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;SubPool&lt;/td&gt;
+					&lt;td&gt;&lt;code&gt;subrelay.example.com/v1alpha1&lt;/code&gt;&lt;/td&gt;
+			&lt;/tr&gt;
+	&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;&lt;code&gt;apiVersion&lt;/code&gt; 不是镜像版本，也不是 Kubernetes 集群版本。它决定 API Server 用哪套 schema 解析和校验对象。&lt;/p&gt;
+&lt;h3 id="kind这张申请表是什么类型"&gt;kind：这张申请表是什么类型
+&lt;/h3&gt;&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-yaml" data-lang="yaml"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nt"&gt;kind&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l"&gt;SubPool&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;&lt;code&gt;kind&lt;/code&gt; 决定对象的类别。不同 Kind 有不同的 &lt;code&gt;spec&lt;/code&gt; 结构。例如 Service 的 &lt;code&gt;spec&lt;/code&gt; 里有端口和 selector，StatefulSet 的 &lt;code&gt;spec&lt;/code&gt; 里有 Pod template 和 volume claim template。&lt;/p&gt;
+&lt;h3 id="metadata对象的身份证"&gt;metadata：对象的身份证
+&lt;/h3&gt;&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-yaml" data-lang="yaml"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nt"&gt;metadata&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nt"&gt;name&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l"&gt;demo-pool&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;常见 metadata 包括：&lt;/p&gt;
+&lt;table&gt;
+	&lt;thead&gt;
+			&lt;tr&gt;
+					&lt;th&gt;字段&lt;/th&gt;
+					&lt;th&gt;作用&lt;/th&gt;
+			&lt;/tr&gt;
+	&lt;/thead&gt;
+	&lt;tbody&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;code&gt;name&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;对象在作用域内的名称&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;code&gt;namespace&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;对象属于哪个 Namespace&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;code&gt;labels&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;供查询、选择和策略匹配使用的键值对&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;code&gt;annotations&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;给工具或控制器使用的非标识性信息&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;code&gt;ownerReferences&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;表示资源归谁管理&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;code&gt;generation&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;spec 被修改后递增的代数&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;code&gt;resourceVersion&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;API Server 用于并发控制的版本&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;code&gt;finalizers&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;删除前必须完成的收尾任务&lt;/td&gt;
+			&lt;/tr&gt;
+	&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;本项目的 &lt;code&gt;SubPool&lt;/code&gt; 是 cluster-scoped，所以它没有 &lt;code&gt;metadata.namespace&lt;/code&gt;。即使执行 &lt;code&gt;kubectl -n test get subpool&lt;/code&gt;，&lt;code&gt;-n test&lt;/code&gt; 也不会让它突然变成 Namespace 内资源。&lt;/p&gt;
+&lt;h3 id="spec-与-status愿望和现实"&gt;spec 与 status：愿望和现实
+&lt;/h3&gt;&lt;p&gt;&lt;code&gt;spec&lt;/code&gt; 是用户或上层控制器表达的期望状态，&lt;code&gt;status&lt;/code&gt; 是控制器观察到的现实状态。&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-text" data-lang="text"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;spec：我希望有一套 Internal 模式、20Gi 存储的号池
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;status：它已经派生出 subpool-demo-pool，目前代理 Endpoint 尚未就绪
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;在本项目里，&lt;code&gt;spec&lt;/code&gt; 包含镜像、CPU、内存、存储、暴露模式和暂停开关；&lt;code&gt;status&lt;/code&gt; 包含 Namespace、CPA Service、hostname、&lt;code&gt;observedGeneration&lt;/code&gt; 和 Conditions。&lt;/p&gt;
+&lt;p&gt;不要手工编辑 status。它属于控制器，不是用户配置区。&lt;/p&gt;
+&lt;h2 id="kubectl-apply-实际做了什么"&gt;kubectl apply 实际做了什么
+&lt;/h2&gt;&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;kubectl apply -f examples/subpool-internal.yaml
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;这条命令大致经历：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;code&gt;kubectl&lt;/code&gt; 读取 YAML。&lt;/li&gt;
+&lt;li&gt;根据当前 kubeconfig 把请求发给 API Server。&lt;/li&gt;
+&lt;li&gt;API Server 做认证、授权、schema 校验和 admission。&lt;/li&gt;
+&lt;li&gt;对象被持久化。&lt;/li&gt;
+&lt;li&gt;监听这个对象的 controller 收到事件。&lt;/li&gt;
+&lt;li&gt;controller 开始 reconcile。&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;&lt;code&gt;kubectl&lt;/code&gt; 并没有亲自创建 StatefulSet 或 PVC。那些资源是 SubRelay Operator 看到 &lt;code&gt;SubPool&lt;/code&gt; 后创建的。&lt;/p&gt;
+&lt;p&gt;这也是排障时必须分层的原因：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;kubectl apply&lt;/code&gt; 失败：通常还没通过 API Server 校验或授权。&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;SubPool&lt;/code&gt; 已存在但没有派生资源：看 Operator 日志和 Conditions。&lt;/li&gt;
+&lt;li&gt;StatefulSet 已创建但 Pod 不 Ready：看 Pod、Event、探针、镜像和存储。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="声明式管理与命令式操作"&gt;声明式管理与命令式操作
+&lt;/h2&gt;&lt;p&gt;Kubernetes 同时支持两种操作方式。&lt;/p&gt;
+&lt;p&gt;命令式操作描述“执行什么动作”：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;kubectl create namespace demo
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;kubectl scale statefulset runtime --replicas&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="m"&gt;0&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;声明式操作描述“最终应该是什么样”：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;kubectl apply -f object.yaml
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;Operator 项目更依赖声明式思维。用户修改 &lt;code&gt;SubPool.spec&lt;/code&gt;，Operator 再把底层资源收敛到新状态。手工修改 Operator 管理的 StatefulSet，可能暂时生效，但下一轮 reconcile 会把它改回来。&lt;/p&gt;
+&lt;p&gt;可以把这叫作“方向盘归 Operator”：底层对象的期望状态来源不是临时的 &lt;code&gt;kubectl edit&lt;/code&gt;，而是 &lt;code&gt;SubPool&lt;/code&gt; 和 Operator Configuration。&lt;/p&gt;
+&lt;h2 id="createapplypatchedit-的区别"&gt;create、apply、patch、edit 的区别
+&lt;/h2&gt;&lt;table&gt;
+	&lt;thead&gt;
+			&lt;tr&gt;
+					&lt;th&gt;命令&lt;/th&gt;
+					&lt;th&gt;适合场景&lt;/th&gt;
+					&lt;th&gt;注意事项&lt;/th&gt;
+			&lt;/tr&gt;
+	&lt;/thead&gt;
+	&lt;tbody&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;code&gt;kubectl create&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;明确只创建一次&lt;/td&gt;
+					&lt;td&gt;对象已存在时失败&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;code&gt;kubectl apply&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;持续声明式维护&lt;/td&gt;
+					&lt;td&gt;适合 Git 中的 manifests&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;code&gt;kubectl patch&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;修改少数字段&lt;/td&gt;
+					&lt;td&gt;适合暂停、恢复等小操作&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;code&gt;kubectl edit&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;临时交互修改&lt;/td&gt;
+					&lt;td&gt;容易留下不可复现的配置&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;code&gt;kubectl replace&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;用完整对象替换&lt;/td&gt;
+					&lt;td&gt;对资源版本和不可变字段更敏感&lt;/td&gt;
+			&lt;/tr&gt;
+	&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;本项目暂停号池使用 merge patch：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;kubectl patch subpool demo-pool --type&lt;span class="o"&gt;=&lt;/span&gt;merge &lt;span class="se"&gt;\
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; -p &lt;span class="s1"&gt;&amp;#39;{&amp;#34;spec&amp;#34;:{&amp;#34;suspend&amp;#34;:true}}&amp;#39;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;这只修改 &lt;code&gt;spec.suspend&lt;/code&gt;，其他字段保持不变。&lt;/p&gt;
+&lt;h2 id="服务端校验为什么重要"&gt;服务端校验为什么重要
+&lt;/h2&gt;&lt;p&gt;&lt;code&gt;SubPool&lt;/code&gt; 的 CRD 给 API Server 安装了一份 schema。例如：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;exposure.mode&lt;/code&gt; 只能是 &lt;code&gt;Internal&lt;/code&gt; 或 &lt;code&gt;Gateway&lt;/code&gt;；&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;metadata.name&lt;/code&gt; 最长 40 个字符，并且必须是 DNS label；&lt;/li&gt;
+&lt;li&gt;CPU 和内存的 request/limit 必须存在；&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;storage.size&lt;/code&gt; 创建后不可修改。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;这类静态错误应尽量在对象进入系统前被拒绝。动态依赖则不能只靠 schema，例如 Shared Mihomo 是否有 Ready Endpoint，需要 Operator 运行时检查并写入 Condition。&lt;/p&gt;
+&lt;p&gt;因此项目用了两层防线：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-text" data-lang="text"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;CRD OpenAPI/CEL：检查格式和不可变规则
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;Operator reconcile：检查资源预算、共享网关和所有权等动态条件
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h2 id="名称作用域与完整身份"&gt;名称、作用域与完整身份
+&lt;/h2&gt;&lt;p&gt;Namespaced 对象的完整身份通常是：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-text" data-lang="text"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;API Group + Kind + Namespace + Name
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;例如：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-text" data-lang="text"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;v1 / Service / subpool-demo-pool / cpa
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;不同 Namespace 中可以同时存在名为 &lt;code&gt;cpa&lt;/code&gt; 的 Service。因此每个 SubPool 都可以使用固定资源名，而不会互相冲突。&lt;/p&gt;
+&lt;p&gt;Cluster-scoped 对象没有 Namespace，例如：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-text" data-lang="text"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;subrelay.example.com/v1alpha1 / SubPool / demo-pool
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;这也是 &lt;code&gt;SubPool&lt;/code&gt; 名称必须全局唯一的原因。&lt;/p&gt;
+&lt;h2 id="读取对象时先看哪里"&gt;读取对象时先看哪里
+&lt;/h2&gt;&lt;p&gt;初学者常对着完整 YAML 从第一行看到最后一行，很快被 &lt;code&gt;managedFields&lt;/code&gt; 淹没。更有效的顺序是：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;kubectl get sp demo-pool
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;kubectl describe sp demo-pool
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;kubectl get sp demo-pool -o yaml
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;阅读时优先关注：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;code&gt;metadata.name&lt;/code&gt;、&lt;code&gt;namespace&lt;/code&gt;、labels 和 owner references；&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;spec&lt;/code&gt; 是否等于你的期望；&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;status.conditions&lt;/code&gt; 的 &lt;code&gt;type&lt;/code&gt;、&lt;code&gt;status&lt;/code&gt;、&lt;code&gt;reason&lt;/code&gt;、&lt;code&gt;message&lt;/code&gt;；&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;metadata.generation&lt;/code&gt; 是否已经被 &lt;code&gt;status.observedGeneration&lt;/code&gt; 观察；&lt;/li&gt;
+&lt;li&gt;最后才看工具自动维护的内部字段。&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;项目中可用更紧凑的命令看 Conditions：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;kubectl get sp demo-pool &lt;span class="se"&gt;\
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; -o &lt;span class="nv"&gt;jsonpath&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;{range .status.conditions[*]}{.type}={.status}{&amp;#34;\t&amp;#34;}{.reason}{&amp;#34;\n&amp;#34;}{end}&amp;#39;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h2 id="删除也是一次状态转换"&gt;删除也是一次状态转换
+&lt;/h2&gt;&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;kubectl delete subpool demo-pool
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;API Server 通常不会立刻把带 finalizer 的对象物理删除，而是先设置 &lt;code&gt;deletionTimestamp&lt;/code&gt;。Operator 看到它后删除专属 Namespace，等待子资源清理完毕，最后移除 finalizer。&lt;/p&gt;
+&lt;p&gt;因此“执行了 delete”与“对象已经消失”不是同一件事。对象停在 &lt;code&gt;Terminating&lt;/code&gt; 时，应检查 finalizer 和负责收尾的 controller，而不是直接 &lt;code&gt;--force&lt;/code&gt;。&lt;/p&gt;
+&lt;h2 id="本项目中的对象阅读练习"&gt;本项目中的对象阅读练习
+&lt;/h2&gt;&lt;p&gt;可以按下面顺序观察一个号池：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;span class="lnt"&gt;4
+&lt;/span&gt;&lt;span class="lnt"&gt;5
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;kubectl get sp demo-pool -o yaml
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;kubectl get namespace subpool-demo-pool -o yaml
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;kubectl -n subpool-demo-pool get statefulset runtime -o yaml
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;kubectl -n subpool-demo-pool get service cpa -o yaml
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;kubectl -n subpool-demo-pool get pvc
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;每看一个对象，都回答五个问题：它是谁、在哪里、谁创建它、它选择谁、它当前是否达到期望。只要这五个问题能回答清楚，大部分 Kubernetes YAML 就不再神秘。&lt;/p&gt;</description></item></channel></rss>
