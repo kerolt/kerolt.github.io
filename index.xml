@@ -13715,7 +13715,7 @@ JSON 格式，描述网络的类型、IPAM 配置、路由等。&lt;/p&gt;
 &lt;p&gt;所以不管用的是哈希还是 B+Tree，在操作索引时用的接口都相同。&lt;/p&gt;
 &lt;h4 id="如何理解索引"&gt;如何理解索引
 &lt;/h4&gt;&lt;p&gt;就如网上很多介绍索引的博客所描述的那样，数据库索引是用来加速检索速度的，就如同新华字典中的音节索引一样：&lt;/p&gt;
-&lt;p&gt;&lt;img loading="lazy" sizes="(max-width: 767px) calc(100vw - 30px), (max-width: 1023px) 700px, (max-width: 1279px) 950px, 1232px" src="https://i2.kknews.cc/xGbg60mPdeRNfqICEnjrmqLM9nGZdeKcOg/0.jpg"&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img class="gallery-image" data-flex-basis="172px" data-flex-grow="72" height="668" loading="lazy" sizes="(max-width: 767px) calc(100vw - 30px), (max-width: 1023px) 700px, (max-width: 1279px) 950px, 1232px" src="https://i2.kknews.cc/xGbg60mPdeRNfqICEnjrmqLM9nGZdeKcOg/0.jpg" width="481"&gt;&lt;/p&gt;
 &lt;p&gt;如同 table_info，catalog 中也有许多的 index_info，每个 index_info 就如同上图音节表中的一个字母。我们对一个字段（列）构建一个索引，就如同在上图中音节表中多加一个字母（例如 X）。&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;需要插入一条记录时，就往对应的索引下插入 &lt;code&gt;(记录， 对应记录的地址)&lt;/code&gt; 这样的键值对，例如上图的 &lt;code&gt;(xian, 519)&lt;/code&gt;，这里的地址为 &lt;code&gt;RID&lt;/code&gt;。&lt;/li&gt;
@@ -14535,7 +14535,7 @@ JSON 格式，描述网络的类型、IPAM 配置、路由等。&lt;/p&gt;
 &lt;/div&gt;</description></item><item><title>【MIT6.S081】Lab10 mmap</title><link>https://kerolt.github.io/p/mit6.s081lab10-mmap/</link><pubDate>Fri, 22 Nov 2024 00:00:00 +0000</pubDate><guid>https://kerolt.github.io/p/mit6.s081lab10-mmap/</guid><description>&lt;h2 id="什么是mmap"&gt;什么是mmap？
 &lt;/h2&gt;&lt;p&gt;&lt;code&gt;mmap&lt;/code&gt; 是一种用于将文件或设备与进程的地址空间关联起来的内存映射技术。通过 &lt;code&gt;mmap&lt;/code&gt;，可以将文件的内容直接映射到进程的虚拟内存地址空间，使得文件的内容可以像操作普通内存一样进行读取和写入。&lt;/p&gt;
 &lt;p&gt;在Linux中，虚拟内存的布局如下：&lt;/p&gt;
-&lt;p&gt;&lt;img class="gallery-image" data-flex-basis="241px" data-flex-grow="100" height="1652" loading="lazy" sizes="(max-width: 767px) calc(100vw - 30px), (max-width: 1023px) 700px, (max-width: 1279px) 950px, 1232px" src="https://cdn.xiaolincoding.com//mysql/other/532e6cdf4899588f8b873b6435cba2d8.png" srcset="https://kerolt.github.io/532e6cdf4899588f8b873b6435cba2d8_3792964083280631767_hu_d9a2adf37ffcfe63.png 800w, https://kerolt.github.io/532e6cdf4899588f8b873b6435cba2d8_3792964083280631767_hu_16735e325345ebc3.png 1600w, https://cdn.xiaolincoding.com//mysql/other/532e6cdf4899588f8b873b6435cba2d8.png 1665w" width="1665"&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img class="gallery-image" data-flex-basis="241px" data-flex-grow="100" height="1652" loading="lazy" sizes="(max-width: 767px) calc(100vw - 30px), (max-width: 1023px) 700px, (max-width: 1279px) 950px, 1232px" src="https://cdn.xiaolincoding.com//mysql/other/532e6cdf4899588f8b873b6435cba2d8.png" srcset="https://kerolt.github.io/532e6cdf4899588f8b873b6435cba2d8_3792964083280631767_hu_5d7de947ef80c0c5.png 800w, https://kerolt.github.io/532e6cdf4899588f8b873b6435cba2d8_3792964083280631767_hu_cf662d8e0b418db9.png 1600w, https://cdn.xiaolincoding.com//mysql/other/532e6cdf4899588f8b873b6435cba2d8.png 1665w" width="1665"&gt;&lt;/p&gt;
 
  &lt;blockquote&gt;
  &lt;p&gt;图片来源：&lt;a class="link" href="https://xiaolincoding.com/os/3_memory/linux_mem.html#_3-%E8%BF%9B%E7%A8%8B%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98%E7%A9%BA%E9%97%B4" target="_blank" rel="noopener"
@@ -14630,7 +14630,7 @@ JSON 格式，描述网络的类型、IPAM 配置、路由等。&lt;/p&gt;
 &lt;p&gt;当使用&lt;code&gt;mmap&lt;/code&gt;系统调用时，也可以使用懒分配的策略（类似于Copy On Write）：我们在mmap系统调用中 &lt;strong&gt;标识（不是分配）&lt;/strong&gt; 文件映射区中有一个区域与文件相关联，但这时还不会分配物理块，自然还不急着将文件读入这片内存区域；当我们需要访问这片区域的内存时，可以通过触发page fault来分配物理块，然后读入文件内容到内存块中，并将虚拟内存映射到这块物理内存上。&lt;/p&gt;
 &lt;p&gt;使用&lt;code&gt;munmap&lt;/code&gt;系统调用时，会解除文件在映射区&lt;code&gt;[addr, addr + len]&lt;/code&gt;范围内的映射，将这块区域的内存写回文件，并释放掉这块内存。实验中保证释放的区域大小一定是页的整数倍。&lt;/p&gt;
 &lt;p&gt;我们也仿照Linux上的，让文件映射区从高地址处开始向低地址增长。下图是文件映射的样子，左边为映射区域大小不固定，右边为映射大小为页框的整数倍：&lt;/p&gt;
-&lt;p&gt;&lt;img loading="lazy" sizes="(max-width: 767px) calc(100vw - 30px), (max-width: 1023px) 700px, (max-width: 1279px) 950px, 1232px" src="https://gitee.com/kerolt/picture/raw/main/20241215-134845-1.png"&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img class="gallery-image" data-flex-basis="255px" data-flex-grow="106" height="1353" loading="lazy" sizes="(max-width: 767px) calc(100vw - 30px), (max-width: 1023px) 700px, (max-width: 1279px) 950px, 1232px" src="https://gitee.com/kerolt/picture/raw/main/20241215-134845-1.png" srcset="https://kerolt.github.io/20241215-134845-1_13067623828124312749_hu_869a7e2fd4884237.png 800w, https://gitee.com/kerolt/picture/raw/main/20241215-134845-1.png 1443w" width="1443"&gt;&lt;/p&gt;
 &lt;p&gt;在实验的提示中，有说到&lt;code&gt;mmaptest&lt;/code&gt;中没有使用的功能可以不实现，其中每次使用&lt;code&gt;mmap&lt;/code&gt;都是映射的&lt;code&gt;PGSIZE&lt;/code&gt;的整数倍，那也就说明我们可以之用考虑右边的情况，这让实验降低了一点复杂度。&lt;/p&gt;
 &lt;h2 id="标识映射区域"&gt;标识映射区域
 &lt;/h2&gt;&lt;p&gt;根据实验提示，我们需要为每个进程设置用于标识映射区域的结构体：&lt;/p&gt;
@@ -22832,7 +22832,7 @@ JSON 格式，描述网络的类型、IPAM 配置、路由等。&lt;/p&gt;
  &gt;博客&lt;/a&gt;），具体为什么我也暂时不清楚，只知道和&lt;code&gt;Y组合子&lt;/code&gt;的知识点有关。&lt;/p&gt;</description></item><item><title>【协程】C++20协程初体验</title><link>https://kerolt.github.io/p/%E5%8D%8F%E7%A8%8Bc-20%E5%8D%8F%E7%A8%8B%E5%88%9D%E4%BD%93%E9%AA%8C/</link><pubDate>Sun, 18 Aug 2024 00:00:00 +0000</pubDate><guid>https://kerolt.github.io/p/%E5%8D%8F%E7%A8%8Bc-20%E5%8D%8F%E7%A8%8B%E5%88%9D%E4%BD%93%E9%AA%8C/</guid><description>&lt;h2 id="为什么我们需要协程"&gt;为什么我们需要协程？
 &lt;/h2&gt;&lt;p&gt;为什么我们有了线程还需要协程呢？（其实这个问题不应该这么问，协程的出现在线程之前）在一个进程中虽然我们可以创建多个线程，但是在一个进程中能创建的线程数量是有限制的，并且线程的调度仍然受操作系统控制，也就是说线程何时抢占、何时被抢占对于开发者来说都是透明的，并且在调度的过程中还可能涉及到用户态和内核态的切换开销。&lt;/p&gt;
 &lt;p&gt;当我们需要去处理一个非常耗时的IO操作时（假设使用的阻塞IO），为了不阻塞当前线程，我们可能会想到新建一个线程去执行这个操作，但是线程的创建和调度也是需要消耗资源的，我们希望有更加轻便的方法，例如：在当前线程中，一个任务遇到阻塞IO时，不要傻傻的停在这里，而是暂停这个任务，转而去执行其他任务，直到IO完成再恢复之前的任务来运行。&lt;/p&gt;
-&lt;p&gt;&lt;img loading="lazy" sizes="(max-width: 767px) calc(100vw - 30px), (max-width: 1023px) 700px, (max-width: 1279px) 950px, 1232px" src="https://gitee.com/kerolt/picture/raw/main/20241216-143810.png"&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img class="gallery-image" data-flex-basis="174px" data-flex-grow="72" height="794" loading="lazy" sizes="(max-width: 767px) calc(100vw - 30px), (max-width: 1023px) 700px, (max-width: 1279px) 950px, 1232px" src="https://gitee.com/kerolt/picture/raw/main/20241216-143810.png" width="578"&gt;&lt;/p&gt;
 &lt;p&gt;这里看起来是不是像两个函数之间的调用和被调用关系？确实有点像，但区别可大了，在任务1中我们并没有去显式地调用任务2！&lt;/p&gt;
 &lt;p&gt;协程的最本质的解释是“&lt;strong&gt;可以挂起和恢复的函数&lt;/strong&gt;”。例如上图中我们遇到耗时的IO操作了，我们就可以&lt;strong&gt;主动&lt;/strong&gt;将当前运行的函数挂起（suspend），让其等待（await）IO操作，让线程去运行其他的函数，直到IO操作完成后再恢复（resume）。上下文切换的时机是靠调用方（写代码的开发人员）自身去控制的，这样协程的调度掌握在我们自己手中，相比与线程减小了系统切换上下文和其他资源的开销。因此协程在需要处理大量I/O操作或者并发任务的情况下提高程序的性能和可维护性。&lt;/p&gt;
 &lt;h2 id="c20带来的协程"&gt;C++20带来的协程
