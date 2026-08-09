@@ -20,12 +20,12 @@
 </span><span class=lnt>6
 </span><span class=lnt>7
 </span><span class=lnt>8
-</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-sh data-lang=sh><span class=line><span class=cl>cat <span class=s>&lt;&lt;EOF | sudo tee /etc/docker/daemon.json 
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-sh data-lang=sh><span class=line><span class=cl>cat <span class=s>&lt;&lt;EOF | sudo tee /etc/docker/daemon.json
 </span></span></span><span class=line><span class=cl><span class=s>{
-</span></span></span><span class=line><span class=cl><span class=s>	&#34;exec-opts&#34;: [&#34;native.cgroupdriver=systemd&#34;],
-</span></span></span><span class=line><span class=cl><span class=s>	&#34;log-driver&#34;: &#34;json-file&#34;,
-</span></span></span><span class=line><span class=cl><span class=s>	&#34;log-opts&#34;: { &#34;max-size&#34;: &#34;100m&#34; },
-</span></span></span><span class=line><span class=cl><span class=s>	&#34;storage-driver&#34;: &#34;overlay2&#34; 
+</span></span></span><span class=line><span class=cl><span class=s>  &#34;exec-opts&#34;: [&#34;native.cgroupdriver=systemd&#34;],
+</span></span></span><span class=line><span class=cl><span class=s>  &#34;log-driver&#34;: &#34;json-file&#34;,
+</span></span></span><span class=line><span class=cl><span class=s>  &#34;log-opts&#34;: { &#34;max-size&#34;: &#34;100m&#34; },
+</span></span></span><span class=line><span class=cl><span class=s>  &#34;storage-driver&#34;: &#34;overlay2&#34;
 </span></span></span><span class=line><span class=cl><span class=s>}
 </span></span></span><span class=line><span class=cl><span class=s>EOF</span>
 </span></span></code></pre></td></tr></table></div></div><p>然后重启 docker：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
@@ -71,8 +71,8 @@
 </span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-sh data-lang=sh><span class=line><span class=cl>sudo apt install -y apt-transport-https ca-certificates curl
 </span></span><span class=line><span class=cl>curl https://mirrors.aliyun.com/kubernetes/apt/doc/apt-key.gpg <span class=p>|</span> sudo apt-key add
 </span></span><span class=line><span class=cl>
-</span></span><span class=line><span class=cl>cat <span class=s>&lt;&lt;EOF | sudo tee /etc/apt/sources.list.d/kubernetes.list 
-</span></span></span><span class=line><span class=cl><span class=s>deb https://mirrors.aliyun.com/kubernetes/apt/ kubernetes-xenial main 
+</span></span><span class=line><span class=cl>cat <span class=s>&lt;&lt;EOF | sudo tee /etc/apt/sources.list.d/kubernetes.list
+</span></span></span><span class=line><span class=cl><span class=s>deb https://mirrors.aliyun.com/kubernetes/apt/ kubernetes-xenial main
 </span></span></span><span class=line><span class=cl><span class=s>EOF</span>
 </span></span><span class=line><span class=cl>
 </span></span><span class=line><span class=cl>sudo apt update
@@ -91,9 +91,9 @@
 </span><span class=lnt>3
 </span><span class=lnt>4
 </span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-sh data-lang=sh><span class=line><span class=cl>sudo kubeadm init <span class=se>\
-</span></span></span><span class=line><span class=cl>	--pod-network-cidr<span class=o>=</span>10.10.0.0/16 <span class=se>\ </span>
-</span></span><span class=line><span class=cl>	--apiserver-advertise-address<span class=o>=</span>192.168.10.210 <span class=se>\
-</span></span></span><span class=line><span class=cl>	--kubernetes-version<span class=o>=</span>v1.23.3
+</span></span></span><span class=line><span class=cl>  --pod-network-cidr<span class=o>=</span>10.10.0.0/16 <span class=se>\
+</span></span></span><span class=line><span class=cl>  --apiserver-advertise-address<span class=o>=</span>192.168.10.210 <span class=se>\
+</span></span></span><span class=line><span class=cl>  --kubernetes-version<span class=o>=</span>v1.23.3
 </span></span></code></pre></td></tr></table></div></div><p>完成后，它会提示接下来要干什么：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
 </span><span class=lnt> 2
 </span><span class=lnt> 3
@@ -147,12 +147,12 @@
 </span><span class=lnt>5
 </span><span class=lnt>6
 </span><span class=lnt>7
-</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-sh data-lang=sh><span class=line><span class=cl>net-conf.json: <span class=p>|</span> 
-</span></span><span class=line><span class=cl>  <span class=o>{</span> 
-</span></span><span class=line><span class=cl>    <span class=s2>&#34;Network&#34;</span>: <span class=s2>&#34;10.10.0.0/16&#34;</span>, 
-</span></span><span class=line><span class=cl>    <span class=s2>&#34;Backend&#34;</span>: <span class=o>{</span> 
-</span></span><span class=line><span class=cl>      <span class=s2>&#34;Type&#34;</span>: <span class=s2>&#34;vxlan&#34;</span> 
-</span></span><span class=line><span class=cl>    <span class=o>}</span> 
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-sh data-lang=sh><span class=line><span class=cl>net-conf.json: <span class=p>|</span>
+</span></span><span class=line><span class=cl>  <span class=o>{</span>
+</span></span><span class=line><span class=cl>    <span class=s2>&#34;Network&#34;</span>: <span class=s2>&#34;10.10.0.0/16&#34;</span>,
+</span></span><span class=line><span class=cl>    <span class=s2>&#34;Backend&#34;</span>: <span class=o>{</span>
+</span></span><span class=line><span class=cl>      <span class=s2>&#34;Type&#34;</span>: <span class=s2>&#34;vxlan&#34;</span>
+</span></span><span class=line><span class=cl>    <span class=o>}</span>
 </span></span><span class=line><span class=cl>  <span class=o>}</span>
 </span></span></code></pre></td></tr></table></div></div><p>然后</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
 </span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-sh data-lang=sh><span class=line><span class=cl>kubectl apply -f kube-flannel.yml

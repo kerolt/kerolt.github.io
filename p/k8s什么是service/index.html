@@ -39,7 +39,7 @@
 </span></span></span><span class=line><span class=cl><span class=w>  </span><span class=nt>ports</span><span class=p>:</span><span class=w>
 </span></span></span><span class=line><span class=cl><span class=w>    </span>- <span class=nt>port</span><span class=p>:</span><span class=w> </span><span class=m>80</span><span class=w>
 </span></span></span><span class=line><span class=cl><span class=w>      </span><span class=nt>targetPort</span><span class=p>:</span><span class=w> </span><span class=m>8080</span><span class=w>
-</span></span></span><span class=line><span class=cl><span class=w>      </span><span class=nt>nodePort</span><span class=p>:</span><span class=w> </span><span class=m>30007</span><span class=w>  </span><span class=c># 可选，不填则自动分配</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span><span class=nt>nodePort</span><span class=p>:</span><span class=w> </span><span class=m>30007</span><span class=w> </span><span class=c># 可选，不填则自动分配</span><span class=w>
 </span></span></span><span class=line><span class=cl><span class=w>  </span><span class=nt>selector</span><span class=p>:</span><span class=w>
 </span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>app</span><span class=p>:</span><span class=w> </span><span class=l>my-app</span><span class=w>
 </span></span></span></code></pre></td></tr></table></div></div><h3 id=3-loadbalancer>3️⃣ <code>LoadBalancer</code></h3><ul><li>适用于<strong>云平台</strong>（AWS、GCP、Azure、阿里云等）</li><li>云平台会自动创建一个<strong>外部负载均衡器</strong>，并分配公网 IP</li><li>用户通过公网 IP 访问服务</li><li>最适合生产环境对外暴露服务</li></ul><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
@@ -84,10 +84,10 @@
 </span></span></span><span class=line><span class=cl><span class=nt>spec</span><span class=p>:</span><span class=w>
 </span></span></span><span class=line><span class=cl><span class=w>  </span><span class=nt>type</span><span class=p>:</span><span class=w> </span><span class=l>NodePort</span><span class=w>
 </span></span></span><span class=line><span class=cl><span class=w>  </span><span class=nt>ports</span><span class=p>:</span><span class=w>
-</span></span></span><span class=line><span class=cl><span class=w>    </span>- <span class=nt>port</span><span class=p>:</span><span class=w> </span><span class=m>80</span><span class=w>        </span><span class=c># Service 暴露的端口</span><span class=w>
-</span></span></span><span class=line><span class=cl><span class=w>      </span><span class=nt>targetPort</span><span class=p>:</span><span class=w> </span><span class=m>80</span><span class=w>  </span><span class=c># Pod 容器监听的端口（nginx 默认 80）</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span>- <span class=nt>port</span><span class=p>:</span><span class=w> </span><span class=m>80</span><span class=w> </span><span class=c># Service 暴露的端口</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span><span class=nt>targetPort</span><span class=p>:</span><span class=w> </span><span class=m>80</span><span class=w> </span><span class=c># Pod 容器监听的端口（nginx 默认 80）</span><span class=w>
 </span></span></span><span class=line><span class=cl><span class=w>  </span><span class=nt>selector</span><span class=p>:</span><span class=w>
-</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>app</span><span class=p>:</span><span class=w> </span><span class=l>my-nginx    </span><span class=w> </span><span class=c># 匹配 Deployment 的 label</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>app</span><span class=p>:</span><span class=w> </span><span class=l>my-nginx</span><span class=w> </span><span class=c># 匹配 Deployment 的 label</span><span class=w>
 </span></span></span></code></pre></td></tr></table></div></div><p>然后：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
 </span><span class=lnt>2
 </span><span class=lnt>3
@@ -103,7 +103,7 @@
 </span></span></code></pre></td></tr></table></div></div><h2 id=service-与-deploymentpod-的关系>Service 与 Deployment/Pod 的关系</h2><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
 </span><span class=lnt>2
 </span><span class=lnt>3
-</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>用户 → Service (稳定入口) → 负载均衡 → 多个 Pod（动态、IP 会变）
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-text data-lang=text><span class=line><span class=cl>用户 → Service (稳定入口) → 负载均衡 → 多个 Pod（动态、IP 会变）
 </span></span><span class=line><span class=cl>                          ↑
 </span></span><span class=line><span class=cl>                      由 Deployment 管理
 </span></span></code></pre></td></tr></table></div></div><ul><li>Deployment 管理 Pod 生命周期（滚动更新、扩缩容）</li><li>Service 管理网络访问（服务发现 + 负载均衡）</li><li>二者配合，实现<strong>高可用、弹性、稳定</strong>的应用架构</li></ul></section><footer class="article-meta article-footer"><section class="article-copyright inline-meta"><svg class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><path d="M14.5 9a3.5 4 0 100 6"/></svg>

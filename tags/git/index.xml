@@ -1,4 +1,67 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Git on Kerolt's Note</title><link>https://kerolt.github.io/tags/git/</link><description>Recent content in Git on Kerolt's Note</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><lastBuildDate>Wed, 24 Jun 2026 00:00:00 +0000</lastBuildDate><atom:link href="https://kerolt.github.io/tags/git/index.xml" rel="self" type="application/rss+xml"/><item><title>Clash-Fake-IP模式下Git-SSH连接失败</title><link>https://kerolt.github.io/p/clash-fake-ip%E6%A8%A1%E5%BC%8F%E4%B8%8Bgit-ssh%E8%BF%9E%E6%8E%A5%E5%A4%B1%E8%B4%A5/</link><pubDate>Sat, 13 Jun 2026 00:00:00 +0000</pubDate><guid>https://kerolt.github.io/p/clash-fake-ip%E6%A8%A1%E5%BC%8F%E4%B8%8Bgit-ssh%E8%BF%9E%E6%8E%A5%E5%A4%B1%E8%B4%A5/</guid><description>&lt;h2 id="问题现象"&gt;问题现象
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Git on Kerolt's Note</title><link>https://kerolt.github.io/tags/git/</link><description>Recent content in Git on Kerolt's Note</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><lastBuildDate>Thu, 06 Aug 2026 00:00:00 +0000</lastBuildDate><atom:link href="https://kerolt.github.io/tags/git/index.xml" rel="self" type="application/rss+xml"/><item><title>Git Submodule 版本锁定</title><link>https://kerolt.github.io/p/git-submodule-%E7%89%88%E6%9C%AC%E9%94%81%E5%AE%9A/</link><pubDate>Thu, 06 Aug 2026 00:00:00 +0000</pubDate><guid>https://kerolt.github.io/p/git-submodule-%E7%89%88%E6%9C%AC%E9%94%81%E5%AE%9A/</guid><description>&lt;h2 id="核心本质submodule-是什么"&gt;核心本质：Submodule 是什么？
+&lt;/h2&gt;&lt;p&gt;Git Submodule 并不是简单的“文件夹克隆”，它是父仓库中指向子仓库某个&lt;strong&gt;特定提交（Commit ID）&lt;/strong&gt; 的指针。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;&lt;code&gt;.gitmodules&lt;/code&gt; 文件&lt;/strong&gt;：账本。记录子模块的远程仓库地址（URL）和本地存放路径（Path）。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Gitlink (160000 模式)&lt;/strong&gt;：锁。父仓库索引中记录的一个 40 位哈希值。它确保了无论子仓库如何更新，父仓库始终锁定在特定的版本。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="版本锁定如何固定到-tag-如-v022"&gt;版本锁定：如何固定到 Tag (如 v0.2.2)？
+&lt;/h2&gt;&lt;p&gt;在 Git 中，锁定版本&lt;strong&gt;不是修改文本文件&lt;/strong&gt;，而是&lt;strong&gt;移动指针&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;规范化三步走：&lt;/strong&gt;&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;进目录&lt;/strong&gt;：&lt;code&gt;cd third_party/blazesym&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;换版本&lt;/strong&gt;：&lt;code&gt;git checkout v0.2.2&lt;/code&gt; (此时子模块处于 &lt;em&gt;detached HEAD&lt;/em&gt; 状态)&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;定指针&lt;/strong&gt;：回到父目录，执行 &lt;code&gt;git add third_party/blazesym&lt;/code&gt; 并提交。&lt;/li&gt;
+&lt;/ol&gt;
+
+ &lt;blockquote&gt;
+ &lt;p&gt;&lt;code&gt;.gitmodules&lt;/code&gt; 决定“从哪来”，父仓库的 Commit 决定“在哪停”。&lt;/p&gt;
+
+ &lt;/blockquote&gt;
+&lt;h2 id="常用指令清单"&gt;常用指令清单
+&lt;/h2&gt;&lt;table&gt;
+	&lt;thead&gt;
+			&lt;tr&gt;
+					&lt;th&gt;&lt;strong&gt;命令&lt;/strong&gt;&lt;/th&gt;
+					&lt;th&gt;&lt;strong&gt;用途&lt;/strong&gt;&lt;/th&gt;
+					&lt;th&gt;&lt;strong&gt;备注&lt;/strong&gt;&lt;/th&gt;
+			&lt;/tr&gt;
+	&lt;/thead&gt;
+	&lt;tbody&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;code&gt;git submodule add &amp;lt;url&amp;gt; &amp;lt;path&amp;gt;&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;首次引入子模块&lt;/td&gt;
+					&lt;td&gt;会自动生成 &lt;code&gt;.gitmodules&lt;/code&gt;&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;code&gt;git submodule update --init --recursive&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;&lt;strong&gt;最常用&lt;/strong&gt;：初始化并下载代码&lt;/td&gt;
+					&lt;td&gt;团队成员拉取代码后必跑&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;code&gt;git submodule status&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;查看当前状态&lt;/td&gt;
+					&lt;td&gt;&lt;code&gt;+&lt;/code&gt; 号表示子模块版本与父仓库记录不一致&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;code&gt;git submodule sync&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;同步 &lt;code&gt;.gitmodules&lt;/code&gt; 的 URL 变更&lt;/td&gt;
+					&lt;td&gt;修改了 SSH/HTTPS 地址后使用&lt;/td&gt;
+			&lt;/tr&gt;
+	&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h2 id="cmake-工程集成规范"&gt;CMake 工程集成规范
+&lt;/h2&gt;&lt;p&gt;在混合开发（如 C++ 链接 Rust 库）时，Submodule 应当配合 CMake 做到“无感构建”：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;自动化校验&lt;/strong&gt;：在 &lt;code&gt;CMakeLists.txt&lt;/code&gt; 中检查 &lt;code&gt;Cargo.toml&lt;/code&gt; 或头文件是否存在，防止协作者忘记初始化 Submodule。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;路径解耦&lt;/strong&gt;：使用 &lt;code&gt;${CMAKE_CURRENT_SOURCE_DIR}&lt;/code&gt; 配合子模块路径，避免绝对路径污染。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;构建隔离&lt;/strong&gt;：将生成的静态库（&lt;code&gt;.a&lt;/code&gt;）通过 &lt;code&gt;add_library(... STATIC IMPORTED)&lt;/code&gt; 导入，并将系统依赖（&lt;code&gt;pthread&lt;/code&gt;, &lt;code&gt;dl&lt;/code&gt; 等）封装在 &lt;code&gt;INTERFACE_LINK_LIBRARIES&lt;/code&gt; 中。&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h2 id="避坑指南"&gt;避坑指南
+&lt;/h2&gt;&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;不要在子模块目录直接 &lt;code&gt;git pull&lt;/code&gt;&lt;/strong&gt;：除非你真的想升级库版本，否则这会导致版本漂移。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;谨慎对待 &lt;code&gt;+&lt;/code&gt; 状态&lt;/strong&gt;：如果 &lt;code&gt;git status&lt;/code&gt; 显示子模块有变动，请确认是你主动升级了版本，还是误操作。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;SSH vs HTTPS&lt;/strong&gt;：在 &lt;code&gt;.gitmodules&lt;/code&gt; 中使用 HTTPS 通常对 CI/CD 环境更友好，避免了 SSH Key 的权限问题。&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>Clash-Fake-IP模式下Git-SSH连接失败</title><link>https://kerolt.github.io/p/clash-fake-ip%E6%A8%A1%E5%BC%8F%E4%B8%8Bgit-ssh%E8%BF%9E%E6%8E%A5%E5%A4%B1%E8%B4%A5/</link><pubDate>Sat, 13 Jun 2026 00:00:00 +0000</pubDate><guid>https://kerolt.github.io/p/clash-fake-ip%E6%A8%A1%E5%BC%8F%E4%B8%8Bgit-ssh%E8%BF%9E%E6%8E%A5%E5%A4%B1%E8%B4%A5/</guid><description>&lt;h2 id="问题现象"&gt;问题现象
 &lt;/h2&gt;&lt;p&gt;执行 &lt;code&gt;git fetch --all&lt;/code&gt; 报错：&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
 &lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;

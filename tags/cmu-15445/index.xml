@@ -727,7 +727,7 @@
 &lt;p&gt;所以不管用的是哈希还是 B+Tree，在操作索引时用的接口都相同。&lt;/p&gt;
 &lt;h4 id="如何理解索引"&gt;如何理解索引
 &lt;/h4&gt;&lt;p&gt;就如网上很多介绍索引的博客所描述的那样，数据库索引是用来加速检索速度的，就如同新华字典中的音节索引一样：&lt;/p&gt;
-&lt;p&gt;&lt;img class="gallery-image" data-flex-basis="172px" data-flex-grow="72" height="668" loading="lazy" sizes="(max-width: 767px) calc(100vw - 30px), (max-width: 1023px) 700px, (max-width: 1279px) 950px, 1232px" src="https://i2.kknews.cc/xGbg60mPdeRNfqICEnjrmqLM9nGZdeKcOg/0.jpg" width="481"&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img loading="lazy" sizes="(max-width: 767px) calc(100vw - 30px), (max-width: 1023px) 700px, (max-width: 1279px) 950px, 1232px" src="https://i2.kknews.cc/xGbg60mPdeRNfqICEnjrmqLM9nGZdeKcOg/0.jpg"&gt;&lt;/p&gt;
 &lt;p&gt;如同 table_info，catalog 中也有许多的 index_info，每个 index_info 就如同上图音节表中的一个字母。我们对一个字段（列）构建一个索引，就如同在上图中音节表中多加一个字母（例如 X）。&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;需要插入一条记录时，就往对应的索引下插入 &lt;code&gt;(记录， 对应记录的地址)&lt;/code&gt; 这样的键值对，例如上图的 &lt;code&gt;(xian, 519)&lt;/code&gt;，这里的地址为 &lt;code&gt;RID&lt;/code&gt;。&lt;/li&gt;
