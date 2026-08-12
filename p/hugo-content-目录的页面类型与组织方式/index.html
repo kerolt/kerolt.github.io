@@ -1,0 +1,451 @@
+<!doctype html><html lang=zh-cn dir=ltr><head><meta charset=utf-8><meta name=viewport content='width=device-width,initial-scale=1'><meta name=description content="核心结论 Hugo 的 content 目录不是简单的 Markdown 文件仓库，而是一棵 Page Tree。目录层级和特殊文件名会决定页面的 Kind、Section、Type、Bundle 类型、模板选择、资源归属以及默认 URL。\n"><title>Hugo content 目录的页面类型与组织方式</title><link rel=canonical href=https://kerolt.github.io/p/hugo-content-%E7%9B%AE%E5%BD%95%E7%9A%84%E9%A1%B5%E9%9D%A2%E7%B1%BB%E5%9E%8B%E4%B8%8E%E7%BB%84%E7%BB%87%E6%96%B9%E5%BC%8F/><link rel=preconnect href=https://fonts.googleapis.com><link rel=preconnect href=https://fonts.gstatic.com crossorigin><link rel=preload as=style href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap"><link rel=stylesheet href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap"><link rel=stylesheet href=/scss/style.min.e62e09c60ba428a627e03568fa3df938f6a8224f815b5846f00816c17d4a0be4.css><meta property='og:title' content="Hugo content 目录的页面类型与组织方式"><meta property='og:description' content="核心结论 Hugo 的 content 目录不是简单的 Markdown 文件仓库，而是一棵 Page Tree。目录层级和特殊文件名会决定页面的 Kind、Section、Type、Bundle 类型、模板选择、资源归属以及默认 URL。\n"><meta property='og:url' content='https://kerolt.github.io/p/hugo-content-%E7%9B%AE%E5%BD%95%E7%9A%84%E9%A1%B5%E9%9D%A2%E7%B1%BB%E5%9E%8B%E4%B8%8E%E7%BB%84%E7%BB%87%E6%96%B9%E5%BC%8F/'><meta property='og:site_name' content="Kerolt's Note"><meta property='og:type' content='article'><meta property='article:section' content='Post'><meta property='article:tag' content='Hugo'><meta property='article:tag' content='Taxonomy'><meta property='article:published_time' content='2026-08-09T00:00:00+00:00'><meta property='article:modified_time' content='2026-08-09T00:00:00+00:00'><meta name=twitter:title content="Hugo content 目录的页面类型与组织方式"><meta name=twitter:description content="核心结论 Hugo 的 content 目录不是简单的 Markdown 文件仓库，而是一棵 Page Tree。目录层级和特殊文件名会决定页面的 Kind、Section、Type、Bundle 类型、模板选择、资源归属以及默认 URL。\n"><link rel="shortcut icon" href=/images/favicon.png></head><body class=article-page><script>(function(){const e="StackColorScheme";localStorage.getItem(e)||localStorage.setItem(e,"auto")})()</script><script>(function(){const t="StackColorScheme",e=localStorage.getItem(t),n=window.matchMedia("(prefers-color-scheme: dark)").matches===!0;e=="dark"||e==="auto"&&n?document.documentElement.dataset.scheme="dark":document.documentElement.dataset.scheme="light"})()</script><div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky"><button class="hamburger hamburger--spin" type=button id=toggle-menu aria-label=切换菜单>
+<span class=hamburger-box><span class=hamburger-inner></span></span></button><header><figure class=site-avatar><a href=/><img src=/images/avatar.jpg width=200 height=200 class=site-logo loading=lazy alt=Avatar>
+</a><span class=emoji>🏸</span></figure><div class=site-meta><h1 class=site-name><a href=/>Kerolt's Note</a></h1><h2 class=site-description>愿你无拘无束自由的活着</h2></div></header><ol class=menu-social><li><a href=https://github.com/kerolt title=GitHub rel=me><svg class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 19c-4.3 1.4-4.3-2.5-6-3m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6.0 00-1.3-3.2 4.2 4.2.0 00-.1-3.2s-1.1-.3-3.5 1.3a12.3 12.3.0 00-6.2.0C6.5 2.8 5.4 3.1 5.4 3.1a4.2 4.2.0 00-.1 3.2A4.6 4.6.0 004 9.5c0 4.6 2.7 5.7 5.5 6-.6.6-.6 1.2-.5 2V21"/></svg></a></li></ol><ol class=menu id=main-menu><li><a href=/><svg class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><polyline points="5 12 3 12 12 3 21 12 19 12"/><path d="M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"/><path d="M9 21v-6a2 2 0 012-2h2a2 2 0 012 2v6"/></svg>
+<span>首页</span></a></li><li><a href=/search/><svg class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="10" cy="10" r="7"/><line x1="21" y1="21" x2="15" y2="15"/></svg>
+<span>搜索</span></a></li><li><a href=/categories/><svg class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><line x1="5" y1="9" x2="19" y2="9"/><line x1="5" y1="15" x2="19" y2="15"/><line x1="11" y1="4" x2="7" y2="20"/><line x1="17" y1="4" x2="13" y2="20"/></svg>
+<span>分类</span></a></li><li><a href=/tags/><svg class="icon icon-tabler icon-tabler-tag" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><path d="M11 3l9 9a1.5 1.5.0 010 2l-6 6a1.5 1.5.0 01-2 0L3 11V7a4 4 0 014-4h4"/><circle cx="9" cy="9" r="2"/></svg>
+<span>标签</span></a></li><li><a href=/about/><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-info-circle"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 12a9 9 0 1018 0A9 9 0 003 12"/><path d="M12 9h.01"/><path d="M11 12h1v4h1"/></svg>
+<span>关于我</span></a></li><li><a href=/archives/><svg class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><rect x="3" y="4" width="18" height="4" rx="2"/><path d="M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
+<span>归档</span></a></li><li class=menu-bottom-section><ol class=menu><li id=dark-mode-toggle><svg class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="8" cy="12" r="2"/><rect x="2" y="6" width="20" height="12" rx="6"/></svg>
+<svg class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="16" cy="12" r="2"/><rect x="2" y="6" width="20" height="12" rx="6"/></svg>
+<span>暗色模式</span></li></ol></li></ol></aside><aside class="sidebar right-sidebar sticky"><section class="widget archives"><div class=widget-icon><svg class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><line x1="5" y1="9" x2="19" y2="9"/><line x1="5" y1="15" x2="19" y2="15"/><line x1="11" y1="4" x2="7" y2="20"/><line x1="17" y1="4" x2="13" y2="20"/></svg></div><h2 class="widget-title section-title">目录</h2><div class=widget--toc><nav class=toc-nav id=TableOfContents><ol><li><a href=#核心结论>核心结论</a></li><li><a href=#hugo-的五种-page-kind>Hugo 的五种 Page Kind</a></li><li><a href=#普通文件indexmd-与-_indexmd>普通文件、<code>index.md</code> 与 <code>_index.md</code></a><ol><li><a href=#普通-markdown-文件>普通 Markdown 文件</a></li><li><a href=#indexmdleaf-bundle><code>index.md</code>：Leaf Bundle</a></li><li><a href=#_indexmdbranch-bundle><code>_index.md</code>：Branch Bundle</a></li></ol></li><li><a href=#section-如何形成>Section 如何形成</a></li><li><a href=#kindtypesection-与-layout-的区别>Kind、Type、Section 与 Layout 的区别</a></li><li><a href=#每类-markdown-文件的-kindtype-和-section>每类 Markdown 文件的 Kind、Type 和 Section</a><ol><li><a href=#首页>首页</a></li><li><a href=#关于我>关于我</a></li><li><a href=#归档>归档</a></li><li><a href=#搜索>搜索</a></li><li><a href=#tag-taxonomy-根页>Tag Taxonomy 根页</a></li><li><a href=#category-taxonomy-根页>Category Taxonomy 根页</a></li><li><a href=#普通博客文章>普通博客文章</a></li><li><a href=#post-目录下的-_indexmd>post 目录下的 _index.md</a></li><li><a href=#tag-term-页>Tag Term 页</a></li><li><a href=#front-matter-能修改哪些值>Front Matter 能修改哪些值</a></li><li><a href=#把-taxonomy-文件移动到-page-后会发生什么>把 Taxonomy 文件移动到 <code>page</code> 后会发生什么</a></li><li><a href=#在模板中验证实际值>在模板中验证实际值</a></li></ol></li><li><a href=#搜索页为什么必须使用-indexmd>搜索页为什么必须使用 <code>index.md</code></a></li><li><a href=#taxonomy-页面为什么使用-_indexmd>Taxonomy 页面为什么使用 <code>_index.md</code></a></li><li><a href=#内容路径与最终-url-可以分离>内容路径与最终 URL 可以分离</a></li><li><a href=#stack-主题下的推荐结构>Stack 主题下的推荐结构</a></li><li><a href=#组织页面时的判断顺序>组织页面时的判断顺序</a></li><li><a href=#常见错误>常见错误</a></li><li><a href=#参考资料>参考资料</a></li></ol></nav></div></section></aside><main class="main full-width"><article class=main-article><header class=article-header><div class=article-details><header class=article-category><a href=/categories/hugo/ style=background-color:#c1beef;color:#120f3d>Hugo</a></header><div class=article-title-wrapper><h2 class=article-title><a href=/p/hugo-content-%E7%9B%AE%E5%BD%95%E7%9A%84%E9%A1%B5%E9%9D%A2%E7%B1%BB%E5%9E%8B%E4%B8%8E%E7%BB%84%E7%BB%87%E6%96%B9%E5%BC%8F/>Hugo content 目录的页面类型与组织方式</a></h2></div><footer class=article-meta><div class=inline-meta><svg class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><path d="M11.795 21H5a2 2 0 01-2-2V7a2 2 0 012-2h12a2 2 0 012 2v4"/><circle cx="18" cy="18" r="4"/><path d="M15 3v4"/><path d="M7 3v4"/><path d="M3 11h16"/><path d="M18 16.496V18l1 1"/></svg>
+<time class=article-time--published datetime=2026-08-09T00:00:00Z>2026年8月9日星期日</time>
+<svg class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg>
+<time class=article-time--reading>阅读时长: 12 分钟</time></div></footer></div></header><aside class=article-toc><details><summary><div class=article-toc-title><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-chevron-right"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 6l6 6-6 6"/></svg>
+<span>目录</span></div></summary><nav class=toc-nav><ol><li><a href=#核心结论>核心结论</a></li><li><a href=#hugo-的五种-page-kind>Hugo 的五种 Page Kind</a></li><li><a href=#普通文件indexmd-与-_indexmd>普通文件、<code>index.md</code> 与 <code>_index.md</code></a><ol><li><a href=#普通-markdown-文件>普通 Markdown 文件</a></li><li><a href=#indexmdleaf-bundle><code>index.md</code>：Leaf Bundle</a></li><li><a href=#_indexmdbranch-bundle><code>_index.md</code>：Branch Bundle</a></li></ol></li><li><a href=#section-如何形成>Section 如何形成</a></li><li><a href=#kindtypesection-与-layout-的区别>Kind、Type、Section 与 Layout 的区别</a></li><li><a href=#每类-markdown-文件的-kindtype-和-section>每类 Markdown 文件的 Kind、Type 和 Section</a><ol><li><a href=#首页>首页</a></li><li><a href=#关于我>关于我</a></li><li><a href=#归档>归档</a></li><li><a href=#搜索>搜索</a></li><li><a href=#tag-taxonomy-根页>Tag Taxonomy 根页</a></li><li><a href=#category-taxonomy-根页>Category Taxonomy 根页</a></li><li><a href=#普通博客文章>普通博客文章</a></li><li><a href=#post-目录下的-_indexmd>post 目录下的 _index.md</a></li><li><a href=#tag-term-页>Tag Term 页</a></li><li><a href=#front-matter-能修改哪些值>Front Matter 能修改哪些值</a></li><li><a href=#把-taxonomy-文件移动到-page-后会发生什么>把 Taxonomy 文件移动到 <code>page</code> 后会发生什么</a></li><li><a href=#在模板中验证实际值>在模板中验证实际值</a></li></ol></li><li><a href=#搜索页为什么必须使用-indexmd>搜索页为什么必须使用 <code>index.md</code></a></li><li><a href=#taxonomy-页面为什么使用-_indexmd>Taxonomy 页面为什么使用 <code>_index.md</code></a></li><li><a href=#内容路径与最终-url-可以分离>内容路径与最终 URL 可以分离</a></li><li><a href=#stack-主题下的推荐结构>Stack 主题下的推荐结构</a></li><li><a href=#组织页面时的判断顺序>组织页面时的判断顺序</a></li><li><a href=#常见错误>常见错误</a></li><li><a href=#参考资料>参考资料</a></li></ol></nav></details></aside><section class=article-content><h2 id=核心结论>核心结论</h2><p>Hugo 的 <code>content</code> 目录不是简单的 Markdown 文件仓库，而是一棵 Page Tree。目录层级和特殊文件名会决定页面的 <code>Kind</code>、<code>Section</code>、<code>Type</code>、Bundle 类型、模板选择、资源归属以及默认 URL。</p><p>设计 <code>content</code> 结构时，不应只考虑最终 URL，而要先判断当前节点是一个具体内容页，还是一个可以包含其他页面的集合。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-text data-lang=text><span class=line><span class=cl>具体页面、没有子页面
+</span></span><span class=line><span class=cl>    → 普通 Markdown 文件或 index.md
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>集合页面、允许包含子页面
+</span></span><span class=line><span class=cl>    → _index.md
+</span></span></code></pre></td></tr></table></div></div><h2 id=hugo-的五种-page-kind>Hugo 的五种 Page Kind</h2><p><code>Kind</code> 表示页面在站点内容模型中的结构角色。它主要由文件位置和 Hugo 内置机制决定，不是一个通常应在 Front Matter 中随意指定的展示参数。</p><div class=table-wrapper><table><thead><tr><th>Kind</th><th>典型内容路径</th><th>含义</th><th>常用模板类型</th></tr></thead><tbody><tr><td><code>home</code></td><td><code>content/_index.md</code></td><td>站点根页面</td><td><code>home.html</code></td></tr><tr><td><code>page</code></td><td><code>content/about.md</code> 或 <code>content/about/index.md</code></td><td>普通内容页</td><td><code>single.html</code>、<code>page.html</code></td></tr><tr><td><code>section</code></td><td><code>content/post/</code> 或 <code>content/post/_index.md</code></td><td>内容集合</td><td><code>section.html</code>、<code>list.html</code></td></tr><tr><td><code>taxonomy</code></td><td><code>content/tags/_index.md</code></td><td>某个 Taxonomy 的 Term 总览</td><td><code>taxonomy.html</code>、<code>list.html</code></td></tr><tr><td><code>term</code></td><td><code>content/tags/hugo/_index.md</code></td><td>某个具体 Term 的内容列表</td><td><code>term.html</code>、<code>list.html</code></td></tr></tbody></table></div><p>在模板中可以通过以下字段检查当前页面：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-go-html-template data-lang=go-html-template><span class=line><span class=cl>Kind=<span class=cp>{{</span><span class=w> </span><span class=na>.Kind</span><span class=w> </span><span class=cp>}}</span>
+</span></span><span class=line><span class=cl>Type=<span class=cp>{{</span><span class=w> </span><span class=na>.Type</span><span class=w> </span><span class=cp>}}</span>
+</span></span><span class=line><span class=cl>Section=<span class=cp>{{</span><span class=w> </span><span class=na>.Section</span><span class=w> </span><span class=cp>}}</span>
+</span></span><span class=line><span class=cl>Layout=<span class=cp>{{</span><span class=w> </span><span class=na>.Layout</span><span class=w> </span><span class=cp>}}</span>
+</span></span><span class=line><span class=cl>BundleType=<span class=cp>{{</span><span class=w> </span><span class=na>.BundleType</span><span class=w> </span><span class=cp>}}</span>
+</span></span><span class=line><span class=cl>RelPermalink=<span class=cp>{{</span><span class=w> </span><span class=na>.RelPermalink</span><span class=w> </span><span class=cp>}}</span>
+</span></span></code></pre></td></tr></table></div></div><h2 id=普通文件indexmd-与-_indexmd>普通文件、<code>index.md</code> 与 <code>_index.md</code></h2><p>这三种形式最容易混淆。</p><h3 id=普通-markdown-文件>普通 Markdown 文件</h3><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-text data-lang=text><span class=line><span class=cl>content/about.md
+</span></span></code></pre></td></tr></table></div></div><p>它表示一个普通页面，适合没有同目录资源的简单内容。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-text data-lang=text><span class=line><span class=cl>Kind       = page
+</span></span><span class=line><span class=cl>BundleType = 空
+</span></span></code></pre></td></tr></table></div></div><h3 id=indexmdleaf-bundle><code>index.md</code>：Leaf Bundle</h3><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-text data-lang=text><span class=line><span class=cl>content/about/
+</span></span><span class=line><span class=cl>├── index.md
+</span></span><span class=line><span class=cl>├── avatar.jpg
+</span></span><span class=line><span class=cl>└── resume.pdf
+</span></span></code></pre></td></tr></table></div></div><p><code>index.md</code> 表示当前目录是一篇具体页面，同时让同目录图片、视频和附件成为该页面的 Page Resources。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-text data-lang=text><span class=line><span class=cl>Kind       = page
+</span></span><span class=line><span class=cl>BundleType = leaf
+</span></span></code></pre></td></tr></table></div></div><p>模板可以通过 <code>.Resources</code> 获取这些资源：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-go-html-template data-lang=go-html-template><span class=line><span class=cl><span class=cp>{{</span><span class=w> </span><span class=k>with</span><span class=w> </span><span class=na>.Resources.Get</span><span class=w> </span><span class=s>&#34;avatar.jpg&#34;</span><span class=w> </span><span class=cp>}}</span>
+</span></span><span class=line><span class=cl>    <span class=p>&lt;</span><span class=nt>img</span> <span class=na>src</span><span class=o>=</span><span class=s>&#34;</span><span class=cp>{{</span><span class=w> </span><span class=na>.RelPermalink</span><span class=w> </span><span class=cp>}}</span><span class=s>&#34;</span> <span class=na>alt</span><span class=o>=</span><span class=s>&#34;Avatar&#34;</span><span class=p>&gt;</span>
+</span></span><span class=line><span class=cl><span class=cp>{{</span><span class=w> </span><span class=k>end</span><span class=w> </span><span class=cp>}}</span>
+</span></span></code></pre></td></tr></table></div></div><p>Leaf Bundle 是内容树的叶子，不应该再包含需要独立渲染的子页面。目录中的其他 Markdown 文件通常会成为 Page Resource，而不是独立 Page。</p><h3 id=_indexmdbranch-bundle><code>_index.md</code>：Branch Bundle</h3><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-text data-lang=text><span class=line><span class=cl>content/docs/
+</span></span><span class=line><span class=cl>├── _index.md
+</span></span><span class=line><span class=cl>├── install.md
+</span></span><span class=line><span class=cl>└── configuration.md
+</span></span></code></pre></td></tr></table></div></div><p><code>_index.md</code> 表示当前目录是一个集合节点，可以拥有子页面和子 Section。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-text data-lang=text><span class=line><span class=cl>Kind       = section
+</span></span><span class=line><span class=cl>BundleType = branch
+</span></span></code></pre></td></tr></table></div></div><p>可以把两者记成：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-text data-lang=text><span class=line><span class=cl>index.md
+</span></span><span class=line><span class=cl>    = 当前目录就是一篇内容，到这里结束
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>_index.md
+</span></span><span class=line><span class=cl>    = 当前目录是一个分支，下面还可以挂其他内容
+</span></span></code></pre></td></tr></table></div></div><h2 id=section-如何形成>Section 如何形成</h2><p><code>content</code> 下的顶层内容目录天然是 Root Section。例如：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-text data-lang=text><span class=line><span class=cl>content/post/
+</span></span><span class=line><span class=cl>├── Go/
+</span></span><span class=line><span class=cl>│   └── defer.md
+</span></span><span class=line><span class=cl>├── Linux/
+</span></span><span class=line><span class=cl>│   └── 零拷贝技术.md
+</span></span><span class=line><span class=cl>└── C++/
+</span></span><span class=line><span class=cl>    └── lambda.md
+</span></span></code></pre></td></tr></table></div></div><p>这些文章的 Root Section 都是 <code>post</code>：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-text data-lang=text><span class=line><span class=cl>Section = post
+</span></span><span class=line><span class=cl>Type    = post
+</span></span></code></pre></td></tr></table></div></div><p><code>Go</code>、<code>Linux</code> 和 <code>C++</code> 等中间目录如果没有 <code>_index.md</code>，通常只是文件组织和 URL 路径的一部分，不是具有独立列表页的 Section。如果需要让某个目录成为嵌套 Section，应为它创建 <code>_index.md</code>。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-text data-lang=text><span class=line><span class=cl>content/post/Go/_index.md
+</span></span></code></pre></td></tr></table></div></div><p>此时 <code>/post/go/</code> 才具有明确的 Section Page，并能拥有自己的标题、描述、菜单和子页面集合。</p><h2 id=kindtypesection-与-layout-的区别>Kind、Type、Section 与 Layout 的区别</h2><p>这几个概念属于不同维度。</p><div class=table-wrapper><table><thead><tr><th>字段</th><th>回答的问题</th><th>主要来源</th></tr></thead><tbody><tr><td><code>Kind</code></td><td>这是普通页、Section 还是 Taxonomy？</td><td>内容树结构和 Hugo 内置机制</td></tr><tr><td><code>Section</code></td><td>这个页面属于哪个 Root Section？</td><td><code>content</code> 下的顶层 Section</td></tr><tr><td><code>Type</code></td><td>应优先使用哪一组类型模板？</td><td>Front Matter 的 <code>type</code>，否则通常来自 Root Section</td></tr><tr><td><code>Layout</code></td><td>在当前 Type 中选择哪个具体模板？</td><td>Front Matter 的 <code>layout</code></td></tr><tr><td><code>Slug</code></td><td>URL 最后一个路径段是什么？</td><td>Front Matter 或文件名</td></tr></tbody></table></div><p>例如 Stack 的搜索页：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-text data-lang=text><span class=line><span class=cl>content/page/search/index.md
+</span></span></code></pre></td></tr></table></div></div><p>Front Matter：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-yaml data-lang=yaml><span class=line><span class=cl><span class=nn>---</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=nt>title</span><span class=p>:</span><span class=w> </span><span class=l>搜索</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=nt>layout</span><span class=p>:</span><span class=w> </span><span class=l>search</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=nt>outputs</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span>- <span class=l>html</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span>- <span class=l>json</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=nn>---</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><p>对应的核心属性为：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-text data-lang=text><span class=line><span class=cl>Kind   = page
+</span></span><span class=line><span class=cl>Type   = page
+</span></span><span class=line><span class=cl>Layout = search
+</span></span></code></pre></td></tr></table></div></div><p>于是可以匹配 Stack 的：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-text data-lang=text><span class=line><span class=cl>layouts/page/search.html
+</span></span><span class=line><span class=cl>layouts/page/search.json
+</span></span></code></pre></td></tr></table></div></div><p>如果移动页面后 Type 不再符合主题约定，可以在 Front Matter 中显式设置：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-yaml data-lang=yaml><span class=line><span class=cl><span class=nt>type</span><span class=p>:</span><span class=w> </span><span class=l>page</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=nt>layout</span><span class=p>:</span><span class=w> </span><span class=l>search</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><p><code>layout</code> 不是全局模板开关，它会与 <code>Kind</code>、<code>Type</code>、语言和 Output Format 一起参与 Template Lookup。</p><h2 id=每类-markdown-文件的-kindtype-和-section>每类 Markdown 文件的 Kind、Type 和 Section</h2><p><code>Kind</code>、<code>Type</code> 和 <code>Section</code> 不是三个需要在每篇 Front Matter 中同时手工填写的字段。Hugo 会先根据内容路径和内置页面类型确定 <code>Kind</code> 与 <code>Section</code>，再根据 Front Matter 或 Root Section 推导 <code>Type</code>。</p><p>可以按照下面的顺序理解：</p><ol><li>Hugo 先判断当前文件是否对应首页、普通页面、Section、Taxonomy 根页或 Term 页，由此得到 <code>Kind</code>。</li><li>Hugo 根据页面所在的顶层内容目录确定 <code>Section</code>；首页没有 Section，Taxonomy 页面使用 Taxonomy 的 plural 名称。</li><li>如果 Front Matter 显式设置了 <code>type</code>，Hugo将其作为 <code>Type</code>；否则普通内容通常继承 Root Section 名称，根目录普通页和首页默认使用 <code>page</code>，Taxonomy 与 Term 默认使用 Taxonomy 的 plural 名称。</li><li><code>layout</code>、<code>slug</code>、<code>url</code>、<code>outputs</code> 和 <code>menu</code> 不负责设置这三个字段，它们分别影响模板选择、发布地址、输出格式和菜单。</li></ol><p>当前站点主要文件的实际值如下：</p><div class=table-wrapper><table><thead><tr><th>Markdown 文件</th><th>页面角色</th><th><code>Kind</code></th><th><code>Type</code></th><th><code>Section</code></th></tr></thead><tbody><tr><td><code>content/_index.md</code></td><td>站点首页</td><td><code>home</code></td><td><code>page</code></td><td>空字符串</td></tr><tr><td><code>content/page/about/index.md</code></td><td>关于我普通页面</td><td><code>page</code></td><td><code>page</code></td><td><code>page</code></td></tr><tr><td><code>content/page/archives/index.md</code></td><td>归档普通页面</td><td><code>page</code></td><td><code>page</code></td><td><code>page</code></td></tr><tr><td><code>content/page/search/index.md</code></td><td>搜索普通页面</td><td><code>page</code></td><td><code>page</code></td><td><code>page</code></td></tr><tr><td><code>content/tags/_index.md</code></td><td>Tag Taxonomy 根页</td><td><code>taxonomy</code></td><td><code>tags</code></td><td><code>tags</code></td></tr><tr><td><code>content/categories/_index.md</code></td><td>Category Taxonomy 根页</td><td><code>taxonomy</code></td><td><code>categories</code></td><td><code>categories</code></td></tr><tr><td><code>content/post/Misc/Hugo-content目录的页面类型与组织方式.md</code></td><td>普通博客文章</td><td><code>page</code></td><td><code>post</code></td><td><code>post</code></td></tr><tr><td><code>content/post/Hugo/example/index.md</code></td><td>Leaf Bundle 形式的博客文章</td><td><code>page</code></td><td><code>post</code></td><td><code>post</code></td></tr><tr><td><code>content/post/_index.md</code></td><td><code>post</code> Root Section 元信息</td><td><code>section</code></td><td><code>post</code></td><td><code>post</code></td></tr><tr><td><code>content/post/Go/_index.md</code></td><td><code>post</code> 下的嵌套 Section 元信息</td><td><code>section</code></td><td><code>post</code></td><td><code>post</code></td></tr><tr><td><code>content/tags/hugo/_index.md</code></td><td><code>hugo</code> Tag Term 元信息</td><td><code>term</code></td><td><code>tags</code></td><td><code>tags</code></td></tr><tr><td><code>content/categories/misc/_index.md</code></td><td><code>misc</code> Category Term 元信息</td><td><code>term</code></td><td><code>categories</code></td><td><code>categories</code></td></tr></tbody></table></div><p>表中 <code>content/post/Hugo/example/index.md</code>、<code>content/post/_index.md</code>、<code>content/post/Go/_index.md</code>、<code>content/tags/hugo/_index.md</code> 和 <code>content/categories/misc/_index.md</code> 用于说明对应结构，当前站点不一定已经创建这些具体示例文件。</p><h3 id=首页>首页</h3><p><code>content</code> 根目录的 <code>_index.md</code> 是 Hugo 站点首页的元信息文件，因此其属性为：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-text data-lang=text><span class=line><span class=cl>Kind    = home
+</span></span><span class=line><span class=cl>Type    = page
+</span></span><span class=line><span class=cl>Section = &#34;&#34;
+</span></span></code></pre></td></tr></table></div></div><p>这里的 <code>_index.md</code> 不会得到 <code>Kind=section</code>，因为 <code>content</code> 根节点在 Hugo 页面模型中具有特殊的首页身份。它当前设置的 <code>menu</code> 只负责把首页加入主菜单，不影响 <code>Kind</code>、<code>Type</code> 或 <code>Section</code>。</p><h3 id=关于我>关于我</h3><p>“关于我”使用 <code>content/page/about/index.md</code>，因此 <code>content/page/about/</code> 是一个 Leaf Bundle，当前节点是一篇具体页面：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-text data-lang=text><span class=line><span class=cl>Kind    = page
+</span></span><span class=line><span class=cl>Type    = page
+</span></span><span class=line><span class=cl>Section = page
+</span></span><span class=line><span class=cl>Layout  = about
+</span></span></code></pre></td></tr></table></div></div><p><code>Kind=page</code> 来自 <code>index.md</code> 的 Leaf Page 语义，<code>Section=page</code> 来自顶层目录 <code>content/page</code>。由于 Front Matter 没有显式设置 <code>type</code>，<code>Type</code> 默认继承 Root Section，因此也是 <code>page</code>。</p><p>当前 Front Matter 中的字段分别负责：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-yaml data-lang=yaml><span class=line><span class=cl><span class=nt>layout</span><span class=p>:</span><span class=w> </span><span class=l>about</span><span class=w> </span><span class=c># 在 Type=page 的候选模板中优先查找 about 布局</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=nt>slug</span><span class=p>:</span><span class=w> </span><span class=l>about</span><span class=w> </span><span class=c># 配合 page permalink 生成 /about/</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=nt>toc</span><span class=p>:</span><span class=w> </span><span class=kc>false</span><span class=w> </span><span class=c># 关闭当前页面的 TOC</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=nt>menu</span><span class=p>:</span><span class=w> </span><span class=c># 将页面加入主菜单</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><p>这些字段都不会改变 <code>Kind=page</code>、<code>Type=page</code>、<code>Section=page</code>。</p><h3 id=归档>归档</h3><p>归档页同样是位于 <code>page</code> Root Section 下的 Leaf Page，<code>content/page/archives/index.md</code>：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-text data-lang=text><span class=line><span class=cl>Kind    = page
+</span></span><span class=line><span class=cl>Type    = page
+</span></span><span class=line><span class=cl>Section = page
+</span></span><span class=line><span class=cl>Layout  = archives
+</span></span></code></pre></td></tr></table></div></div><p><code>layout: archives</code> 使它选择 Stack 的归档布局，归档数据由该布局读取并组织。页面仍然是普通 <code>page</code>，并不存在 <code>archives</code> 这种 Hugo 内置 Kind。</p><p><code>slug: archives</code> 只参与 <code>/archives/</code> URL 的生成，不会把 <code>Type</code> 或 <code>Section</code> 设置为 <code>archives</code>。</p><h3 id=搜索>搜索</h3><p>搜索页 <code>content/page/search/index.md</code> 也是 Leaf Page：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-text data-lang=text><span class=line><span class=cl>Kind    = page
+</span></span><span class=line><span class=cl>Type    = page
+</span></span><span class=line><span class=cl>Section = page
+</span></span><span class=line><span class=cl>Layout  = search
+</span></span></code></pre></td></tr></table></div></div><p>它的特殊之处不在 <code>Kind</code>，而在自定义布局和 Output Format：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-yaml data-lang=yaml><span class=line><span class=cl><span class=nt>layout</span><span class=p>:</span><span class=w> </span><span class=l>search</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=nt>outputs</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span>- <span class=l>html</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span>- <span class=l>json</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><p><code>layout: search</code> 使 HTML 输出匹配 Stack 的 <code>layouts/page/search.html</code>，JSON 输出匹配对应的搜索数据模板。<code>outputs</code> 只决定同一个 Page 需要生成哪些输出格式，不会创建新的 Kind，也不会改变 <code>Type</code> 或 <code>Section</code>。</p><h3 id=tag-taxonomy-根页>Tag Taxonomy 根页</h3><p>Hugo 默认配置中存在 <code>tag = "tags"</code>，因此逻辑路径 <code>/tags</code> 被识别为 Tag Taxonomy 根节点 <code>content/tags/_index.md</code>：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-text data-lang=text><span class=line><span class=cl>Kind    = taxonomy
+</span></span><span class=line><span class=cl>Type    = tags
+</span></span><span class=line><span class=cl>Section = tags
+</span></span><span class=line><span class=cl>Layout  = tags
+</span></span></code></pre></td></tr></table></div></div><p>这里的 <code>Kind=taxonomy</code> 不是单独由 <code>_index.md</code> 决定的，而是由“启用了 plural 名称为 <code>tags</code> 的 Taxonomy”与“文件位于 <code>content/tags/_index.md</code>”共同决定。<code>_index.md</code> 为 Hugo 自动生成的 Taxonomy Page 补充标题、菜单等元信息。</p><p>如果没有这个文件，只要 Tag Taxonomy 已启用并且文章使用了 <code>tags</code>，Hugo 仍然可以生成 <code>/tags/</code>。缺少的只是自定义标题、菜单和其他页面元信息。</p><h3 id=category-taxonomy-根页>Category Taxonomy 根页</h3><p>Hugo 默认配置中存在 <code>category = "categories"</code>，因此该文件对应 Category Taxonomy 根页面 <code>content/categories/_index.md</code>：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-text data-lang=text><span class=line><span class=cl>Kind    = taxonomy
+</span></span><span class=line><span class=cl>Type    = categories
+</span></span><span class=line><span class=cl>Section = categories
+</span></span><span class=line><span class=cl>Layout  = categories
+</span></span></code></pre></td></tr></table></div></div><p><code>Type</code> 和 <code>Section</code> 使用 plural 名称 <code>categories</code>，而不是 singular 名称 <code>category</code>。文章 Front Matter 也使用 plural 字段建立关系：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-yaml data-lang=yaml><span class=line><span class=cl><span class=nt>categories</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span>- <span class=l>Misc</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><p>当前文件中的 <code>layout: categories</code>、<code>slug: categories</code> 和 <code>menu</code> 都不会创建 Taxonomy；真正让页面获得 <code>Kind=taxonomy</code> 的是 Hugo Taxonomy 配置和逻辑路径。</p><h3 id=普通博客文章>普通博客文章</h3><p>普通博客文章自身位于：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-text data-lang=text><span class=line><span class=cl>content/post/.../*.md
+</span></span></code></pre></td></tr></table></div></div><p>它是普通 Markdown 内容文件，并且位于 <code>post</code> Root Section 下，因此：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-text data-lang=text><span class=line><span class=cl>Kind    = page
+</span></span><span class=line><span class=cl>Type    = post
+</span></span><span class=line><span class=cl>Section = post
+</span></span></code></pre></td></tr></table></div></div><p>中间目录 <code>Misc</code> 不会把 <code>Type</code> 或 <code>Section</code> 改为 <code>Misc</code>。它当前只是文件组织和 URL 逻辑路径的一部分；文章的 <code>categories: [Misc]</code> 是独立的 Taxonomy 关系，也不会改变 <code>Section</code>。</p><p>普通文件与 Leaf Bundle 在这三个值上可以完全相同：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-text data-lang=text><span class=line><span class=cl>content/post/Hugo/example.md
+</span></span><span class=line><span class=cl>content/post/Hugo/example/index.md
+</span></span></code></pre></td></tr></table></div></div><p>二者通常都是：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-text data-lang=text><span class=line><span class=cl>Kind    = page
+</span></span><span class=line><span class=cl>Type    = post
+</span></span><span class=line><span class=cl>Section = post
+</span></span></code></pre></td></tr></table></div></div><p>区别在于后者是 Leaf Bundle，可以把同目录图片和附件作为 Page Resources 管理，而不是 <code>Kind</code>、<code>Type</code> 或 <code>Section</code> 不同。</p><h3 id=post-目录下的-_indexmd>post 目录下的 _index.md</h3><p>如果创建：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-text data-lang=text><span class=line><span class=cl>content/post/_index.md
+</span></span></code></pre></td></tr></table></div></div><p>它会成为 <code>post</code> Root Section 的元信息页面：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-text data-lang=text><span class=line><span class=cl>Kind    = section
+</span></span><span class=line><span class=cl>Type    = post
+</span></span><span class=line><span class=cl>Section = post
+</span></span></code></pre></td></tr></table></div></div><p>如果进一步创建：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-text data-lang=text><span class=line><span class=cl>content/post/Go/_index.md
+</span></span></code></pre></td></tr></table></div></div><p><code>Go</code> 会成为嵌套 Section，但 <code>.Section</code> 仍然返回 Root Section <code>post</code>：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-text data-lang=text><span class=line><span class=cl>Kind    = section
+</span></span><span class=line><span class=cl>Type    = post
+</span></span><span class=line><span class=cl>Section = post
+</span></span></code></pre></td></tr></table></div></div><p>需要获得当前嵌套 Section Page 时应使用 <code>.CurrentSection</code>，不能只依赖 <code>.Section</code> 区分 <code>post/Go</code> 与 <code>post/Linux</code>。</p><h3 id=tag-term-页>Tag Term 页</h3><p>如果为具体 Tag 创建元信息文件：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-text data-lang=text><span class=line><span class=cl>content/tags/hugo/_index.md
+</span></span></code></pre></td></tr></table></div></div><p>它对应 <code>/tags/hugo/</code>，属性为：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-text data-lang=text><span class=line><span class=cl>Kind    = term
+</span></span><span class=line><span class=cl>Type    = tags
+</span></span><span class=line><span class=cl>Section = tags
+</span></span></code></pre></td></tr></table></div></div><p><code>Kind=term</code> 表示它是一个具体 Term 的文章集合，<code>.Pages</code> 通常是所有声明了 <code>tags: [Hugo]</code> 的文章。<code>Type</code> 与 <code>Section</code> 仍然使用 Taxonomy plural 名称 <code>tags</code>，而不是 Term 名称 <code>hugo</code>。</p><p>Category Term 采用相同规则：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-text data-lang=text><span class=line><span class=cl>content/categories/misc/_index.md
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>Kind    = term
+</span></span><span class=line><span class=cl>Type    = categories
+</span></span><span class=line><span class=cl>Section = categories
+</span></span></code></pre></td></tr></table></div></div><h3 id=front-matter-能修改哪些值>Front Matter 能修改哪些值</h3><p>三个字段的可控方式并不相同：</p><div class=table-wrapper><table><thead><tr><th>字段</th><th>能否通过 Front Matter 修改</th><th>正确控制方式</th></tr></thead><tbody><tr><td><code>Kind</code></td><td>不能直接修改</td><td>调整文件形态、内容路径，或者启用相应 Hugo 内置机制</td></tr><tr><td><code>Type</code></td><td>可以</td><td>设置 <code>type</code>；未设置时由 Root Section 等信息推导</td></tr><tr><td><code>Section</code></td><td>不能直接修改</td><td>调整文件所在的 Root Section 或使用 Hugo Module mount</td></tr></tbody></table></div><p>例如在“关于我”页面设置：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-yaml data-lang=yaml><span class=line><span class=cl><span class=nt>type</span><span class=p>:</span><span class=w> </span><span class=l>landing</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><p>结果会变成：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-text data-lang=text><span class=line><span class=cl>Kind    = page
+</span></span><span class=line><span class=cl>Type    = landing
+</span></span><span class=line><span class=cl>Section = page
+</span></span></code></pre></td></tr></table></div></div><p>只有 <code>Type</code> 被覆盖，页面仍然是普通 Page，也仍然位于 <code>page</code> Section。</p><p>类似地，下面这些字段都不能改变 Page Kind：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-yaml data-lang=yaml><span class=line><span class=cl><span class=nt>layout</span><span class=p>:</span><span class=w> </span><span class=l>taxonomy</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=nt>slug</span><span class=p>:</span><span class=w> </span><span class=l>tags</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=nt>url</span><span class=p>:</span><span class=w> </span><span class=l>/tags/</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><p>它们可以改变模板候选或发布 URL，但不能把 <code>content/page/tags/index.md</code> 转换为 Taxonomy Page。</p><h3 id=把-taxonomy-文件移动到-page-后会发生什么>把 Taxonomy 文件移动到 <code>page</code> 后会发生什么</h3><p>正确位置：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-text data-lang=text><span class=line><span class=cl>content/tags/_index.md
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>Kind    = taxonomy
+</span></span><span class=line><span class=cl>Type    = tags
+</span></span><span class=line><span class=cl>Section = tags
+</span></span></code></pre></td></tr></table></div></div><p>如果移动并改成：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-text data-lang=text><span class=line><span class=cl>content/page/tags/index.md
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>Kind    = page
+</span></span><span class=line><span class=cl>Type    = page
+</span></span><span class=line><span class=cl>Section = page
+</span></span></code></pre></td></tr></table></div></div><p>如果移动后仍使用 <code>_index.md</code>：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-text data-lang=text><span class=line><span class=cl>content/page/tags/_index.md
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>Kind    = section
+</span></span><span class=line><span class=cl>Type    = page
+</span></span><span class=line><span class=cl>Section = page
+</span></span></code></pre></td></tr></table></div></div><p>即使通过 <code>slug</code>、<code>url</code> 或 permalink 让它们最终发布到 <code>/tags/</code>，它们也不会恢复 <code>Kind=taxonomy</code>。与此同时，Hugo 仍会为真正的 Tag Taxonomy 生成 <code>/tags/</code>，从而产生重复输出路径。因此 Taxonomy 元信息文件应保持在 <code>content/tags/_index.md</code> 和 <code>content/categories/_index.md</code>。</p><h3 id=在模板中验证实际值>在模板中验证实际值</h3><p>判断页面类型时应直接查看 Hugo Page 对象，而不是根据浏览器地址猜测。可以临时在模板中输出：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span><span class=lnt>8
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-go-html-template data-lang=go-html-template><span class=line><span class=cl><span class=p>&lt;</span><span class=nt>pre</span><span class=p>&gt;</span>
+</span></span><span class=line><span class=cl>Kind=<span class=cp>{{</span><span class=w> </span><span class=na>.Kind</span><span class=w> </span><span class=cp>}}</span>
+</span></span><span class=line><span class=cl>Type=<span class=cp>{{</span><span class=w> </span><span class=na>.Type</span><span class=w> </span><span class=cp>}}</span>
+</span></span><span class=line><span class=cl>Section=<span class=cp>{{</span><span class=w> </span><span class=k>printf</span><span class=w> </span><span class=s>&#34;%q&#34;</span><span class=w> </span><span class=na>.Section</span><span class=w> </span><span class=cp>}}</span>
+</span></span><span class=line><span class=cl>Layout=<span class=cp>{{</span><span class=w> </span><span class=na>.Layout</span><span class=w> </span><span class=cp>}}</span>
+</span></span><span class=line><span class=cl>BundleType=<span class=cp>{{</span><span class=w> </span><span class=na>.BundleType</span><span class=w> </span><span class=cp>}}</span>
+</span></span><span class=line><span class=cl>RelPermalink=<span class=cp>{{</span><span class=w> </span><span class=na>.RelPermalink</span><span class=w> </span><span class=cp>}}</span>
+</span></span><span class=line><span class=cl><span class=p>&lt;/</span><span class=nt>pre</span><span class=p>&gt;</span>
+</span></span></code></pre></td></tr></table></div></div><p>其中 <code>printf "%q"</code> 可以明确显示首页的空 <code>Section</code>。当前站点还可以使用 <code>hugo list all</code> 查看内容文件的 <code>kind</code>、<code>section</code> 和最终 permalink，再结合 <code>.Type</code> 的推导规则定位模板匹配问题。</p><h2 id=搜索页为什么必须使用-indexmd>搜索页为什么必须使用 <code>index.md</code></h2><p>正确结构是：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-text data-lang=text><span class=line><span class=cl>content/page/search/index.md
+</span></span></code></pre></td></tr></table></div></div><p>如果误写成：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-text data-lang=text><span class=line><span class=cl>content/page/search/_index.md
+</span></span></code></pre></td></tr></table></div></div><p>搜索节点会从普通页面变成 Section：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-text data-lang=text><span class=line><span class=cl>Kind=page       → Kind=section
+</span></span><span class=line><span class=cl>single 模板语义 → list 模板语义
+</span></span></code></pre></td></tr></table></div></div><p>Stack 的搜索功能依赖 <code>layouts/page/search.html</code> 和 <code>layouts/page/search.json</code>，还需要加载 <code>search.tsx</code>。一旦页面变成 Section，模板查找方向就会改变，最终可能只得到空白列表页或无法生成正确的 JSON 搜索索引。</p><h2 id=taxonomy-页面为什么使用-_indexmd>Taxonomy 页面为什么使用 <code>_index.md</code></h2><p>Hugo 默认提供：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-toml data-lang=toml><span class=line><span class=cl><span class=p>[</span><span class=nx>taxonomies</span><span class=p>]</span>
+</span></span><span class=line><span class=cl><span class=nx>category</span> <span class=p>=</span> <span class=s2>&#34;categories&#34;</span>
+</span></span><span class=line><span class=cl><span class=nx>tag</span> <span class=p>=</span> <span class=s2>&#34;tags&#34;</span>
+</span></span></code></pre></td></tr></table></div></div><p>文章通过 plural 字段关联 Term：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-yaml data-lang=yaml><span class=line><span class=cl><span class=nt>categories</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span>- <span class=l>博客</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=nt>tags</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span>- <span class=l>Hugo</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span>- <span class=l>Stack</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><p>Hugo 会自动生成：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-text data-lang=text><span class=line><span class=cl>/categories/
+</span></span><span class=line><span class=cl>/categories/博客/
+</span></span><span class=line><span class=cl>/tags/
+</span></span><span class=line><span class=cl>/tags/hugo/
+</span></span><span class=line><span class=cl>/tags/stack/
+</span></span></code></pre></td></tr></table></div></div><p>对应的可选元信息文件是：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span><span class=lnt>8
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-text data-lang=text><span class=line><span class=cl>content/categories/_index.md
+</span></span><span class=line><span class=cl>    → 分类 Taxonomy 根页
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>content/tags/_index.md
+</span></span><span class=line><span class=cl>    → 标签 Taxonomy 根页
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>content/tags/hugo/_index.md
+</span></span><span class=line><span class=cl>    → Hugo Term 页
+</span></span></code></pre></td></tr></table></div></div><p>这些节点都是集合，所以使用 <code>_index.md</code>。文件负责补充标题、描述、封面和菜单，真正的文章归属关系来自每篇文章的 Front Matter。</p><p>如果把 <code>content/tags/_index.md</code> 写成 <code>content/tags/index.md</code>，就会把 <code>/tags/</code> 声明成普通叶子 Page，与 Hugo 自动生成的 Taxonomy 根页发生内容模型冲突。</p><h2 id=内容路径与最终-url-可以分离>内容路径与最终 URL 可以分离</h2><p>内容文件所在目录不会绝对决定最终 URL。Hugo 还会考虑 <code>slug</code>、<code>url</code> 和站点的 <code>permalinks</code> 配置。</p><p>当前站点使用：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-toml data-lang=toml><span class=line><span class=cl><span class=p>[</span><span class=nx>permalinks</span><span class=p>]</span>
+</span></span><span class=line><span class=cl><span class=nx>post</span> <span class=p>=</span> <span class=s2>&#34;/p/:slug/&#34;</span>
+</span></span><span class=line><span class=cl><span class=nx>page</span> <span class=p>=</span> <span class=s2>&#34;/:slug/&#34;</span>
+</span></span></code></pre></td></tr></table></div></div><p>因此：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-text data-lang=text><span class=line><span class=cl>content/post/Linux/零拷贝技术.md
+</span></span><span class=line><span class=cl>    → /p/零拷贝技术/
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>content/page/search/index.md
+</span></span><span class=line><span class=cl>    → /search/
+</span></span></code></pre></td></tr></table></div></div><p>这说明目录主要用于表达内容模型和模板类型，而 permalink 可以独立控制发布路径。不要为了缩短 URL 随意移动内容目录，应优先使用 permalink 或 <code>url</code> 配置。</p><h2 id=stack-主题下的推荐结构>Stack 主题下的推荐结构</h2><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-text data-lang=text><span class=line><span class=cl>content/
+</span></span><span class=line><span class=cl>├── _index.md
+</span></span><span class=line><span class=cl>├── post/
+</span></span><span class=line><span class=cl>│   ├── _index.md                  # 可选，post Section 元信息
+</span></span><span class=line><span class=cl>│   ├── Go/
+</span></span><span class=line><span class=cl>│   │   └── defer.md
+</span></span><span class=line><span class=cl>│   └── Hugo/
+</span></span><span class=line><span class=cl>│       └── page-bundle/
+</span></span><span class=line><span class=cl>│           ├── index.md
+</span></span><span class=line><span class=cl>│           └── cover.png
+</span></span><span class=line><span class=cl>├── page/
+</span></span><span class=line><span class=cl>│   ├── about/
+</span></span><span class=line><span class=cl>│   │   └── index.md
+</span></span><span class=line><span class=cl>│   ├── archives/
+</span></span><span class=line><span class=cl>│   │   └── index.md
+</span></span><span class=line><span class=cl>│   └── search/
+</span></span><span class=line><span class=cl>│       └── index.md
+</span></span><span class=line><span class=cl>├── categories/
+</span></span><span class=line><span class=cl>│   └── _index.md
+</span></span><span class=line><span class=cl>└── tags/
+</span></span><span class=line><span class=cl>    ├── _index.md
+</span></span><span class=line><span class=cl>    └── hugo/
+</span></span><span class=line><span class=cl>        └── _index.md
+</span></span></code></pre></td></tr></table></div></div><p>这里的职责划分是：</p><div class=table-wrapper><table><thead><tr><th>路径</th><th>职责</th></tr></thead><tbody><tr><td><code>content/post</code></td><td>首页、归档和 RSS 中的主要文章</td></tr><tr><td><code>content/page</code></td><td>搜索、关于、归档等独立功能页</td></tr><tr><td><code>content/categories</code></td><td>Category Taxonomy 元信息</td></tr><tr><td><code>content/tags</code></td><td>Tag Taxonomy 和 Term 元信息</td></tr></tbody></table></div><p>Stack 通过 <code>mainSections = ["post"]</code> 识别主要文章，因此普通功能页不会混入首页文章列表和搜索索引。</p><h2 id=组织页面时的判断顺序>组织页面时的判断顺序</h2><p>新增页面前可以依次判断：</p><ol><li>这是具体内容还是集合？具体内容使用 <code>foo.md</code> 或 <code>index.md</code>，集合使用 <code>_index.md</code>。</li><li>是否需要与页面绑定图片和附件？需要时使用 Leaf Bundle，即 <code>目录/index.md</code>。</li><li>是否需要子页面和独立列表页？需要时使用 Branch Bundle，即 <code>目录/_index.md</code>。</li><li>它属于哪个业务类型？博客文章放在 <code>post</code>，功能页放在 <code>page</code>，不要只根据 URL 选择目录。</li><li>是否属于 Taxonomy？标签和分类关系写入文章 Front Matter，<code>content/tags</code> 与 <code>content/categories</code> 只保存集合元信息。</li><li>主题模板位于哪个 Type 目录？例如 <code>layouts/page/search.html</code> 要求搜索页以 <code>Type=page</code> 参与查找。</li><li>最终 URL 是否符合需求？不符合时优先调整 permalink、<code>slug</code> 或 <code>url</code>，不要先破坏内容模型。</li></ol><h2 id=常见错误>常见错误</h2><div class=table-wrapper><table><thead><tr><th>错误</th><th>后果</th><th>正确方式</th></tr></thead><tbody><tr><td>用 <code>_index.md</code> 创建普通功能页</td><td>页面变成 Section，使用 list 语义</td><td>改为 <code>index.md</code></td></tr><tr><td>用 <code>index.md</code> 创建标签根页</td><td>普通 Page 与 Taxonomy 根页冲突</td><td>改为 <code>tags/_index.md</code></td></tr><tr><td>为了修改 URL 随意移动顶层目录</td><td>Type 和模板匹配可能改变</td><td>配置 permalink 或显式 <code>type</code></td></tr><tr><td>认为 <code>layout</code> 可以脱离 Type 独立工作</td><td>找不到主题中的类型模板</td><td>同时检查 <code>Kind</code>、<code>Type</code> 和 <code>Layout</code></td></tr><tr><td>在 Leaf Bundle 中放独立 Markdown 子页面</td><td>子 Markdown 可能变成 Page Resource</td><td>改用 Branch Bundle</td></tr><tr><td>手工维护标签文章列表</td><td>与 Hugo 自动 Taxonomy 重复</td><td>在文章 Front Matter 中声明 <code>tags</code></td></tr></tbody></table></div><h2 id=参考资料>参考资料</h2><ul><li><a class=link href=https://gohugo.io/content-management/page-bundles/ target=_blank rel=noopener>Hugo Page Bundles</a></li><li><a class=link href=https://gohugo.io/content-management/sections/ target=_blank rel=noopener>Hugo Sections</a></li><li><a class=link href=https://gohugo.io/content-management/taxonomies/ target=_blank rel=noopener>Hugo Taxonomies</a></li><li><a class=link href=https://gohugo.io/templates/lookup-order/ target=_blank rel=noopener>Hugo Template Lookup Order</a></li></ul></section><footer class="article-meta article-footer"><section class=article-tags><a href=/tags/hugo/>Hugo</a>
+<a href=/tags/taxonomy/>Taxonomy</a></section><section class="article-copyright inline-meta"><svg class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><path d="M14.5 9a3.5 4 0 100 6"/></svg>
+<span>Licensed under CC BY-NC-SA 4.0</span></section></footer></article><footer class=site-footer><section class=copyright>&copy;
+2025 -
+2026 Kerolt's Note</section><section class=powerby>使用 <a href=https://gohugo.io/ target=_blank rel=noopener>Hugo</a> 构建<br>主题 <b><a href=https://github.com/CaiJimmy/hugo-theme-stack target=_blank rel=noopener data-version=4.0.3>Stack</a></b> 由 <a href=https://jimmycai.com target=_blank rel=noopener>Jimmy</a> 设计</section></footer><script type=module>
+    import gallery from '\/ts\/gallery.js';
+
+    const articleContent = document.querySelector('.article-content');
+    const shouldLoad = articleContent && (articleContent.querySelectorAll('figure').length > 0 || articleContent.querySelectorAll('img.gallery-image').length > 0);
+    
+    if (shouldLoad) {
+        gallery(articleContent);
+
+        const PhotoSwipeLightbox = (await import("https:\/\/cdn.jsdelivr.net\/npm\/photoswipe@5.4.4\/dist\/photoswipe-lightbox.esm.min.js")).default;
+        const styleHref = "https:\/\/cdn.jsdelivr.net\/npm\/photoswipe@5.4.4\/dist\/photoswipe.css";
+
+        const styleTag = document.createElement('link');
+        styleTag.rel = 'stylesheet';
+        styleTag.href = styleHref;
+        document.head.appendChild(styleTag);
+
+        const lightbox = new PhotoSwipeLightbox({
+            gallerySelector: '.article-content',
+            childSelector: 'figure a.image-link',
+            pswpModule: () => import("https:\/\/cdn.jsdelivr.net\/npm\/photoswipe@5.4.4\/dist\/photoswipe.esm.min.js")
+        });
+        lightbox.init();
+    }
+</script></main></div><script type=text/javascript src=/ts/main.f856840516f7c2ad1769a8f5937e3d08d6cb386e2cd2dd025ae696e0ff207958.js defer></script></body></html>
