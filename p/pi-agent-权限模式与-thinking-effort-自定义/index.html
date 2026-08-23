@@ -1,0 +1,269 @@
+<!doctype html><html lang=zh-cn dir=ltr><head><meta charset=utf-8><meta name=viewport content='width=device-width,initial-scale=1'><meta name=description content="背景 我在 Pi Agent 中同时安装了 @georgedong32/permission-modes 和 pi-zentui。两者单独使用都没什么问题，放在一起后却有两个地方不太顺手：\n我想保留 Zentui 的 Starship Footer，同时在 Footer 中看到当前权限模式。 我希望用一个简单的 /effort 命令查看或调整模型的 Thinking 强度。 当时的环境是：\n"><title>Pi Agent 权限模式与 Thinking Effort 自定义</title><link rel=canonical href=https://kerolt.github.io/p/pi-agent-%E6%9D%83%E9%99%90%E6%A8%A1%E5%BC%8F%E4%B8%8E-thinking-effort-%E8%87%AA%E5%AE%9A%E4%B9%89/><link rel=preconnect href=https://fonts.googleapis.com><link rel=preconnect href=https://fonts.gstatic.com crossorigin><link rel=preload as=style href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap"><link rel=stylesheet href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap"><link rel=stylesheet href=/scss/style.min.6c875234350e518395efbf51958523b0852fb2215ab8cb81358f9317153eba2d.css><meta property='og:title' content="Pi Agent 权限模式与 Thinking Effort 自定义"><meta property='og:description' content="背景 我在 Pi Agent 中同时安装了 @georgedong32/permission-modes 和 pi-zentui。两者单独使用都没什么问题，放在一起后却有两个地方不太顺手：\n我想保留 Zentui 的 Starship Footer，同时在 Footer 中看到当前权限模式。 我希望用一个简单的 /effort 命令查看或调整模型的 Thinking 强度。 当时的环境是：\n"><meta property='og:url' content='https://kerolt.github.io/p/pi-agent-%E6%9D%83%E9%99%90%E6%A8%A1%E5%BC%8F%E4%B8%8E-thinking-effort-%E8%87%AA%E5%AE%9A%E4%B9%89/'><meta property='og:site_name' content="Kerolt's Note"><meta property='og:type' content='article'><meta property='article:section' content='Post'><meta property='article:tag' content='Pi Agent'><meta property='article:tag' content='Zentui'><meta property='article:tag' content='Permission Modes'><meta property='article:tag' content='Extension'><meta property='article:published_time' content='2026-08-17T00:00:00+00:00'><meta property='article:modified_time' content='2026-08-17T00:00:00+00:00'><meta name=twitter:title content="Pi Agent 权限模式与 Thinking Effort 自定义"><meta name=twitter:description content="背景 我在 Pi Agent 中同时安装了 @georgedong32/permission-modes 和 pi-zentui。两者单独使用都没什么问题，放在一起后却有两个地方不太顺手：\n我想保留 Zentui 的 Starship Footer，同时在 Footer 中看到当前权限模式。 我希望用一个简单的 /effort 命令查看或调整模型的 Thinking 强度。 当时的环境是：\n"><link rel="shortcut icon" href=/images/favicon.png></head><body class=article-page><script>(function(){const e="StackColorScheme";localStorage.getItem(e)||localStorage.setItem(e,"auto")})()</script><script>(function(){const t="StackColorScheme",e=localStorage.getItem(t),n=window.matchMedia("(prefers-color-scheme: dark)").matches===!0;e=="dark"||e==="auto"&&n?document.documentElement.dataset.scheme="dark":document.documentElement.dataset.scheme="light"})()</script><div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky"><button class="hamburger hamburger--spin" type=button id=toggle-menu aria-label=切换菜单>
+<span class=hamburger-box><span class=hamburger-inner></span></span></button><header><figure class=site-avatar><a href=/><img src=/images/avatar.jpg width=200 height=200 class=site-logo loading=lazy alt=Avatar>
+</a><span class=emoji>🏸</span></figure><div class=site-meta><h1 class=site-name><a href=/>Kerolt's Note</a></h1><h2 class=site-description>愿你无拘无束自由的活着</h2></div></header><ol class=menu-social><li><a href=https://github.com/kerolt title=GitHub rel=me><svg class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 19c-4.3 1.4-4.3-2.5-6-3m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6.0 00-1.3-3.2 4.2 4.2.0 00-.1-3.2s-1.1-.3-3.5 1.3a12.3 12.3.0 00-6.2.0C6.5 2.8 5.4 3.1 5.4 3.1a4.2 4.2.0 00-.1 3.2A4.6 4.6.0 004 9.5c0 4.6 2.7 5.7 5.5 6-.6.6-.6 1.2-.5 2V21"/></svg></a></li></ol><ol class=menu id=main-menu><li><a href=/><svg class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><polyline points="5 12 3 12 12 3 21 12 19 12"/><path d="M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"/><path d="M9 21v-6a2 2 0 012-2h2a2 2 0 012 2v6"/></svg>
+<span>首页</span></a></li><li><a href=/search/><svg class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="10" cy="10" r="7"/><line x1="21" y1="21" x2="15" y2="15"/></svg>
+<span>搜索</span></a></li><li><a href=/categories/><svg class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><line x1="5" y1="9" x2="19" y2="9"/><line x1="5" y1="15" x2="19" y2="15"/><line x1="11" y1="4" x2="7" y2="20"/><line x1="17" y1="4" x2="13" y2="20"/></svg>
+<span>分类</span></a></li><li><a href=/tags/><svg class="icon icon-tabler icon-tabler-tag" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><path d="M11 3l9 9a1.5 1.5.0 010 2l-6 6a1.5 1.5.0 01-2 0L3 11V7a4 4 0 014-4h4"/><circle cx="9" cy="9" r="2"/></svg>
+<span>标签</span></a></li><li><a href=/about/><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-info-circle"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 12a9 9 0 1018 0A9 9 0 003 12"/><path d="M12 9h.01"/><path d="M11 12h1v4h1"/></svg>
+<span>关于我</span></a></li><li><a href=/archives/><svg class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><rect x="3" y="4" width="18" height="4" rx="2"/><path d="M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
+<span>归档</span></a></li><li class=menu-bottom-section><ol class=menu><li id=dark-mode-toggle><svg class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="8" cy="12" r="2"/><rect x="2" y="6" width="20" height="12" rx="6"/></svg>
+<svg class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="16" cy="12" r="2"/><rect x="2" y="6" width="20" height="12" rx="6"/></svg>
+<span>暗色模式</span></li></ol></li></ol></aside><aside class="sidebar right-sidebar sticky"><section class="widget archives"><div class=widget-icon><svg class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><line x1="5" y1="9" x2="19" y2="9"/><line x1="5" y1="15" x2="19" y2="15"/><line x1="11" y1="4" x2="7" y2="20"/><line x1="17" y1="4" x2="13" y2="20"/></svg></div><h2 class="widget-title section-title">目录</h2><div class=widget--toc><nav class=toc-nav id=TableOfContents><ol><li><a href=#背景>背景</a></li><li><a href=#这次用到的-extension-机制>这次用到的 Extension 机制</a></li><li><a href=#为什么两个-footer-会冲突>为什么两个 Footer 会冲突</a></li><li><a href=#在-zentui-footer-中显示-permission-mode>在 Zentui Footer 中显示 Permission Mode</a></li><li><a href=#增加-effort-命令>增加 <code>/effort</code> 命令</a></li><li><a href=#重载与验证>重载与验证</a></li><li><a href=#几点注意事项>几点注意事项</a></li></ol></nav></div></section></aside><main class="main full-width"><article class=main-article><header class=article-header><div class=article-details><header class=article-category><a href=/categories/harness/ style=background-color:#efc7be;color:#3d180f>Harness</a></header><div class=article-title-wrapper><h2 class=article-title><a href=/p/pi-agent-%E6%9D%83%E9%99%90%E6%A8%A1%E5%BC%8F%E4%B8%8E-thinking-effort-%E8%87%AA%E5%AE%9A%E4%B9%89/>Pi Agent 权限模式与 Thinking Effort 自定义</a></h2></div><footer class=article-meta><div class=inline-meta><svg class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><path d="M11.795 21H5a2 2 0 01-2-2V7a2 2 0 012-2h12a2 2 0 012 2v4"/><circle cx="18" cy="18" r="4"/><path d="M15 3v4"/><path d="M7 3v4"/><path d="M3 11h16"/><path d="M18 16.496V18l1 1"/></svg>
+<time class=article-time--published datetime=2026-08-17T00:00:00Z>2026年8月17日星期一</time>
+<svg class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg>
+<time class=article-time--reading>阅读时长: 5 分钟</time></div></footer></div></header><aside class=article-toc><details><summary><div class=article-toc-title><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-chevron-right"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 6l6 6-6 6"/></svg>
+<span>目录</span></div></summary><nav class=toc-nav><ol><li><a href=#背景>背景</a></li><li><a href=#这次用到的-extension-机制>这次用到的 Extension 机制</a></li><li><a href=#为什么两个-footer-会冲突>为什么两个 Footer 会冲突</a></li><li><a href=#在-zentui-footer-中显示-permission-mode>在 Zentui Footer 中显示 Permission Mode</a></li><li><a href=#增加-effort-命令>增加 <code>/effort</code> 命令</a></li><li><a href=#重载与验证>重载与验证</a></li><li><a href=#几点注意事项>几点注意事项</a></li></ol></nav></details></aside><section class=article-content><h2 id=背景>背景</h2><p>我在 Pi Agent 中同时安装了 <code>@georgedong32/permission-modes</code> 和 <code>pi-zentui</code>。两者单独使用都没什么问题，放在一起后却有两个地方不太顺手：</p><ol><li>我想保留 Zentui 的 Starship Footer，同时在 Footer 中看到当前权限模式。</li><li>我希望用一个简单的 <code>/effort</code> 命令查看或调整模型的 Thinking 强度。</li></ol><p>当时的环境是：</p><ul><li>Pi：<code>0.84.2</code></li><li>Permission Modes：<code>@georgedong32/permission-modes@2.6.3</code></li><li>UI：<code>pi-zentui</code></li></ul><p>这两个需求最后都通过本地 Extension 解决了。不过在动手之前，需要先理清 Pi 的插件加载方式，以及哪些 UI 能力可以叠加、哪些不能。</p><h2 id=这次用到的-extension-机制>这次用到的 Extension 机制</h2><p>Pi Extension 是由 Pi 直接加载的 TypeScript 模块，不是单独运行的进程。本文实际涉及的接口不多：用 <code>registerCommand()</code> 注册 <code>/effort</code>，用 <code>pi.on()</code> 管理会话生命周期，再通过 <code>setStatus()</code>、<code>setFooter()</code> 和 Thinking API 处理界面状态。</p><p>两个自定义功能都属于个人工作流，所以我把文件放在全局目录 <code>~/.pi/agent/extensions/</code>，而不是项目内的 <code>.pi/extensions/</code>。</p><p>其中，权限模式桥接需要一个定时器。这个定时器不能在 Extension 重载后继续握着旧的 <code>ctx</code>，因此要跟着会话启动和关闭：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-ts data-lang=ts><span class=line><span class=cl><span class=nx>pi</span><span class=p>.</span><span class=nx>on</span><span class=p>(</span><span class=s2>&#34;session_start&#34;</span><span class=p>,</span> <span class=p>(</span><span class=nx>_event</span><span class=p>,</span> <span class=nx>ctx</span><span class=p>)</span> <span class=o>=&gt;</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>  <span class=c1>// 创建当前会话使用的 timer
+</span></span></span><span class=line><span class=cl><span class=p>});</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=nx>pi</span><span class=p>.</span><span class=nx>on</span><span class=p>(</span><span class=s2>&#34;session_shutdown&#34;</span><span class=p>,</span> <span class=p>()</span> <span class=o>=&gt;</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>  <span class=c1>// 清理 timer
+</span></span></span><span class=line><span class=cl><span class=p>});</span>
+</span></span></code></pre></td></tr></table></div></div><p>执行 <code>/reload</code> 时，Pi 会先触发旧实例的 <code>session_shutdown</code>，重新加载 Extension 后，再触发新实例的 <code>session_start</code>。后面的桥接代码也按这个方式处理。</p><h2 id=为什么两个-footer-会冲突>为什么两个 Footer 会冲突</h2><p>问题出在 <code>setStatus()</code> 和 <code>setFooter()</code> 的语义不同。<code>setStatus(key, value)</code> 可以按 key 叠加，多个 Extension 发布的状态能够交给 Zentui 一起展示；<code>setFooter(factory)</code> 则会替换整个 Footer，后调用的一方会覆盖前一方。</p><p><code>permission-modes</code> 和 Zentui 都调用了 <code>ctx.ui.setFooter()</code>。与其再写一个 Footer 参与覆盖，不如让 Zentui 保留渲染权，只把权限模式桥接成普通的 Extension Status。</p><p>加载顺序仍要调整：我把 Zentui 放在 <code>packages</code> 数组末尾，让它最后安装 Footer。但这招只对 UI 所有权有效，解决不了快捷键冲突。Pi <code>0.84.2</code> 把 <code>Shift+Tab</code> 留给内置的 <code>app.thinking.cycle</code>；如果 Permission Modes 注册同一个按键，Pi 会直接跳过。需要使用该快捷键时，应在 <code>~/.pi/agent/keybindings.json</code> 中重新绑定内置动作，先把它释放出来。</p><p>另外，Permission Modes 的 <code>allow / ask / deny</code> 是通过 <code>tool_call</code> 等事件实现的进程内策略，不是 Bubblewrap、容器或虚拟机那样的系统级隔离。</p><h2 id=在-zentui-footer-中显示-permission-mode>在 Zentui Footer 中显示 Permission Mode</h2><p>桥接文件位于：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-text data-lang=text><span class=line><span class=cl>~/.pi/agent/extensions/permission-mode-zentui.ts
+</span></span></code></pre></td></tr></table></div></div><p>完整代码如下：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span><span class=lnt>34
+</span><span class=lnt>35
+</span><span class=lnt>36
+</span><span class=lnt>37
+</span><span class=lnt>38
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-ts data-lang=ts><span class=line><span class=cl><span class=kr>import</span> <span class=kr>type</span> <span class=p>{</span> <span class=nx>ExtensionAPI</span> <span class=p>}</span> <span class=kr>from</span> <span class=s2>&#34;@earendil-works/pi-coding-agent&#34;</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=kr>const</span> <span class=nx>MODE_STATUS</span> <span class=o>=</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>  <span class=nx>ask</span><span class=o>:</span> <span class=p>{</span> <span class=nx>label</span><span class=o>:</span> <span class=s2>&#34;● Ask&#34;</span><span class=p>,</span> <span class=nx>color</span><span class=o>:</span> <span class=s2>&#34;muted&#34;</span> <span class=p>},</span>
+</span></span><span class=line><span class=cl>  <span class=nx>plan</span><span class=o>:</span> <span class=p>{</span> <span class=nx>label</span><span class=o>:</span> <span class=s2>&#34;⏸ Plan&#34;</span><span class=p>,</span> <span class=nx>color</span><span class=o>:</span> <span class=s2>&#34;accent&#34;</span> <span class=p>},</span>
+</span></span><span class=line><span class=cl>  <span class=nx>auto</span><span class=o>:</span> <span class=p>{</span> <span class=nx>label</span><span class=o>:</span> <span class=s2>&#34;▶ Auto&#34;</span><span class=p>,</span> <span class=nx>color</span><span class=o>:</span> <span class=s2>&#34;warning&#34;</span> <span class=p>},</span>
+</span></span><span class=line><span class=cl>  <span class=nx>bypass</span><span class=o>:</span> <span class=p>{</span> <span class=nx>label</span><span class=o>:</span> <span class=s2>&#34;⚡️ Bypass&#34;</span><span class=p>,</span> <span class=nx>color</span><span class=o>:</span> <span class=s2>&#34;error&#34;</span> <span class=p>},</span>
+</span></span><span class=line><span class=cl><span class=p>}</span> <span class=kr>as</span> <span class=kr>const</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=cm>/** Bridges permission-modes state into Zentui&#39;s extension-status footer. */</span>
+</span></span><span class=line><span class=cl><span class=kr>export</span> <span class=k>default</span> <span class=kd>function</span> <span class=nx>permissionModeZentui</span><span class=p>(</span><span class=nx>pi</span>: <span class=kt>ExtensionAPI</span><span class=p>)</span><span class=o>:</span> <span class=k>void</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>  <span class=kd>let</span> <span class=nx>timer</span>: <span class=kt>NodeJS.Timeout</span> <span class=o>|</span> <span class=kc>undefined</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>  <span class=nx>pi</span><span class=p>.</span><span class=nx>on</span><span class=p>(</span><span class=s2>&#34;session_start&#34;</span><span class=p>,</span> <span class=p>(</span><span class=nx>_event</span><span class=p>,</span> <span class=nx>ctx</span><span class=p>)</span> <span class=o>=&gt;</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=kd>let</span> <span class=nx>previousMode</span>: <span class=kt>string</span> <span class=o>|</span> <span class=kc>undefined</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=kr>const</span> <span class=nx>syncStatus</span> <span class=o>=</span> <span class=p>()</span><span class=o>:</span> <span class=k>void</span> <span class=o>=&gt;</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>      <span class=kr>const</span> <span class=nx>mode</span> <span class=o>=</span> <span class=nx>process</span><span class=p>.</span><span class=nx>env</span><span class=p>.</span><span class=nx>PERMISSION_MODES_INHERITED_MODE</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>      <span class=k>if</span> <span class=p>(</span><span class=o>!</span><span class=nx>mode</span> <span class=o>||</span> <span class=nx>mode</span> <span class=o>===</span> <span class=nx>previousMode</span><span class=p>)</span> <span class=k>return</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>      <span class=nx>previousMode</span> <span class=o>=</span> <span class=nx>mode</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>      <span class=kr>const</span> <span class=nx>status</span> <span class=o>=</span> <span class=nx>MODE_STATUS</span><span class=p>[</span><span class=nx>mode</span> <span class=kr>as</span> <span class=k>keyof</span> <span class=k>typeof</span> <span class=nx>MODE_STATUS</span><span class=p>];</span>
+</span></span><span class=line><span class=cl>      <span class=nx>ctx</span><span class=p>.</span><span class=nx>ui</span><span class=p>.</span><span class=nx>setStatus</span><span class=p>(</span>
+</span></span><span class=line><span class=cl>        <span class=s2>&#34;permission-mode&#34;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>        <span class=nx>status</span> <span class=o>?</span> <span class=nx>ctx</span><span class=p>.</span><span class=nx>ui</span><span class=p>.</span><span class=nx>theme</span><span class=p>.</span><span class=nx>fg</span><span class=p>(</span><span class=nx>status</span><span class=p>.</span><span class=nx>color</span><span class=p>,</span> <span class=nx>status</span><span class=p>.</span><span class=nx>label</span><span class=p>)</span> <span class=o>:</span> <span class=nx>mode</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>      <span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=p>};</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=nx>syncStatus</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>    <span class=nx>timer</span> <span class=o>=</span> <span class=nx>setInterval</span><span class=p>(</span><span class=nx>syncStatus</span><span class=p>,</span> <span class=mi>200</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=nx>timer</span><span class=p>.</span><span class=nx>unref</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>  <span class=p>});</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>  <span class=nx>pi</span><span class=p>.</span><span class=nx>on</span><span class=p>(</span><span class=s2>&#34;session_shutdown&#34;</span><span class=p>,</span> <span class=p>()</span> <span class=o>=&gt;</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=p>(</span><span class=nx>timer</span><span class=p>)</span> <span class=nx>clearInterval</span><span class=p>(</span><span class=nx>timer</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=nx>timer</span> <span class=o>=</span> <span class=kc>undefined</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=p>});</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p><code>syncStatus()</code> 每 200 毫秒读取一次 <code>PERMISSION_MODES_INHERITED_MODE</code>，但只有模式变化时才更新 Footer。<code>ask</code>、<code>plan</code>、<code>auto</code> 和 <code>bypass</code> 会分别显示为 <code>● Ask</code>、<code>⏸ Plan</code>、<code>▶ Auto</code> 和 <code>⚡️ Bypass</code>。定时器则在 <code>session_shutdown</code> 中清理。</p><p>接着调整 <code>~/.pi/agent/settings.json</code> 中的包顺序，让 Zentui 最后加载：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-json data-lang=json><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>  <span class=nt>&#34;packages&#34;</span><span class=p>:</span> <span class=p>[</span>
+</span></span><span class=line><span class=cl>    <span class=s2>&#34;npm:pi-cc-extensions&#34;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>    <span class=s2>&#34;npm:@georgedong32/permission-modes&#34;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>    <span class=s2>&#34;npm:pi-zentui&#34;</span>
+</span></span><span class=line><span class=cl>  <span class=p>]</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p>Zentui 会把 <code>permission-mode</code> 当作第三方 Extension Status。显示在 Footer 左边、中间还是右边，可以到 <code>/zentui</code> 的 <strong>Extensions</strong> 页面里设置。整个改动没有碰 npm 包中的源码，更新 Package 时也不需要反复补丁。</p><h2 id=增加-effort-命令>增加 <code>/effort</code> 命令</h2><p><code>/effort</code> 与 Footer 没有关系，我把它留在另一个文件中：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-text data-lang=text><span class=line><span class=cl>~/.pi/agent/extensions/effort-command.ts
+</span></span></code></pre></td></tr></table></div></div><p>代码如下：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span><span class=lnt>34
+</span><span class=lnt>35
+</span><span class=lnt>36
+</span><span class=lnt>37
+</span><span class=lnt>38
+</span><span class=lnt>39
+</span><span class=lnt>40
+</span><span class=lnt>41
+</span><span class=lnt>42
+</span><span class=lnt>43
+</span><span class=lnt>44
+</span><span class=lnt>45
+</span><span class=lnt>46
+</span><span class=lnt>47
+</span><span class=lnt>48
+</span><span class=lnt>49
+</span><span class=lnt>50
+</span><span class=lnt>51
+</span><span class=lnt>52
+</span><span class=lnt>53
+</span><span class=lnt>54
+</span><span class=lnt>55
+</span><span class=lnt>56
+</span><span class=lnt>57
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-ts data-lang=ts><span class=line><span class=cl><span class=kr>import</span> <span class=kr>type</span> <span class=p>{</span> <span class=nx>ExtensionAPI</span> <span class=p>}</span> <span class=kr>from</span> <span class=s2>&#34;@earendil-works/pi-coding-agent&#34;</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=kr>const</span> <span class=nx>EFFORT_LEVELS</span> <span class=o>=</span> <span class=p>[</span><span class=s2>&#34;off&#34;</span><span class=p>,</span> <span class=s2>&#34;minimal&#34;</span><span class=p>,</span> <span class=s2>&#34;low&#34;</span><span class=p>,</span> <span class=s2>&#34;medium&#34;</span><span class=p>,</span> <span class=s2>&#34;high&#34;</span><span class=p>,</span> <span class=s2>&#34;xhigh&#34;</span><span class=p>,</span> <span class=s2>&#34;max&#34;</span><span class=p>]</span> <span class=kr>as</span> <span class=kr>const</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=kr>type</span> <span class=nx>EffortLevel</span> <span class=o>=</span> <span class=p>(</span><span class=k>typeof</span> <span class=nx>EFFORT_LEVELS</span><span class=p>)[</span><span class=kt>number</span><span class=p>];</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=cm>/** Reports whether a command argument is a supported thinking-effort level. */</span>
+</span></span><span class=line><span class=cl><span class=kd>function</span> <span class=nx>isEffortLevel</span><span class=p>(</span><span class=nx>value</span>: <span class=kt>string</span><span class=p>)</span><span class=o>:</span> <span class=nx>value</span> <span class=k>is</span> <span class=nx>EffortLevel</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>  <span class=k>return</span> <span class=nx>EFFORT_LEVELS</span><span class=p>.</span><span class=nx>some</span><span class=p>((</span><span class=nx>level</span><span class=p>)</span> <span class=o>=&gt;</span> <span class=nx>level</span> <span class=o>===</span> <span class=nx>value</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=cm>/** Registers the /effort command for selecting the active thinking level. */</span>
+</span></span><span class=line><span class=cl><span class=kr>export</span> <span class=k>default</span> <span class=kd>function</span> <span class=nx>effortCommand</span><span class=p>(</span><span class=nx>pi</span>: <span class=kt>ExtensionAPI</span><span class=p>)</span><span class=o>:</span> <span class=k>void</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>  <span class=nx>pi</span><span class=p>.</span><span class=nx>registerCommand</span><span class=p>(</span><span class=s2>&#34;effort&#34;</span><span class=p>,</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=nx>description</span><span class=o>:</span> <span class=s2>&#34;Set thinking effort: off, minimal, low, medium, high, xhigh, or max&#34;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>    <span class=nx>getArgumentCompletions</span><span class=o>:</span> <span class=p>(</span><span class=nx>prefix</span><span class=p>)</span> <span class=o>=&gt;</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>      <span class=kr>const</span> <span class=nx>normalizedPrefix</span> <span class=o>=</span> <span class=nx>prefix</span><span class=p>.</span><span class=nx>toLowerCase</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>      <span class=kr>const</span> <span class=nx>matches</span> <span class=o>=</span> <span class=nx>EFFORT_LEVELS</span><span class=p>.</span><span class=nx>filter</span><span class=p>((</span><span class=nx>level</span><span class=p>)</span> <span class=o>=&gt;</span> <span class=nx>level</span><span class=p>.</span><span class=nx>startsWith</span><span class=p>(</span><span class=nx>normalizedPrefix</span><span class=p>)).</span><span class=nx>map</span><span class=p>(</span>
+</span></span><span class=line><span class=cl>        <span class=p>(</span><span class=nx>level</span><span class=p>)</span> <span class=o>=&gt;</span> <span class=p>({</span>
+</span></span><span class=line><span class=cl>          <span class=nx>value</span>: <span class=kt>level</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>          <span class=nx>label</span>: <span class=kt>level</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>        <span class=p>}),</span>
+</span></span><span class=line><span class=cl>      <span class=p>);</span>
+</span></span><span class=line><span class=cl>      <span class=k>return</span> <span class=nx>matches</span><span class=p>.</span><span class=nx>length</span> <span class=o>&gt;</span> <span class=mi>0</span> <span class=o>?</span> <span class=nx>matches</span> : <span class=kt>null</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=p>},</span>
+</span></span><span class=line><span class=cl>    <span class=nx>handler</span>: <span class=kt>async</span> <span class=p>(</span><span class=nx>args</span><span class=p>,</span> <span class=nx>ctx</span><span class=p>)</span> <span class=o>=&gt;</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>      <span class=kd>let</span> <span class=nx>requested</span> <span class=o>=</span> <span class=nx>args</span><span class=p>.</span><span class=nx>trim</span><span class=p>().</span><span class=nx>toLowerCase</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>      <span class=k>if</span> <span class=p>(</span><span class=o>!</span><span class=nx>requested</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=k>if</span> <span class=p>(</span><span class=o>!</span><span class=nx>ctx</span><span class=p>.</span><span class=nx>hasUI</span><span class=p>)</span> <span class=k>return</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=kr>const</span> <span class=nx>selected</span> <span class=o>=</span> <span class=k>await</span> <span class=nx>ctx</span><span class=p>.</span><span class=nx>ui</span><span class=p>.</span><span class=nx>select</span><span class=p>(</span>
+</span></span><span class=line><span class=cl>          <span class=sb>`Thinking effort (current: </span><span class=si>${</span><span class=nx>pi</span><span class=p>.</span><span class=nx>getThinkingLevel</span><span class=p>()</span><span class=si>}</span><span class=sb>)`</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>          <span class=p>[...</span><span class=nx>EFFORT_LEVELS</span><span class=p>],</span>
+</span></span><span class=line><span class=cl>        <span class=p>);</span>
+</span></span><span class=line><span class=cl>        <span class=k>if</span> <span class=p>(</span><span class=o>!</span><span class=nx>selected</span><span class=p>)</span> <span class=k>return</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=nx>requested</span> <span class=o>=</span> <span class=nx>selected</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>      <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>      <span class=k>if</span> <span class=p>(</span><span class=o>!</span><span class=nx>isEffortLevel</span><span class=p>(</span><span class=nx>requested</span><span class=p>))</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=nx>ctx</span><span class=p>.</span><span class=nx>ui</span><span class=p>.</span><span class=nx>notify</span><span class=p>(</span>
+</span></span><span class=line><span class=cl>          <span class=sb>`Unknown effort &#34;</span><span class=si>${</span><span class=nx>requested</span><span class=si>}</span><span class=sb>&#34;. Expected: </span><span class=si>${</span><span class=nx>EFFORT_LEVELS</span><span class=p>.</span><span class=nx>join</span><span class=p>(</span><span class=s2>&#34;, &#34;</span><span class=p>)</span><span class=si>}</span><span class=sb>`</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>          <span class=s2>&#34;error&#34;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>        <span class=p>);</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>      <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>      <span class=nx>pi</span><span class=p>.</span><span class=nx>setThinkingLevel</span><span class=p>(</span><span class=nx>requested</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>      <span class=kr>const</span> <span class=nx>applied</span> <span class=o>=</span> <span class=nx>pi</span><span class=p>.</span><span class=nx>getThinkingLevel</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>      <span class=k>if</span> <span class=p>(</span><span class=nx>applied</span> <span class=o>!==</span> <span class=nx>requested</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=nx>ctx</span><span class=p>.</span><span class=nx>ui</span><span class=p>.</span><span class=nx>notify</span><span class=p>(</span>
+</span></span><span class=line><span class=cl>          <span class=sb>`Requested </span><span class=si>${</span><span class=nx>requested</span><span class=si>}</span><span class=sb>; active model applied </span><span class=si>${</span><span class=nx>applied</span><span class=si>}</span><span class=sb>`</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>          <span class=s2>&#34;warning&#34;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>        <span class=p>);</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>      <span class=p>}</span>
+</span></span><span class=line><span class=cl>      <span class=nx>ctx</span><span class=p>.</span><span class=nx>ui</span><span class=p>.</span><span class=nx>notify</span><span class=p>(</span><span class=sb>`Thinking effort: </span><span class=si>${</span><span class=nx>applied</span><span class=si>}</span><span class=sb>`</span><span class=p>,</span> <span class=s2>&#34;info&#34;</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=p>},</span>
+</span></span><span class=line><span class=cl>  <span class=p>});</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p>不带参数的 <code>/effort</code> 会打开选择菜单；如果已经知道目标等级，也可以直接输入 <code>/effort high</code>。可选值为 <code>off</code>、<code>minimal</code>、<code>low</code>、<code>medium</code>、<code>high</code>、<code>xhigh</code> 和 <code>max</code>，命令本身带参数补全和输入检查。</p><p>设置后再调用 <code>getThinkingLevel()</code> 很有必要：有些模型不支持请求的等级，Pi 会自动降级。此时通知中应该展示实际生效值，而不是原样复述用户输入。</p><h2 id=重载与验证>重载与验证</h2><p>保存两个 Extension 并调整 Package 顺序后，在 Pi 中执行：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-text data-lang=text><span class=line><span class=cl>/reload
+</span></span></code></pre></td></tr></table></div></div><p><code>/settings reload</code> 不是有效命令；<code>/settings</code> 和 <code>/reload</code> 是分开的。</p><p>写下这篇记录时，我已经检查过两个 TypeScript 文件的语法和 <code>settings.json</code> 的 JSON 格式。至于 Footer 展示和 <code>/effort</code> 菜单，仍需要在当前会话执行 <code>/reload</code> 后做一次实际交互确认，静态检查替代不了这一步。</p><h2 id=几点注意事项>几点注意事项</h2><ul><li>Permission Modes 的 Auto 模式依赖分类模型判断风险。分类模型不可用时，写入操作可能 fail-closed。需要维护全局配置时，可以先切换到 <code>/ask</code>，再明确批准目标操作。</li><li><code>bypass</code> 会放行高风险操作，不适合作为日常默认模式。</li><li>桥接 Extension 依赖 <code>PERMISSION_MODES_INHERITED_MODE</code>。如果 Permission Modes 后续改名或删除这个环境变量，桥接代码也要跟着调整。</li></ul></section><footer class="article-meta article-footer"><section class=article-tags><a href=/tags/pi-agent/>Pi Agent</a>
+<a href=/tags/zentui/>Zentui</a>
+<a href=/tags/permission-modes/>Permission Modes</a>
+<a href=/tags/extension/>Extension</a></section><section class="article-copyright inline-meta"><svg class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><path d="M14.5 9a3.5 4 0 100 6"/></svg>
+<span>Licensed under CC BY-NC-SA 4.0</span></section></footer></article><footer class=site-footer><section class=copyright>&copy;
+2025 -
+2026 Kerolt's Note</section><section class=powerby>使用 <a href=https://gohugo.io/ target=_blank rel=noopener>Hugo</a> 构建<br>主题 <b><a href=https://github.com/CaiJimmy/hugo-theme-stack target=_blank rel=noopener data-version=4.0.3>Stack</a></b> 由 <a href=https://jimmycai.com target=_blank rel=noopener>Jimmy</a> 设计</section></footer><script type=module>
+    import gallery from '\/ts\/gallery.js';
+
+    const articleContent = document.querySelector('.article-content');
+    const shouldLoad = articleContent && (articleContent.querySelectorAll('figure').length > 0 || articleContent.querySelectorAll('img.gallery-image').length > 0);
+    
+    if (shouldLoad) {
+        gallery(articleContent);
+
+        const PhotoSwipeLightbox = (await import("https:\/\/cdn.jsdelivr.net\/npm\/photoswipe@5.4.4\/dist\/photoswipe-lightbox.esm.min.js")).default;
+        const styleHref = "https:\/\/cdn.jsdelivr.net\/npm\/photoswipe@5.4.4\/dist\/photoswipe.css";
+
+        const styleTag = document.createElement('link');
+        styleTag.rel = 'stylesheet';
+        styleTag.href = styleHref;
+        document.head.appendChild(styleTag);
+
+        const lightbox = new PhotoSwipeLightbox({
+            gallerySelector: '.article-content',
+            childSelector: 'figure a.image-link',
+            pswpModule: () => import("https:\/\/cdn.jsdelivr.net\/npm\/photoswipe@5.4.4\/dist\/photoswipe.esm.min.js")
+        });
+        lightbox.init();
+    }
+</script></main></div><script type=text/javascript src=/ts/main.f856840516f7c2ad1769a8f5937e3d08d6cb386e2cd2dd025ae696e0ff207958.js defer></script></body></html>
