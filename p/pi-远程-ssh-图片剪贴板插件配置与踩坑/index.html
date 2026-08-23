@@ -1,0 +1,237 @@
+<!doctype html><html lang=zh-cn dir=ltr><head><meta charset=utf-8><meta name=viewport content='width=device-width,initial-scale=1'><meta name=description content="背景与原理 在 Mac 上通过 VS Code Remote SSH 连到远端无图形界面的 Fedora 开发机使用 Pi 时，按 Ctrl+V 默认读不到 Mac 本地的剪贴板图片。\n解决思路很简单：\nMac 端：通过 pngpaste 导出剪贴板图片，用 launchd 监听端口（inetd 模式按需调用）； 传输层：通过 SSH 反向隧道（RemoteForward）把 Mac 本地的服务暴露给 Fedora 的 127.0.0.1:7779； Fedora 端：安装 pi-ssh-image-clipboard 插件，拦截 Ctrl+V，从 127.0.0.1:7779 读取图片写入 /tmp/，并将文件路径填入 Pi 输入框。 flowchart LR A[Mac 剪贴板] --> B[launchd + pngpaste\\n127.0.0.1:7779] B -->|SSH RemoteForward| C[Fedora 127.0.0.1:7779] C --> D[pi-ssh-image-clipboard] D --> E[\" /tmp/pi-clipboard-uuid.png\"] e -->F[Pi 输入框]整个链路不复杂，但配置时最容易踩的坑是：以为在 ~/.ssh/config 里写了 RemoteForward 就完事了，实际当前已有的 VS Code SSH 连接或 ControlMaster 并不会动态补上新转发。\n"><title>Pi 远程 SSH 图片剪贴板插件配置与踩坑</title><link rel=canonical href=https://kerolt.github.io/p/pi-%E8%BF%9C%E7%A8%8B-ssh-%E5%9B%BE%E7%89%87%E5%89%AA%E8%B4%B4%E6%9D%BF%E6%8F%92%E4%BB%B6%E9%85%8D%E7%BD%AE%E4%B8%8E%E8%B8%A9%E5%9D%91/><link rel=preconnect href=https://fonts.googleapis.com><link rel=preconnect href=https://fonts.gstatic.com crossorigin><link rel=preload as=style href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap"><link rel=stylesheet href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap"><link rel=stylesheet href=/scss/style.min.6c875234350e518395efbf51958523b0852fb2215ab8cb81358f9317153eba2d.css><meta property='og:title' content="Pi 远程 SSH 图片剪贴板插件配置与踩坑"><meta property='og:description' content="背景与原理 在 Mac 上通过 VS Code Remote SSH 连到远端无图形界面的 Fedora 开发机使用 Pi 时，按 Ctrl+V 默认读不到 Mac 本地的剪贴板图片。\n解决思路很简单：\nMac 端：通过 pngpaste 导出剪贴板图片，用 launchd 监听端口（inetd 模式按需调用）； 传输层：通过 SSH 反向隧道（RemoteForward）把 Mac 本地的服务暴露给 Fedora 的 127.0.0.1:7779； Fedora 端：安装 pi-ssh-image-clipboard 插件，拦截 Ctrl+V，从 127.0.0.1:7779 读取图片写入 /tmp/，并将文件路径填入 Pi 输入框。 flowchart LR A[Mac 剪贴板] --> B[launchd + pngpaste\\n127.0.0.1:7779] B -->|SSH RemoteForward| C[Fedora 127.0.0.1:7779] C --> D[pi-ssh-image-clipboard] D --> E[\" /tmp/pi-clipboard-uuid.png\"] e -->F[Pi 输入框]整个链路不复杂，但配置时最容易踩的坑是：以为在 ~/.ssh/config 里写了 RemoteForward 就完事了，实际当前已有的 VS Code SSH 连接或 ControlMaster 并不会动态补上新转发。\n">
+<meta property='og:url' content='https://kerolt.github.io/p/pi-%E8%BF%9C%E7%A8%8B-ssh-%E5%9B%BE%E7%89%87%E5%89%AA%E8%B4%B4%E6%9D%BF%E6%8F%92%E4%BB%B6%E9%85%8D%E7%BD%AE%E4%B8%8E%E8%B8%A9%E5%9D%91/'><meta property='og:site_name' content="Kerolt's Note"><meta property='og:type' content='article'><meta property='article:section' content='Post'><meta property='article:tag' content='Pi Agent'><meta property='article:tag' content='SSH'><meta property='article:tag' content='macOS'><meta property='article:tag' content='Fedora'><meta property='article:tag' content='Clipboard'><meta property='article:published_time' content='2026-08-20T00:00:00+00:00'><meta property='article:modified_time' content='2026-08-20T00:00:00+00:00'><meta name=twitter:title content="Pi 远程 SSH 图片剪贴板插件配置与踩坑"><meta name=twitter:description content="背景与原理 在 Mac 上通过 VS Code Remote SSH 连到远端无图形界面的 Fedora 开发机使用 Pi 时，按 Ctrl+V 默认读不到 Mac 本地的剪贴板图片。\n解决思路很简单：\nMac 端：通过 pngpaste 导出剪贴板图片，用 launchd 监听端口（inetd 模式按需调用）； 传输层：通过 SSH 反向隧道（RemoteForward）把 Mac 本地的服务暴露给 Fedora 的 127.0.0.1:7779； Fedora 端：安装 pi-ssh-image-clipboard 插件，拦截 Ctrl+V，从 127.0.0.1:7779 读取图片写入 /tmp/，并将文件路径填入 Pi 输入框。 flowchart LR A[Mac 剪贴板] --> B[launchd + pngpaste\\n127.0.0.1:7779] B -->|SSH RemoteForward| C[Fedora 127.0.0.1:7779] C --> D[pi-ssh-image-clipboard] D --> E[\" /tmp/pi-clipboard-uuid.png\"] e -->F[Pi 输入框]整个链路不复杂，但配置时最容易踩的坑是：以为在 ~/.ssh/config 里写了 RemoteForward 就完事了，实际当前已有的 VS Code SSH 连接或 ControlMaster 并不会动态补上新转发。\n">
+<link rel="shortcut icon" href=/images/favicon.png></head><body class=article-page><script>(function(){const e="StackColorScheme";localStorage.getItem(e)||localStorage.setItem(e,"auto")})()</script><script>(function(){const t="StackColorScheme",e=localStorage.getItem(t),n=window.matchMedia("(prefers-color-scheme: dark)").matches===!0;e=="dark"||e==="auto"&&n?document.documentElement.dataset.scheme="dark":document.documentElement.dataset.scheme="light"})()</script><div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky"><button class="hamburger hamburger--spin" type=button id=toggle-menu aria-label=切换菜单>
+<span class=hamburger-box><span class=hamburger-inner></span></span></button><header><figure class=site-avatar><a href=/><img src=/images/avatar.jpg width=200 height=200 class=site-logo loading=lazy alt=Avatar>
+</a><span class=emoji>🏸</span></figure><div class=site-meta><h1 class=site-name><a href=/>Kerolt's Note</a></h1><h2 class=site-description>愿你无拘无束自由的活着</h2></div></header><ol class=menu-social><li><a href=https://github.com/kerolt title=GitHub rel=me><svg class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 19c-4.3 1.4-4.3-2.5-6-3m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6.0 00-1.3-3.2 4.2 4.2.0 00-.1-3.2s-1.1-.3-3.5 1.3a12.3 12.3.0 00-6.2.0C6.5 2.8 5.4 3.1 5.4 3.1a4.2 4.2.0 00-.1 3.2A4.6 4.6.0 004 9.5c0 4.6 2.7 5.7 5.5 6-.6.6-.6 1.2-.5 2V21"/></svg></a></li></ol><ol class=menu id=main-menu><li><a href=/><svg class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><polyline points="5 12 3 12 12 3 21 12 19 12"/><path d="M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"/><path d="M9 21v-6a2 2 0 012-2h2a2 2 0 012 2v6"/></svg>
+<span>首页</span></a></li><li><a href=/search/><svg class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="10" cy="10" r="7"/><line x1="21" y1="21" x2="15" y2="15"/></svg>
+<span>搜索</span></a></li><li><a href=/categories/><svg class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><line x1="5" y1="9" x2="19" y2="9"/><line x1="5" y1="15" x2="19" y2="15"/><line x1="11" y1="4" x2="7" y2="20"/><line x1="17" y1="4" x2="13" y2="20"/></svg>
+<span>分类</span></a></li><li><a href=/tags/><svg class="icon icon-tabler icon-tabler-tag" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><path d="M11 3l9 9a1.5 1.5.0 010 2l-6 6a1.5 1.5.0 01-2 0L3 11V7a4 4 0 014-4h4"/><circle cx="9" cy="9" r="2"/></svg>
+<span>标签</span></a></li><li><a href=/about/><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-info-circle"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 12a9 9 0 1018 0A9 9 0 003 12"/><path d="M12 9h.01"/><path d="M11 12h1v4h1"/></svg>
+<span>关于我</span></a></li><li><a href=/archives/><svg class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><rect x="3" y="4" width="18" height="4" rx="2"/><path d="M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
+<span>归档</span></a></li><li class=menu-bottom-section><ol class=menu><li id=dark-mode-toggle><svg class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="8" cy="12" r="2"/><rect x="2" y="6" width="20" height="12" rx="6"/></svg>
+<svg class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="16" cy="12" r="2"/><rect x="2" y="6" width="20" height="12" rx="6"/></svg>
+<span>暗色模式</span></li></ol></li></ol></aside><aside class="sidebar right-sidebar sticky"><section class="widget archives"><div class=widget-icon><svg class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><line x1="5" y1="9" x2="19" y2="9"/><line x1="5" y1="15" x2="19" y2="15"/><line x1="11" y1="4" x2="7" y2="20"/><line x1="17" y1="4" x2="13" y2="20"/></svg></div><h2 class="widget-title section-title">目录</h2><div class=widget--toc><nav class=toc-nav id=TableOfContents><ol><li><a href=#背景与原理>背景与原理</a></li><li><a href=#1-mac-端配置提供图片服务>1. Mac 端配置：提供图片服务</a><ol><li><a href=#安装-pngpaste>安装 pngpaste</a></li><li><a href=#配置-clipserve-launchagent>配置 clipserve (LaunchAgent)</a></li></ol></li><li><a href=#2-传输层常驻-ssh-反向隧道>2. 传输层：常驻 SSH 反向隧道</a><ol><li><a href=#踩坑为什么不直接靠-vs-code-ssh-转发>踩坑：为什么不直接靠 VS Code SSH 转发？</a></li><li><a href=#配置-ssh-tunnel-launchagent>配置 SSH Tunnel (LaunchAgent)</a></li></ol></li><li><a href=#3-fedora-端配置安装与配置-pi-插件>3. Fedora 端配置：安装与配置 Pi 插件</a><ol><li><a href=#安装插件锁定-commit>安装插件（锁定 Commit）</a></li><li><a href=#解绑内置冲突快捷键>解绑内置冲突快捷键</a></li></ol></li><li><a href=#排障速查>排障速查</a></li><li><a href=#安全与多用户注意事项>安全与多用户注意事项</a></li></ol></nav></div></section></aside><main class="main full-width"><article class=main-article><header class=article-header><div class=article-details><header class=article-category><a href=/categories/harness/ style=background-color:#efc7be;color:#3d180f>Harness</a></header><div class=article-title-wrapper><h2 class=article-title><a href=/p/pi-%E8%BF%9C%E7%A8%8B-ssh-%E5%9B%BE%E7%89%87%E5%89%AA%E8%B4%B4%E6%9D%BF%E6%8F%92%E4%BB%B6%E9%85%8D%E7%BD%AE%E4%B8%8E%E8%B8%A9%E5%9D%91/>Pi 远程 SSH 图片剪贴板插件配置与踩坑</a></h2></div><footer class=article-meta><div class=inline-meta><svg class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><path d="M11.795 21H5a2 2 0 01-2-2V7a2 2 0 012-2h12a2 2 0 012 2v4"/><circle cx="18" cy="18" r="4"/><path d="M15 3v4"/><path d="M7 3v4"/><path d="M3 11h16"/><path d="M18 16.496V18l1 1"/></svg>
+<time class=article-time--published datetime=2026-08-20T00:00:00Z>2026年8月20日星期四</time>
+<svg class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg>
+<time class=article-time--reading>阅读时长: 4 分钟</time></div></footer></div></header><aside class=article-toc><details><summary><div class=article-toc-title><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-chevron-right"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 6l6 6-6 6"/></svg>
+<span>目录</span></div></summary><nav class=toc-nav><ol><li><a href=#背景与原理>背景与原理</a></li><li><a href=#1-mac-端配置提供图片服务>1. Mac 端配置：提供图片服务</a><ol><li><a href=#安装-pngpaste>安装 pngpaste</a></li><li><a href=#配置-clipserve-launchagent>配置 clipserve (LaunchAgent)</a></li></ol></li><li><a href=#2-传输层常驻-ssh-反向隧道>2. 传输层：常驻 SSH 反向隧道</a><ol><li><a href=#踩坑为什么不直接靠-vs-code-ssh-转发>踩坑：为什么不直接靠 VS Code SSH 转发？</a></li><li><a href=#配置-ssh-tunnel-launchagent>配置 SSH Tunnel (LaunchAgent)</a></li></ol></li><li><a href=#3-fedora-端配置安装与配置-pi-插件>3. Fedora 端配置：安装与配置 Pi 插件</a><ol><li><a href=#安装插件锁定-commit>安装插件（锁定 Commit）</a></li><li><a href=#解绑内置冲突快捷键>解绑内置冲突快捷键</a></li></ol></li><li><a href=#排障速查>排障速查</a></li><li><a href=#安全与多用户注意事项>安全与多用户注意事项</a></li></ol></nav></details></aside><section class=article-content><h2 id=背景与原理>背景与原理</h2><p>在 Mac 上通过 VS Code Remote SSH 连到远端无图形界面的 Fedora 开发机使用 Pi 时，按 <code>Ctrl+V</code> 默认读不到 Mac 本地的剪贴板图片。</p><p>解决思路很简单：</p><ol><li><strong>Mac 端</strong>：通过 <code>pngpaste</code> 导出剪贴板图片，用 <code>launchd</code> 监听端口（inetd 模式按需调用）；</li><li><strong>传输层</strong>：通过 SSH 反向隧道（<code>RemoteForward</code>）把 Mac 本地的服务暴露给 Fedora 的 <code>127.0.0.1:7779</code>；</li><li><strong>Fedora 端</strong>：安装 <a class=link href=https://github.com/pasky/pi-ssh-image-clipboard target=_blank rel=noopener><code>pi-ssh-image-clipboard</code></a> 插件，拦截 <code>Ctrl+V</code>，从 <code>127.0.0.1:7779</code> 读取图片写入 <code>/tmp/</code>，并将文件路径填入 Pi 输入框。</li></ol><pre class=mermaid style=visibility:hidden>flowchart LR
+    A[Mac 剪贴板] --> B[launchd + pngpaste\n127.0.0.1:7779]
+    B -->|SSH RemoteForward| C[Fedora 127.0.0.1:7779]
+    C --> D[pi-ssh-image-clipboard]
+    D --> E["/tmp/pi-clipboard-UUID.png"]
+    E --> F[Pi 输入框]</pre><p>整个链路不复杂，但配置时最容易踩的坑是：<strong>以为在 <code>~/.ssh/config</code> 里写了 <code>RemoteForward</code> 就完事了，实际当前已有的 VS Code SSH 连接或 ControlMaster 并不会动态补上新转发</strong>。</p><h2 id=1-mac-端配置提供图片服务>1. Mac 端配置：提供图片服务</h2><h3 id=安装-pngpaste>安装 pngpaste</h3><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>brew install pngpaste
+</span></span><span class=line><span class=cl>which pngpaste
+</span></span><span class=line><span class=cl><span class=c1># Apple Silicon: /opt/homebrew/bin/pngpaste</span>
+</span></span><span class=line><span class=cl><span class=c1># Intel Mac:     /usr/local/bin/pngpaste</span>
+</span></span></code></pre></td></tr></table></div></div><h3 id=配置-clipserve-launchagent>配置 clipserve (LaunchAgent)</h3><p>新建 <code>~/Library/LaunchAgents/org.pasky.clipserve.plist</code>：</p><blockquote><p><strong>注意</strong>：<code>&lt;string></code> 中的 <code>pngpaste</code> 路径务必替换为 <code>which pngpaste</code> 的实际输出。</p></blockquote><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-xml data-lang=xml><span class=line><span class=cl><span class=cp>&lt;?xml version=&#34;1.0&#34; encoding=&#34;UTF-8&#34;?&gt;</span>
+</span></span><span class=line><span class=cl><span class=cp>&lt;!DOCTYPE plist PUBLIC &#34;-//Apple//DTD PLIST 1.0//EN&#34; &#34;http://www.apple.com/DTDs/PropertyList-1.0.dtd&#34;&gt;</span>
+</span></span><span class=line><span class=cl><span class=nt>&lt;plist</span> <span class=na>version=</span><span class=s>&#34;1.0&#34;</span><span class=nt>&gt;</span>
+</span></span><span class=line><span class=cl><span class=nt>&lt;dict&gt;</span>
+</span></span><span class=line><span class=cl>    <span class=nt>&lt;key&gt;</span>Label<span class=nt>&lt;/key&gt;</span>
+</span></span><span class=line><span class=cl>    <span class=nt>&lt;string&gt;</span>org.pasky.clipserve<span class=nt>&lt;/string&gt;</span>
+</span></span><span class=line><span class=cl>    <span class=nt>&lt;key&gt;</span>ProgramArguments<span class=nt>&lt;/key&gt;</span>
+</span></span><span class=line><span class=cl>    <span class=nt>&lt;array&gt;</span>
+</span></span><span class=line><span class=cl>        <span class=nt>&lt;string&gt;</span>/opt/homebrew/bin/pngpaste<span class=nt>&lt;/string&gt;</span>
+</span></span><span class=line><span class=cl>        <span class=nt>&lt;string&gt;</span>-<span class=nt>&lt;/string&gt;</span>
+</span></span><span class=line><span class=cl>    <span class=nt>&lt;/array&gt;</span>
+</span></span><span class=line><span class=cl>    <span class=nt>&lt;key&gt;</span>Sockets<span class=nt>&lt;/key&gt;</span>
+</span></span><span class=line><span class=cl>    <span class=nt>&lt;dict&gt;</span>
+</span></span><span class=line><span class=cl>        <span class=nt>&lt;key&gt;</span>Listeners<span class=nt>&lt;/key&gt;</span>
+</span></span><span class=line><span class=cl>        <span class=nt>&lt;dict&gt;</span>
+</span></span><span class=line><span class=cl>            <span class=nt>&lt;key&gt;</span>SockNodeName<span class=nt>&lt;/key&gt;</span>
+</span></span><span class=line><span class=cl>            <span class=nt>&lt;string&gt;</span>127.0.0.1<span class=nt>&lt;/string&gt;</span>
+</span></span><span class=line><span class=cl>            <span class=nt>&lt;key&gt;</span>SockServiceName<span class=nt>&lt;/key&gt;</span>
+</span></span><span class=line><span class=cl>            <span class=nt>&lt;string&gt;</span>7779<span class=nt>&lt;/string&gt;</span>
+</span></span><span class=line><span class=cl>        <span class=nt>&lt;/dict&gt;</span>
+</span></span><span class=line><span class=cl>    <span class=nt>&lt;/dict&gt;</span>
+</span></span><span class=line><span class=cl>    <span class=nt>&lt;key&gt;</span>inetdCompatibility<span class=nt>&lt;/key&gt;</span>
+</span></span><span class=line><span class=cl>    <span class=nt>&lt;dict&gt;</span>
+</span></span><span class=line><span class=cl>        <span class=nt>&lt;key&gt;</span>Wait<span class=nt>&lt;/key&gt;</span>
+</span></span><span class=line><span class=cl>        <span class=nt>&lt;false/&gt;</span>
+</span></span><span class=line><span class=cl>    <span class=nt>&lt;/dict&gt;</span>
+</span></span><span class=line><span class=cl>    <span class=nt>&lt;key&gt;</span>StandardErrorPath<span class=nt>&lt;/key&gt;</span>
+</span></span><span class=line><span class=cl>    <span class=nt>&lt;string&gt;</span>/tmp/pngpaste-clipserve.err<span class=nt>&lt;/string&gt;</span>
+</span></span><span class=line><span class=cl><span class=nt>&lt;/dict&gt;</span>
+</span></span><span class=line><span class=cl><span class=nt>&lt;/plist&gt;</span>
+</span></span></code></pre></td></tr></table></div></div><p>使用 inetd 模式的好处是：平时不占用后台进程，只有端口收到连接时才调起 <code>pngpaste -</code> 吐出二进制流。</p><p>加载服务并验证：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl><span class=c1># 启动服务</span>
+</span></span><span class=line><span class=cl>launchctl bootstrap gui/<span class=k>$(</span>id -u<span class=k>)</span> ~/Library/LaunchAgents/org.pasky.clipserve.plist
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># 截图到剪贴板后测试本地能否读取</span>
+</span></span><span class=line><span class=cl>nc 127.0.0.1 <span class=m>7779</span> <span class=p>|</span> file -
+</span></span><span class=line><span class=cl><span class=c1># 正常输出：/dev/stdin: PNG image data, ...</span>
+</span></span></code></pre></td></tr></table></div></div><h2 id=2-传输层常驻-ssh-反向隧道>2. 传输层：常驻 SSH 反向隧道</h2><h3 id=踩坑为什么不直接靠-vs-code-ssh-转发>踩坑：为什么不直接靠 VS Code SSH 转发？</h3><p>VS Code Remote SSH 复用的是初始建立的 SSH 通道，在 <code>~/.ssh/config</code> 新增 <code>RemoteForward</code> 后，不断开重连是不会生效的。而且只要 VS Code 窗口关掉或连接重置，转发就会中断。</p><p>更稳妥的方式是用单独的 LaunchAgent 维护一条专职转发的 SSH 隧道。</p><h3 id=配置-ssh-tunnel-launchagent>配置 SSH Tunnel (LaunchAgent)</h3><p>新建 <code>~/Library/LaunchAgents/org.pasky.pi-clip-tunnel.plist</code>：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span><span class=lnt>34
+</span><span class=lnt>35
+</span><span class=lnt>36
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-xml data-lang=xml><span class=line><span class=cl><span class=cp>&lt;?xml version=&#34;1.0&#34; encoding=&#34;UTF-8&#34;?&gt;</span>
+</span></span><span class=line><span class=cl><span class=cp>&lt;!DOCTYPE plist PUBLIC &#34;-//Apple//DTD PLIST 1.0//EN&#34; &#34;http://www.apple.com/DTDs/PropertyList-1.0.dtd&#34;&gt;</span>
+</span></span><span class=line><span class=cl><span class=nt>&lt;plist</span> <span class=na>version=</span><span class=s>&#34;1.0&#34;</span><span class=nt>&gt;</span>
+</span></span><span class=line><span class=cl><span class=nt>&lt;dict&gt;</span>
+</span></span><span class=line><span class=cl>    <span class=nt>&lt;key&gt;</span>Label<span class=nt>&lt;/key&gt;</span>
+</span></span><span class=line><span class=cl>    <span class=nt>&lt;string&gt;</span>org.pasky.pi-clip-tunnel<span class=nt>&lt;/string&gt;</span>
+</span></span><span class=line><span class=cl>    <span class=nt>&lt;key&gt;</span>ProgramArguments<span class=nt>&lt;/key&gt;</span>
+</span></span><span class=line><span class=cl>    <span class=nt>&lt;array&gt;</span>
+</span></span><span class=line><span class=cl>        <span class=nt>&lt;string&gt;</span>/usr/bin/ssh<span class=nt>&lt;/string&gt;</span>
+</span></span><span class=line><span class=cl>        <span class=nt>&lt;string&gt;</span>-S<span class=nt>&lt;/string&gt;</span>
+</span></span><span class=line><span class=cl>        <span class=nt>&lt;string&gt;</span>none<span class=nt>&lt;/string&gt;</span>
+</span></span><span class=line><span class=cl>        <span class=nt>&lt;string&gt;</span>-NT<span class=nt>&lt;/string&gt;</span>
+</span></span><span class=line><span class=cl>        <span class=nt>&lt;string&gt;</span>-o<span class=nt>&lt;/string&gt;</span>
+</span></span><span class=line><span class=cl>        <span class=nt>&lt;string&gt;</span>BatchMode=yes<span class=nt>&lt;/string&gt;</span>
+</span></span><span class=line><span class=cl>        <span class=nt>&lt;string&gt;</span>-o<span class=nt>&lt;/string&gt;</span>
+</span></span><span class=line><span class=cl>        <span class=nt>&lt;string&gt;</span>ExitOnForwardFailure=yes<span class=nt>&lt;/string&gt;</span>
+</span></span><span class=line><span class=cl>        <span class=nt>&lt;string&gt;</span>-o<span class=nt>&lt;/string&gt;</span>
+</span></span><span class=line><span class=cl>        <span class=nt>&lt;string&gt;</span>ServerAliveInterval=30<span class=nt>&lt;/string&gt;</span>
+</span></span><span class=line><span class=cl>        <span class=nt>&lt;string&gt;</span>-o<span class=nt>&lt;/string&gt;</span>
+</span></span><span class=line><span class=cl>        <span class=nt>&lt;string&gt;</span>ServerAliveCountMax=3<span class=nt>&lt;/string&gt;</span>
+</span></span><span class=line><span class=cl>        <span class=nt>&lt;string&gt;</span>-o<span class=nt>&lt;/string&gt;</span>
+</span></span><span class=line><span class=cl>        <span class=nt>&lt;string&gt;</span>ConnectTimeout=10<span class=nt>&lt;/string&gt;</span>
+</span></span><span class=line><span class=cl>        <span class=nt>&lt;string&gt;</span>-R<span class=nt>&lt;/string&gt;</span>
+</span></span><span class=line><span class=cl>        <span class=nt>&lt;string&gt;</span>127.0.0.1:7779:127.0.0.1:7779<span class=nt>&lt;/string&gt;</span>
+</span></span><span class=line><span class=cl>        <span class=nt>&lt;string&gt;</span>fedora<span class=nt>&lt;/string&gt;</span>
+</span></span><span class=line><span class=cl>    <span class=nt>&lt;/array&gt;</span>
+</span></span><span class=line><span class=cl>    <span class=nt>&lt;key&gt;</span>RunAtLoad<span class=nt>&lt;/key&gt;</span>
+</span></span><span class=line><span class=cl>    <span class=nt>&lt;true/&gt;</span>
+</span></span><span class=line><span class=cl>    <span class=nt>&lt;key&gt;</span>KeepAlive<span class=nt>&lt;/key&gt;</span>
+</span></span><span class=line><span class=cl>    <span class=nt>&lt;true/&gt;</span>
+</span></span><span class=line><span class=cl>    <span class=nt>&lt;key&gt;</span>ThrottleInterval<span class=nt>&lt;/key&gt;</span>
+</span></span><span class=line><span class=cl>    <span class=nt>&lt;integer&gt;</span>10<span class=nt>&lt;/integer&gt;</span>
+</span></span><span class=line><span class=cl>    <span class=nt>&lt;key&gt;</span>StandardErrorPath<span class=nt>&lt;/key&gt;</span>
+</span></span><span class=line><span class=cl>    <span class=nt>&lt;string&gt;</span>/tmp/pi-clip-tunnel.err<span class=nt>&lt;/string&gt;</span>
+</span></span><span class=line><span class=cl><span class=nt>&lt;/dict&gt;</span>
+</span></span><span class=line><span class=cl><span class=nt>&lt;/plist&gt;</span>
+</span></span></code></pre></td></tr></table></div></div><p>关键参数：</p><ul><li><code>-S none</code>：不复用已有的 SSH ControlMaster，避免被其他会话状态干扰；</li><li><code>-o ExitOnForwardFailure=yes</code>：端口冲突或转发失败时立即退出，交给 <code>launchd</code> 的 <code>KeepAlive</code> 重试；</li><li><code>-o BatchMode=yes</code>：非交互模式，依赖配置好的 SSH Key（需已配好公钥免密登录或 1Password / ssh-agent）。</li></ul><p>加载隧道：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>launchctl bootstrap gui/<span class=k>$(</span>id -u<span class=k>)</span> ~/Library/LaunchAgents/org.pasky.pi-clip-tunnel.plist
+</span></span></code></pre></td></tr></table></div></div><p>在 Fedora 上验证隧道是否通畅：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl><span class=c1># 检查端口监听</span>
+</span></span><span class=line><span class=cl>ss -ltn <span class=s1>&#39;( sport = :7779 )&#39;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># 测试读取 Mac 剪贴板</span>
+</span></span><span class=line><span class=cl>nc 127.0.0.1 <span class=m>7779</span> <span class=p>|</span> file -
+</span></span></code></pre></td></tr></table></div></div><h2 id=3-fedora-端配置安装与配置-pi-插件>3. Fedora 端配置：安装与配置 Pi 插件</h2><h3 id=安装插件锁定-commit>安装插件（锁定 Commit）</h3><p>Pi Extension 和 Pi 运行在同一权限下，建议锁定经过审计的 commit 安装：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>pi install <span class=s1>&#39;git:github.com/pasky/pi-ssh-image-clipboard@55db30a67dc039aec243c0737f5fec179add057c&#39;</span>
+</span></span></code></pre></td></tr></table></div></div><h3 id=解绑内置冲突快捷键>解绑内置冲突快捷键</h3><p>Pi 原生自带的 <code>app.clipboard.pasteImage</code> 同样绑定了 <code>Ctrl+V</code>，在无 GUI 的 Linux 下无法工作还会截断事件。</p><p>在 Fedora 的 <code>~/.pi/agent/keybindings.json</code> 中将其置空：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-json data-lang=json><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>  <span class=nt>&#34;app.clipboard.pasteImage&#34;</span><span class=p>:</span> <span class=p>[]</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p>修改后在 Pi 终端里执行 <code>/reload</code> 重新加载配置。</p><h2 id=排障速查>排障速查</h2><ul><li><p><strong>Fedora 报 <code>Connection refused</code></strong></p><ul><li>原因：远端 7779 端口未建立监听（转发隧道未通）。</li><li>排查：Fedora 上运行 <code>ss -ltn '( sport = :7779 )'</code> 检查端口；Mac 上测试 <code>ssh -S none -o BatchMode=yes fedora true</code> 确认 SSH 密钥是否支持非交互免密登录。</li></ul></li><li><p><strong>报 <code>Remote forwarding failed</code></strong></p><ul><li>原因：远端 7779 端口被旧残余进程占用，或 sshd 禁止了端口转发。</li><li>排查：Fedora 上运行 <code>ss -ltnp '( sport = :7779 )'</code> 查看占用进程；检查远端 <code>/etc/ssh/sshd_config</code> 是否开启 <code>AllowTcpForwarding yes</code>。</li></ul></li><li><p><strong>提示 <code>No image on client clipboard</code></strong></p><ul><li>原因：Mac 当前剪贴板中没有可识别的图片数据。</li><li>排查：在 Mac 本地执行 <code>pngpaste - | file -</code> 验证剪贴板是否有有效图像流。</li></ul></li><li><p><strong>按 <code>Ctrl+V</code> 没反应或报快捷键冲突</strong></p><ul><li>原因：Pi 内置图片粘贴动作未解绑，或插件未生效。</li><li>排查：检查 <code>~/.pi/agent/keybindings.json</code> 配置，并在 Pi 终端中执行 <code>/reload</code>。</li></ul></li><li><p><strong>发送后模型报错无法识别图片</strong></p><ul><li>原因：当前激活的模型不支持 Vision（图片）输入。</li><li>排查：运行 <code>pi --list-models</code>，确认当前模型在 <code>images</code> 一列是否标记为 <code>yes</code>。</li></ul></li></ul><h2 id=安全与多用户注意事项>安全与多用户注意事项</h2><ol><li><p><strong>回环端口暴露</strong>：
+<code>127.0.0.1:7779</code> 在单人开发机上最省事，但在多人共享的服务器上，其他本地用户也能连该端口偷读你的 Mac 剪贴板。多用户环境建议改用插件支持的 Unix Socket 方案：<code>~/.pi-clip/&lt;client>.sock</code>（配合 <code>chmod 700</code>）。</p></li><li><p><strong>临时文件权限</strong>：
+插件保存的 <code>/tmp/pi-clipboard-*.png</code> 默认权限是 <code>0644</code>。如果涉及敏感业务截图，可配置别名让 Pi 在严格 umask 下运行：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl><span class=nb>alias</span> <span class=nv>pi</span><span class=o>=</span><span class=s1>&#39;(umask 077 &amp;&amp; command pi &#34;$@&#34;)&#39;</span>
+</span></span></code></pre></td></tr></table></div></div><p>并定期清理历史缓存：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>find /tmp -maxdepth <span class=m>1</span> -user <span class=s2>&#34;</span><span class=nv>$USER</span><span class=s2>&#34;</span> -name <span class=s1>&#39;pi-clipboard-*&#39;</span> -mtime +1 -delete
+</span></span></code></pre></td></tr></table></div></div></li></ol></section><footer class="article-meta article-footer"><section class=article-tags><a href=/tags/pi-agent/>Pi Agent</a>
+<a href=/tags/ssh/>SSH</a>
+<a href=/tags/macos/>MacOS</a>
+<a href=/tags/fedora/>Fedora</a>
+<a href=/tags/clipboard/>Clipboard</a></section><section class="article-copyright inline-meta"><svg class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><path d="M14.5 9a3.5 4 0 100 6"/></svg>
+<span>Licensed under CC BY-NC-SA 4.0</span></section></footer></article><footer class=site-footer><section class=copyright>&copy;
+2025 -
+2026 Kerolt's Note</section><section class=powerby>使用 <a href=https://gohugo.io/ target=_blank rel=noopener>Hugo</a> 构建<br>主题 <b><a href=https://github.com/CaiJimmy/hugo-theme-stack target=_blank rel=noopener data-version=4.0.3>Stack</a></b> 由 <a href=https://jimmycai.com target=_blank rel=noopener>Jimmy</a> 设计</section></footer><script type=module>
+    import gallery from '\/ts\/gallery.js';
+
+    const articleContent = document.querySelector('.article-content');
+    const shouldLoad = articleContent && (articleContent.querySelectorAll('figure').length > 0 || articleContent.querySelectorAll('img.gallery-image').length > 0);
+    
+    if (shouldLoad) {
+        gallery(articleContent);
+
+        const PhotoSwipeLightbox = (await import("https:\/\/cdn.jsdelivr.net\/npm\/photoswipe@5.4.4\/dist\/photoswipe-lightbox.esm.min.js")).default;
+        const styleHref = "https:\/\/cdn.jsdelivr.net\/npm\/photoswipe@5.4.4\/dist\/photoswipe.css";
+
+        const styleTag = document.createElement('link');
+        styleTag.rel = 'stylesheet';
+        styleTag.href = styleHref;
+        document.head.appendChild(styleTag);
+
+        const lightbox = new PhotoSwipeLightbox({
+            gallerySelector: '.article-content',
+            childSelector: 'figure a.image-link',
+            pswpModule: () => import("https:\/\/cdn.jsdelivr.net\/npm\/photoswipe@5.4.4\/dist\/photoswipe.esm.min.js")
+        });
+        lightbox.init();
+    }
+</script><div class=mermaid-modal id=mermaid-modal><div class=mermaid-modal-header><div class=mermaid-modal-controls><button data-zoom=-1>− Zoom Out</button>
+<button data-zoom=0>Reset (100%)</button>
+<button data-zoom=1>+ Zoom In</button>
+<button data-zoom=fit>Fit to Screen</button></div><button class=mermaid-modal-close id=mermaid-modal-close>✕ Close (Esc)</button></div><div class=mermaid-modal-body id=mermaid-modal-body><div class=mermaid-modal-content id=mermaid-modal-content></div></div></div><script src=https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js></script><script type=module>
+import { initMermaidPage } from '\/ts\/mermaid.js';
+initMermaidPage({"darkTheme":"dark","darkThemeVariables":{},"htmlLabels":true,"lightTheme":"default","lightThemeVariables":{},"look":"classic","securityLevel":"strict","transparentBackground":false});
+</script></main></div><script type=text/javascript src=/ts/main.f856840516f7c2ad1769a8f5937e3d08d6cb386e2cd2dd025ae696e0ff207958.js defer></script></body></html>
