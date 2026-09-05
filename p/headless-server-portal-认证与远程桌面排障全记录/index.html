@@ -1,0 +1,449 @@
+<!doctype html><html lang=zh-cn dir=ltr><head><meta charset=utf-8><meta name=viewport content='width=device-width,initial-scale=1'><meta name=description content="背景与网络拓扑 在一台运行 Fedora 44 Server 的无显示器（Headless）高性能计算服务器上，机器同时接入了多套网络。其中，校园有线网需要通过 Dr.COM Web Portal 进行网页登录认证。由于服务器未安装默认图形界面，且存在多网卡出口路由竞争，无法直接弹窗认证。\n"><title>Headless Server Portal 认证与远程桌面排障全记录</title><link rel=canonical href=https://kerolt.github.io/p/headless-server-portal-%E8%AE%A4%E8%AF%81%E4%B8%8E%E8%BF%9C%E7%A8%8B%E6%A1%8C%E9%9D%A2%E6%8E%92%E9%9A%9C%E5%85%A8%E8%AE%B0%E5%BD%95/><link rel=preconnect href=https://fonts.googleapis.com><link rel=preconnect href=https://fonts.gstatic.com crossorigin><link rel=preload as=style href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap"><link rel=stylesheet href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap"><link rel=stylesheet href=/scss/style.min.6c875234350e518395efbf51958523b0852fb2215ab8cb81358f9317153eba2d.css><meta property='og:title' content="Headless Server Portal 认证与远程桌面排障全记录"><meta property='og:description' content="背景与网络拓扑 在一台运行 Fedora 44 Server 的无显示器（Headless）高性能计算服务器上，机器同时接入了多套网络。其中，校园有线网需要通过 Dr.COM Web Portal 进行网页登录认证。由于服务器未安装默认图形界面，且存在多网卡出口路由竞争，无法直接弹窗认证。\n"><meta property='og:url' content='https://kerolt.github.io/p/headless-server-portal-%E8%AE%A4%E8%AF%81%E4%B8%8E%E8%BF%9C%E7%A8%8B%E6%A1%8C%E9%9D%A2%E6%8E%92%E9%9A%9C%E5%85%A8%E8%AE%B0%E5%BD%95/'><meta property='og:site_name' content="Kerolt's Note"><meta property='og:type' content='article'><meta property='article:section' content='Post'><meta property='article:tag' content='Portal'><meta property='article:tag' content='Dr.COM'><meta property='article:tag' content='XRDP'><meta property='article:tag' content='KRDP'><meta property='article:tag' content='SSH Tunnel'><meta property='article:tag' content='远程桌面'><meta property='article:published_time' content='2026-09-05T00:00:00+00:00'><meta property='article:modified_time' content='2026-09-05T00:00:00+00:00'><meta name=twitter:title content="Headless Server Portal 认证与远程桌面排障全记录"><meta name=twitter:description content="背景与网络拓扑 在一台运行 Fedora 44 Server 的无显示器（Headless）高性能计算服务器上，机器同时接入了多套网络。其中，校园有线网需要通过 Dr.COM Web Portal 进行网页登录认证。由于服务器未安装默认图形界面，且存在多网卡出口路由竞争，无法直接弹窗认证。\n"><link rel="shortcut icon" href=/images/favicon.png></head><body class=article-page><script>(function(){const e="StackColorScheme";localStorage.getItem(e)||localStorage.setItem(e,"auto")})()</script><script>(function(){const t="StackColorScheme",e=localStorage.getItem(t),n=window.matchMedia("(prefers-color-scheme: dark)").matches===!0;e=="dark"||e==="auto"&&n?document.documentElement.dataset.scheme="dark":document.documentElement.dataset.scheme="light"})()</script><div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky"><button class="hamburger hamburger--spin" type=button id=toggle-menu aria-label=切换菜单>
+<span class=hamburger-box><span class=hamburger-inner></span></span></button><header><figure class=site-avatar><a href=/><img src=/images/avatar.jpg width=200 height=200 class=site-logo loading=lazy alt=Avatar>
+</a><span class=emoji>🏸</span></figure><div class=site-meta><h1 class=site-name><a href=/>Kerolt's Note</a></h1><h2 class=site-description>愿你无拘无束自由的活着</h2></div></header><ol class=menu-social><li><a href=https://github.com/kerolt title=GitHub rel=me><svg class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 19c-4.3 1.4-4.3-2.5-6-3m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6.0 00-1.3-3.2 4.2 4.2.0 00-.1-3.2s-1.1-.3-3.5 1.3a12.3 12.3.0 00-6.2.0C6.5 2.8 5.4 3.1 5.4 3.1a4.2 4.2.0 00-.1 3.2A4.6 4.6.0 004 9.5c0 4.6 2.7 5.7 5.5 6-.6.6-.6 1.2-.5 2V21"/></svg></a></li></ol><ol class=menu id=main-menu><li><a href=/><svg class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><polyline points="5 12 3 12 12 3 21 12 19 12"/><path d="M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"/><path d="M9 21v-6a2 2 0 012-2h2a2 2 0 012 2v6"/></svg>
+<span>首页</span></a></li><li><a href=/search/><svg class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="10" cy="10" r="7"/><line x1="21" y1="21" x2="15" y2="15"/></svg>
+<span>搜索</span></a></li><li><a href=/categories/><svg class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><line x1="5" y1="9" x2="19" y2="9"/><line x1="5" y1="15" x2="19" y2="15"/><line x1="11" y1="4" x2="7" y2="20"/><line x1="17" y1="4" x2="13" y2="20"/></svg>
+<span>分类</span></a></li><li><a href=/tags/><svg class="icon icon-tabler icon-tabler-tag" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><path d="M11 3l9 9a1.5 1.5.0 010 2l-6 6a1.5 1.5.0 01-2 0L3 11V7a4 4 0 014-4h4"/><circle cx="9" cy="9" r="2"/></svg>
+<span>标签</span></a></li><li><a href=/about/><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-info-circle"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 12a9 9 0 1018 0A9 9 0 003 12"/><path d="M12 9h.01"/><path d="M11 12h1v4h1"/></svg>
+<span>关于我</span></a></li><li><a href=/archives/><svg class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><rect x="3" y="4" width="18" height="4" rx="2"/><path d="M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
+<span>归档</span></a></li><li class=menu-bottom-section><ol class=menu><li id=dark-mode-toggle><svg class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="8" cy="12" r="2"/><rect x="2" y="6" width="20" height="12" rx="6"/></svg>
+<svg class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="16" cy="12" r="2"/><rect x="2" y="6" width="20" height="12" rx="6"/></svg>
+<span>暗色模式</span></li></ol></li></ol></aside><aside class="sidebar right-sidebar sticky"><section class="widget archives"><div class=widget-icon><svg class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><line x1="5" y1="9" x2="19" y2="9"/><line x1="5" y1="15" x2="19" y2="15"/><line x1="11" y1="4" x2="7" y2="20"/><line x1="17" y1="4" x2="13" y2="20"/></svg></div><h2 class="widget-title section-title">目录</h2><div class=widget--toc><nav class=toc-nav id=TableOfContents><ol><li><a href=#背景与网络拓扑>背景与网络拓扑</a><ol><li><a href=#网络拓扑与接口分布>网络拓扑与接口分布</a></li></ol></li><li><a href=#一现象排查有线网卡已获取-ip却无法访问互联网>一、现象排查：有线网卡已获取 IP，却无法访问互联网</a><ol><li><a href=#1-现象观察>1. 现象观察</a></li><li><a href=#2-逐层排查证据>2. 逐层排查证据</a></li><li><a href=#3-根因剖析与多默认路由优先级陷阱>3. 根因剖析与多默认路由优先级陷阱</a></li></ol></li><li><a href=#二方案-a纯命令行自动化-drcom-认证>二、方案 A：纯命令行自动化 Dr.COM 认证</a><ol><li><a href=#1-认证接口逆向分析>1. 认证接口逆向分析</a></li><li><a href=#2-自动化登录脚本实现>2. 自动化登录脚本实现</a></li></ol></li><li><a href=#三方案-bssh-tunnel--本地浏览器转发>三、方案 B：SSH Tunnel + 本地浏览器转发</a><ol><li><a href=#1-动态端口转发socks5>1. 动态端口转发（SOCKS5）</a></li><li><a href=#2-多网卡环境下的流量出口陷阱与对策>2. 多网卡环境下的流量出口陷阱与对策</a></li><li><a href=#3-踩坑复盘静态端口转发为何报-channel-4-open-failed>3. 踩坑复盘：静态端口转发为何报 <code>channel 4: open failed</code>？</a></li></ol></li><li><a href=#四方案-cfedora-server-部署-xfce--xrdp-远程桌面>四、方案 C：Fedora Server 部署 XFCE + xrdp 远程桌面</a><ol><li><a href=#1-安装与网络隔离>1. 安装与网络隔离</a></li><li><a href=#2-踩坑与排障一登录认证成功后瞬间闪退>2. 踩坑与排障（一）：登录认证成功后瞬间闪退</a><ol><li><a href=#故障现象>故障现象</a></li><li><a href=#日志溯源>日志溯源</a></li><li><a href=#根因剖析>根因剖析</a></li><li><a href=#解决方案>解决方案</a></li></ol></li><li><a href=#3-踩坑与排障二进入桌面后画面卡死假死>3. 踩坑与排障（二）：进入桌面后画面卡死假死</a><ol><li><a href=#故障现象-1>故障现象</a></li><li><a href=#排查数据>排查数据</a></li><li><a href=#综合优化措施>综合优化措施</a></li></ol></li></ol></li><li><a href=#五进阶实践通过-krdp-接入-rocky-linux-102-kde-wayland>五、进阶实践：通过 KRDP 接入 Rocky Linux 10.2 (KDE Wayland)</a><ol><li><a href=#1-配置与激活-krdp-用户服务>1. 配置与激活 KRDP 用户服务</a></li><li><a href=#2-踩坑与排障一xdg-desktop-portal-注册失败app-id-命名不一致>2. 踩坑与排障（一）：XDG Desktop Portal 注册失败（App ID 命名不一致）</a><ol><li><a href=#故障现象-2>故障现象</a></li><li><a href=#根因剖析-1>根因剖析</a></li><li><a href=#解决方案-1>解决方案</a></li></ol></li><li><a href=#3-踩坑与排障二客户端-0x204-错误分层诊断>3. 踩坑与排障（二）：客户端 0x204 错误分层诊断</a><ol><li><a href=#关键检查点>关键检查点：</a></li></ol></li></ol></li><li><a href=#六体系化排障方法论与命令速查表>六、体系化排障方法论与命令速查表</a><ol><li><a href=#常用诊断命令速查>常用诊断命令速查</a></li></ol></li><li><a href=#总结与备忘清单>总结与备忘清单</a></li></ol></nav></div></section></aside><main class="main full-width"><article class=main-article><header class=article-header><div class=article-details><header class=article-category><a href=/categories/network/ style=background-color:#efe2be;color:#3d320f>Network</a></header><div class=article-title-wrapper><h2 class=article-title><a href=/p/headless-server-portal-%E8%AE%A4%E8%AF%81%E4%B8%8E%E8%BF%9C%E7%A8%8B%E6%A1%8C%E9%9D%A2%E6%8E%92%E9%9A%9C%E5%85%A8%E8%AE%B0%E5%BD%95/>Headless Server Portal 认证与远程桌面排障全记录</a></h2></div><footer class=article-meta><div class=inline-meta><svg class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><path d="M11.795 21H5a2 2 0 01-2-2V7a2 2 0 012-2h12a2 2 0 012 2v4"/><circle cx="18" cy="18" r="4"/><path d="M15 3v4"/><path d="M7 3v4"/><path d="M3 11h16"/><path d="M18 16.496V18l1 1"/></svg>
+<time class=article-time--published datetime=2026-09-05T00:00:00Z>2026年9月5日星期六</time>
+<svg class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg>
+<time class=article-time--reading>阅读时长: 14 分钟</time></div></footer></div></header><aside class=article-toc><details><summary><div class=article-toc-title><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-chevron-right"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 6l6 6-6 6"/></svg>
+<span>目录</span></div></summary><nav class=toc-nav><ol><li><a href=#背景与网络拓扑>背景与网络拓扑</a><ol><li><a href=#网络拓扑与接口分布>网络拓扑与接口分布</a></li></ol></li><li><a href=#一现象排查有线网卡已获取-ip却无法访问互联网>一、现象排查：有线网卡已获取 IP，却无法访问互联网</a><ol><li><a href=#1-现象观察>1. 现象观察</a></li><li><a href=#2-逐层排查证据>2. 逐层排查证据</a></li><li><a href=#3-根因剖析与多默认路由优先级陷阱>3. 根因剖析与多默认路由优先级陷阱</a></li></ol></li><li><a href=#二方案-a纯命令行自动化-drcom-认证>二、方案 A：纯命令行自动化 Dr.COM 认证</a><ol><li><a href=#1-认证接口逆向分析>1. 认证接口逆向分析</a></li><li><a href=#2-自动化登录脚本实现>2. 自动化登录脚本实现</a></li></ol></li><li><a href=#三方案-bssh-tunnel--本地浏览器转发>三、方案 B：SSH Tunnel + 本地浏览器转发</a><ol><li><a href=#1-动态端口转发socks5>1. 动态端口转发（SOCKS5）</a></li><li><a href=#2-多网卡环境下的流量出口陷阱与对策>2. 多网卡环境下的流量出口陷阱与对策</a></li><li><a href=#3-踩坑复盘静态端口转发为何报-channel-4-open-failed>3. 踩坑复盘：静态端口转发为何报 <code>channel 4: open failed</code>？</a></li></ol></li><li><a href=#四方案-cfedora-server-部署-xfce--xrdp-远程桌面>四、方案 C：Fedora Server 部署 XFCE + xrdp 远程桌面</a><ol><li><a href=#1-安装与网络隔离>1. 安装与网络隔离</a></li><li><a href=#2-踩坑与排障一登录认证成功后瞬间闪退>2. 踩坑与排障（一）：登录认证成功后瞬间闪退</a><ol><li><a href=#故障现象>故障现象</a></li><li><a href=#日志溯源>日志溯源</a></li><li><a href=#根因剖析>根因剖析</a></li><li><a href=#解决方案>解决方案</a></li></ol></li><li><a href=#3-踩坑与排障二进入桌面后画面卡死假死>3. 踩坑与排障（二）：进入桌面后画面卡死假死</a><ol><li><a href=#故障现象-1>故障现象</a></li><li><a href=#排查数据>排查数据</a></li><li><a href=#综合优化措施>综合优化措施</a></li></ol></li></ol></li><li><a href=#五进阶实践通过-krdp-接入-rocky-linux-102-kde-wayland>五、进阶实践：通过 KRDP 接入 Rocky Linux 10.2 (KDE Wayland)</a><ol><li><a href=#1-配置与激活-krdp-用户服务>1. 配置与激活 KRDP 用户服务</a></li><li><a href=#2-踩坑与排障一xdg-desktop-portal-注册失败app-id-命名不一致>2. 踩坑与排障（一）：XDG Desktop Portal 注册失败（App ID 命名不一致）</a><ol><li><a href=#故障现象-2>故障现象</a></li><li><a href=#根因剖析-1>根因剖析</a></li><li><a href=#解决方案-1>解决方案</a></li></ol></li><li><a href=#3-踩坑与排障二客户端-0x204-错误分层诊断>3. 踩坑与排障（二）：客户端 0x204 错误分层诊断</a><ol><li><a href=#关键检查点>关键检查点：</a></li></ol></li></ol></li><li><a href=#六体系化排障方法论与命令速查表>六、体系化排障方法论与命令速查表</a><ol><li><a href=#常用诊断命令速查>常用诊断命令速查</a></li></ol></li><li><a href=#总结与备忘清单>总结与备忘清单</a></li></ol></nav></details></aside><section class=article-content><h2 id=背景与网络拓扑>背景与网络拓扑</h2><p>在一台运行 <strong>Fedora 44 Server</strong> 的无显示器（Headless）高性能计算服务器上，机器同时接入了多套网络。其中，校园有线网需要通过 <strong>Dr.COM Web Portal</strong> 进行网页登录认证。由于服务器未安装默认图形界面，且存在多网卡出口路由竞争，无法直接弹窗认证。</p><p>为了实现认证和后续的图形化运维，先后尝试了 <strong>CLI 脚本模拟认证</strong>、<strong>SSH 动态隧道（SOCKS5）+ 本地浏览器</strong>、<strong>XFCE + xrdp 远程桌面</strong>，以及连接同网段另一台 <strong>Rocky Linux 10.2（KDE Plasma Wayland + KRDP）</strong> 主机。在这一过程中遇到了多默认路由屏蔽、ARP 故障、xrdp 闪退与画面假死、KRDP XDG Desktop Portal 注册失败等一系列典型问题。</p><h3 id=网络拓扑与接口分布>网络拓扑与接口分布</h3><p>整个排障环境的网络拓扑结构如下所示：</p><pre class=mermaid style=visibility:hidden>flowchart TB
+    subgraph Client ["本地管理端 (Mac / Windows)"]
+        MAC["MacBook<br>192.168.202.1 / 10.112.112.1"]
+    end
+
+    subgraph FedoraHost ["Fedora 44 Server (Headless 主机)"]
+        NIC1["enp171s0<br>192.168.202.2/24<br>(直连管理口)"]
+        NIC2["enp172s0<br>10.65.152.121/16<br>(校园有线，待 Portal 认证)"]
+        NIC3["wlp173s0<br>10.124.245.201/24<br>(已认证 WiFi, metric=50)"]
+        TUN_F["tun0<br>10.112.112.2/24<br>(科研专网隧道)"]
+    end
+
+    subgraph LabHost ["Rocky Linux 10.2 (实验室主机)"]
+        TUN_R["tun0<br>10.112.112.4/24<br>(KDE Plasma Wayland + KRDP)"]
+    end
+
+    subgraph CampusNet ["校园网络基础设施"]
+        GW["有线网关<br>10.65.0.1 (metric=102)"]
+        PORTAL["Dr.COM 认证服务器<br>10.1.116.8:80 / :801"]
+    end
+
+    MAC <-->|直连双绞线 / 管理流量| NIC1
+    NIC2 <--> GW
+    GW -. 拦截重定向 .-> PORTAL
+    TUN_F <===>|内网互联| TUN_R
+    MAC -.->|科研专网路由| TUN_R</pre><p>涉及的核心网络接口信息表：</p><div class=table-wrapper><table><thead><tr><th>主机节点</th><th>接口名称</th><th>IP / 掩码</th><th>作用说明</th></tr></thead><tbody><tr><td><strong>Fedora Server</strong></td><td><code>enp171s0</code></td><td><code>192.168.202.2/24</code></td><td>与 Mac 直连网口，提供稳健的带外 SSH 和 RDP 运维通道</td></tr><tr><td><strong>Fedora Server</strong></td><td><code>enp172s0</code></td><td><code>10.65.152.121/16</code></td><td>校园有线网（NetworkManager 连接名 <code>有线连接 1</code>），待认证</td></tr><tr><td><strong>Fedora Server</strong></td><td><code>wlp173s0</code></td><td><code>10.124.245.201/24</code></td><td>实验室备用 WiFi（连接名 <code>KEROLT</code>），已可连通外网</td></tr><tr><td><strong>Fedora Server</strong></td><td><code>tun0</code></td><td><code>10.112.112.2/24</code></td><td>实验室内部互联隧道</td></tr><tr><td><strong>Rocky Linux 10.2</strong></td><td><code>tun0</code></td><td><code>10.112.112.4/24</code></td><td>已运行 KDE Plasma Wayland 桌面及 KRDP 服务的计算节点</td></tr></tbody></table></div><h2 id=一现象排查有线网卡已获取-ip却无法访问互联网>一、现象排查：有线网卡已获取 IP，却无法访问互联网</h2><h3 id=1-现象观察>1. 现象观察</h3><p>通过 <code>nmcli</code> 查看，<code>enp172s0</code> 状态正常，且已通过 DHCP 成功获取到了 IP 地址与默认网关：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-text data-lang=text><span class=line><span class=cl>接口: enp172s0 (有线连接 1)
+</span></span><span class=line><span class=cl>IP 地址: 10.65.152.121/16
+</span></span><span class=line><span class=cl>默认网关: 10.65.0.1
+</span></span></code></pre></td></tr></table></div></div><p>但在强制绑定该接口访问公网时，外部网络完全不可达：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>ping -I enp172s0 223.5.5.5
+</span></span><span class=line><span class=cl><span class=c1># 结果: 100% packet loss</span>
+</span></span></code></pre></td></tr></table></div></div><h3 id=2-逐层排查证据>2. 逐层排查证据</h3><ul><li><strong>二层 / 三层连通性正常</strong>：能够稳定 ping 通上联汇聚交换机/默认网关，时延极低且无丢包：<div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>ping -I enp172s0 10.65.0.1
+</span></span><span class=line><span class=cl><span class=c1># 结果: 0% packet loss，rtt min/avg/max = 0.42/0.51/0.63 ms</span>
+</span></span></code></pre></td></tr></table></div></div></li><li><strong>公网 ICMP 流量被丢弃</strong>：外部 IPv4 地址（如公共 DNS <code>223.5.5.5</code>）100% 丢包。</li><li><strong>应用层 HTTP 探测暴露劫持与重定向</strong>：使用 <code>curl</code> 针对公网 IP 发起纯 HTTP 请求，捕获到了典型的 302 重定向报文：<div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>curl -I --interface enp172s0 http://223.5.5.5
+</span></span></code></pre></td></tr></table></div></div>返回如下响应头：<div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-http data-lang=http><span class=line><span class=cl><span class=kr>HTTP</span><span class=o>/</span><span class=m>1.0</span> <span class=m>302</span> <span class=ne>Moved Temporarily</span>
+</span></span><span class=line><span class=cl><span class=n>Server</span><span class=o>:</span> <span class=l>NetEngine Server 1.0</span>
+</span></span><span class=line><span class=cl><span class=n>Location</span><span class=o>:</span> <span class=l>http://10.1.116.8/a79.htm?zjnudrcom8905=ethtrunk/2:1077.0</span>
+</span></span></code></pre></td></tr></table></div></div>进一步获取重定向目标页面的响应，其 HTTP 响应头包含 <code>Server: DrcomServer1.0</code>，页面标题明确显示为 <code>上网登录页</code>。</li></ul><h3 id=3-根因剖析与多默认路由优先级陷阱>3. 根因剖析与多默认路由优先级陷阱</h3><p>物理链路、DHCP 协商及局域网通信均正常。校园网出口部署了 <strong>Dr.COM Web Portal 准入控制系统</strong>，未认证主机允许访问校园内网及 Portal 认证服务器，但所有外部公网流量均被网关拦截并重定向。</p><p>在排查初期，如果不加 <code>--interface enp172s0</code> 直接在终端执行 <code>curl http://www.baidu.com</code>，会发现能够正常访问互联网。检查系统路由表：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-text data-lang=text><span class=line><span class=cl>$ ip route show
+</span></span><span class=line><span class=cl>default via 10.124.245.141 dev wlp173s0 proto dhcp src 10.124.245.201 metric 50
+</span></span><span class=line><span class=cl>default via 10.65.0.1 dev enp172s0 proto dhcp src 10.65.152.121 metric 102
+</span></span></code></pre></td></tr></table></div></div><blockquote class="alert alert-important"><div class=alert-header><span class=alert-icon>📌</span>
+<span class=alert-title>重要</span></div><div class=alert-body><p><strong>多出口优先级陷阱</strong>：
+系统同时存在两条默认路由（<code>0.0.0.0/0</code>）。WiFi 接口（<code>wlp173s0</code>）的路由 metric 为 50，优先级高于有线网卡（<code>enp172s0</code>）的 102。因此未经指定出接口的普通应用流量默认通过 WiFi 出口访问外网，完全掩盖了有线网络尚未认证的事实。排查多网卡主机时，**必须显式指定出接口（<code>-I</code> 或 <code>--interface</code>）**才能观测到真实的接口状态。</p></div></blockquote><h2 id=二方案-a纯命令行自动化-drcom-认证>二、方案 A：纯命令行自动化 Dr.COM 认证</h2><p>对于长期运行的 Headless 服务器，最优雅的解决方案是编写无需图形界面的认证脚本，配合 systemd 或 crontab 实现开机与断线自动认证。</p><h3 id=1-认证接口逆向分析>1. 认证接口逆向分析</h3><p>查看 Portal 登录页源码及加载的 JavaScript 脚本，提取出关键参数：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-javascript data-lang=javascript><span class=line><span class=cl><span class=nx>authloginport</span> <span class=o>=</span> <span class=mi>801</span>
+</span></span><span class=line><span class=cl><span class=nx>authloginpath</span> <span class=o>=</span> <span class=s1>&#39;/eportal/?c=ACSetting&amp;a=Login&#39;</span>
+</span></span><span class=line><span class=cl><span class=nx>authuserfield</span> <span class=o>=</span> <span class=s1>&#39;DDDDD&#39;</span>
+</span></span><span class=line><span class=cl><span class=nx>authpassfield</span> <span class=o>=</span> <span class=s1>&#39;upass&#39;</span>
+</span></span></code></pre></td></tr></table></div></div><p>进一步确认底层支持 JSONP 方式提交登录请求，其服务端标准登录接口为：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-text data-lang=text><span class=line><span class=cl>http://10.1.116.8:801/eportal/?c=Portal&amp;a=Login
+</span></span></code></pre></td></tr></table></div></div><p>使用测试参数验证接口响应：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>curl -s <span class=s2>&#34;http://10.1.116.8:801/eportal/?c=Portal&amp;a=Login&amp;callback=dr1003&amp;login_method=1&amp;user_account=,0,testuser&amp;user_password=wrongpass&#34;</span>
+</span></span></code></pre></td></tr></table></div></div><p>服务端返回 JSONP 格式响应：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-json data-lang=json><span class=line><span class=cl><span class=err>dr</span><span class=mi>1003</span><span class=err>(</span><span class=p>{</span><span class=nt>&#34;result&#34;</span><span class=p>:</span> <span class=mi>0</span><span class=p>,</span> <span class=nt>&#34;msg&#34;</span><span class=p>:</span> <span class=s2>&#34;账号不存在&#34;</span><span class=p>,</span> <span class=nt>&#34;ret_code&#34;</span><span class=p>:</span> <span class=mi>1</span><span class=p>}</span><span class=err>)</span>
+</span></span></code></pre></td></tr></table></div></div><p>能够明确返回认证系统业务错误码，证明接口路径、方法及参数格式完全正确。参数中 <code>user_account=,0,${USER}</code> 为典型的运营商标识前缀（<code>,0,</code> 代表校园网默认出海线路）。</p><h3 id=2-自动化登录脚本实现>2. 自动化登录脚本实现</h3><p>为提高脚本通用性与安全性，账号密码通过环境变量注入，避免硬编码明文密码。</p><p>创建脚本 <code>~/.local/bin/drcom-auth.sh</code>：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span><span class=lnt>34
+</span><span class=lnt>35
+</span><span class=lnt>36
+</span><span class=lnt>37
+</span><span class=lnt>38
+</span><span class=lnt>39
+</span><span class=lnt>40
+</span><span class=lnt>41
+</span><span class=lnt>42
+</span><span class=lnt>43
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl><span class=cp>#!/usr/bin/env bash
+</span></span></span><span class=line><span class=cl><span class=c1># ==============================================================================</span>
+</span></span><span class=line><span class=cl><span class=c1># 脚本名称: drcom-auth.sh</span>
+</span></span><span class=line><span class=cl><span class=c1># 作用说明: 校园网 Dr.COM Portal 命令行自动化认证脚本</span>
+</span></span><span class=line><span class=cl><span class=c1># ==============================================================================</span>
+</span></span><span class=line><span class=cl><span class=nb>set</span> -euo pipefail
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=nv>IFACE</span><span class=o>=</span><span class=s2>&#34;</span><span class=si>${</span><span class=nv>DRCOM_IFACE</span><span class=k>:-</span><span class=nv>enp172s0</span><span class=si>}</span><span class=s2>&#34;</span>
+</span></span><span class=line><span class=cl><span class=nv>REALM</span><span class=o>=</span><span class=s2>&#34;</span><span class=si>${</span><span class=nv>DRCOM_REALM</span><span class=k>:-</span><span class=nv>10</span><span class=p>.1.116.8:</span><span class=nv>801</span><span class=si>}</span><span class=s2>&#34;</span>
+</span></span><span class=line><span class=cl><span class=nv>USER</span><span class=o>=</span><span class=s2>&#34;</span><span class=si>${</span><span class=nv>DRCOM_USER</span><span class=p>:?错误: 必须提供 DRCOM_USER 环境变量</span><span class=si>}</span><span class=s2>&#34;</span>
+</span></span><span class=line><span class=cl><span class=nv>PASS</span><span class=o>=</span><span class=s2>&#34;</span><span class=si>${</span><span class=nv>DRCOM_PASS</span><span class=p>:?错误: 必须提供 DRCOM_PASS 环境变量</span><span class=si>}</span><span class=s2>&#34;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># 1. 动态获取指定接口的当前 IPv4 地址</span>
+</span></span><span class=line><span class=cl><span class=nv>IP</span><span class=o>=</span><span class=k>$(</span>ip -4 -o addr show dev <span class=s2>&#34;</span><span class=nv>$IFACE</span><span class=s2>&#34;</span> <span class=p>|</span> awk <span class=s1>&#39;{print $4}&#39;</span> <span class=p>|</span> cut -d/ -f1 <span class=p>|</span> head -n1<span class=k>)</span>
+</span></span><span class=line><span class=cl><span class=k>if</span> <span class=o>[[</span> -z <span class=s2>&#34;</span><span class=nv>$IP</span><span class=s2>&#34;</span> <span class=o>]]</span><span class=p>;</span> <span class=k>then</span>
+</span></span><span class=line><span class=cl>  <span class=nb>echo</span> <span class=s2>&#34;[!] 错误: 接口 </span><span class=nv>$IFACE</span><span class=s2> 未获取到有效 IPv4 地址，请检查 DHCP 状态&#34;</span> &gt;<span class=p>&amp;</span><span class=m>2</span>
+</span></span><span class=line><span class=cl>  <span class=nb>exit</span> <span class=m>1</span>
+</span></span><span class=line><span class=cl><span class=k>fi</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=nb>echo</span> <span class=s2>&#34;[*] 正在通过接口 </span><span class=nv>$IFACE</span><span class=s2> (IP: </span><span class=nv>$IP</span><span class=s2>) 请求认证...&#34;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># 2. 发起 GET JSONP 登录请求</span>
+</span></span><span class=line><span class=cl><span class=nv>resp</span><span class=o>=</span><span class=k>$(</span>curl --interface <span class=s2>&#34;</span><span class=nv>$IFACE</span><span class=s2>&#34;</span> -sS -m <span class=m>15</span> -G <span class=se>\
+</span></span></span><span class=line><span class=cl>  <span class=s2>&#34;http://</span><span class=si>${</span><span class=nv>REALM</span><span class=si>}</span><span class=s2>/eportal/&#34;</span> <span class=se>\
+</span></span></span><span class=line><span class=cl>  --data-urlencode <span class=s2>&#34;c=Portal&#34;</span> <span class=se>\
+</span></span></span><span class=line><span class=cl>  --data-urlencode <span class=s2>&#34;a=Login&#34;</span> <span class=se>\
+</span></span></span><span class=line><span class=cl>  --data-urlencode <span class=s2>&#34;callback=dr1003&#34;</span> <span class=se>\
+</span></span></span><span class=line><span class=cl>  --data-urlencode <span class=s2>&#34;login_method=1&#34;</span> <span class=se>\
+</span></span></span><span class=line><span class=cl>  --data-urlencode <span class=s2>&#34;user_account=,0,</span><span class=si>${</span><span class=nv>USER</span><span class=si>}</span><span class=s2>&#34;</span> <span class=se>\
+</span></span></span><span class=line><span class=cl>  --data-urlencode <span class=s2>&#34;user_password=</span><span class=si>${</span><span class=nv>PASS</span><span class=si>}</span><span class=s2>&#34;</span> <span class=se>\
+</span></span></span><span class=line><span class=cl>  --data-urlencode <span class=s2>&#34;wlan_user_ip=</span><span class=si>${</span><span class=nv>IP</span><span class=si>}</span><span class=s2>&#34;</span> <span class=se>\
+</span></span></span><span class=line><span class=cl>  --data-urlencode <span class=s2>&#34;wlan_user_ipv6=&#34;</span> <span class=se>\
+</span></span></span><span class=line><span class=cl>  --data-urlencode <span class=s2>&#34;wlan_user_mac=000000000000&#34;</span> <span class=se>\
+</span></span></span><span class=line><span class=cl>  --data-urlencode <span class=s2>&#34;wlan_ac_ip=&#34;</span> <span class=se>\
+</span></span></span><span class=line><span class=cl>  --data-urlencode <span class=s2>&#34;wlan_ac_name=&#34;</span><span class=k>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># 3. 结果判断</span>
+</span></span><span class=line><span class=cl><span class=k>if</span> grep -q <span class=s1>&#39;&#34;result&#34;:1&#39;</span> <span class=o>&lt;&lt;&lt;</span> <span class=s2>&#34;</span><span class=nv>$resp</span><span class=s2>&#34;</span><span class=p>;</span> <span class=k>then</span>
+</span></span><span class=line><span class=cl>  <span class=nb>echo</span> <span class=s2>&#34;[+] 认证成功！服务器响应: </span><span class=nv>$resp</span><span class=s2>&#34;</span>
+</span></span><span class=line><span class=cl><span class=k>else</span>
+</span></span><span class=line><span class=cl>  <span class=nb>echo</span> <span class=s2>&#34;[-] 认证失败！服务器响应: </span><span class=nv>$resp</span><span class=s2>&#34;</span> &gt;<span class=p>&amp;</span><span class=m>2</span>
+</span></span><span class=line><span class=cl>  <span class=nb>exit</span> <span class=m>2</span>
+</span></span><span class=line><span class=cl><span class=k>fi</span>
+</span></span></code></pre></td></tr></table></div></div><p>赋予执行权限并测试运行：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>chmod <span class=m>700</span> ~/.local/bin/drcom-auth.sh
+</span></span><span class=line><span class=cl><span class=nv>DRCOM_USER</span><span class=o>=</span><span class=s2>&#34;my_student_id&#34;</span> <span class=nv>DRCOM_PASS</span><span class=o>=</span><span class=s2>&#34;my_password&#34;</span> ~/.local/bin/drcom-auth.sh
+</span></span></code></pre></td></tr></table></div></div><blockquote class="alert alert-tip"><div class=alert-header><span class=alert-icon>💡</span>
+<span class=alert-title>提示</span></div><div class=alert-body><p>建议将脚本存放在 <code>~/.local/bin</code> 或 <code>/usr/local/bin</code> 等持久目录。避免放置在 <code>/tmp</code> 下，防止系统定时清理（如 <code>systemd-tmpfiles-clean</code>）或机器重启后丢失。</p></div></blockquote><hr><h2 id=三方案-bssh-tunnel--本地浏览器转发>三、方案 B：SSH Tunnel + 本地浏览器转发</h2><p>在某些特殊场景下（例如 Portal 临时启用了滑动验证码、短信二次验证或复杂的动态前端安全检测），纯命令行脚本无法处理交互式验证，此时需要借助客户端浏览器呈现认证页面。</p><h3 id=1-动态端口转发socks5>1. 动态端口转发（SOCKS5）</h3><p>在本地 Mac 终端执行：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl><span class=c1># 建立后台动态 SOCKS5 代理隧道</span>
+</span></span><span class=line><span class=cl>ssh -D <span class=m>21219</span> -N -C kerolt@192.168.202.2
+</span></span></code></pre></td></tr></table></div></div><p>配置本地浏览器代理（建议使用独立浏览器 Profile 或 SwitchyOmega 插件）：</p><ul><li><strong>代理协议</strong>：SOCKS5</li><li><strong>代理服务器</strong>：<code>127.0.0.1</code></li><li><strong>端口</strong>：<code>21219</code></li></ul><blockquote class="alert alert-note"><div class=alert-header><span class=alert-icon>📝</span>
+<span class=alert-title>备注</span></div><div class=alert-body><p>SOCKS5 代理客户端设置的端口必须与 SSH 命令 <code>-D</code> 参数指定的本地监听端口（如 <code>21219</code>）保持严格一致，避免端口不匹配导致连接被拒。</p></div></blockquote><h3 id=2-多网卡环境下的流量出口陷阱与对策>2. 多网卡环境下的流量出口陷阱与对策</h3><p>在 SOCKS5 隧道中，连接是由远程 Linux 主机发起的。根据前文分析的 Linux 路由规则，由于 WiFi 的 metric 优先级高于有线网卡，SOCKS5 转发的流量仍然会从 WiFi 接口流出，从而无法触发有线网卡的 Portal 页面。</p><p><strong>快速应对策略</strong>：临时断开 WiFi 连接。</p><p>由于 Mac 是通过直连网卡（<code>192.168.202.0/24</code>）与服务器建立 SSH 会话的，关闭 WiFi 并不会中断当前的 SSH 隧道：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl><span class=c1># 临时关闭 WiFi，使有线网卡成为唯一默认出口</span>
+</span></span><span class=line><span class=cl>sudo nmcli connection down KEROLT
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># 在 Mac 浏览器中访问任意 HTTP 网站（如 http://neverssl.com），完成 Portal 认证</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># 认证完成后重新激活 WiFi</span>
+</span></span><span class=line><span class=cl>sudo nmcli connection up KEROLT
+</span></span></code></pre></td></tr></table></div></div><p><em>(进阶方案：亦可配置基于 UID 的 <code>ip rule</code> 策略路由，将特定用户发起的流量固定导向 <code>enp172s0</code>，但单次运维中临时 down 掉 WiFi 效率最高。)</em></p><h3 id=3-踩坑复盘静态端口转发为何报-channel-4-open-failed>3. 踩坑复盘：静态端口转发为何报 <code>channel 4: open failed</code>？</h3><p>在排查过程中，曾尝试通过静态端口转发将认证服务器直接映射到本地：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>ssh -N <span class=se>\
+</span></span></span><span class=line><span class=cl>  -L 18080:10.1.116.8:80 <span class=se>\
+</span></span></span><span class=line><span class=cl>  -L 18010:10.1.116.8:801 <span class=se>\
+</span></span></span><span class=line><span class=cl>  kerolt@192.168.202.2
+</span></span></code></pre></td></tr></table></div></div><p>随后在本地浏览器访问 <code>http://127.0.0.1:18080</code> 时，SSH 终端频繁输出如下报错：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-text data-lang=text><span class=line><span class=cl>channel 4: open failed: connect failed: open failed
+</span></span></code></pre></td></tr></table></div></div><p>很多工程师遇到这个错误容易误判为 SSH 权限或配置问题。在服务器端查看邻居解析状态暴露了真相：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>ip neigh show dev enp172s0
+</span></span><span class=line><span class=cl><span class=c1># 输出: 10.1.116.8 dev enp172s0 FAILED</span>
+</span></span></code></pre></td></tr></table></div></div><blockquote class="alert alert-warning"><div class=alert-header><span class=alert-icon>⚠️</span>
+<span class=alert-title>警告</span></div><div class=alert-body><p><strong>排查经验</strong>：
+<code>channel open failed: connect failed</code> 表明 <strong>Mac 到服务器的 SSH 隧道完全通畅，但服务器向目标转发地址发起 TCP 三次握手失败</strong>。
+当时认证服务器 <code>10.1.116.8</code> 自身的 ARP 处于 FAILED 状态，导致 80 与 801 端口在网络层根本不可达。这属于校园网认证系统服务端的暂时性故障。SSH 隧道无法绕过上游服务端本身的网络宕机。</p></div></blockquote><h2 id=四方案-cfedora-server-部署-xfce--xrdp-远程桌面>四、方案 C：Fedora Server 部署 XFCE + xrdp 远程桌面</h2><p>如果日常维护需要常驻图形交互环境（例如浏览网页图形控制台、观察 GPU 仪表盘或应对复杂的交互式验证），在 Headless 服务器上安装轻量级桌面环境 + xrdp 是兼顾资源消耗与易用性的方案。</p><h3 id=1-安装与网络隔离>1. 安装与网络隔离</h3><p>安装轻量级 XFCE 桌面环境与 xrdp 服务：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>sudo dnf group install -y xfce-desktop
+</span></span><span class=line><span class=cl>sudo dnf install -y xrdp xorgxrdp xrdp-selinux dbus-x11 firefox
+</span></span><span class=line><span class=cl>sudo systemctl <span class=nb>enable</span> --now xrdp
+</span></span></code></pre></td></tr></table></div></div><blockquote class="alert alert-note"><div class=alert-header><span class=alert-icon>📝</span>
+<span class=alert-title>备注</span></div><div class=alert-body><p>服务器<strong>不需要</strong>将系统默认目标切换为 <code>graphical.target</code>，继续维持无头服务器的标准 <code>multi-user.target</code> 运行即可。xrdp 的 sesman 组件会在用户通过 RDP 发起连接时，按需动态拉起独立的虚拟 Xorg 会话，无连接时不占用额外 GPU/渲染资源。</p></div></blockquote><p><strong>防火墙最小权限放行</strong>：
+为防止将 RDP 暴露在开放的校园网环境中，只允许 Mac 直连管理网段访问 3389 端口：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>sudo firewall-cmd --permanent --zone<span class=o>=</span>FedoraServer <span class=se>\
+</span></span></span><span class=line><span class=cl>  --add-rich-rule<span class=o>=</span><span class=s1>&#39;rule family=&#34;ipv4&#34; source address=&#34;192.168.202.0/24&#34; port port=&#34;3389&#34; protocol=&#34;tcp&#34; accept&#39;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>sudo firewall-cmd --reload
+</span></span></code></pre></td></tr></table></div></div><hr><h3 id=2-踩坑与排障一登录认证成功后瞬间闪退>2. 踩坑与排障（一）：登录认证成功后瞬间闪退</h3><h4 id=故障现象>故障现象</h4><p>在 Mac 端使用 Windows App（原 Microsoft Remote Desktop 客户端）连接服务器，输入用户名和密码验证通过后，远程桌面窗口一闪黑屏，随后立即自动关闭断开。</p><h4 id=日志溯源>日志溯源</h4><p>查看 xrdp 与 sesman 服务的运行时日志：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>journalctl -u xrdp -u xrdp-sesman --since <span class=s2>&#34;-5 min&#34;</span>
+</span></span></code></pre></td></tr></table></div></div><p>日志中出现以下典型会话终结记录：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-text data-lang=text><span class=line><span class=cl>login was successful - creating session
+</span></span><span class=line><span class=cl>connected to Xorg
+</span></span><span class=line><span class=cl>Xorg server closed connection
+</span></span><span class=line><span class=cl>Session on display 10 has finished
+</span></span></code></pre></td></tr></table></div></div><h4 id=根因剖析>根因剖析</h4><p>在 Fedora 系统中，用户主目录下若不存在 <code>~/.Xclients</code>，xrdp 会回退调用系统全局的 <code>/etc/X11/xinit/Xclients</code>。由于系统中未安装默认的 GNOME 桌面环境，该全局脚本无法自动探知并拉起 XFCE，窗口管理器启动指令执行完毕后立即退出，导致 Xorg 服务端判定会话结束而直接关闭连接。</p><h4 id=解决方案>解决方案</h4><p>在用户主目录下显式创建 <code>~/.Xclients</code> 启动脚本，通过 <code>dbus-launch</code> 启动 XFCE 会话，并务必刷新 SELinux 安全标签：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>cat &gt; ~/.Xclients <span class=s>&lt;&lt;&#39;EOF&#39;
+</span></span></span><span class=line><span class=cl><span class=s>#!/bin/sh
+</span></span></span><span class=line><span class=cl><span class=s>export XDG_SESSION_TYPE=x11
+</span></span></span><span class=line><span class=cl><span class=s>unset DBUS_SESSION_BUS_ADDRESS
+</span></span></span><span class=line><span class=cl><span class=s>exec dbus-launch --exit-with-session startxfce4
+</span></span></span><span class=line><span class=cl><span class=s>EOF</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>chmod <span class=m>700</span> ~/.Xclients
+</span></span><span class=line><span class=cl><span class=c1># 恢复文件 SELinux 上下文，避免被安全策略拦截执行</span>
+</span></span><span class=line><span class=cl>restorecon -v ~/.Xclients
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>sudo systemctl restart xrdp
+</span></span></code></pre></td></tr></table></div></div><hr><h3 id=3-踩坑与排障二进入桌面后画面卡死假死>3. 踩坑与排障（二）：进入桌面后画面卡死假死</h3><h4 id=故障现象-1>故障现象</h4><p>成功登录进入 XFCE 桌面，打开终端或 Firefox 运行几秒钟后，鼠标移动无响应，整个桌面画面彻底冻结。</p><h4 id=排查数据>排查数据</h4><p>在直连 SSH 终端中实时排查系统资源与连接状态：</p><ul><li>节点负载极低：<code>load average: 0.80, 0.48, 0.32</code>；</li><li>可用内存充裕（剩余 ~21 GiB）；</li><li><code>xfce4-session</code>、<code>Xorg</code>、<code>xfwm4</code> 及 <code>firefox</code> 进程均处于正常睡眠（S）状态，并无崩溃或死锁；</li><li>RDP 协议的 TCP 3389 连接处于稳定的 <code>ESTABLISHED</code> 状态。</li></ul><p>进一步排查 <code>/var/log/xrdp.log</code> 与图形日志，发现核心症结在于：</p><ol><li><strong>动态分辨率频繁重协商</strong>：Mac 客户端在窗口模式下拖动边缘改变大小时，频繁向 xrdp 发送动态分辨率重置请求，导致 xrdp 持续高频重建 OpenH264 编码管道，造成协议处理管道阻塞；</li><li><strong>窗口合成器冲突</strong>：XFCE 默认的 <code>xfwm4</code> 合成器（Compositor）在虚拟帧缓冲区中处理半透明与阴影特效时发生图形同步阻塞。</li></ol><h4 id=综合优化措施>综合优化措施</h4><ol><li><strong>禁用 XFCE 窗口合成器</strong>：
+在终端下执行命令，关闭当前 X 屏幕下的合成器功能：<div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl><span class=nv>DISPLAY</span><span class=o>=</span>:10.0 <span class=nv>XAUTHORITY</span><span class=o>=</span><span class=s2>&#34;</span><span class=nv>$HOME</span><span class=s2>/.Xauthority&#34;</span> <span class=se>\
+</span></span></span><span class=line><span class=cl>  xfconf-query -c xfwm4 -p /general/use_compositing -s <span class=nb>false</span>
+</span></span></code></pre></td></tr></table></div></div></li><li><strong>客户端锁定固定分辨率</strong>：
+在 Mac 客户端连接设置中，将显示分辨率固定为如 <code>1920x1080</code>，并<strong>取消勾选</strong>“自动根据窗口大小调整远程分辨率（Update the session resolution on resize）”。</li><li><strong>回退 xrdp 编解码器为稳健的 RFX</strong>：
+OpenH264 硬件/软件加速在某些客户端上容易引发通道协商挂起。编辑 <code>/etc/xrdp/gfx.toml</code>，将编解码器回退为纯 RemoteFX（RFX）：<div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-toml data-lang=toml><span class=line><span class=cl><span class=p>[</span><span class=nx>codec</span><span class=p>]</span>
+</span></span><span class=line><span class=cl><span class=nx>order</span> <span class=p>=</span> <span class=p>[</span> <span class=s2>&#34;RFX&#34;</span> <span class=p>]</span>
+</span></span></code></pre></td></tr></table></div></div>重启服务生效：<div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>sudo systemctl restart xrdp
+</span></span></code></pre></td></tr></table></div></div></li></ol><blockquote class="alert alert-tip"><div class=alert-header><span class=alert-icon>💡</span>
+<span class=alert-title>提示</span></div><div class=alert-body><p><strong>会话生命周期管理</strong>：
+直接点击客户端窗口的关闭按钮，仅代表断开当前 RDP 传输层连接，后台的 Xorg、XFCE 和 Firefox 等应用会保持原样继续驻留运行，下次重连时会直接恢复现有桌面。如果任务结束希望释放服务器内存，应在 XFCE 界面右上角点击 <strong>Log Out（注销）</strong> 正常终止会话。</p></div></blockquote><h2 id=五进阶实践通过-krdp-接入-rocky-linux-102-kde-wayland>五、进阶实践：通过 KRDP 接入 Rocky Linux 10.2 (KDE Wayland)</h2><p>在另一台处于科研专网隧道（<code>10.112.112.4</code>）的实验室计算节点上，系统为 <strong>Rocky Linux 10.2</strong>，且物理机前台正在运行 <strong>KDE Plasma 6 (Wayland)</strong> 桌面。</p><p>对于 Wayland 显示服务架构，传统的 X11 xrdp 方案无法直接捕获 Wayland 合成器画面。KDE 官方自 Plasma 6 起深度集成了 <strong>KRDP</strong>（基于 FreeRDP 实现的 Wayland 原生远程桌面组件），能够直接共享当前活动的 Plasma 桌面会话。</p><h3 id=1-配置与激活-krdp-用户服务>1. 配置与激活 KRDP 用户服务</h3><p>KRDP 作为 systemd 用户级服务（User Service）运行，依赖 D-Bus 会话总线。需为其配置自签名 TLS 证书并启用系统用户认证：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl><span class=c1># 1. 授予 Wayland 远程桌面 Portal 权限</span>
+</span></span><span class=line><span class=cl>flatpak permission-set kde-authorized remote-desktop org.kde.krdpserver yes
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># 2. 生成自签名证书与私钥</span>
+</span></span><span class=line><span class=cl>install -d -m <span class=m>700</span> ~/.local/share/krdpserver
+</span></span><span class=line><span class=cl>openssl req -nodes -new -x509 <span class=se>\
+</span></span></span><span class=line><span class=cl>  -keyout ~/.local/share/krdpserver/krdp.key <span class=se>\
+</span></span></span><span class=line><span class=cl>  -out ~/.local/share/krdpserver/krdp.crt <span class=se>\
+</span></span></span><span class=line><span class=cl>  -days <span class=m>3650</span> -batch <span class=se>\
+</span></span></span><span class=line><span class=cl>  -subj <span class=s2>&#34;/CN=10.112.112.4&#34;</span>
+</span></span><span class=line><span class=cl>chmod <span class=m>600</span> ~/.local/share/krdpserver/krdp.key
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># 3. 写入 KRDP 配置文件</span>
+</span></span><span class=line><span class=cl>kwriteconfig6 --file krdpserverrc --group General <span class=se>\
+</span></span></span><span class=line><span class=cl>  --key Certificate <span class=s2>&#34;</span><span class=nv>$HOME</span><span class=s2>/.local/share/krdpserver/krdp.crt&#34;</span>
+</span></span><span class=line><span class=cl>kwriteconfig6 --file krdpserverrc --group General <span class=se>\
+</span></span></span><span class=line><span class=cl>  --key CertificateKey <span class=s2>&#34;</span><span class=nv>$HOME</span><span class=s2>/.local/share/krdpserver/krdp.key&#34;</span>
+</span></span><span class=line><span class=cl>kwriteconfig6 --file krdpserverrc --group General <span class=se>\
+</span></span></span><span class=line><span class=cl>  --key SystemUserEnabled <span class=nb>true</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># 4. 启动并启用 KRDP 用户服务</span>
+</span></span><span class=line><span class=cl>systemctl --user <span class=nb>enable</span> --now app-org.kde.krdpserver.service
+</span></span></code></pre></td></tr></table></div></div><hr><h3 id=2-踩坑与排障一xdg-desktop-portal-注册失败app-id-命名不一致>2. 踩坑与排障（一）：XDG Desktop Portal 注册失败（App ID 命名不一致）</h3><h4 id=故障现象-2>故障现象</h4><p>KRDP 服务启动后立即进入异常退出状态，用户日志中反复输出如下报错：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-text data-lang=text><span class=line><span class=cl>Failed to register with host portal
+</span></span><span class=line><span class=cl>App info not found for &#39;org.kde.krdp-server&#39;
+</span></span></code></pre></td></tr></table></div></div><h4 id=根因剖析-1>根因剖析</h4><p>在系统 RPM 软件包中，安装的 Desktop 入口文件名为：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-text data-lang=text><span class=line><span class=cl>/usr/share/applications/org.kde.krdpserver.desktop
+</span></span></code></pre></td></tr></table></div></div><p>但 KRDP 内部向 <code>xdg-desktop-portal</code> 请求远程桌面会话句柄时，所传递的 App ID 字符串为 <code>org.kde.krdp-server</code>（中间多了一个连字符 <code>-</code>）。Portal 无法在应用列表中匹配到该 App ID 的 desktop 文件，从而拒绝了注册请求。</p><h4 id=解决方案-1>解决方案</h4><p>在用户级应用目录中创建别名 desktop 文件，并为该 App ID 单独授予权限：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>mkdir -p ~/.local/share/applications
+</span></span><span class=line><span class=cl>cp /usr/share/applications/org.kde.krdpserver.desktop <span class=se>\
+</span></span></span><span class=line><span class=cl>  ~/.local/share/applications/org.kde.krdp-server.desktop
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># 显式授予新 ID 远程桌面权限</span>
+</span></span><span class=line><span class=cl>flatpak permission-set kde-authorized remote-desktop org.kde.krdp-server yes
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># 依次重启 Portal 相关服务与 KRDP</span>
+</span></span><span class=line><span class=cl>systemctl --user restart xdg-desktop-portal.service
+</span></span><span class=line><span class=cl>systemctl --user restart plasma-xdg-desktop-portal-kde.service
+</span></span><span class=line><span class=cl>systemctl --user restart app-org.kde.krdpserver.service
+</span></span></code></pre></td></tr></table></div></div><hr><h3 id=3-踩坑与排障二客户端-0x204-错误分层诊断>3. 踩坑与排障（二）：客户端 0x204 错误分层诊断</h3><p>在 Mac 客户端连接 <code>10.112.112.4:3389</code> 时，客户端经常报出笼统的 <code>0x204</code> 错误代码（通常代表连接超时或协议握手失败）。建议严格按照以下流程逐步定位：</p><pre class=mermaid style=visibility:hidden>flowchart TD
+    A["客户端报 0x204 错误"] --> B{"1. 四层端口连通性验证<br>nc -vz 10.112.112.4 3389"}
+    B -- Connection refused / Timeout --> C["网络/安全层阻断<br>- 检查防火墙真实来源 IP<br>- 检查隧道路由状态<br>- 确认 KRDP 服务正在 LISTEN"]
+    B -- Succeeded --> D{"2. 协议与会话追查<br>查看目标机 journalctl"}
+    D -- 报错: Portal 鉴权失败 --> E["修复 XDG Portal 授权<br>或使用 FreeRDP 客户端交叉验证"]
+    D -- 无连接日志 / SDDM 未登录 --> F["物理机处于 SDDM 锁屏态<br>KRDP 必须在 Wayland 会话登录后才能连接"]</pre><h4 id=关键检查点>关键检查点：</h4><ol><li><p><strong>四层连通性与监听确认</strong>：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl><span class=c1># 在 Mac 端直接探测目标端口</span>
+</span></span><span class=line><span class=cl>nc -vz 10.112.112.4 <span class=m>3389</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># 若通过 SSH 端口转发（如本地映射为 13389）：</span>
+</span></span><span class=line><span class=cl>lsof -nP -iTCP:13389 -sTCP:LISTEN
+</span></span><span class=line><span class=cl>nc -vz 127.0.0.1 <span class=m>13389</span>
+</span></span></code></pre></td></tr></table></div></div></li><li><p><strong>防火墙真实来源 IP 校验</strong>：
+目标机防火墙必须放行真实的报文来源 IP。如果 Mac 拥有隧道直达路由，源 IP 为 <code>10.112.112.1</code>；如果经过 Fedora Server 跳板转发，目标机看到的源 IP 则为 Fedora 的 <code>10.112.112.2</code>：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl><span class=c1># 以 Mac 直连隧道 IP 为例：</span>
+</span></span><span class=line><span class=cl>sudo firewall-cmd --permanent --zone<span class=o>=</span>public <span class=se>\
+</span></span></span><span class=line><span class=cl>  --add-rich-rule<span class=o>=</span><span class=s1>&#39;rule family=&#34;ipv4&#34; source address=&#34;10.112.112.1/32&#34; port port=&#34;3389&#34; protocol=&#34;tcp&#34; accept&#39;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>sudo firewall-cmd --reload
+</span></span></code></pre></td></tr></table></div></div></li></ol><blockquote class="alert alert-important"><div class=alert-header><span class=alert-icon>📌</span>
+<span class=alert-title>重要</span></div><div class=alert-body><p><strong>KRDP 的核心设计限制</strong>：
+KRDP 本质上是<strong>现有活跃桌面的屏幕共享器（Screen Sharer）</strong>，而不是独立的会话创建器。它<strong>无法像 xrdp 那样在后台按需创建独立的 X/Wayland 虚拟桌面，也无法在锁屏界面 SDDM 阶段进行远程认证</strong>。
+主机重启后如果停留在 SDDM 显示管理器登录界面，KRDP 用户服务将无法启动。必须在物理机本地登录一次进入桌面，或者在 SDDM 中配置自动登录（需结合物理环境安全风险综合评估）。</p></div></blockquote><hr><h2 id=六体系化排障方法论与命令速查表>六、体系化排障方法论与命令速查表</h2><p>在面对 Linux 多网卡路由竞争、Web Portal 准入重定向以及跨架构远程桌面（X11 vs Wayland）的复合故障时，建议遵循<strong>自底向上（Bottom-Up）的分层诊断法</strong>：</p><div class=table-wrapper><table><thead><tr><th>诊断层级</th><th>验证重点</th><th>典型故障特征</th><th>核心排查命令</th></tr></thead><tbody><tr><td><strong>L1/L2 物理与链路层</strong></td><td>网线、PHY 状态、协商速率、ARP 解析</td><td>物理断开、ARP 状态为 FAILED</td><td><code>ip link show</code><br><code>ethtool &lt;接口></code><br><code>ip neigh show</code></td></tr><tr><td><strong>L3 网络与路由层</strong></td><td>IP 掩码正确性、多默认路由 metric 权重、源地址路由</td><td>流量从次级网卡流出、无法 ping 通网关</td><td><code>ip -4 addr show</code><br><code>ip route show</code><br><code>ip route get &lt;目标IP></code></td></tr><tr><td><strong>L4 传输与安全层</strong></td><td>TCP 监听端口、iptables/firewalld 规则、NAT 源地址</td><td>端口未监听、SYN 报文被防火墙 DROP</td><td><code>ss -lntp</code><br><code>nc -vz &lt;目标IP> &lt;端口></code><br><code>firewall-cmd --list-all</code></td></tr><tr><td><strong>L7 准入与认证层</strong></td><td>HTTP 302 重定向、Portal 状态码、JSONP 响应</td><td>外网流量被拦截、Portal 脚本报错</td><td><code>curl -I -v --interface &lt;接口> http://neverssl.com</code></td></tr><tr><td><strong>桌面与应用会话层</strong></td><td>Xorg/Wayland 生命周期、D-Bus、SELinux、合成器</td><td>RDP 登录后闪退、画面卡顿冻结、XDG 授权失败</td><td><code>journalctl -u xrdp -u xrdp-sesman -e</code><br><code>systemctl --user status app-org.kde.krdpserver</code></td></tr></tbody></table></div><h3 id=常用诊断命令速查>常用诊断命令速查</h3><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl><span class=c1># 1. 快速检查多网卡连接状态与路由</span>
+</span></span><span class=line><span class=cl>nmcli device status
+</span></span><span class=line><span class=cl>ip route show
+</span></span><span class=line><span class=cl>ip route get 223.5.5.5
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># 2. 绑定特定接口测试网关与外网连通性</span>
+</span></span><span class=line><span class=cl>ping -I enp172s0 10.65.0.1
+</span></span><span class=line><span class=cl>curl -I --interface enp172s0 http://223.5.5.5
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># 3. 端口连通性探测与监听确认</span>
+</span></span><span class=line><span class=cl>nc -vz 10.112.112.4 <span class=m>3389</span>
+</span></span><span class=line><span class=cl>ss -lntp <span class=p>|</span> grep -E <span class=s1>&#39;3389|801&#39;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># 4. 远程桌面核心日志追查</span>
+</span></span><span class=line><span class=cl>journalctl -u xrdp -u xrdp-sesman --since <span class=s2>&#34;-10 min&#34;</span>
+</span></span><span class=line><span class=cl>journalctl --user -u app-org.kde.krdpserver.service --since <span class=s2>&#34;-10 min&#34;</span>
+</span></span></code></pre></td></tr></table></div></div><hr><h2 id=总结与备忘清单>总结与备忘清单</h2><p>通过本次排障与调优，我们打通了多网卡 Headless 主机在校园网复杂准入环境下的完整访问链路：</p><ul><li><input checked disabled type=checkbox> <strong>有线网络连通性</strong>：确认物理与 DHCP 链路正常，根因为 Dr.COM Portal 拦截；理清了 WiFi 与有线网卡的多默认路由优先级陷阱。</li><li><input checked disabled type=checkbox> <strong>自动化认证</strong>：完成了命令行逆向与 JSONP 脚本化封装（<code>drcom-auth.sh</code>），支持环境变量传参，可随时接入定时保活。</li><li><input checked disabled type=checkbox> <strong>SSH 代理旁路</strong>：明确了 SOCKS5 代理受系统路由表支配的特点，掌握了多出口主机的临时断网认证策略，溯源了静态端口转发时上游 ARP FAILED 故障。</li><li><input checked disabled type=checkbox> <strong>xrdp 稳定运行</strong>：通过配置 <code>~/.Xclients</code> 修复了缺少窗口管理器的闪退问题；通过禁用 xfwm4 合成器、锁定客户端分辨率与切换 RFX 编解码器，彻底根治了画面假死。</li><li><input checked disabled type=checkbox> <strong>KRDP 机制摸底</strong>：定位并修复了 Wayland 环境下 <code>org.kde.krdp-server</code> XDG Desktop Portal App ID 不匹配的缺陷；明确了其屏幕共享属性及依赖已登录桌面会话的运行边界。</li></ul></section><footer class="article-meta article-footer"><section class=article-tags><a href=/tags/portal/>Portal</a>
+<a href=/tags/dr.com/>Dr.COM</a>
+<a href=/tags/xrdp/>XRDP</a>
+<a href=/tags/krdp/>KRDP</a>
+<a href=/tags/ssh-tunnel/>SSH Tunnel</a>
+<a href=/tags/%E8%BF%9C%E7%A8%8B%E6%A1%8C%E9%9D%A2/>远程桌面</a></section><section class="article-copyright inline-meta"><svg class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><path d="M14.5 9a3.5 4 0 100 6"/></svg>
+<span>Licensed under CC BY-NC-SA 4.0</span></section></footer></article><footer class=site-footer><section class=copyright>&copy;
+2025 -
+2026 Kerolt's Note</section><section class=powerby>使用 <a href=https://gohugo.io/ target=_blank rel=noopener>Hugo</a> 构建<br>主题 <b><a href=https://github.com/CaiJimmy/hugo-theme-stack target=_blank rel=noopener data-version=4.0.3>Stack</a></b> 由 <a href=https://jimmycai.com target=_blank rel=noopener>Jimmy</a> 设计</section></footer><script type=module>
+    import gallery from '\/ts\/gallery.js';
+
+    const articleContent = document.querySelector('.article-content');
+    const shouldLoad = articleContent && (articleContent.querySelectorAll('figure').length > 0 || articleContent.querySelectorAll('img.gallery-image').length > 0);
+    
+    if (shouldLoad) {
+        gallery(articleContent);
+
+        const PhotoSwipeLightbox = (await import("https:\/\/cdn.jsdelivr.net\/npm\/photoswipe@5.4.4\/dist\/photoswipe-lightbox.esm.min.js")).default;
+        const styleHref = "https:\/\/cdn.jsdelivr.net\/npm\/photoswipe@5.4.4\/dist\/photoswipe.css";
+
+        const styleTag = document.createElement('link');
+        styleTag.rel = 'stylesheet';
+        styleTag.href = styleHref;
+        document.head.appendChild(styleTag);
+
+        const lightbox = new PhotoSwipeLightbox({
+            gallerySelector: '.article-content',
+            childSelector: 'figure a.image-link',
+            pswpModule: () => import("https:\/\/cdn.jsdelivr.net\/npm\/photoswipe@5.4.4\/dist\/photoswipe.esm.min.js")
+        });
+        lightbox.init();
+    }
+</script><div class=mermaid-modal id=mermaid-modal><div class=mermaid-modal-header><div class=mermaid-modal-controls><button data-zoom=-1>− Zoom Out</button>
+<button data-zoom=0>Reset (100%)</button>
+<button data-zoom=1>+ Zoom In</button>
+<button data-zoom=fit>Fit to Screen</button></div><button class=mermaid-modal-close id=mermaid-modal-close>✕ Close (Esc)</button></div><div class=mermaid-modal-body id=mermaid-modal-body><div class=mermaid-modal-content id=mermaid-modal-content></div></div></div><script src=https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js></script><script type=module>
+import { initMermaidPage } from '\/ts\/mermaid.js';
+initMermaidPage({"darkTheme":"dark","darkThemeVariables":{},"htmlLabels":true,"lightTheme":"default","lightThemeVariables":{},"look":"classic","securityLevel":"strict","transparentBackground":false});
+</script></main></div><script type=text/javascript src=/ts/main.f856840516f7c2ad1769a8f5937e3d08d6cb386e2cd2dd025ae696e0ff207958.js defer></script></body></html>
