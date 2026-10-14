@@ -1,0 +1,3 @@
+User-agent: *
+Disallow:
+Sitemap: https://kerolt.github.io/sitemap.xml
