@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Zentui on Kerolt's Note</title><link>https://kerolt.github.io/tags/zentui/</link><description>Recent content in Zentui on Kerolt's Note</description><generator>Hugo</generator><language>zh-cn</language><lastBuildDate>Mon, 17 Aug 2026 00:00:00 +0000</lastBuildDate><atom:link href="https://kerolt.github.io/tags/zentui/index.xml" rel="self" type="application/rss+xml"/><item><title>Pi Agent 权限模式与 Thinking Effort 自定义</title><link>https://kerolt.github.io/p/pi-agent-%E6%9D%83%E9%99%90%E6%A8%A1%E5%BC%8F%E4%B8%8E-thinking-effort-%E8%87%AA%E5%AE%9A%E4%B9%89/</link><pubDate>Mon, 17 Aug 2026 00:00:00 +0000</pubDate><guid>https://kerolt.github.io/p/pi-agent-%E6%9D%83%E9%99%90%E6%A8%A1%E5%BC%8F%E4%B8%8E-thinking-effort-%E8%87%AA%E5%AE%9A%E4%B9%89/</guid><description>&lt;h2 id="背景"&gt;背景&lt;/h2&gt;
-&lt;p&gt;我在 Pi Agent 中同时安装了 &lt;code&gt;@georgedong32/permission-modes&lt;/code&gt; 和 &lt;code&gt;pi-zentui&lt;/code&gt;。两者单独使用都没什么问题，放在一起后却有两个地方不太顺手：&lt;/p&gt;
-&lt;ol&gt;
-&lt;li&gt;我想保留 Zentui 的 Starship Footer，同时在 Footer 中看到当前权限模式。&lt;/li&gt;
-&lt;li&gt;我希望用一个简单的 &lt;code&gt;/effort&lt;/code&gt; 命令查看或调整模型的 Thinking 强度。&lt;/li&gt;
-&lt;/ol&gt;
-&lt;p&gt;当时的环境是：&lt;/p&gt;</description></item></channel></rss>
