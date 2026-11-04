@@ -1,4 +1,12 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Ops on Kerolt's Note</title><link>https://kerolt.github.io/categories/ops/</link><description>Recent content in Ops on Kerolt's Note</description><generator>Hugo</generator><language>zh-cn</language><lastBuildDate>Tue, 01 Sep 2026 00:00:00 +0000</lastBuildDate><atom:link href="https://kerolt.github.io/categories/ops/index.xml" rel="self" type="application/rss+xml"/><item><title>Kind 与 Minikube 配置代理</title><link>https://kerolt.github.io/p/kind-%E4%B8%8E-minikube-%E9%85%8D%E7%BD%AE%E4%BB%A3%E7%90%86/</link><pubDate>Thu, 05 Mar 2026 00:00:00 +0000</pubDate><guid>https://kerolt.github.io/p/kind-%E4%B8%8E-minikube-%E9%85%8D%E7%BD%AE%E4%BB%A3%E7%90%86/</guid><description>&lt;h2 id="what"&gt;What&lt;/h2&gt;
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Ops on Kerolt's Note</title><link>https://kerolt.github.io/categories/ops/</link><description>Recent content in Ops on Kerolt's Note</description><generator>Hugo</generator><language>zh-cn</language><lastBuildDate>Sat, 19 Sep 2026 00:00:00 +0000</lastBuildDate><atom:link href="https://kerolt.github.io/categories/ops/index.xml" rel="self" type="application/rss+xml"/><item><title>EasyTier 子网代理</title><link>https://kerolt.github.io/p/easytier-%E5%AD%90%E7%BD%91%E4%BB%A3%E7%90%86/</link><pubDate>Sat, 19 Sep 2026 00:00:00 +0000</pubDate><guid>https://kerolt.github.io/p/easytier-%E5%AD%90%E7%BD%91%E4%BB%A3%E7%90%86/</guid><description>&lt;h2 id="背景"&gt;背景&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;组网拓扑：本机（Mac）通过 EasyTier 虚拟网连接一台 Linux 网关节点，该节点所在局域网内有一台 GitLab 服务器。&lt;/li&gt;
+&lt;li&gt;目标：在 Mac 浏览器中直接访问 GitLab 的 Web 页面和 git 服务。&lt;/li&gt;
+&lt;li&gt;方案选型：使用 EasyTier 的子网代理（subnet proxy）功能，让网关节点把 GitLab 地址代理进虚拟网。相比逐端口转发，一次配置全局受益，浏览器、HTTP、SSH 全部透明可用。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="过程"&gt;过程&lt;/h2&gt;
+&lt;h3 id="1声明代理网段"&gt;（1）声明代理网段&lt;/h3&gt;
+&lt;p&gt;在已通过 easytier 连接的 Linux 节点上的 easytier 配置文件中加入：&lt;/p&gt;</description></item><item><title>Kind 与 Minikube 配置代理</title><link>https://kerolt.github.io/p/kind-%E4%B8%8E-minikube-%E9%85%8D%E7%BD%AE%E4%BB%A3%E7%90%86/</link><pubDate>Thu, 05 Mar 2026 00:00:00 +0000</pubDate><guid>https://kerolt.github.io/p/kind-%E4%B8%8E-minikube-%E9%85%8D%E7%BD%AE%E4%BB%A3%E7%90%86/</guid><description>&lt;h2 id="what"&gt;What&lt;/h2&gt;
 &lt;p&gt;本地的 kind / minikube 集群拉取镜像时，总是报同一个错误：&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
 &lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
